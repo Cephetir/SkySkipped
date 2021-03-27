@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "templatemod",
+    "name": "TemplateMod",
+    "description": "",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/My-Name-Is-Jeff/basic-mixin-template",
+    "updateUrl": "",
+    "authorList": ["My-Name-Is-Jeff"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
