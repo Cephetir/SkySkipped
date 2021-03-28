@@ -1,0 +1,11 @@
+{
+  "compatibilityLevel": "JAVA_8",
+  "package": "mynameisjeff.simpletogglesprint.mixins",
+  "refmap": "mixins.simpletogglesprint.refmap.json",
+  "mixins": [
+    "MixinEntityPlayerSP",
+    "MixinGuiIngameMenu",
+    "MixinMovementInputFromOptions"
+  ],
+  "verbose": true
+}
