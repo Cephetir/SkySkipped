@@ -18,9 +18,9 @@ buildscript {
 apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "org.spongepowered.mixin"
 
-version = "0.0.1"
-group = "mynameisjeff.templatemod"
-archivesBaseName = "TemplateMod"
+version = "1.0"
+group = "mynameisjeff.simpletogglesprint"
+archivesBaseName = "SimpleToggleSprint"
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -33,8 +33,8 @@ minecraft {
     runDir = "run"
     mappings = "stable_22"
     makeObfSourceJar = false
-    clientJvmArgs += "-Dfml.coreMods.load=mynameisjeff.templatemod.tweaker.FMLLoadingPlugin"
-    clientRunArgs += "--mixin mixins.templatemod.json"
+    clientJvmArgs += "-Dfml.coreMods.load=mynameisjeff.simpletogglesprint.tweaker.FMLLoadingPlugin"
+    clientRunArgs += "--mixin mixins.simpletogglesprint.json"
 }
 
 repositories {
@@ -73,11 +73,12 @@ dependencies {
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
+    provided files("libs/modcore.jar")
     configurations.compile.extendsFrom(configurations.packageLib)
 }
 
 mixin {
-    add sourceSets.main, "mixins.templatemod.refmap.json"
+    add sourceSets.main, "mixins.simpletogglesprint.refmap.json"
 }
 
 jar {
@@ -85,10 +86,10 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest.attributes(
-            "FMLCorePlugin": "mynameisjeff.templatemod.tweaker.FMLLoadingPlugin",
+            "FMLCorePlugin": "mynameisjeff.simpletogglesprint.tweaker.FMLLoadingPlugin",
             "FMLCorePluginContainsFMLMod": true,
             "ForceLoadAsMod": true,
-            "MixinConfigs": "mixins.templatemod.json",
+            "MixinConfigs": "mixins.simpletogglesprint.json",
             "ModSide": "CLIENT",
             "TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
             "TweakOrder": "0",

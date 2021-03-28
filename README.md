@@ -1,2 +1,2 @@
-# basic-mixin-template
-Template for 1.8.9 mods with Mixins
+# Simple Toggle Sprint
+Basic Toggle Sprint and Sneak for Minecraft 1.8.9

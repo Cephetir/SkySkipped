@@ -1,11 +1,11 @@
 [
   {
-    "modid": "templatemod",
-    "name": "TemplateMod",
+    "modid": "simpletogglesprint",
+    "name": "SimpleToggleSprint",
     "description": "",
     "version": "${version}",
     "mcversion": "${mcversion}",
-    "url": "https://github.com/My-Name-Is-Jeff/basic-mixin-template",
+    "url": "https://github.com/My-Name-Is-Jeff/SimpleToggleSprint",
     "updateUrl": "",
     "authorList": ["My-Name-Is-Jeff"],
     "credits": "",
