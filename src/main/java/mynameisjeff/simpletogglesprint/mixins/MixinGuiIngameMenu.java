@@ -39,7 +39,7 @@ public class MixinGuiIngameMenu extends GuiScreen {
     @Inject(method = "initGui", at = @At("TAIL"))
     private void addGuiButtons(CallbackInfo ci) {
         if (Config.showConfigOnEscape) {
-            this.buttonList.add(configButton = new GuiButton(-69420, 2,this.height - 62, 100, 20, "ToggleSprint"));
+            this.buttonList.add(configButton = new GuiButton(-69420, 2,this.height - 82, 100, 20, "ToggleSprint"));
         }
     }
 
