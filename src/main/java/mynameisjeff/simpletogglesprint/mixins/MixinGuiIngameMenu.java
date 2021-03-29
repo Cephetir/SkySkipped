@@ -1,19 +1,19 @@
-/**
- *     SimpleToggleSprint
- *     Copyright (C) 2021  My-Name-Is-Jeff
- *
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU Affero General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU Affero General Public License for more details.
- *
- *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+/*
+      SimpleToggleSprint
+      Copyright (C) 2021  My-Name-Is-Jeff
+
+      This program is free software: you can redistribute it and/or modify
+      it under the terms of the GNU Affero General Public License as published by
+      the Free Software Foundation, either version 3 of the License, or
+      (at your option) any later version.
+
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU Affero General Public License for more details.
+
+      You should have received a copy of the GNU Affero General Public License
+      along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package mynameisjeff.simpletogglesprint.mixins;
@@ -39,7 +39,7 @@ public class MixinGuiIngameMenu extends GuiScreen {
     @Inject(method = "initGui", at = @At("TAIL"))
     private void addGuiButtons(CallbackInfo ci) {
         if (Config.showConfigOnEscape) {
-            this.buttonList.add(configButton = new GuiButton(-69420, 2,this.height - 82, 100, 20, "ToggleSprint"));
+            this.buttonList.add(configButton = new GuiButton(-69420, 2, this.height - 82, 100, 20, "ToggleSprint"));
         }
     }
 
