@@ -115,15 +115,15 @@ public class SimpleToggleSprint {
 
     private enum DisplayState {
         DESCENDINGHELD("[Descending (key held)]", () -> mc.thePlayer.capabilities.isFlying && mc.thePlayer.isSneaking() && sneakHeld),
-        DESCENDINGTOGGLED("[Descending (toggled)]", () -> mc.thePlayer.capabilities.isFlying && Config.toggleSneakState),
+        DESCENDINGTOGGLED("[Descending (toggled)]", () -> mc.thePlayer.capabilities.isFlying && Config.enabledToggleSneak && Config.toggleSneakState),
         DESCENDING("[Descending (vanilla)]", () -> mc.thePlayer.capabilities.isFlying && mc.thePlayer.isSneaking()),
         FLYING("[Flying]", () -> mc.thePlayer.capabilities.isFlying),
         RIDING("[Riding]", () -> mc.thePlayer.isRiding()),
         SNEAKHELD("[Sneaking (key held)]", () -> mc.thePlayer.isSneaking() && sneakHeld),
-        TOGGLESNEAK("[Sneaking (toggled)]", () -> Config.toggleSneakState),
+        TOGGLESNEAK("[Sneaking (toggled)]", () -> Config.enabledToggleSneak && Config.toggleSneakState),
         SNEAKING("[Sneaking (vanilla)]", () -> mc.thePlayer.isSneaking()),
         SPRINTHELD("[Sprinting (key held)]", () -> mc.thePlayer.isSprinting() && sprintHeld),
-        TOGGLESPRINT("[Sprinting (toggled)]", () -> Config.toggleSprintState),
+        TOGGLESPRINT("[Sprinting (toggled)]", () -> Config.enabledToggleSprint && Config.toggleSprintState),
         SPRINTING("[Sprinting (vanilla)]", () -> mc.thePlayer.isSprinting());
 
         public final String displayText;
