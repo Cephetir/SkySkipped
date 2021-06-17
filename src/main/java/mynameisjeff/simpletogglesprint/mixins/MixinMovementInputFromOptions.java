@@ -33,14 +33,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(MovementInputFromOptions.class)
-public class MixinMovementInputFromOptions extends MovementInput {
+public abstract class MixinMovementInputFromOptions extends MovementInput {
 
     @Shadow @Final private GameSettings gameSettings;
     @Unique private final Minecraft mc = Minecraft.getMinecraft();
 
     @Redirect(method = "updatePlayerMoveState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/settings/KeyBinding;isKeyDown()Z"))
-    private boolean setSneakDownState(KeyBinding keyBinding) {
-        return Config.enabledToggleSneak && Config.toggleSneakState && keyBinding == this.gameSettings.keyBindSneak && mc.currentScreen == null || keyBinding.isKeyDown();
+    private boolean setSneakState(KeyBinding keyBinding) {
+        return keyBinding.isKeyDown() || (mc.currentScreen == null && Config.enabledToggleSneak && Config.toggleSneakState && keyBinding == this.gameSettings.keyBindSneak);
     }
 
 }
