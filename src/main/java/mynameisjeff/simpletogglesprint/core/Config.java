@@ -70,6 +70,22 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "Seperate Keybind for Toggle Sprint",
+            category = "General", subcategory = "Toggle Sprint",
+            description = "Use a seperate keybind for Toggle Sprint.\nConfigure it in the In-Game Controls menu."
+    )
+    public static boolean keybindToggleSprint = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Seperate Keybind for Toggle Sneak",
+            category = "General", subcategory = "Toggle Sneak",
+            description = "Use a seperate keybind for Toggle Sneak.\nConfigure it in the In-Game Controls menu."
+    )
+    public static boolean keybindToggleSneak = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Enabled",
             category = "Display",
             description = "Displays the toggle states on your HUD."
@@ -77,9 +93,42 @@ public class Config extends Vigilant {
     public static boolean displayToggleState = true;
 
     @Property(
+            type = PropertyType.SWITCH,
+            name = "Show in GUIs",
+            category = "Display"
+    )
+    public static boolean showInGui;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Display Background",
+            category = "Display",
+            description = "Display a background."
+    )
+    public static boolean displayBackground;
+
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Color",
+            category = "Color", subcategory = "Simple",
+            description = "Choose a color for the HUD.",
+            options = {"White", "Light Gray", "Gray", "Dark Gray", "Black", "Red", "Pink", "Orange", "Yellow", "Green", "Magenta", "Cyan", "Blue", "Chroma"}
+    )
+    public static int simpleColor;
+
+    @Property(
+            type = PropertyType.SELECTOR,
+            name = "Use Simple or Advanced Color",
+            category = "Color",
+            description = "Use the Simple or Advanced option for the Color selection.",
+            options = {"Simple", "Advanced"}
+    )
+    public static int isAdvanced;
+
+    @Property(
             type = PropertyType.SLIDER,
             name = "Red",
-            category = "Display", subcategory = "Color",
+            category = "Color", subcategory = "Advanced",
             description = "Change the red value for the color of the display.",
             max = 255
     )
@@ -88,7 +137,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SLIDER,
             name = "Green",
-            category = "Display", subcategory = "Color",
+            category = "Color", subcategory = "Advanced",
             description = "Change the green value for the color of the display.",
             max = 255
     )
@@ -97,7 +146,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SLIDER,
             name = "Blue",
-            category = "Display", subcategory = "Color",
+            category = "Color", subcategory = "Advanced",
             description = "Change the blue value for the color of the display.",
             max = 255
     )
@@ -132,21 +181,21 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "Text-Shadow",
+            name = "Text Shadow",
             category = "Display", subcategory = "Options",
-            description = "Change whether or not the display has text-shadow."
+            description = "Change whether or not the display has text shadow."
     )
     public static boolean displayStateShadow = true;
 
     @Property(
             type = PropertyType.SELECTOR,
-            name = "Text-Alignment",
+            name = "Text Alignment",
             category = "Display", subcategory = "Options",
-            description = "Changes the text-alignment settings for the state display.",
+            description = "Changes the text alignment settings for the state display.",
             options = {
                     "Left-Right",
-                    "Center",
-                    "Right-Left"
+                    "Right-Left",
+                    "Center"
             }
     )
     public static int displayStateAlignment = 0;

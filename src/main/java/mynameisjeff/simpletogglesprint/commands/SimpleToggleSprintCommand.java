@@ -37,7 +37,7 @@ public class SimpleToggleSprintCommand extends CommandBase {
 
     @Override
     public List<String> getCommandAliases() {
-        return Collections.emptyList();
+        return Collections.singletonList("togglesprint");
     }
 
     @Override
@@ -56,7 +56,7 @@ public class SimpleToggleSprintCommand extends CommandBase {
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+    public void processCommand(ICommandSender sender, String[] args) {
         ModCore.getInstance().getGuiHandler().open(SimpleToggleSprint.config.gui());
     }
 }
