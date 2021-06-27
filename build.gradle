@@ -5,7 +5,7 @@ plugins {
     id "java"
 }
 
-version = "1.2"
+version = "1.2.1"
 group = "mynameisjeff.simpletogglesprint"
 archivesBaseName = "SimpleToggleSprint"
 
@@ -25,8 +25,13 @@ repositories {
     maven { url "https://repo.spongepowered.org/repository/maven-public/" }
 }
 
+configurations {
+    bundle
+    implementation.extendsFrom(bundle)
+}
+
 dependencies {
-    implementation("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
+    bundle("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
         transitive = false
         exclude module: "guava"
         exclude module: "commons-io"
@@ -62,6 +67,7 @@ jar {
 shadowJar {
     archiveFileName = jar.archiveFileName
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    configurations = [project.configurations.bundle]
 
     exclude "**/module-info.class"
     exclude "dummyThing"
