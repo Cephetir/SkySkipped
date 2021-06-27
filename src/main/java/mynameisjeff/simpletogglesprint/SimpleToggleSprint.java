@@ -47,7 +47,7 @@ public class SimpleToggleSprint {
 
     public static final String MODID = "simpletogglesprint";
     public static final String MOD_NAME = "SimpleToggleSprint";
-    public static final String VERSION = "1.2";
+    public static final String VERSION = "1.2.1";
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static final KeyBinding keySprint = new KeyBinding("Toggle Sprint", Keyboard.KEY_NONE, "SimpleToggleSprint");
     public static final KeyBinding keySneak = new KeyBinding("Toggle Sneak", Keyboard.KEY_NONE, "SimpleToggleSprint");
@@ -174,4 +174,7 @@ public class SimpleToggleSprint {
         }
     }
 
+    public static boolean shouldSetSprint(KeyBinding keyBinding) {
+        return keyBinding.isKeyDown() || (Config.enabledToggleSprint && Config.toggleSprintState && keyBinding == mc.gameSettings.keyBindSprint && mc.currentScreen == null);
+    }
 }
