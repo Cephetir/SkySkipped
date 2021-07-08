@@ -1,4 +1,4 @@
-package mynameisjeff.simpletogglesprint.tweaker;
+package cephetir.simplemod.tweaker;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

@@ -16,13 +16,13 @@
       along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package mynameisjeff.simpletogglesprint;
+package cephetir.simplemod;
 
 
-import mynameisjeff.simpletogglesprint.commands.SimpleToggleSprintCommand;
-import mynameisjeff.simpletogglesprint.core.Config;
-import mynameisjeff.simpletogglesprint.tweaker.ModCoreInstaller;
-import mynameisjeff.simpletogglesprint.utils.ConfigColor;
+import cephetir.simplemod.commands.SimpleModCommand;
+import cephetir.simplemod.core.Config;
+import cephetir.simplemod.tweaker.ModCoreInstaller;
+import cephetir.simplemod.utils.ConfigColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -42,15 +42,15 @@ import org.lwjgl.input.Mouse;
 
 import java.util.function.Supplier;
 
-@Mod(modid = SimpleToggleSprint.MODID, name = SimpleToggleSprint.MOD_NAME, version = SimpleToggleSprint.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
-public class SimpleToggleSprint {
+@Mod(modid = SimpleMod.MODID, name = SimpleMod.MOD_NAME, version = SimpleMod.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
+public class SimpleMod {
 
-    public static final String MODID = "simpletogglesprint";
-    public static final String MOD_NAME = "SimpleToggleSprint";
-    public static final String VERSION = "1.2.1";
+    public static final String MODID = "simplemod";
+    public static final String MOD_NAME = "SimpleMod";
+    public static final String VERSION = "1.0";
     public static final Minecraft mc = Minecraft.getMinecraft();
-    public static final KeyBinding keySprint = new KeyBinding("Toggle Sprint", Keyboard.KEY_NONE, "SimpleToggleSprint");
-    public static final KeyBinding keySneak = new KeyBinding("Toggle Sneak", Keyboard.KEY_NONE, "SimpleToggleSprint");
+    public static final KeyBinding keySprint = new KeyBinding("Toggle Sprint", Keyboard.KEY_NONE, "SimpleMod");
+    public static final KeyBinding keySneak = new KeyBinding("Toggle Sneak", Keyboard.KEY_NONE, "SimpleMod");
     public static Config config = new Config();
     public static boolean sprintHeld = false;
     public static boolean sneakHeld = false;
@@ -64,7 +64,7 @@ public class SimpleToggleSprint {
 
     @Mod.EventHandler
     public void onPostInit(FMLPostInitializationEvent event) {
-        ClientCommandHandler.instance.registerCommand(new SimpleToggleSprintCommand());
+        ClientCommandHandler.instance.registerCommand(new SimpleModCommand());
         ClientRegistry.registerKeyBinding(keySprint);
         ClientRegistry.registerKeyBinding(keySneak);
     }

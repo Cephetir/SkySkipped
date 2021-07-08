@@ -1,4 +1,4 @@
-package mynameisjeff.simpletogglesprint.tweaker;
+package cephetir.simplemod.tweaker;
 
 import net.minecraftforge.fml.relauncher.CoreModManager;
 import org.spongepowered.asm.lib.tree.ClassNode;
@@ -31,7 +31,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.startsWith("mynameisjeff.simpletogglesprint.mixins.playerapi.")) {
+        if (mixinClassName.startsWith("cephetir.simplemod.mixins.playerapi.")) {
             return hasPlayerAPI;
         }
         return true;

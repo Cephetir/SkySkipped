@@ -16,30 +16,30 @@
       along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package mynameisjeff.simpletogglesprint.mixins;
+package cephetir.simplemod.mixins;
 
-import com.mojang.authlib.GameProfile;
-import mynameisjeff.simpletogglesprint.SimpleToggleSprint;
-import mynameisjeff.simpletogglesprint.core.Config;
+import cephetir.simplemod.core.Config;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.world.World;
+import net.minecraft.util.MovementInput;
+import net.minecraft.util.MovementInputFromOptions;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(EntityPlayerSP.class)
-public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
+@Mixin(MovementInputFromOptions.class)
+public abstract class MixinMovementInputFromOptions extends MovementInput {
 
-    public MixinEntityPlayerSP(World worldIn, GameProfile playerProfile) {
-        super(worldIn, playerProfile);
+    @Shadow @Final private GameSettings gameSettings;
+    @Unique private final Minecraft mc = Minecraft.getMinecraft();
+
+    @Redirect(method = "updatePlayerMoveState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/settings/KeyBinding;isKeyDown()Z"))
+    private boolean setSneakState(KeyBinding keyBinding) {
+        return keyBinding.isKeyDown() || (mc.currentScreen == null && Config.enabledToggleSneak && Config.toggleSneakState && keyBinding == this.gameSettings.keyBindSneak);
     }
 
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/settings/KeyBinding;isKeyDown()Z"))
-    private boolean setSprintState(KeyBinding keyBinding) {
-        return SimpleToggleSprint.shouldSetSprint(keyBinding);
-    }
 }
