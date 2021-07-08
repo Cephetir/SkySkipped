@@ -1,13 +1,13 @@
 [
   {
-    "modid": "simpletogglesprint",
-    "name": "SimpleToggleSprint",
+    "modid": "simplemod",
+    "name": "SimpleMod",
     "description": "",
     "version": "${version}",
     "mcversion": "${mcversion}",
-    "url": "https://github.com/My-Name-Is-Jeff/SimpleToggleSprint",
+    "url": "https://github.com/Cephetir",
     "updateUrl": "",
-    "authorList": ["My-Name-Is-Jeff"],
+    "authorList": ["Cephetir"],
     "credits": "",
     "logoFile": "",
     "screenshots": [],

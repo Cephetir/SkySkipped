@@ -16,7 +16,7 @@
       along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package mynameisjeff.simpletogglesprint.tweaker;
+package cephetir.simplemod.tweaker;
 
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
@@ -31,7 +31,7 @@ public class FMLLoadingPlugin implements IFMLLoadingPlugin {
 
     public FMLLoadingPlugin() {
         MixinBootstrap.init();
-        Mixins.addConfiguration("mixins.simpletogglesprint.json");
+        Mixins.addConfiguration("mixins.simplemod.json");
         MixinEnvironment.getCurrentEnvironment().setObfuscationContext("searge");
         MixinEnvironment.getCurrentEnvironment().setSide(MixinEnvironment.Side.CLIENT);
     }

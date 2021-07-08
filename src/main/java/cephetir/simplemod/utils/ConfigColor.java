@@ -1,6 +1,6 @@
-package mynameisjeff.simpletogglesprint.utils;
+package cephetir.simplemod.utils;
 
-import mynameisjeff.simpletogglesprint.core.Config;
+import cephetir.simplemod.core.Config;
 
 import java.awt.*;
 

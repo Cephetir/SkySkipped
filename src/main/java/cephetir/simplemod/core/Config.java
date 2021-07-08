@@ -16,7 +16,7 @@
       along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package mynameisjeff.simpletogglesprint.core;
+package cephetir.simplemod.core;
 
 import club.sk1er.vigilance.Vigilant;
 import club.sk1er.vigilance.data.Property;
@@ -30,7 +30,7 @@ public class Config extends Vigilant {
             type = PropertyType.SWITCH,
             name = "Show Config on Menu",
             category = "General", subcategory = "Options",
-            description = "Adds the option to configure to the escape menu.\nYou can also access this menu with /simpletogglesprint."
+            description = "Adds the option to configure to the escape menu.\nYou can also access this menu with /simplemod."
     )
     public static boolean showConfigOnEscape = true;
 
@@ -201,7 +201,7 @@ public class Config extends Vigilant {
     public static int displayStateAlignment = 0;
 
     public Config() {
-        super(new File("./config/simpletogglesprint.toml"));
+        super(new File("./config/simplemod.toml"));
         initialize();
     }
 }

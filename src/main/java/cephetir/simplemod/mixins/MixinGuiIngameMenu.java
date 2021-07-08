@@ -16,11 +16,11 @@
       along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package mynameisjeff.simpletogglesprint.mixins;
+package cephetir.simplemod.mixins;
 
 import club.sk1er.mods.core.ModCore;
-import mynameisjeff.simpletogglesprint.SimpleToggleSprint;
-import mynameisjeff.simpletogglesprint.core.Config;
+import cephetir.simplemod.SimpleMod;
+import cephetir.simplemod.core.Config;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiScreen;
@@ -46,7 +46,7 @@ public abstract class MixinGuiIngameMenu extends GuiScreen {
     @Inject(method = "actionPerformed", at = @At("TAIL"))
     private void onButtonPress(GuiButton button, CallbackInfo ci) {
         if (button == configButton) {
-            ModCore.getInstance().getGuiHandler().open(SimpleToggleSprint.config.gui());
+            ModCore.getInstance().getGuiHandler().open(SimpleMod.config.gui());
         }
     }
 

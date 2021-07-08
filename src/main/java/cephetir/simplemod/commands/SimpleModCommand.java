@@ -16,23 +16,22 @@
       along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package mynameisjeff.simpletogglesprint.commands;
+package cephetir.simplemod.commands;
 
 import club.sk1er.mods.core.ModCore;
-import mynameisjeff.simpletogglesprint.SimpleToggleSprint;
+import cephetir.simplemod.SimpleMod;
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
 
 import java.util.Collections;
 import java.util.List;
 
-public class SimpleToggleSprintCommand extends CommandBase {
+public class SimpleModCommand extends CommandBase {
 
     @Override
     public String getCommandName() {
-        return "simpletogglesprint";
+        return "simplemod";
     }
 
     @Override
@@ -57,6 +56,6 @@ public class SimpleToggleSprintCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        ModCore.getInstance().getGuiHandler().open(SimpleToggleSprint.config.gui());
+        ModCore.getInstance().getGuiHandler().open(SimpleMod.config.gui());
     }
 }
