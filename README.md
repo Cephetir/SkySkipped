@@ -1,2 +1,2 @@
-# Simple Toggle Sprint
-Basic Toggle Sprint and Sneak for Minecraft 1.8.9
+# Simple Mod
+Cephetir's simple mod for Hypixel and Skyblock
