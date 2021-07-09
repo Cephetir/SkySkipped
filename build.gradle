@@ -1,6 +1,5 @@
 plugins {
     id "net.minecraftforge.gradle.forge" version "8f14deb"
-    id "org.spongepowered.mixin" version "d5f9873d60"
     id "com.github.johnrengelman.shadow" version "6.1.0"
     id "java"
 }
@@ -17,7 +16,6 @@ minecraft {
     mappings = "stable_22"
     makeObfSourceJar = false
     clientJvmArgs += "-Dfml.coreMods.load=cephetir.simplemod.tweaker.FMLLoadingPlugin"
-    clientRunArgs += "--mixin mixins.simplemod.json"
 }
 
 repositories {
@@ -31,21 +29,7 @@ configurations {
 }
 
 dependencies {
-    bundle("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
-        transitive = false
-        exclude module: "guava"
-        exclude module: "commons-io"
-        exclude module: "gson"
-        exclude module: "launchwrapper"
-        exclude module: "log4j-core"
-    }
-    annotationProcessor("org.spongepowered:mixin:0.7.11-SNAPSHOT")
-
     provided files("libs/modcore.jar")
-}
-
-mixin {
-    add sourceSets.main, "mixins.simplemod.refmap.json"
 }
 
 jar {
@@ -56,10 +40,7 @@ jar {
             "FMLCorePlugin": "cephetir.simplemod.tweaker.FMLLoadingPlugin",
             "FMLCorePluginContainsFMLMod": true,
             "ForceLoadAsMod": true,
-            "MixinConfigs": "mixins.simplemod.json",
             "ModSide": "CLIENT",
-            "TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
-            "TweakOrder": "0",
     )
     enabled = false
 }
