@@ -1,41 +1,12 @@
-/*
-      SimpleToggleSprint
-      Copyright (C) 2021  My-Name-Is-Jeff
-
-      This program is free software: you can redistribute it and/or modify
-      it under the terms of the GNU Affero General Public License as published by
-      the Free Software Foundation, either version 3 of the License, or
-      (at your option) any later version.
-
-      This program is distributed in the hope that it will be useful,
-      but WITHOUT ANY WARRANTY; without even the implied warranty of
-      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-      GNU Affero General Public License for more details.
-
-      You should have received a copy of the GNU Affero General Public License
-      along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package cephetir.simplemod.tweaker;
 
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
-import org.spongepowered.asm.launch.MixinBootstrap;
-import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.asm.mixin.Mixins;
 
 import java.util.Map;
 
 @IFMLLoadingPlugin.MCVersion("1.8.9")
 public class FMLLoadingPlugin implements IFMLLoadingPlugin {
-
-    public FMLLoadingPlugin() {
-        MixinBootstrap.init();
-        Mixins.addConfiguration("mixins.simplemod.json");
-        MixinEnvironment.getCurrentEnvironment().setObfuscationContext("searge");
-        MixinEnvironment.getCurrentEnvironment().setSide(MixinEnvironment.Side.CLIENT);
-    }
-
     @Override
     public String[] getASMTransformerClass() {
         int initialize = ModCoreInstaller.initialize(Launch.minecraftHome, "1.8.9");
