@@ -1,7 +1,7 @@
 package cephetir.simplemod.commands;
 
 import cephetir.simplemod.SimpleMod;
-import club.sk1er.mods.core.ModCore;
+import gg.essential.api.EssentialAPI;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
@@ -38,6 +38,6 @@ public class SimpleModCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        ModCore.getInstance().getGuiHandler().open(SimpleMod.config.gui());
+        EssentialAPI.getGuiUtil().openScreen(SimpleMod.config.gui());
     }
 }
