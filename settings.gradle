@@ -21,9 +21,6 @@ pluginManagement {
                 case "net.minecraftforge.gradle.forge":
                     useModule("com.github.Skytils:ForgeGradle:${requested.version}")
                     break
-                case "org.spongepowered.mixin":
-                    useModule("com.github.Skytils:mixingradle:${requested.version}")
-                    break
             }
         }
     }
