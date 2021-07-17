@@ -3,7 +3,7 @@
     "modid": "simplemod",
     "name": "SimpleMod",
     "description": "Simple mod for Hypixel",
-    "version": "${version}",
+    "version": "1.2",
     "mcversion": "${mcversion}",
     "url": "https://github.com/Cephetir/SimpleMod",
     "updateUrl": "",
