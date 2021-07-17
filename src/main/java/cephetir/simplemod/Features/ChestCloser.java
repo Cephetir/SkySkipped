@@ -8,10 +8,8 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class ChestCloser implements KeyInputListener, GuiClickListener {
-    @SubscribeEvent
     @Override
     public void onKeyInput(GuiScreenEvent.KeyboardInputEvent keyboardInputEvent) throws InterruptedException {
         GuiScreen screen = Minecraft.getMinecraft().currentScreen;
@@ -28,7 +26,6 @@ public class ChestCloser implements KeyInputListener, GuiClickListener {
         }
     }
 
-    @SubscribeEvent
     @Override
     public void onMouseInput(GuiScreenEvent.MouseInputEvent.Pre mouseInputEvent) throws InterruptedException {
         GuiScreen screen = Minecraft.getMinecraft().currentScreen;
