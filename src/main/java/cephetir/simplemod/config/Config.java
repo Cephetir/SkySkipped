@@ -47,6 +47,14 @@ public class Config extends Vigilant {
 //    )
     public static String dungeonName = "dungeonName";
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Discord RPC",
+            category = "Discord", subcategory = "Discord RPC",
+            description = "Shows status in discord."
+    )
+    public static boolean DRPC = true;
+
     public Config() {
         super(new File("./config/simplemod.toml"));
         initialize();

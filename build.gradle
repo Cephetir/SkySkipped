@@ -23,8 +23,7 @@ apply plugin: "com.github.johnrengelman.shadow"
 
 group= "cephetir.simplemod"
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = targetCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 
 sourceSets {
@@ -37,7 +36,6 @@ minecraft {
     version = "1.8.9-11.15.1.2318-1.8.9"
     runDir = "run"
     mappings = "stable_22"
-    clientJvmArgs += "-Dfml.coreMods.load=cephetir.simplemod.forge.SMTweaker"
 }
 
 configurations {
@@ -47,6 +45,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    jcenter()
     maven { url = "https://repo.sk1er.club/repository/maven-public/" }
     maven { url = "https://jitpack.io/" }
     maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
@@ -56,9 +55,19 @@ dependencies {
     embed "gg.essential:loader-launchwrapper:1.0.2"
 
     implementation "gg.essential:Essential:1193-10809-SNAPSHOT"
+    implementation('org.projectlombok:lombok:1.18.16')
+    annotationProcessor('org.projectlombok:lombok:1.18.16')
+    implementation 'com.github.Vatuu:discord-rpc:1.6.2'
+    implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
+        exclude module: 'log4j'
+    }
 }
 
 jar {
+    enabled = false
+}
+
+sourceJar {
     enabled = false
 }
 
