@@ -1,7 +1,8 @@
-package cephetir.simplemod.discordrpc;
+package cephetir.skyskipped.discordrpc;
 
-import cephetir.simplemod.SimpleMod;
-import cephetir.simplemod.config.Config;
+import cephetir.skyskipped.SkySkipped;
+import cephetir.skyskipped.config.Cache;
+import cephetir.skyskipped.config.Config;
 import com.jagrosh.discordipc.IPCClient;
 import com.jagrosh.discordipc.IPCListener;
 import com.jagrosh.discordipc.entities.RichPresence;
@@ -52,22 +53,22 @@ public class DiscordRPCManager implements IPCListener {
             while(!Thread.currentThread().isInterrupted()) {
                 if(Config.DRPC) {
                     GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-                    if(Config.isInDungeon) {
+                    if(Cache.isInDungeon) {
                         //Client.getINSTANCE().getDiscordRP().update("Playing Dungeons", "Cleared: " + Config.dungeonPercentage);
-                        setStateLine("Playing Dungeons");
-                        setDetailsLine("Cleared: " + Config.dungeonPercentage);
+                        setDetailsLine("Playing Dungeons");
+                        setStateLine("Cleared: " + Cache.dungeonPercentage +" %");
                     } else if((!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
                         //Client.getINSTANCE().getDiscordRP().update("Playing Multiplayer"/*+Minecraft.getMinecraft().getCurrentServerData().serverIP*/, "In game");
-                        setStateLine("Playing on "+Minecraft.getMinecraft().getCurrentServerData().serverIP);
-                        setDetailsLine("In game");
+                        setDetailsLine("Playing on "+Minecraft.getMinecraft().getCurrentServerData().serverIP);
+                        setStateLine("In game");
                     } else if(Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null) {
                         //Client.getINSTANCE().getDiscordRP().update("Playing Singleplayer", "In game");
-                        setStateLine("Playing Singleplayer");
-                        setDetailsLine("In game");
+                        setDetailsLine("Playing Singleplayer");
+                        setStateLine("In game");
                     } else {
                         //Client.getINSTANCE().getDiscordRP().update("In main menu", "Idle");
-                        setStateLine("In main menu");
-                        setDetailsLine("Idle");
+                        setDetailsLine("In main menu");
+                        setStateLine("Idle");
                     }
                     try {
                         Thread.sleep(10000);
@@ -95,8 +96,7 @@ public class DiscordRPCManager implements IPCListener {
                 .setState(stateLine)
                 .setDetails(detailsLine)
                 .setStartTimestamp(startTimestamp)
-                .setLargeImage("large", "SimpleMod v"+ SimpleMod.VERSION)
-                .setSmallImage("large", "SimpleMod v"+ SimpleMod.VERSION)
+                .setLargeImage("large", "SkySkipped v"+ SkySkipped.VERSION)
                 .build();
         client.sendRichPresence(presence);
     }

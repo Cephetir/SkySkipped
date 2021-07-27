@@ -1,4 +1,4 @@
-package cephetir.simplemod.utils;
+package cephetir.skyskipped.utils;
 
 import java.util.List;
 import java.util.Map;

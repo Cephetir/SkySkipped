@@ -1,12 +1,12 @@
 [
   {
-    "modid": "simplemod",
-    "name": "SimpleMod",
-    "description": "Simple mod for Hypixel",
-    "version": "1.3",
+    "modid": "skyskipped",
+    "name": "SkySkipped",
+    "description": "",
+    "version": "${version}",
     "mcversion": "${mcversion}",
-    "url": "https://github.com/Cephetir/SimpleMod",
-    "updateUrl": "https://github.com/Cephetir/SimpleMod/lastest",
+    "url": "https://github.com/Cephetir/SkySkipped",
+    "updateUrl": "https://github.com/Cephetir/SkySkipped/releases/latest",
     "authorList": ["Cephetir"],
     "credits": "",
     "logoFile": "",

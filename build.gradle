@@ -21,7 +21,9 @@ buildscript {
 apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "com.github.johnrengelman.shadow"
 
-group= "cephetir.simplemod"
+version = "1.4"
+group = "cephetir.skyskipped"
+archivesBaseName = "SkySkipped"
 
 sourceCompatibility = targetCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
@@ -54,10 +56,9 @@ repositories {
 dependencies {
     embed "gg.essential:loader-launchwrapper:1.0.2"
 
-    implementation "gg.essential:Essential:1193-10809-SNAPSHOT"
+    implementation "gg.essential:Essential:1229-10809-SNAPSHOT"
     implementation('org.projectlombok:lombok:1.18.16')
     annotationProcessor('org.projectlombok:lombok:1.18.16')
-    implementation 'com.github.Vatuu:discord-rpc:1.6.2'
     implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
         exclude module: 'log4j'
     }
@@ -72,17 +73,15 @@ sourceJar {
 }
 
 shadowJar {
-    archiveClassifier.set("")
+    archiveFileName = jar.archiveFileName
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     configurations = [project.configurations.embed]
 
     manifest.attributes(
-            'FMLCorePluginContainsFMLMod': true,
             "ForceLoadAsMod": true,
             'ModSide': 'CLIENT',
-            "FMLCorePlugin": "cephetir.simplemod.forge.SMTweaker",
             "TweakClass": "gg.essential.loader.stage0.EssentialSetupTweaker",
             "TweakOrder": "0"
     )

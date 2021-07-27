@@ -1,11 +1,12 @@
-package cephetir.simplemod;
+package cephetir.skyskipped;
 
-import cephetir.simplemod.Features.ChatSwapper;
-import cephetir.simplemod.Features.ChestCloser;
-import cephetir.simplemod.commands.SimpleModCommand;
-import cephetir.simplemod.config.Config;
-import cephetir.simplemod.discordrpc.Client;
-import cephetir.simplemod.listeners.InDungeon;
+import cephetir.skyskipped.Features.ChatSwapper;
+import cephetir.skyskipped.Features.ChestCloser;
+import cephetir.skyskipped.Features.PlayerESP;
+import cephetir.skyskipped.commands.SkySkippedCommand;
+import cephetir.skyskipped.config.Config;
+import cephetir.skyskipped.discordrpc.Client;
+import cephetir.skyskipped.listeners.InDungeon;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -15,16 +16,16 @@ import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = SimpleMod.MODID, name = SimpleMod.MOD_NAME, version = SimpleMod.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
-public class SimpleMod {
-    public static final String MODID = "simplemod";
-    public static final String MOD_NAME = "SimpleMod";
-    public static final String VERSION = "1.3";
+@Mod(modid = SkySkipped.MODID, name = SkySkipped.MOD_NAME, version = SkySkipped.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
+public class SkySkipped {
+    public static final String MODID = "skyskipped";
+    public static final String MOD_NAME = "SkySkipped";
+    public static final String VERSION = "1.4";
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static Config config = new Config();
 
     @Mod.Instance(MODID)
-    public static SimpleMod Instance;
+    public static SkySkipped Instance;
 
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
@@ -38,11 +39,12 @@ public class SimpleMod {
         MinecraftForge.EVENT_BUS.register(new InDungeon());
         MinecraftForge.EVENT_BUS.register(new ChatSwapper());
         MinecraftForge.EVENT_BUS.register(new ChestCloser());
+        MinecraftForge.EVENT_BUS.register(new PlayerESP());
     }
 
     @Mod.EventHandler
     public void onPostInit(FMLPostInitializationEvent event) {
-        ClientCommandHandler.instance.registerCommand(new SimpleModCommand());
+        ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
     }
 
     @Mod.EventHandler
