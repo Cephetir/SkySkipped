@@ -20,7 +20,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class SkySkipped {
     public static final String MODID = "skyskipped";
     public static final String MOD_NAME = "SkySkipped";
-    public static final String VERSION = "1.4";
+    public static final String VERSION = "1.5";
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static Config config = new Config();
 
@@ -40,6 +40,7 @@ public class SkySkipped {
         MinecraftForge.EVENT_BUS.register(new ChatSwapper());
         MinecraftForge.EVENT_BUS.register(new ChestCloser());
         MinecraftForge.EVENT_BUS.register(new PlayerESP());
+        //MinecraftForge.EVENT_BUS.register(new AutoGoing());
     }
 
     @Mod.EventHandler

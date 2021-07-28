@@ -5,9 +5,13 @@ import cephetir.skyskipped.config.Config;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.scoreboard.ScorePlayerTeam;
+import net.minecraft.scoreboard.Team;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
@@ -16,15 +20,23 @@ public class PlayerESP {
     private boolean preCalled = false;
     @SubscribeEvent
     public void onEntityRenderPre(RenderPlayerEvent.Pre event) {
-
-
         if (preCalled) return;
         if (!Config.playerESP) return;
         if (!Cache.isInDungeon) return;
-
-        if(!(event.entityPlayer instanceof EntityOtherPlayerMP)) return;
-
-
+        boolean ctue = false;
+        if(Config.onlyPlayers) {
+            if(event.entityPlayer instanceof EntityOtherPlayerMP) {
+                ScorePlayerTeam scoreplayerteam = (ScorePlayerTeam) event.entityPlayer.getTeam();
+                if (scoreplayerteam != null && scoreplayerteam.getNameTagVisibility() != Team.EnumVisible.NEVER) {
+                    ctue = true;
+                }
+            }
+        } else {
+            if((event.entityPlayer instanceof EntityOtherPlayerMP) || (event.entity instanceof EntityZombie) || (event.entity instanceof EntitySkeleton)) {
+                ctue = true;
+            }
+        }
+        if(!ctue) return;
         preCalled = true;
 
         GL11.glEnable(GL11.GL_STENCIL_TEST);
