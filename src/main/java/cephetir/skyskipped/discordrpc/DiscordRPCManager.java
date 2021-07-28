@@ -2,7 +2,6 @@ package cephetir.skyskipped.discordrpc;
 
 import cephetir.skyskipped.SkySkipped;
 import cephetir.skyskipped.config.Cache;
-import cephetir.skyskipped.config.Config;
 import com.jagrosh.discordipc.IPCClient;
 import com.jagrosh.discordipc.IPCListener;
 import com.jagrosh.discordipc.entities.RichPresence;
@@ -51,7 +50,7 @@ public class DiscordRPCManager implements IPCListener {
         new Thread(() -> {
             System.out.println("THREAD STARTED");
             while(!Thread.currentThread().isInterrupted()) {
-                if(Config.DRPC) {
+                //if(Config.DRPC) {
                     GuiScreen screen = Minecraft.getMinecraft().currentScreen;
                     if(Cache.isInDungeon) {
                         //Client.getINSTANCE().getDiscordRP().update("Playing Dungeons", "Cleared: " + Config.dungeonPercentage);
@@ -75,7 +74,7 @@ public class DiscordRPCManager implements IPCListener {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }
+                //}
             }
         }).start();
     }

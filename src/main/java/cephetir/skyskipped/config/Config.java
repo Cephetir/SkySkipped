@@ -23,13 +23,13 @@ public class Config extends Vigilant {
     )
     public static boolean chatSwapper = false;
 
-//    @Property(
-//            type = PropertyType.SWITCH,
-//            name = "Discord RPC",
-//            category = "Discord", subcategory = "Discord RPC",
-//            description = "Shows status in discord."
-//    )
-    public static boolean DRPC = true;
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Discord RPC",
+            category = "Discord", subcategory = "Discord RPC",
+            description = "Shows status in discord."
+    )
+    public static boolean DRPC = false;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -39,8 +39,26 @@ public class Config extends Vigilant {
     )
     public static boolean playerESP = false;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Players Only",
+            category = "Dungeons", subcategory = "Dungeons",
+            description = "Shows only players through walls."
+    )
+    public static boolean onlyPlayers = false;
+
+//    @Property(
+//            type = PropertyType.SWITCH,
+//            name = "Auto going",
+//            category = "Dungeons", subcategory = "Dungeons",
+//            description = "Automatically says GOING! in chat when go throw the portal"
+//    )
+    public static boolean autoGoing = false;
+
     public Config() {
         super(new File("./config/skyskipped.toml"));
         initialize();
+
+        addDependency("onlyPlayers", "playerESP");
     }
 }

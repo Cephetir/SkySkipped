@@ -23,14 +23,14 @@ public class Client {
     }
 
     public void update() {
-        new Thread(() -> {
-            while(true) {
-                if (Config.DRPC && (!discordRPCManager.isActive())) {
-                    discordRPCManager.start();
-                } else if ((!Config.DRPC) && discordRPCManager.isActive()) {
-                    discordRPCManager.stop();
-                }
-            }
-        }).start();
+//        new Thread(() -> {
+//            while(true) {
+//                if (Config.DRPC && (!discordRPCManager.isActive())) {
+//                    discordRPCManager.start();
+//                } else if ((!Config.DRPC) && discordRPCManager.isActive()) {
+//                    discordRPCManager.stop();
+//                }
+//            }
+//        }).start();
     }
 }
