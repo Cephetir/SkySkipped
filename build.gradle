@@ -13,7 +13,7 @@ buildscript {
         maven { url "https://repo.sk1er.club/repository/maven-public" }
     }
     dependencies {
-        classpath "com.github.asbyth:ForgeGradle:b13624b272"
+        classpath "com.github.asbyth:ForgeGradle:b13624"
         classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
     }
 }
@@ -47,7 +47,6 @@ configurations {
 
 repositories {
     mavenCentral()
-    jcenter()
     maven { url = "https://repo.sk1er.club/repository/maven-public/" }
     maven { url = "https://jitpack.io/" }
     maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
@@ -57,7 +56,7 @@ dependencies {
     embed "gg.essential:loader-launchwrapper:1.1.0"
     embed "com.github.jagrosh:DiscordIPC:e29d6d8"
 
-    implementation("gg.essential:essential-1.8.9-forge:1282")
+    implementation("gg.essential:essential-1.8.9-forge:1286")
     implementation('org.projectlombok:lombok:1.18.20')
     annotationProcessor('org.projectlombok:lombok:1.18.20')
     implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {

@@ -1,12 +1,9 @@
 package cephetir.skyskipped.discordrpc;
 
 import cephetir.skyskipped.SkySkipped;
-import cephetir.skyskipped.config.Cache;
 import com.jagrosh.discordipc.IPCClient;
 import com.jagrosh.discordipc.IPCListener;
 import com.jagrosh.discordipc.entities.RichPresence;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import org.json.JSONObject;
 
 import java.time.OffsetDateTime;
@@ -47,36 +44,41 @@ public class DiscordRPCManager implements IPCListener {
             ex.printStackTrace();
         }
 
-        new Thread(() -> {
-            System.out.println("THREAD STARTED");
-            while(!Thread.currentThread().isInterrupted()) {
-                //if(Config.DRPC) {
-                    GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-                    if(Cache.isInDungeon) {
-                        //Client.getINSTANCE().getDiscordRP().update("Playing Dungeons", "Cleared: " + Config.dungeonPercentage);
-                        setDetailsLine("Playing Dungeons");
-                        setStateLine("Cleared: " + Cache.dungeonPercentage +" %");
-                    } else if((!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
-                        //Client.getINSTANCE().getDiscordRP().update("Playing Multiplayer"/*+Minecraft.getMinecraft().getCurrentServerData().serverIP*/, "In game");
-                        setDetailsLine("Playing on "+Minecraft.getMinecraft().getCurrentServerData().serverIP);
-                        setStateLine("In game");
-                    } else if(Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null) {
-                        //Client.getINSTANCE().getDiscordRP().update("Playing Singleplayer", "In game");
-                        setDetailsLine("Playing Singleplayer");
-                        setStateLine("In game");
-                    } else {
-                        //Client.getINSTANCE().getDiscordRP().update("In main menu", "Idle");
-                        setDetailsLine("In main menu");
-                        setStateLine("Idle");
-                    }
-                    try {
-                        Thread.sleep(10000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                //}
-            }
-        }).start();
+//        new Thread(() -> {
+//            System.out.println("THREAD STARTED");
+//            while(!Thread.currentThread().isInterrupted()) {
+//                //if(Config.DRPC) {
+//                    GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+//                    if(Cache.isInDungeon) {
+//                        //Client.getINSTANCE().getDiscordRP().update("Playing Dungeons", "Cleared: " + Config.dungeonPercentage);
+//                        setDetailsLine("Playing Dungeons");
+//                        setStateLine("Cleared: " + Cache.dungeonPercentage +" %");
+//                    } else if((!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
+//                        //Client.getINSTANCE().getDiscordRP().update("Playing Multiplayer"/*+Minecraft.getMinecraft().getCurrentServerData().serverIP*/, "In game");
+//                        if(Minecraft.getMinecraft().getCurrentServerData().serverIP.contains("hypixel.net")) {
+//                            setDetailsLine("Playing on Hypixel");
+//                            setStateLine("In game");
+//                        } else {
+//                            setDetailsLine("Playing on "+Minecraft.getMinecraft().getCurrentServerData().serverIP);
+//                            setStateLine("In game");
+//                        }
+//                    } else if(Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null) {
+//                        //Client.getINSTANCE().getDiscordRP().update("Playing Singleplayer", "In game");
+//                        setDetailsLine("Playing Singleplayer");
+//                        setStateLine("In game");
+//                    } else {
+//                        //Client.getINSTANCE().getDiscordRP().update("In main menu", "Idle");
+//                        setDetailsLine("In main menu");
+//                        setStateLine("Idle");
+//                    }
+//                    try {
+//                        Thread.sleep(10000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                //}
+//            }
+//        }).start();
     }
 
     public void stop() {

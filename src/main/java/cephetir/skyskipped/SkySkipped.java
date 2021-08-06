@@ -14,7 +14,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 @Mod(modid = SkySkipped.MODID, name = SkySkipped.MOD_NAME, version = SkySkipped.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
 public class SkySkipped {
@@ -28,19 +27,16 @@ public class SkySkipped {
     public static SkySkipped Instance;
 
     @Mod.EventHandler
-    public void onPreInit(FMLPreInitializationEvent event) {
-        Client.getINSTANCE().init();
-    }
-
-    @Mod.EventHandler
     public void onInit(FMLInitializationEvent event) {
         config.preload();
+        MinecraftForge.EVENT_BUS.register(new Client());
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new InDungeon());
         MinecraftForge.EVENT_BUS.register(new ChatSwapper());
         MinecraftForge.EVENT_BUS.register(new ChestCloser());
         MinecraftForge.EVENT_BUS.register(new PlayerESP());
         //MinecraftForge.EVENT_BUS.register(new AutoGoing());
+        Client.getINSTANCE().init();
     }
 
     @Mod.EventHandler
