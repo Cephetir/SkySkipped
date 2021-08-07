@@ -6,7 +6,7 @@ import cephetir.skyskipped.Features.PlayerESP;
 import cephetir.skyskipped.commands.SkySkippedCommand;
 import cephetir.skyskipped.config.Config;
 import cephetir.skyskipped.discordrpc.Client;
-import cephetir.skyskipped.listeners.InDungeon;
+import cephetir.skyskipped.listeners.Status;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 public class SkySkipped {
     public static final String MODID = "skyskipped";
     public static final String MOD_NAME = "SkySkipped";
-    public static final String VERSION = "1.5";
+    public static final String VERSION = "1.5.1";
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static Config config = new Config();
 
@@ -31,11 +31,10 @@ public class SkySkipped {
         config.preload();
         MinecraftForge.EVENT_BUS.register(new Client());
         MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.register(new InDungeon());
+        MinecraftForge.EVENT_BUS.register(new Status());
         MinecraftForge.EVENT_BUS.register(new ChatSwapper());
         MinecraftForge.EVENT_BUS.register(new ChestCloser());
         MinecraftForge.EVENT_BUS.register(new PlayerESP());
-        //MinecraftForge.EVENT_BUS.register(new AutoGoing());
         Client.getINSTANCE().init();
     }
 

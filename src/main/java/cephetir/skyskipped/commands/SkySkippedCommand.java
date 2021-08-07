@@ -2,6 +2,7 @@ package cephetir.skyskipped.commands;
 
 import cephetir.skyskipped.SkySkipped;
 import gg.essential.api.EssentialAPI;
+import gg.essential.universal.UChat;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
@@ -23,7 +24,7 @@ public class SkySkippedCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "§SkySkipped§7: §c/sm §7- §fOpens configuration gui";
+        return null;
     }
 
     @Override
@@ -40,6 +41,16 @@ public class SkySkippedCommand extends CommandBase {
     public void processCommand(ICommandSender sender, String[] args) {
         if(args.length == 0) {
             EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui());
+//        } else if(args[0].equals("github")) {
+//            //UChat.chat("§cSkySkipped §f:: §eGithub: §fhttps://github.com/Cephetir/SkySkipped");
+//            UTextComponent text = new UTextComponent("§cSkySkipped §f:: §eGithub: §fhttps://github.com/Cephetir/SkySkipped");
+//            text.setHover(HoverEvent.Action.SHOW_TEXT, "§9Open URL in browser.");
+//            text.setClick(ClickEvent.Action.OPEN_URL, "https://github.com/Cephetir/SkySkipped");
+        } else {
+            UChat.chat("§cSkySkipped §f:: §eUsage:\n" +
+                            "             §f:: §e/sm §f- §eOpens GUI\n"
+                            //"             §f:: §e/sm github §f- §eOpens official github page"
+            );
         }
     }
 }

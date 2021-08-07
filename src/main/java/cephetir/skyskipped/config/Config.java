@@ -47,14 +47,6 @@ public class Config extends Vigilant {
     )
     public static boolean onlyPlayers = false;
 
-//    @Property(
-//            type = PropertyType.SWITCH,
-//            name = "Auto going",
-//            category = "Dungeons", subcategory = "Dungeons",
-//            description = "Automatically says GOING! in chat when go throw the portal"
-//    )
-    public static boolean autoGoing = false;
-
     public Config() {
         super(new File("./config/skyskipped.toml"));
         initialize();
