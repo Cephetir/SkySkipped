@@ -28,31 +28,36 @@ public class Client {
 
     @SubscribeEvent
     public void update(TickEvent.ClientTickEvent event) {
-        if (Config.DRPC && (!discordRPCManager.isActive())) {
-            discordRPCManager.start();
-        } else if ((!Config.DRPC) && discordRPCManager.isActive()) {
+        if(event.phase == TickEvent.Phase.START) {
+            if (Config.DRPC && (!discordRPCManager.isActive())) {
+                discordRPCManager.start();
+            } else if ((!Config.DRPC) && discordRPCManager.isActive()) {
                 discordRPCManager.stop();
                 return;
-        }
+            }
 
-        GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-        if(Cache.isInDungeon) {
-            discordRPCManager.setDetailsLine("Playing Dungeons");
-            discordRPCManager.setStateLine("Cleared: " + Cache.dungeonPercentage +" %");
-        } else if((!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
-            if(Minecraft.getMinecraft().getCurrentServerData().serverIP.contains("hypixel.net")) {
-                discordRPCManager.setDetailsLine("Playing on Hypixel");
+            GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+            if(Cache.isInDungeon) {
+                discordRPCManager.setDetailsLine("Playing Dungeons");
+                discordRPCManager.setStateLine("Cleared: " + Cache.dungeonPercentage +" %");
+            } else if((!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
+                if(Cache.inSkyblock) {
+                    discordRPCManager.setDetailsLine("Playing on Hypixel Skyblock");
+                    discordRPCManager.setStateLine("Holding: " + Cache.itemheld);
+                } else if(Minecraft.getMinecraft().getCurrentServerData().serverIP.toLowerCase().contains("hypixel.net")) {
+                    discordRPCManager.setDetailsLine("Playing on Hypixel");
+                    discordRPCManager.setStateLine("In game");
+                } else {
+                    discordRPCManager.setDetailsLine("Playing on "+Minecraft.getMinecraft().getCurrentServerData().serverIP);
+                    discordRPCManager.setStateLine("In game");
+                }
+            } else if(Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null) {
+                discordRPCManager.setDetailsLine("Playing Singleplayer");
                 discordRPCManager.setStateLine("In game");
             } else {
-                discordRPCManager.setDetailsLine("Playing on "+Minecraft.getMinecraft().getCurrentServerData().serverIP);
-                discordRPCManager.setStateLine("In game");
+                discordRPCManager.setDetailsLine("In main menu");
+                discordRPCManager.setStateLine("Idle");
             }
-        } else if(Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null) {
-            discordRPCManager.setDetailsLine("Playing Singleplayer");
-            discordRPCManager.setStateLine("In game");
-        } else {
-            discordRPCManager.setDetailsLine("In main menu");
-            discordRPCManager.setStateLine("Idle");
         }
     }
 }
