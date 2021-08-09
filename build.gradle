@@ -21,7 +21,7 @@ buildscript {
 apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "com.github.johnrengelman.shadow"
 
-version = "1.5.1"
+version = "1.6"
 group = "cephetir.skyskipped"
 archivesBaseName = "SkySkipped"
 
@@ -54,9 +54,8 @@ repositories {
 
 dependencies {
     embed "gg.essential:loader-launchwrapper:1.1.0"
-    embed "com.github.jagrosh:DiscordIPC:e29d6d8"
 
-    implementation("gg.essential:essential-1.8.9-forge:1286")
+    implementation("gg.essential:essential-1.8.9-forge:1291")
     implementation('org.projectlombok:lombok:1.18.20')
     annotationProcessor('org.projectlombok:lombok:1.18.20')
     implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
