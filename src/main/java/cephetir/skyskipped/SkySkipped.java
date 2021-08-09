@@ -20,6 +20,7 @@ package cephetir.skyskipped;
 
 import cephetir.skyskipped.Features.ChatSwapper;
 import cephetir.skyskipped.Features.ChestCloser;
+import cephetir.skyskipped.Features.LastCrit;
 import cephetir.skyskipped.Features.PlayerESP;
 import cephetir.skyskipped.commands.SkySkippedCommand;
 import cephetir.skyskipped.config.Config;
@@ -31,7 +32,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 
 @Mod(modid = SkySkipped.MODID, name = SkySkipped.MOD_NAME, version = SkySkipped.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
 public class SkySkipped {
@@ -53,11 +53,8 @@ public class SkySkipped {
         MinecraftForge.EVENT_BUS.register(new ChatSwapper());
         MinecraftForge.EVENT_BUS.register(new ChestCloser());
         MinecraftForge.EVENT_BUS.register(new PlayerESP());
+        MinecraftForge.EVENT_BUS.register(new LastCrit());
         Client.getINSTANCE().init();
-    }
-
-    @Mod.EventHandler
-    public void onPostInit(FMLPostInitializationEvent event) {
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
     }
 

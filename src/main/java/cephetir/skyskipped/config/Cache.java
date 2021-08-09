@@ -25,4 +25,5 @@ public class Cache {
     public static boolean inParty = false;
     public static boolean inSkyblock = false;
     public static String itemheld = "";
+    public static String lastCrit = "0";
 }

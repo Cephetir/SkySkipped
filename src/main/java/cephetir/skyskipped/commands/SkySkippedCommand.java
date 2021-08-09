@@ -19,6 +19,7 @@
 package cephetir.skyskipped.commands;
 
 import cephetir.skyskipped.SkySkipped;
+import cephetir.skyskipped.config.Cache;
 import gg.essential.api.EssentialAPI;
 import gg.essential.universal.UChat;
 import gg.essential.universal.wrappers.message.UTextComponent;
@@ -62,16 +63,19 @@ public class SkySkippedCommand extends CommandBase {
     public void processCommand(ICommandSender sender, String[] args) {
         if(args.length == 0) {
             EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui());
-        } else if(args[0].equals("github")) {
-            UChat.chat("§cSkySkipped §f:: §eGithub: §fhttps://github.com/Cephetir/SkySkipped");
+        } else if (args[0].equals("github")) {
             UTextComponent text = new UTextComponent("§cSkySkipped §f:: §eGithub: §fhttps://github.com/Cephetir/SkySkipped");
             text.setHover(HoverEvent.Action.SHOW_TEXT, "§9Open URL in browser.");
             text.setClick(ClickEvent.Action.OPEN_URL, "https://github.com/Cephetir/SkySkipped");
             sender.addChatMessage(text);
+        } else if (args[0].equals("crit")) {
+            UTextComponent text = new UTextComponent("§cSkySkipped §f:: §eLast Crit: §f" + Cache.lastCrit);
+            sender.addChatMessage(text);
         } else {
             UChat.chat("§cSkySkipped §f:: §eUsage:\n" +
-                            "             §f:: §e/sm §f- §eOpens GUI\n"
-                            //"             §f:: §e/sm github §f- §eOpens official github page"
+                    "§cSkySkipped §f:: §e/sm §f- §eOpens GUI\n" +
+                    "§cSkySkipped §f:: §e/sm github §f- §eOpens official github page\n" +
+                    "§cSkySkipped §f:: §e/sm crit §f- §eShows last critical hit\n"
             );
         }
     }
