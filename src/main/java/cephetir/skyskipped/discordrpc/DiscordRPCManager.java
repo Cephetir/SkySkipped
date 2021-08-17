@@ -61,42 +61,6 @@ public class DiscordRPCManager implements IPCListener {
             System.out.println("DiscordRP has thrown an unexpected error while trying to start...");
             ex.printStackTrace();
         }
-
-//        new Thread(() -> {
-//            System.out.println("THREAD STARTED");
-//            while(!Thread.currentThread().isInterrupted()) {
-//                //if(Config.DRPC) {
-//                    GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-//                    if(Cache.isInDungeon) {
-//                        //Client.getINSTANCE().getDiscordRP().update("Playing Dungeons", "Cleared: " + Config.dungeonPercentage);
-//                        setDetailsLine("Playing Dungeons");
-//                        setStateLine("Cleared: " + Cache.dungeonPercentage +" %");
-//                    } else if((!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
-//                        //Client.getINSTANCE().getDiscordRP().update("Playing Multiplayer"/*+Minecraft.getMinecraft().getCurrentServerData().serverIP*/, "In game");
-//                        if(Minecraft.getMinecraft().getCurrentServerData().serverIP.contains("hypixel.net")) {
-//                            setDetailsLine("Playing on Hypixel");
-//                            setStateLine("In game");
-//                        } else {
-//                            setDetailsLine("Playing on "+Minecraft.getMinecraft().getCurrentServerData().serverIP);
-//                            setStateLine("In game");
-//                        }
-//                    } else if(Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null) {
-//                        //Client.getINSTANCE().getDiscordRP().update("Playing Singleplayer", "In game");
-//                        setDetailsLine("Playing Singleplayer");
-//                        setStateLine("In game");
-//                    } else {
-//                        //Client.getINSTANCE().getDiscordRP().update("In main menu", "Idle");
-//                        setDetailsLine("In main menu");
-//                        setStateLine("Idle");
-//                    }
-//                    try {
-//                        Thread.sleep(10000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                //}
-//            }
-//        }).start();
     }
 
     public void stop() {
@@ -123,14 +87,14 @@ public class DiscordRPCManager implements IPCListener {
     public void setStateLine(String status) {
         this.stateLine = status;
         if (isActive()) {
-            updatePresence();
+            //updatePresence();
         }
     }
 
     public void setDetailsLine(String status) {
         this.detailsLine = status;
         if (isActive()) {
-            updatePresence();
+            //updatePresence();
         }
     }
 
