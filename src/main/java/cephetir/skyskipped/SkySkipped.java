@@ -18,10 +18,7 @@
 
 package cephetir.skyskipped;
 
-import cephetir.skyskipped.Features.ChatSwapper;
-import cephetir.skyskipped.Features.ChestCloser;
-import cephetir.skyskipped.Features.LastCrit;
-import cephetir.skyskipped.Features.PlayerESP;
+import cephetir.skyskipped.Features.*;
 import cephetir.skyskipped.commands.SkySkippedCommand;
 import cephetir.skyskipped.config.Config;
 import cephetir.skyskipped.discordrpc.Client;
@@ -54,6 +51,7 @@ public class SkySkipped {
         MinecraftForge.EVENT_BUS.register(new ChestCloser());
         MinecraftForge.EVENT_BUS.register(new PlayerESP());
         MinecraftForge.EVENT_BUS.register(new LastCrit());
+        MinecraftForge.EVENT_BUS.register(new Nons());
         Client.getINSTANCE().init();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
     }

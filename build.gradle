@@ -60,8 +60,8 @@ minecraft {
 }
 
 configurations {
-    embed
-    implementation.extendsFrom(embed)
+    include
+    implementation.extendsFrom(include)
 }
 
 repositories {
@@ -72,13 +72,23 @@ repositories {
 }
 
 dependencies {
-    embed "gg.essential:loader-launchwrapper:1.1.0"
+    include "gg.essential:loader-launchwrapper:1.1.0"
+    include(implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
+        exclude module: 'log4j'
+        exclude module: 'json'
+        exclude module: 'slf4j-api'
+        exclude module: 'junixsocket-common'
+        exclude module: 'junixsocket-native-common'
+    })
 
-    implementation("gg.essential:essential-1.8.9-forge:1304")
+    implementation("gg.essential:essential-1.8.9-forge:1305")
     implementation('org.projectlombok:lombok:1.18.20')
     annotationProcessor('org.projectlombok:lombok:1.18.20')
     implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
         exclude module: 'log4j'
+        exclude module: 'slf4j-api'
+        exclude module: 'junixsocket-common'
+        exclude module: 'junixsocket-native-common'
     }
 }
 
@@ -95,7 +105,7 @@ shadowJar {
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    configurations = [project.configurations.embed]
+    configurations = [project.configurations.include]
 
     manifest.attributes(
             "ForceLoadAsMod": true,
