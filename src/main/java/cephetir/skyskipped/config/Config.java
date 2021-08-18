@@ -36,10 +36,18 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Party chat swapper",
-            category = "Chat", subcategory = "Swapper",
+            category = "Chat", subcategory = "Chat",
             description = "Automatically swaps between party chat and global chat."
     )
     public static boolean chatSwapper = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "[NON] Rank",
+            category = "Chat", subcategory = "Chat",
+            description = "Adds the [NON] rank, given to people without a rank."
+    )
+    public static boolean nons = false;
 
     @Property(
             type = PropertyType.SWITCH,
