@@ -25,9 +25,8 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,29 +37,26 @@ import java.util.regex.Pattern;
  * @author Wyvest
  */
 public class Nons {
-    Pattern regex = Pattern.compile("^(?:[\\w\\- ]+ )?(?:(?<chatTypePrefix>[A-Za-z]+) > |)(?<stars>(?:\\[.*?]?)* )(?<tags>(?:\\[[^]]+] ?)*)(?<senderUsername>\\w{1,16})(?: [\\w\\- ]+)?: (?<message>.+)$");
-    String[] ranks = new String[]{"youtube", "owner", "admin", "gm", "mvp", "vip", "mojang", "events", "mcp", "pig"};
+    Pattern regex = Pattern.compile("^(?:[\\w\\- ]+ )?(?:(?<chatTypePrefix>[A-Za-z]+) > |)(?<tags>(?:\\[[^]]+] ?)*)(?<senderUsername>\\w{1,16})(?: [\\w\\- ]+)?: (?<message>.+)$");
 
     @SubscribeEvent
-    public void onTick(@NotNull ClientChatReceivedEvent event) {
+    public void doThings(ClientChatReceivedEvent event) {
         if (!Config.nons) return;
-        String unformattedText = EnumChatFormatting.getTextWithoutFormattingCodes(event.message.getUnformattedText());
+        ChatComponentText text = (ChatComponentText) event.message;
+        String unformattedText = EnumChatFormatting.getTextWithoutFormattingCodes(text.getUnformattedText());
         Matcher matcher = regex.matcher(unformattedText);
         if (matcher.matches()) {
-            if (!containsAny(matcher.group("tags"), ranks)) {
-                Minecraft.getMinecraft().thePlayer.addChatMessage(addNonTag((ChatComponentText) event.message, matcher));
+            String substringBefore = StringUtils.substringBefore(text.getFormattedText(), matcher.group("senderUsername").substring(1));
+            if (substringBefore.charAt(substringBefore.lastIndexOf("§") + 1) == '7') {
+                Minecraft.getMinecraft().thePlayer.addChatMessage(addNonTag(text, matcher));
                 event.setCanceled(true);
+            } else if (substringBefore.charAt(substringBefore.lastIndexOf("§") + 1) == 'r') {
+                if (substringBefore.charAt(substringBefore.lastIndexOf("§", substringBefore.lastIndexOf("§"))) == '7') {
+                    Minecraft.getMinecraft().thePlayer.addChatMessage(addNonTag(text, matcher));
+                    event.setCanceled(true);
+                }
             }
         }
-    }
-
-    private boolean containsAny(String string, String[] list) {
-        for (String check : list) {
-            if (string.toLowerCase(Locale.ENGLISH).contains(check)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private ChatComponentText addNonTag(ChatComponentText message, Matcher matcher) {
