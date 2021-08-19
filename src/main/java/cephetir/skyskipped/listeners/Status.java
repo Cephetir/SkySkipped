@@ -53,7 +53,6 @@ public class Status {
                 for (String skyblock : SKYBLOCK_IN_ALL_LANGUAGES) {
                     if (objectiveName.startsWith(skyblock)) {
                         foundSkyblock = true;
-                        System.out.println("Skyblock found!");
                     }
                 }
 
@@ -62,7 +61,6 @@ public class Status {
                     String strippedLine = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()))).trim();
                     if (strippedLine.contains("Dungeon Cleared: ")) {
                         foundDungeon = true;
-                        System.out.println("Dungeon found!");
                     }
                     if(Cache.isInDungeon) {
                         if (strippedLine.contains("Dungeon Cleared: ")) {
