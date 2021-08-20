@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cephetir.skyskipped.Features;
+package cephetir.skyskipped.Features.impl;
 
+import cephetir.skyskipped.Features.Feature;
 import cephetir.skyskipped.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
@@ -36,8 +37,12 @@ import java.util.regex.Pattern;
  *
  * @author Wyvest
  */
-public class Nons {
+public class Nons extends Feature {
     Pattern regex = Pattern.compile("^(?:[\\w\\- ]+ )?(?:(?<chatTypePrefix>[A-Za-z]+) > |)(?<tags>(?:\\[[^]]+] ?)*)(?<senderUsername>\\w{1,16})(?: [\\w\\- ]+)?: (?<message>.+)$");
+
+    public Nons() {
+        super("[NON] Rank", "Chat", "Adds the [NON] rank, given to people without a rank.");
+    }
 
     @SubscribeEvent
     public void doThings(ClientChatReceivedEvent event) {

@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cephetir.skyskipped.Features;
+package cephetir.skyskipped.Features.impl;
 
+import cephetir.skyskipped.Features.Feature;
 import cephetir.skyskipped.config.Cache;
 import cephetir.skyskipped.utils.TextUtils;
 import net.minecraft.entity.Entity;
@@ -29,8 +30,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LastCrit {
+public class LastCrit extends Feature {
     private final Pattern damagePattern = Pattern.compile("✧*(\\d+[⚔+✧❤♞☄✷]*)");
+
+    public LastCrit() {
+        super("Last Crit", "Dungeons", "Shows last critical hit");
+    }
 
     @SubscribeEvent
     public void onRenderLiving(RenderLivingEvent.Specials.Post<EntityLivingBase> event) {

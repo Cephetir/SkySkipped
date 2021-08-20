@@ -18,7 +18,7 @@
 
 package cephetir.skyskipped;
 
-import cephetir.skyskipped.Features.*;
+import cephetir.skyskipped.Features.Features;
 import cephetir.skyskipped.commands.SkySkippedCommand;
 import cephetir.skyskipped.config.Config;
 import cephetir.skyskipped.discordrpc.Client;
@@ -37,6 +37,7 @@ public class SkySkipped {
     public static final String VERSION = "1.6";
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static Config config = new Config();
+    public static Features features = new Features();
 
     @Mod.Instance(MODID)
     public static SkySkipped Instance;
@@ -44,15 +45,10 @@ public class SkySkipped {
     @Mod.EventHandler
     public void onInit(FMLInitializationEvent event) {
         config.preload();
-        MinecraftForge.EVENT_BUS.register(new Client());
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new Client());
         MinecraftForge.EVENT_BUS.register(new Status());
-        MinecraftForge.EVENT_BUS.register(new ChatSwapper());
-        MinecraftForge.EVENT_BUS.register(new ChestCloser());
-        MinecraftForge.EVENT_BUS.register(new PlayerESP());
-        MinecraftForge.EVENT_BUS.register(new LastCrit());
-        MinecraftForge.EVENT_BUS.register(new Nons());
-        Client.getINSTANCE().init();
+        features.register();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
     }
 
