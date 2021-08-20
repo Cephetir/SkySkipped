@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cephetir.skyskipped.Features;
+package cephetir.skyskipped.Features.impl;
 
+import cephetir.skyskipped.Features.Feature;
 import cephetir.skyskipped.config.Cache;
 import cephetir.skyskipped.config.Config;
 import net.minecraft.client.Minecraft;
@@ -27,11 +28,16 @@ import net.minecraft.inventory.ContainerChest;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-public class ChestCloser {
+public class ChestCloser extends Feature {
+
+    public ChestCloser() {
+        super("Chest Closer", "Dungeons", "Chests in dungeon will close automatically.");
+    }
+
     @SubscribeEvent
     public void onKeyInput(GuiScreenEvent.KeyboardInputEvent keyboardInputEvent) {
         GuiScreen screen = Minecraft.getMinecraft().currentScreen;
-        if(Config.chestCloser && Cache.isInDungeon && screen instanceof GuiChest) {
+        if (Config.chestCloser && Cache.isInDungeon && screen instanceof GuiChest) {
             ContainerChest ch = (ContainerChest) ((GuiChest) screen).inventorySlots;
             if ("Large Chest".equals(ch.getLowerChestInventory().getName()) || "Chest".equals(ch.getLowerChestInventory().getName())) {
                 Minecraft.getMinecraft().thePlayer.closeScreen();

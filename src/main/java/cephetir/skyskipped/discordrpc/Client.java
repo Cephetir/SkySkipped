@@ -35,9 +35,7 @@ public class Client {
     private final DiscordRPCManager discordRPCManager = new DiscordRPCManager();
 
     public void init() {
-        if (Config.DRPC) {
-            discordRPCManager.start();
-        }
+        discordRPCManager.start();
     }
 
     public void shutdown() {

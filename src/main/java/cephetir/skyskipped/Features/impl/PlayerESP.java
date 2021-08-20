@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cephetir.skyskipped.Features;
+package cephetir.skyskipped.Features.impl;
 
+import cephetir.skyskipped.Features.Feature;
 import cephetir.skyskipped.config.Cache;
 import cephetir.skyskipped.config.Config;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -34,16 +35,21 @@ import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
-public class PlayerESP {
+public class PlayerESP extends Feature {
     private boolean preCalled = false;
+
+    public PlayerESP() {
+        super("Player ESP", "Dungeons", "Shows players through walls.");
+    }
+
     @SubscribeEvent
     public void onEntityRenderPre(RenderPlayerEvent.Pre event) {
         if (preCalled) return;
         if (!Config.playerESP) return;
         if (!Cache.isInDungeon) return;
         boolean ctue = false;
-        if(Config.onlyPlayers) {
-            if(event.entityPlayer instanceof EntityOtherPlayerMP) {
+        if (Config.onlyPlayers) {
+            if (event.entityPlayer instanceof EntityOtherPlayerMP) {
                 ScorePlayerTeam scoreplayerteam = (ScorePlayerTeam) event.entityPlayer.getTeam();
                 if (scoreplayerteam != null && scoreplayerteam.getNameTagVisibility() != Team.EnumVisible.NEVER) {
                     ctue = true;
