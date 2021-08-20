@@ -81,7 +81,7 @@ dependencies {
         exclude module: 'junixsocket-native-common'
     })
 
-    implementation("gg.essential:essential-1.8.9-forge:1313")
+    implementation("gg.essential:essential-1.8.9-forge:1316")
     implementation('org.projectlombok:lombok:1.18.20')
     annotationProcessor('org.projectlombok:lombok:1.18.20')
     implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
