@@ -39,7 +39,7 @@ buildscript {
 apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "com.github.johnrengelman.shadow"
 
-version = "1.6"
+version = "1.7"
 group = "cephetir.skyskipped"
 archivesBaseName = "SkySkipped"
 
