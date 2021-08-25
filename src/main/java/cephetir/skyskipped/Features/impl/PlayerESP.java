@@ -81,7 +81,8 @@ public class PlayerESP extends Feature {
         float f = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * event.partialRenderTick;
         try {
             event.renderer.doRender((AbstractClientPlayer) event.entityPlayer, event.x, event.y, event.z, f, event.partialRenderTick);
-        } catch (Throwable t) {}
+        } catch (Throwable ignored) {
+        }
 
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         GL11.glStencilFunc(GL11.GL_NOTEQUAL, 1, 0xff);
@@ -93,8 +94,9 @@ public class PlayerESP extends Feature {
         GlStateManager.scale(1.2f, 1.1f, 1.2f);
         event.renderer.setRenderOutlines(true);
         try {
-            event.renderer.doRender((AbstractClientPlayer) event.entityPlayer, 0,-0.9,0, f, event.partialRenderTick);
-        } catch (Throwable t) {}
+            event.renderer.doRender((AbstractClientPlayer) event.entityPlayer, 0, -0.9, 0, f, event.partialRenderTick);
+        } catch (Throwable ignored) {
+        }
 
         event.renderer.setRenderOutlines(false);
         GL11.glDepthFunc(GL11.GL_LEQUAL);

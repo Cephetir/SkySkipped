@@ -22,7 +22,6 @@ import cephetir.skyskipped.config.Cache;
 import cephetir.skyskipped.config.Config;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -52,7 +51,6 @@ public class Client {
                 return;
             }
 
-            GuiScreen screen = Minecraft.getMinecraft().currentScreen;
             if(Cache.isInDungeon) {
                 discordRPCManager.setDetailsLine("Playing Dungeons");
                 discordRPCManager.setStateLine("Cleared: " + Cache.dungeonPercentage +" %");

@@ -20,7 +20,6 @@ package cephetir.skyskipped.listeners;
 
 import cephetir.skyskipped.config.Cache;
 import cephetir.skyskipped.utils.TextUtils;
-import com.google.common.collect.Sets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -30,14 +29,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.Collection;
-import java.util.Set;
 
 public class Status {
-    private static final Set<String> SKYBLOCK_IN_ALL_LANGUAGES = Sets.newHashSet("SKYBLOCK");
 
     @SubscribeEvent
     public void updateSkyblock(TickEvent.ClientTickEvent event) {
-        if(event.phase == TickEvent.Phase.START) {
+        if (event.phase == TickEvent.Phase.START) {
             try {
                 boolean foundDungeon = false;
                 boolean foundSkyblock = false;
@@ -50,10 +47,8 @@ public class Status {
                 Collection<Score> scores = scoreboard.getSortedScores(scoreObjective);
                 String objectiveName = TextUtils.stripColor(scoreObjective.getDisplayName());
 
-                for (String skyblock : SKYBLOCK_IN_ALL_LANGUAGES) {
-                    if (objectiveName.startsWith(skyblock)) {
-                        foundSkyblock = true;
-                    }
+                if (objectiveName.startsWith("SKYBLOCK")) {
+                    foundSkyblock = true;
                 }
 
                 for (Score sc : scores) {
@@ -62,7 +57,7 @@ public class Status {
                     if (strippedLine.contains("Dungeon Cleared: ")) {
                         foundDungeon = true;
                     }
-                    if(Cache.isInDungeon) {
+                    if (Cache.isInDungeon) {
                         if (strippedLine.contains("Dungeon Cleared: ")) {
                             percentage = Integer.parseInt(strippedLine.substring(17));
                         }
@@ -75,13 +70,13 @@ public class Status {
                 Cache.isInDungeon = foundDungeon;
                 Cache.dungeonPercentage = percentage;
                 Cache.dungeonName = dungeonName;
-                if(foundSkyblock) {
-                    if(Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null) {
+                if (foundSkyblock) {
+                    if (Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null) {
                         itemheld = TextUtils.stripColor(Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem().getDisplayName());
                     }
                 }
                 Cache.itemheld = itemheld;
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
