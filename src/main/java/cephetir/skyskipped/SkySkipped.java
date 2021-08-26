@@ -19,9 +19,9 @@
 package cephetir.skyskipped;
 
 import cephetir.skyskipped.Features.Features;
+import cephetir.skyskipped.Features.impl.discordrpc.Client;
 import cephetir.skyskipped.commands.SkySkippedCommand;
 import cephetir.skyskipped.config.Config;
-import cephetir.skyskipped.discordrpc.Client;
 import cephetir.skyskipped.listeners.Status;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientCommandHandler;
