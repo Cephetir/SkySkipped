@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cephetir.skyskipped.discordrpc;
+package cephetir.skyskipped.Features.impl.discordrpc;
 
 import cephetir.skyskipped.SkySkipped;
 import com.jagrosh.discordipc.IPCClient;

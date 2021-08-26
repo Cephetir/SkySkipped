@@ -65,18 +65,8 @@ public class Config extends Vigilant {
     )
     public static boolean playerESP = false;
 
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Players Only",
-            category = "Dungeons", subcategory = "Dungeons",
-            description = "Shows only players through walls."
-    )
-    public static boolean onlyPlayers = false;
-
     public Config() {
         super(new File("./config/skyskipped.toml"));
         initialize();
-
-        addDependency("onlyPlayers", "playerESP");
     }
 }

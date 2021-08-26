@@ -35,13 +35,13 @@ public class ChatSwapper extends Feature {
     @SubscribeEvent
     public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
         if (Config.chatSwapper) {
-            if (event.message.getUnformattedText().startsWith("You have been kicked from the party") || event.message.getUnformattedText().contains("has disbanded") || event.message.getUnformattedText().startsWith("You left the party")) {
+            if (event.message.getUnformattedText().startsWith("You have been kicked from the party") || event.message.getUnformattedText().contains("has disbanded") || event.message.getUnformattedText().startsWith("You left the party") || event.message.getUnformattedText().contains("has been disbanded")) {
                 if (Cache.inParty) {
                     Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat all");
                     Cache.inParty = false;
                 }
             } else if (event.message.getUnformattedText().startsWith("You have joined") || event.message.getUnformattedText().startsWith("Party M") || event.message.getUnformattedText().contains("joined the ")) {
-                if(!Cache.inParty) {
+                if (!Cache.inParty) {
                     Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat p");
                     Cache.inParty = true;
                 }
