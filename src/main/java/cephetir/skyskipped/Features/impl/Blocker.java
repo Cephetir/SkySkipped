@@ -33,8 +33,13 @@ public class Blocker extends Feature {
     public void block(PlayerInteractEvent event) {
         if (!Cache.inSkyblock || !Config.gsBlock) return;
         if (event.entity != mc.thePlayer || event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) return;
-        String item = TextUtils.stripColor(mc.thePlayer.getHeldItem().getDisplayName());
-        if (item == null || !item.contains("Giant's Sword")) return;
+        String item = "";
+        try {
+            item = TextUtils.stripColor(mc.thePlayer.getHeldItem().getDisplayName());
+        } catch (NullPointerException ignored) {
+            return;
+        }
+        if (!item.contains("Giant's Sword")) return;
         mc.thePlayer.playSound("random.orb", 0.8f, 1f);
         event.setCanceled(true);
     }
