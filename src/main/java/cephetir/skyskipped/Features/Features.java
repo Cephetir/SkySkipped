@@ -35,6 +35,7 @@ public class Features {
         features.add(new LastCrit());
         features.add(new Nons());
         features.add(new Blocker());
+        features.add(new Ping());
         for (Feature feature : features) {
             MinecraftForge.EVENT_BUS.register(feature);
         }

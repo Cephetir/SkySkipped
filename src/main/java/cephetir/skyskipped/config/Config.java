@@ -72,6 +72,14 @@ public class Config extends Vigilant {
     )
     public static boolean gsBlock = false;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Name ping",
+            category = "Chat", subcategory = "Chat",
+            description = "Plays sound when someone says your name in chat."
+    )
+    public static boolean ping = false;
+
     public Config() {
         super(new File("./config/skyskipped.toml"));
         initialize();
