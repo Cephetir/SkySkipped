@@ -75,7 +75,7 @@ public class Status {
                     }
                 }
                 Cache.itemheld = itemheld;
-            } catch (Exception ignored) {
+            } catch (NullPointerException ignored) {
             }
         }
     }
