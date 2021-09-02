@@ -33,7 +33,7 @@ import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
 public class SkySkipped {
     public static final String MODID = "skyskipped";
     public static final String MOD_NAME = "SkySkipped";
-    public static final String VERSION = "1.7";
+    public static final String VERSION = "1.8";
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static Config config = new Config();
     public static Features features = new Features();
