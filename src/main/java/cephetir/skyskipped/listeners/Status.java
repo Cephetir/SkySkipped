@@ -75,8 +75,7 @@ public class Status {
                     }
                 }
                 Cache.itemheld = itemheld;
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ignored) {
             }
         }
     }
