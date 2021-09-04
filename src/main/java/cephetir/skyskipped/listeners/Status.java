@@ -19,6 +19,7 @@ package cephetir.skyskipped.listeners;
 
 import cephetir.skyskipped.config.Cache;
 import cephetir.skyskipped.utils.TextUtils;
+import gg.essential.api.EssentialAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -33,7 +34,7 @@ public class Status {
 
     @SubscribeEvent
     public void updateSkyblock(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && (!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
+        if (event.phase == TickEvent.Phase.START && !Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null && EssentialAPI.getMinecraftUtil().isHypixel()) {
             try {
                 boolean foundDungeon = false;
                 boolean foundSkyblock = false;

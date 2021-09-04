@@ -17,11 +17,13 @@
 
 package cephetir.skyskipped.config;
 
+import cephetir.skyskipped.Features.impl.discordrpc.Client;
 import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
 
 import java.io.File;
+import java.util.function.Consumer;
 
 public class Config extends Vigilant {
     @Property(
@@ -82,6 +84,13 @@ public class Config extends Vigilant {
 
     public Config() {
         super(new File("./config/skyskipped.toml"));
+        registerListener("ping", (Consumer<Boolean>) aBoolean -> {
+            if (aBoolean && (!Client.getINSTANCE().getDiscordRPCManager().isActive())) {
+                Client.getINSTANCE().getDiscordRPCManager().start();
+            } else if (!aBoolean && Client.getINSTANCE().getDiscordRPCManager().isActive()) {
+                Client.getINSTANCE().getDiscordRPCManager().stop();
+            }
+        });
         initialize();
     }
 }
