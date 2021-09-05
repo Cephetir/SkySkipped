@@ -74,10 +74,6 @@ dependencies {
     include "gg.essential:loader-launchwrapper:1.1.1"
     include(implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
         exclude module: 'log4j'
-        exclude module: 'json'
-        exclude module: 'slf4j-api'
-        exclude module: 'junixsocket-common'
-        exclude module: 'junixsocket-native-common'
     })
 
     implementation("gg.essential:essential-1.8.9-forge:1328")
@@ -85,9 +81,6 @@ dependencies {
     annotationProcessor('org.projectlombok:lombok:1.18.20')
     implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
         exclude module: 'log4j'
-        exclude module: 'slf4j-api'
-        exclude module: 'junixsocket-common'
-        exclude module: 'junixsocket-native-common'
     }
 }
 
