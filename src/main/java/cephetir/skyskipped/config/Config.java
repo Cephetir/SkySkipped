@@ -82,12 +82,15 @@ public class Config extends Vigilant {
     )
     public static boolean ping = false;
 
+    private long timer = 0;
     public Config() {
         super(new File("./config/skyskipped.toml"));
-        registerListener("ping", (Consumer<Boolean>) aBoolean -> {
+        registerListener("DRPC", (Consumer<Boolean>) aBoolean -> {
             if (aBoolean && (!Client.getINSTANCE().getDiscordRPCManager().isActive())) {
                 Client.getINSTANCE().getDiscordRPCManager().start();
             } else if (!aBoolean && Client.getINSTANCE().getDiscordRPCManager().isActive()) {
+                if (System.currentTimeMillis() - timer < 4000) return;
+                timer = System.currentTimeMillis();
                 Client.getINSTANCE().getDiscordRPCManager().stop();
             }
         });

@@ -18,6 +18,7 @@
 package cephetir.skyskipped.Features.impl.discordrpc;
 
 import cephetir.skyskipped.config.Cache;
+import cephetir.skyskipped.config.Config;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -32,6 +33,7 @@ public class Client {
     private final DiscordRPCManager discordRPCManager = new DiscordRPCManager();
 
     public void init() {
+        if (!Config.DRPC) return;
         discordRPCManager.start();
     }
 
@@ -43,7 +45,7 @@ public class Client {
     @SubscribeEvent
     public void update(TickEvent.ClientTickEvent event) {
         if (!(event.phase == TickEvent.Phase.START) && !discordRPCManager.isActive()) return;
-        if (System.currentTimeMillis() - timer < 3000) return;
+        if (System.currentTimeMillis() - timer < 2000) return;
         timer = System.currentTimeMillis();
 
 

@@ -28,12 +28,13 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 @Mod(modid = SkySkipped.MODID, name = SkySkipped.MOD_NAME, version = SkySkipped.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
 public class SkySkipped {
     public static final String MODID = "skyskipped";
     public static final String MOD_NAME = "SkySkipped";
-    public static final String VERSION = "1.8";
+    public static final String VERSION = "1.8.1";
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static Config config = new Config();
     public static Features features = new Features();
@@ -41,10 +42,15 @@ public class SkySkipped {
     @Mod.Instance(MODID)
     public static SkySkipped Instance;
 
-    @Mod.EventHandler
-    public void onInit(FMLInitializationEvent event) {
+    @Mod.EventHandler()
+    public void onPreInit(FMLPreInitializationEvent event) {
+        System.out.println("Starting SkySkipped...");
         config.preload();
         MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    @Mod.EventHandler
+    public void onInit(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new Client());
         MinecraftForge.EVENT_BUS.register(new Status());
         features.register();

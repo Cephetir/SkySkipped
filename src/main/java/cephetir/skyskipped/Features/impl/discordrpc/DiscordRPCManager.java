@@ -41,11 +41,11 @@ public class DiscordRPCManager implements IPCListener {
 
     public void start() {
         try {
-            System.out.println("Starting Discord RP...");
             if (isActive()) {
                 return;
             }
 
+            System.out.println("Starting Discord RP...");
             stateLine = "Starting...";
             detailsLine = "";
             startTimestamp = OffsetDateTime.now();
