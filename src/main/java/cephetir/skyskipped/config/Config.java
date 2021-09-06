@@ -82,7 +82,32 @@ public class Config extends Vigilant {
     )
     public static boolean ping = false;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Leave Dungeon",
+            category = "Dungeons", subcategory = "Dungeons",
+            description = "Runs /leavedungeon command after run ends."
+    )
+    public static boolean EndLeave = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Party FragBot when Dungeon ends",
+            category = "Dungeons", subcategory = "Dungeons",
+            description = "Runs /fragrun command after run ends."
+    )
+    public static boolean EndParty = false;
+
+    @Property(
+            type = PropertyType.TEXT,
+            name = "FragBot Name",
+            category = "Dungeons", subcategory = "Dungeons",
+            description = "FragBot IGN."
+    )
+    public static String BotName = "";
+
     private long timer = 0;
+
     public Config() {
         super(new File("./config/skyskipped.toml"));
         registerListener("DRPC", (Consumer<Boolean>) aBoolean -> {
