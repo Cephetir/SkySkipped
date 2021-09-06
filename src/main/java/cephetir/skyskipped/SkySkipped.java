@@ -19,6 +19,8 @@ package cephetir.skyskipped;
 
 import cephetir.skyskipped.Features.Features;
 import cephetir.skyskipped.Features.impl.discordrpc.Client;
+import cephetir.skyskipped.Features.impl.fragrun.LeaveCommand;
+import cephetir.skyskipped.Features.impl.fragrun.PartyCommand;
 import cephetir.skyskipped.commands.SkySkippedCommand;
 import cephetir.skyskipped.config.Config;
 import cephetir.skyskipped.listeners.Status;
@@ -34,11 +36,12 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class SkySkipped {
     public static final String MODID = "skyskipped";
     public static final String MOD_NAME = "SkySkipped";
-    public static final String VERSION = "1.8.1";
+    public static final String VERSION = "1.9";
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static Config config = new Config();
     public static Features features = new Features();
 
+    @SuppressWarnings("unused")
     @Mod.Instance(MODID)
     public static SkySkipped Instance;
 
@@ -53,8 +56,11 @@ public class SkySkipped {
     public void onInit(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new Client());
         MinecraftForge.EVENT_BUS.register(new Status());
+        //MinecraftForge.EVENT_BUS.register(new RenderUtils());
         features.register();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
+        ClientCommandHandler.instance.registerCommand(new LeaveCommand());
+        ClientCommandHandler.instance.registerCommand(new PartyCommand());
     }
 
     @Mod.EventHandler

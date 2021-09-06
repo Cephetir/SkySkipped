@@ -27,14 +27,14 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import static cephetir.skyskipped.SkySkipped.mc;
 
-public class RenderUtil {
+public class RenderUtils {
     private String title = null;
     private int titleDisplayTicks = 0;
 
     public void createTitle(String title, int ticks) {
         mc.thePlayer.playSound("random.orb", 0.8f, 1f);
-        this.title = title;
         this.titleDisplayTicks = ticks;
+        this.title = title;
     }
 
     /**
@@ -68,8 +68,8 @@ public class RenderUtil {
         if (event.phase != TickEvent.Phase.START) return;
         if (titleDisplayTicks > 0) {
             titleDisplayTicks--;
-        } else {
-            titleDisplayTicks = 0;
+        } else if (titleDisplayTicks == 0) {
+            titleDisplayTicks = -1;
             title = null;
         }
     }
