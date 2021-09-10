@@ -18,7 +18,6 @@
 package cephetir.skyskipped.Features.impl.discordrpc;
 
 import cephetir.skyskipped.config.Cache;
-import cephetir.skyskipped.config.Config;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -33,7 +32,7 @@ public class RPC {
     private final DiscordRPCManager discordRPCManager = new DiscordRPCManager();
 
     public void init() {
-        if (!Config.DRPC) return;
+        //if (!Config.DRPC) return;
         discordRPCManager.start();
     }
 
@@ -41,42 +40,30 @@ public class RPC {
         discordRPCManager.stop();
     }
 
-    private long timer = 0;
     @SubscribeEvent
     public void update(TickEvent.ClientTickEvent event) {
         if (!(event.phase == TickEvent.Phase.START) && !discordRPCManager.isActive()) return;
-        if (System.currentTimeMillis() - timer < 2000) return;
-        timer = System.currentTimeMillis();
 
-        String details;
-        String state;
         if (Cache.isInDungeon) {
-            details = "Playing Dungeons";
-            state = "Cleared: " + Cache.dungeonPercentage + " %";
+            discordRPCManager.setDetailsLine("Playing Dungeons");
+            discordRPCManager.setStateLine("Cleared: " + Cache.dungeonPercentage + " %");
         } else if ((!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
             if (Cache.inSkyblock) {
-                details = "Playing on Hypixel Skyblock";
-                state = "Holding: " + Cache.itemheld;
+                discordRPCManager.setDetailsLine("Playing on Hypixel Skyblock");
+                discordRPCManager.setStateLine("Holding: " + Cache.itemheld);
             } else if (Minecraft.getMinecraft().getCurrentServerData().serverIP.toLowerCase().contains("hypixel.net")) {
-                details = "Playing on Hypixel";
-                state = "In game";
+                discordRPCManager.setDetailsLine("Playing on Hypixel");
+                discordRPCManager.setStateLine("In game");
             } else {
-                details = "Playing on " + Minecraft.getMinecraft().getCurrentServerData().serverIP;
-                state = "In game";
+                discordRPCManager.setDetailsLine("Playing on " + Minecraft.getMinecraft().getCurrentServerData().serverIP);
+                discordRPCManager.setStateLine("In game");
             }
         } else if (Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null) {
-            details = "Playing Singleplayer";
-            state = "In game";
+            discordRPCManager.setDetailsLine("Playing Singleplayer");
+            discordRPCManager.setStateLine("In game");
         } else {
-            details = "In main menu";
-            state = "Idle";
-        }
-
-        if (!discordRPCManager.detailsLine.equals(details)) {
-            discordRPCManager.setDetailsLine(details);
-        }
-        if (!discordRPCManager.stateLine.equals(state)) {
-            discordRPCManager.setStateLine(state);
+            discordRPCManager.setDetailsLine("In main menu");
+            discordRPCManager.setStateLine("Idle");
         }
     }
 }
