@@ -57,6 +57,7 @@ public class SkySkipped {
         MinecraftForge.EVENT_BUS.register(RPC.getINSTANCE());
         MinecraftForge.EVENT_BUS.register(new Status());
         //MinecraftForge.EVENT_BUS.register(new RenderUtils());
+        RPC.getINSTANCE().init();
         features.register();
         RPC.getINSTANCE().init();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());

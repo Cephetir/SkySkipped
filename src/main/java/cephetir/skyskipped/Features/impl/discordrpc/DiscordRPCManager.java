@@ -21,22 +21,25 @@ import cephetir.skyskipped.SkySkipped;
 import com.jagrosh.discordipc.IPCClient;
 import com.jagrosh.discordipc.IPCListener;
 import com.jagrosh.discordipc.entities.RichPresence;
+import lombok.Getter;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.json.JSONObject;
 
 import java.time.OffsetDateTime;
-import java.util.Timer;
-import java.util.TimerTask;
 
+@Getter
 public class DiscordRPCManager implements IPCListener {
     private static final long APPLICATION_ID = 867366183057752094L;
     private static final long UPDATE_PERIOD = 4200L;
 
     private IPCClient client;
-    public String detailsLine = "";
-    public String stateLine = "";
+    private String detailsLine;
+    private String stateLine;
     private OffsetDateTime startTimestamp;
 
-    private Timer updateTimer;
+    //private Timer updateTimer;
     private boolean connected;
 
     public void start() {
@@ -83,31 +86,43 @@ public class DiscordRPCManager implements IPCListener {
         client.sendRichPresence(presence);
     }
 
+    private int tickCounter;
+
     public void setStateLine(String status) {
         this.stateLine = status;
-        if (isActive()) {
-            updatePresence();
-        }
+//        if (isActive()) {
+//            updatePresence();
+//        }
     }
 
     public void setDetailsLine(String status) {
         this.detailsLine = status;
-        if (isActive()) {
-            updatePresence();
-        }
+//        if (isActive()) {
+//            updatePresence();
+//        }
     }
 
     @Override
     public void onReady(IPCClient client) {
         System.out.println("Discord RPC started");
         connected = true;
-        updateTimer = new Timer();
-        updateTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                updatePresence();
-            }
-        }, 0, UPDATE_PERIOD);
+//        updateTimer = new Timer();
+//        updateTimer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                updatePresence();
+//            }
+//        }, 0, UPDATE_PERIOD);
+        MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    @SubscribeEvent
+    public void onClientTick(TickEvent.ClientTickEvent event) {
+        tickCounter++;
+        if (tickCounter % 200 == 0) {
+            updatePresence();
+            tickCounter = 0;
+        }
     }
 
     @Override
@@ -115,7 +130,8 @@ public class DiscordRPCManager implements IPCListener {
         System.out.println("Discord RPC closed");
         this.client = null;
         connected = false;
-        cancelTimer();
+        //cancelTimer();
+        MinecraftForge.EVENT_BUS.unregister(this);
     }
 
     @Override
@@ -123,13 +139,14 @@ public class DiscordRPCManager implements IPCListener {
         System.out.println("Discord RPC disconnected");
         this.client = null;
         connected = false;
-        cancelTimer();
+        //cancelTimer();
+        MinecraftForge.EVENT_BUS.unregister(this);
     }
 
-    private void cancelTimer() {
-        if(updateTimer != null) {
-            updateTimer.cancel();
-            updateTimer = null;
-        }
-    }
+//    private void cancelTimer() {
+//        if(updateTimer != null) {
+//            updateTimer.cancel();
+//            updateTimer = null;
+//        }
+//    }
 }
