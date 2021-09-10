@@ -17,7 +17,7 @@
 
 package cephetir.skyskipped.config;
 
-import cephetir.skyskipped.Features.impl.discordrpc.Client;
+import cephetir.skyskipped.Features.impl.discordrpc.RPC;
 import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
@@ -111,12 +111,12 @@ public class Config extends Vigilant {
     public Config() {
         super(new File("./config/skyskipped.toml"));
         registerListener("DRPC", (Consumer<Boolean>) aBoolean -> {
-            if (aBoolean && (!Client.getINSTANCE().getDiscordRPCManager().isActive())) {
-                Client.getINSTANCE().getDiscordRPCManager().start();
-            } else if (!aBoolean && Client.getINSTANCE().getDiscordRPCManager().isActive()) {
+            if (aBoolean && (!RPC.getINSTANCE().getDiscordRPCManager().isActive())) {
                 if (System.currentTimeMillis() - timer < 4000) return;
                 timer = System.currentTimeMillis();
-                Client.getINSTANCE().getDiscordRPCManager().stop();
+                RPC.getINSTANCE().getDiscordRPCManager().start();
+            } else if (!aBoolean && RPC.getINSTANCE().getDiscordRPCManager().isActive()) {
+                RPC.getINSTANCE().getDiscordRPCManager().stop();
             }
         });
         initialize();

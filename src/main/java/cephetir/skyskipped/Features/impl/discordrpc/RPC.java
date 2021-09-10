@@ -24,10 +24,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-public class Client {
+public class RPC {
 
     @Getter
-    private static final Client INSTANCE = new Client();
+    private static final RPC INSTANCE = new RPC();
 
     @Getter
     private final DiscordRPCManager discordRPCManager = new DiscordRPCManager();
@@ -48,27 +48,35 @@ public class Client {
         if (System.currentTimeMillis() - timer < 2000) return;
         timer = System.currentTimeMillis();
 
-
+        String details;
+        String state;
         if (Cache.isInDungeon) {
-            discordRPCManager.setDetailsLine("Playing Dungeons");
-            discordRPCManager.setStateLine("Cleared: " + Cache.dungeonPercentage + " %");
+            details = "Playing Dungeons";
+            state = "Cleared: " + Cache.dungeonPercentage + " %";
         } else if ((!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
             if (Cache.inSkyblock) {
-                discordRPCManager.setDetailsLine("Playing on Hypixel Skyblock");
-                discordRPCManager.setStateLine("Holding: " + Cache.itemheld);
+                details = "Playing on Hypixel Skyblock";
+                state = "Holding: " + Cache.itemheld;
             } else if (Minecraft.getMinecraft().getCurrentServerData().serverIP.toLowerCase().contains("hypixel.net")) {
-                discordRPCManager.setDetailsLine("Playing on Hypixel");
-                discordRPCManager.setStateLine("In game");
+                details = "Playing on Hypixel";
+                state = "In game";
             } else {
-                discordRPCManager.setDetailsLine("Playing on " + Minecraft.getMinecraft().getCurrentServerData().serverIP);
-                discordRPCManager.setStateLine("In game");
+                details = "Playing on " + Minecraft.getMinecraft().getCurrentServerData().serverIP;
+                state = "In game";
             }
         } else if (Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null) {
-            discordRPCManager.setDetailsLine("Playing Singleplayer");
-            discordRPCManager.setStateLine("In game");
+            details = "Playing Singleplayer";
+            state = "In game";
         } else {
-            discordRPCManager.setDetailsLine("In main menu");
-            discordRPCManager.setStateLine("Idle");
+            details = "In main menu";
+            state = "Idle";
+        }
+
+        if (!discordRPCManager.detailsLine.equals(details)) {
+            discordRPCManager.setDetailsLine(details);
+        }
+        if (!discordRPCManager.stateLine.equals(state)) {
+            discordRPCManager.setStateLine(state);
         }
     }
 }

@@ -32,8 +32,8 @@ public class DiscordRPCManager implements IPCListener {
     private static final long UPDATE_PERIOD = 4200L;
 
     private IPCClient client;
-    private String detailsLine;
-    private String stateLine;
+    public String detailsLine = "";
+    public String stateLine = "";
     private OffsetDateTime startTimestamp;
 
     private Timer updateTimer;
@@ -85,16 +85,16 @@ public class DiscordRPCManager implements IPCListener {
 
     public void setStateLine(String status) {
         this.stateLine = status;
-//        if (isActive()) {
-//            updatePresence();
-//        }
+        if (isActive()) {
+            updatePresence();
+        }
     }
 
     public void setDetailsLine(String status) {
         this.detailsLine = status;
-//        if (isActive()) {
-//            updatePresence();
-//        }
+        if (isActive()) {
+            updatePresence();
+        }
     }
 
     @Override
