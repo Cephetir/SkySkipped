@@ -25,14 +25,24 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class RPC {
 
-    @Getter
-    private static final RPC INSTANCE = new RPC();
+    private static RPC INSTANCE = null;
+
+    // Make this a Singleton
+    public static RPC getINSTANCE() {
+        if (RPC.INSTANCE == null) {
+            RPC.INSTANCE = new RPC();
+        }
+
+        return RPC.INSTANCE;
+    }
+
+    private RPC() {}
 
     @Getter
     private final DiscordRPCManager discordRPCManager = new DiscordRPCManager();
 
     public void init() {
-        //if (!Config.DRPC) return;
+        // if (!Config.DRPC) return; TODO Config is not working?
         discordRPCManager.start();
     }
 
