@@ -19,6 +19,7 @@ package cephetir.skyskipped.Features;
 
 import cephetir.skyskipped.Features.impl.*;
 import cephetir.skyskipped.Features.impl.fragrun.FragRun;
+import cephetir.skyskipped.gui.hud.HUD;
 import lombok.Getter;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -28,6 +29,8 @@ import java.util.List;
 public class Features {
     @Getter
     public List<Feature> features = new ArrayList<>();
+    @Getter
+    public List<HUD> huds = new ArrayList<>();
 
     public void register() {
         features.add(new ChestCloser());
@@ -38,8 +41,6 @@ public class Features {
         features.add(new Blocker());
         features.add(new Ping());
         features.add(new FragRun());
-        for (Feature feature : features) {
-            MinecraftForge.EVENT_BUS.register(feature);
-        }
+        features.forEach(MinecraftForge.EVENT_BUS::register);
     }
 }

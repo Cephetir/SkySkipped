@@ -18,6 +18,8 @@
 package cephetir.skyskipped.config;
 
 import cephetir.skyskipped.Features.impl.discordrpc.RPC;
+import cephetir.skyskipped.SkySkipped;
+import cephetir.skyskipped.gui.hud.impl.FPSHud;
 import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
@@ -106,6 +108,14 @@ public class Config extends Vigilant {
     )
     public static String BotName = "";
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "FPS",
+            category = "HUD", subcategory = "HUD",
+            description = "Shows your fps."
+    )
+    public static boolean fpsHud = false;
+
     private long timer = 0;
 
     public Config() {
@@ -117,6 +127,13 @@ public class Config extends Vigilant {
                 RPC.getINSTANCE().getDiscordRPCManager().start();
             } else if (!aBoolean && RPC.getINSTANCE().getDiscordRPCManager().isActive()) {
                 RPC.getINSTANCE().getDiscordRPCManager().stop();
+            }
+        });
+        registerListener("fpsHud", (Consumer<Boolean>) aBoolean -> {
+            if (aBoolean) {
+                SkySkipped.hudManager.register(new FPSHud());
+            } else {
+                SkySkipped.hudManager.unregister(new FPSHud());
             }
         });
         initialize();
