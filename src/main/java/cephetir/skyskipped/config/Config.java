@@ -19,6 +19,7 @@ package cephetir.skyskipped.config;
 
 import cephetir.skyskipped.Features.impl.discordrpc.RPC;
 import cephetir.skyskipped.SkySkipped;
+import cephetir.skyskipped.gui.hud.ScreenPosition;
 import cephetir.skyskipped.gui.hud.impl.FPSHud;
 import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.Property;
@@ -116,7 +117,23 @@ public class Config extends Vigilant {
     )
     public static boolean fpsHud = false;
 
+    public static final FPSHud fpsHudClass = new FPSHud();
+    @Property(
+            type = PropertyType.NUMBER,
+            name = "FPS Pos X",
+            category = "HUD", subcategory = "HUD",
+            description = "Where on screen hud will be."
+    )
+    public static int fpsPosX = 1;
+
     private long timer = 0;
+    @Property(
+            type = PropertyType.NUMBER,
+            name = "FPS Pos Y",
+            category = "HUD", subcategory = "HUD",
+            description = "Where on screen hud will be."
+    )
+    public static int fpsPosY = 1;
 
     public Config() {
         super(new File("./config/skyskipped.toml"));
@@ -131,9 +148,10 @@ public class Config extends Vigilant {
         });
         registerListener("fpsHud", (Consumer<Boolean>) aBoolean -> {
             if (aBoolean) {
-                SkySkipped.hudManager.register(new FPSHud());
+                fpsHudClass.save(ScreenPosition.fromAbsolute(fpsPosX, fpsPosY));
+                SkySkipped.hudManager.register(fpsHudClass);
             } else {
-                SkySkipped.hudManager.unregister(new FPSHud());
+                SkySkipped.hudManager.unregister(fpsHudClass);
             }
         });
         initialize();
