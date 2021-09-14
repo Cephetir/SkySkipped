@@ -53,6 +53,7 @@ public class Config extends Vigilant {
     )
     public static boolean nons = false;
 
+    @SuppressWarnings("unused")
     @Property(
             type = PropertyType.SWITCH,
             name = "Discord RPC",
@@ -109,6 +110,7 @@ public class Config extends Vigilant {
     )
     public static String BotName = "";
 
+    @SuppressWarnings("unused")
     @Property(
             type = PropertyType.SWITCH,
             name = "FPS",
