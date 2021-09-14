@@ -17,11 +17,19 @@
 
 package cephetir.skyskipped.gui.hud.impl;
 
+import cephetir.skyskipped.config.Config;
 import cephetir.skyskipped.gui.hud.HUD;
 import cephetir.skyskipped.gui.hud.ScreenPosition;
 import net.minecraft.client.Minecraft;
 
 public class FPSHud extends HUD {
+
+    @Override
+    public void save(ScreenPosition pos) {
+        this.pos = pos;
+        Config.fpsPosX = pos.getAbsoluteX();
+        Config.fpsPosY = pos.getAbsoluteY();
+    }
 
     @Override
     public int getHeight() {
@@ -35,11 +43,11 @@ public class FPSHud extends HUD {
 
     @Override
     public void render(ScreenPosition pos) {
-        font.drawStringWithShadow(String.format("§7[§6FPS§7]§f %d", Minecraft.getDebugFPS()), pos.getAbsoluteX(), pos.getAbsoluteY(), -1);
+        font.drawString(String.format("§7[§cFPS§7]§f %d", Minecraft.getDebugFPS()), pos.getAbsoluteX(), pos.getAbsoluteY(), -1);
     }
 
     @Override
     public void renderDummy(ScreenPosition pos) {
-        font.drawStringWithShadow("§7[§6FPS§7]§f 999", pos.getAbsoluteX(), pos.getAbsoluteY(), -1);
+        font.drawString(String.format("§7[§cFPS§7]§f %d", Minecraft.getDebugFPS()), pos.getAbsoluteX(), pos.getAbsoluteY(), -1);
     }
 }

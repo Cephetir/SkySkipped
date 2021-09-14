@@ -23,7 +23,6 @@ import cephetir.skyskipped.Features.impl.fragrun.LeaveCommand;
 import cephetir.skyskipped.Features.impl.fragrun.PartyCommand;
 import cephetir.skyskipped.commands.SkySkippedCommand;
 import cephetir.skyskipped.config.Config;
-import cephetir.skyskipped.config.HUDConfig;
 import cephetir.skyskipped.gui.hud.HUDManager;
 import cephetir.skyskipped.listeners.Status;
 import net.minecraft.client.Minecraft;
@@ -49,7 +48,6 @@ public class SkySkipped {
     public static Config config = new Config();
     private static final Features features = new Features();
     public static HUDManager hudManager;
-    public static HUDConfig hudConfig;
     private final KeyBinding locGuiKey = new KeyBinding("Open GUI", Keyboard.KEY_B, MOD_NAME);
 
     @SuppressWarnings("unused")
@@ -59,9 +57,9 @@ public class SkySkipped {
     @Mod.EventHandler()
     public void onPreInit(FMLPreInitializationEvent event) {
         System.out.println("Starting SkySkipped...");
+        //hudManager.register(Config.fpsHudClass);
         config.preload();
         MinecraftForge.EVENT_BUS.register(this);
-        hudConfig = new HUDConfig(event.getModConfigurationDirectory());
     }
 
     @Mod.EventHandler
@@ -76,7 +74,6 @@ public class SkySkipped {
         ClientCommandHandler.instance.registerCommand(new LeaveCommand());
         ClientCommandHandler.instance.registerCommand(new PartyCommand());
         ClientRegistry.registerKeyBinding(locGuiKey);
-        hudConfig.loadFromFile();
     }
 
     @SubscribeEvent
@@ -88,6 +85,5 @@ public class SkySkipped {
     @Mod.EventHandler
     public void stop(FMLModDisabledEvent event) {
         RPC.getINSTANCE().shutdown();
-        hudConfig.saveToFile();
     }
 }

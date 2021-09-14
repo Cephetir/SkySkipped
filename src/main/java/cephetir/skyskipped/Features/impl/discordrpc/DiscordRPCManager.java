@@ -86,8 +86,6 @@ public class DiscordRPCManager implements IPCListener {
         client.sendRichPresence(presence);
     }
 
-    private int tickCounter;
-
     public void setStateLine(String status) {
         this.stateLine = status;
 //        if (isActive()) {
@@ -116,6 +114,7 @@ public class DiscordRPCManager implements IPCListener {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
+    private int tickCounter;
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         tickCounter++;

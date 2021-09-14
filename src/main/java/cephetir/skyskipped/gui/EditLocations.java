@@ -37,6 +37,9 @@ public class EditLocations extends GuiScreen {
 
     private int prevX, prevY;
 
+    public EditLocations() {
+    }
+
     public EditLocations(HUDManager api) {
         Collection<IRenderer> registeredRenderers = api.getRegisteredRenderers();
 
