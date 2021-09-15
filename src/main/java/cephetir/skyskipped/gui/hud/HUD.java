@@ -17,13 +17,7 @@
 
 package cephetir.skyskipped.gui.hud;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-
 public abstract class HUD implements IRenderer {
-    protected static final Minecraft mc = Minecraft.getMinecraft();
-    protected static final FontRenderer font = mc.fontRendererObj;
-
     protected ScreenPosition pos;
 
     @Override

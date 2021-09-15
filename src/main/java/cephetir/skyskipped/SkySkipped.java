@@ -47,7 +47,6 @@ public class SkySkipped {
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static Config config = new Config();
     private static final Features features = new Features();
-    public static HUDManager hudManager;
     private final KeyBinding locGuiKey = new KeyBinding("Open GUI", Keyboard.KEY_B, MOD_NAME);
 
     @SuppressWarnings("unused")
@@ -57,7 +56,6 @@ public class SkySkipped {
     @Mod.EventHandler()
     public void onPreInit(FMLPreInitializationEvent event) {
         System.out.println("Starting SkySkipped...");
-        //hudManager.register(Config.fpsHudClass);
         config.preload();
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -66,8 +64,6 @@ public class SkySkipped {
     public void onInit(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(RPC.getINSTANCE());
         MinecraftForge.EVENT_BUS.register(new Status());
-        //MinecraftForge.EVENT_BUS.register(new RenderUtils());
-        hudManager = HUDManager.getINSTANCE();
         features.register();
         RPC.getINSTANCE().init();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
@@ -79,7 +75,7 @@ public class SkySkipped {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (mc.currentScreen != null || mc.theWorld == null || mc.thePlayer == null) return;
-        if (GameSettings.isKeyDown(locGuiKey)) hudManager.openConfigScreen();
+        if (GameSettings.isKeyDown(locGuiKey)) HUDManager.getINSTANCE().openConfigScreen();
     }
 
     @Mod.EventHandler
