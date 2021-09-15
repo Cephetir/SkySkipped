@@ -22,13 +22,13 @@ import cephetir.skyskipped.gui.hud.HUD;
 import cephetir.skyskipped.gui.hud.ScreenPosition;
 import net.minecraft.client.Minecraft;
 
-public class FPSHud extends HUD {
+public class PingHud extends HUD {
 
     @Override
     public void save(ScreenPosition pos) {
         this.pos = pos;
-        Config.fpsPosX = pos.getAbsoluteX();
-        Config.fpsPosY = pos.getAbsoluteY();
+        Config.pingPosX = pos.getAbsoluteX();
+        Config.pingPosY = pos.getAbsoluteY();
     }
 
     @Override
@@ -38,16 +38,16 @@ public class FPSHud extends HUD {
 
     @Override
     public int getWidth() {
-        return Minecraft.getMinecraft().fontRendererObj.getStringWidth("[FPS] 999");
+        return Minecraft.getMinecraft().fontRendererObj.getStringWidth("[Ping] 9999");
     }
 
     @Override
     public void render(ScreenPosition pos) {
-        Minecraft.getMinecraft().fontRendererObj.drawString(String.format("§7[§cFPS§7]§f %d", Minecraft.getDebugFPS()), pos.getAbsoluteX(), pos.getAbsoluteY(), -1, true);
+        Minecraft.getMinecraft().fontRendererObj.drawString(String.format("§7[§cPing§7]§f %d", Minecraft.getMinecraft().getCurrentServerData().pingToServer), pos.getAbsoluteX(), pos.getAbsoluteY(), -1, true);
     }
 
     @Override
     public void renderDummy(ScreenPosition pos) {
-        Minecraft.getMinecraft().fontRendererObj.drawString(String.format("§7[§cFPS§7]§f %d", Minecraft.getDebugFPS()), pos.getAbsoluteX(), pos.getAbsoluteY(), -1, true);
+        Minecraft.getMinecraft().fontRendererObj.drawString(String.format("§7[§cPing§7]§f %d", Minecraft.getMinecraft().getCurrentServerData().pingToServer), pos.getAbsoluteX(), pos.getAbsoluteY(), -1, true);
     }
 }
