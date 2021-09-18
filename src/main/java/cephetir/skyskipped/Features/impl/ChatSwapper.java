@@ -34,7 +34,7 @@ public class ChatSwapper extends Feature {
 
     @SubscribeEvent
     public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
-        if (!Config.chatSwapper && !EssentialAPI.getMinecraftUtil().isHypixel()) return;
+        if (!Config.chatSwapper || !EssentialAPI.getMinecraftUtil().isHypixel()) return;
         if (event.message.getUnformattedText().startsWith("You have been kicked from the party") || event.message.getUnformattedText().contains("has disbanded") || event.message.getUnformattedText().startsWith("You left the party") || event.message.getUnformattedText().contains("has been disbanded")) {
             if (Cache.inParty) {
                 Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat all");

@@ -42,7 +42,7 @@ public class PlayerESP extends Feature {
     @SuppressWarnings("all")
     @SubscribeEvent
     public void onEntityRenderPre(RenderPlayerEvent.Pre event) {
-        if (preCalled && !Config.playerESP && !Cache.isInDungeon) return;
+        if (preCalled || !Config.playerESP || !Cache.isInDungeon) return;
         if (event.entityPlayer instanceof EntityOtherPlayerMP) return;
         ScorePlayerTeam scoreplayerteam = (ScorePlayerTeam) event.entityPlayer.getTeam();
         if (scoreplayerteam != null && scoreplayerteam.getNameTagVisibility() != Team.EnumVisible.NEVER) ;
