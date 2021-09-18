@@ -31,15 +31,15 @@ public class FragRun extends Feature {
 
     @SubscribeEvent
     public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
-        if (UTextComponent.Companion.stripFormatting(event.message.getUnformattedText()).trim().contains("> EXTRA STATS <")) {
-            if (Config.EndParty && !Config.BotName.equals("") && !Config.EndLeave) {
-                new PartyCommand().start();
-            } else if (Config.EndLeave && !Config.EndParty) {
-                new LeaveCommand().start();
-            } else if (Config.EndLeave) {
-                new PartyCommand().start();
-                new LeaveCommand().start();
-            }
+        if (UTextComponent.Companion.stripFormatting(event.message.getUnformattedText()).trim().contains("> EXTRA STATS <"))
+            return;
+        if (Config.EndParty && !Config.BotName.equals("") && !Config.EndLeave) {
+            new PartyCommand().start();
+        } else if (Config.EndLeave && !Config.EndParty) {
+            new LeaveCommand().start();
+        } else if (Config.EndLeave) {
+            new PartyCommand().start();
+            new LeaveCommand().start();
         }
     }
 }

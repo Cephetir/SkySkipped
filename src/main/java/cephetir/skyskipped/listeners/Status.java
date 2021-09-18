@@ -33,7 +33,7 @@ import java.util.Collection;
 public class Status {
 
     @SubscribeEvent
-    public void updateSkyblock(TickEvent.ClientTickEvent event) {
+    public void update(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START && !Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null && EssentialAPI.getMinecraftUtil().isHypixel()) {
             try {
                 boolean foundDungeon = false;
@@ -45,65 +45,39 @@ public class Status {
                 Scoreboard scoreboard = Minecraft.getMinecraft().thePlayer.getWorldScoreboard();
                 ScoreObjective scoreObjective = scoreboard.getObjectiveInDisplaySlot(1);
                 Collection<Score> scores = scoreboard.getSortedScores(scoreObjective);
-                String objectiveName = TextUtils.stripColor(scoreObjective.getDisplayName());
 
+                String objectiveName = TextUtils.stripColor(scoreObjective.getDisplayName());
                 if (objectiveName.startsWith("SKYBLOCK")) {
                     foundSkyblock = true;
                 }
 
-                for (Score sc : scores) {
-                    ScorePlayerTeam scorePlayerTeam = scoreboard.getPlayersTeam(sc.getPlayerName());
-                    String strippedLine = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()))).trim();
-                    if (strippedLine.contains("Dungeon Cleared: ")) {
-                        foundDungeon = true;
-                    }
-                    if (Cache.isInDungeon) {
+                if(foundSkyblock) {
+                    for (Score sc : scores) {
+                        ScorePlayerTeam scorePlayerTeam = scoreboard.getPlayersTeam(sc.getPlayerName());
+                        String strippedLine = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()))).trim();
                         if (strippedLine.contains("Dungeon Cleared: ")) {
-                            percentage = Integer.parseInt(strippedLine.substring(17));
+                            foundDungeon = true;
                         }
-                        if (ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()).startsWith(" §7⏣")) {
-                            dungeonName = strippedLine.trim();
+                        if (Cache.isInDungeon) {
+                            if (strippedLine.contains("Dungeon Cleared: ")) {
+                                percentage = Integer.parseInt(strippedLine.substring(17));
+                            }
+                            if (ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()).startsWith(" §7⏣")) {
+                                dungeonName = strippedLine.trim();
+                            }
                         }
+                    }
+                    if (Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null) {
+                        itemheld = TextUtils.stripColor(Minecraft.getMinecraft().thePlayer.getHeldItem().getDisplayName());
                     }
                 }
                 Cache.inSkyblock = foundSkyblock;
                 Cache.isInDungeon = foundDungeon;
                 Cache.dungeonPercentage = percentage;
                 Cache.dungeonName = dungeonName;
-                if (foundSkyblock) {
-                    if (Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null) {
-                        itemheld = TextUtils.stripColor(Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem().getDisplayName());
-                    }
-                }
                 Cache.itemheld = itemheld;
             } catch (NullPointerException ignored) {
             }
         }
     }
-//
-//    Scoreboard scoreboard = Minecraft.getMinecraft().thePlayer.getWorldScoreboard();
-//    ScoreObjective scoreObjective = scoreboard.getObjectiveInDisplaySlot(1);
-//    Collection<Score> scores = scoreboard.getSortedScores(scoreObjective);
-//    boolean foundDungeon = false;
-//    int percentage = 0;
-//    String dungeonName = null;
-//    String dungeonTeam = null;
-//    for (Score sc : scores) {
-//        ScorePlayerTeam scorePlayerTeam = scoreboard.getPlayersTeam(sc.getPlayerName());
-//        String strippedLine = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()))).trim();
-//        if (strippedLine.contains("Dungeon Cleared: ")) {
-//            foundDungeon = true;
-//            percentage = Integer.parseInt(strippedLine.substring(17));
-//        }
-//        if (ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()).startsWith(" §7⏣")) {
-//            dungeonName = strippedLine.trim();
-//        }
-//        if (ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()).startsWith("§e[")) {
-//            dungeonTeam = strippedLine.trim();
-//        }
-//    }
-//    Config.isInDungeon = foundDungeon;
-//    Config.dungeonPercentage = percentage;
-//    Config.dungeonName = dungeonName;
-//    Config.dungeonTeam = dungeonTeam;
 }

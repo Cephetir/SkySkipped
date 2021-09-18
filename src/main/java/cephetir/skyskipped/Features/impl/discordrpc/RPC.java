@@ -36,7 +36,8 @@ public class RPC {
         return RPC.INSTANCE;
     }
 
-    private RPC() {}
+    private RPC() {
+    }
 
     @Getter
     private final DiscordRPCManager discordRPCManager = new DiscordRPCManager();
