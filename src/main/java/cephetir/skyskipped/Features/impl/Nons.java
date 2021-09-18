@@ -46,7 +46,7 @@ public class Nons extends Feature {
 
     @SubscribeEvent
     public void doThings(ClientChatReceivedEvent event) {
-        if (!Config.nons && !EssentialAPI.getMinecraftUtil().isHypixel()) return;
+        if (!Config.nons || !EssentialAPI.getMinecraftUtil().isHypixel()) return;
         ChatComponentText text = (ChatComponentText) event.message;
         String unformattedText = EnumChatFormatting.getTextWithoutFormattingCodes(text.getUnformattedText());
         Matcher matcher = regex.matcher(unformattedText);
