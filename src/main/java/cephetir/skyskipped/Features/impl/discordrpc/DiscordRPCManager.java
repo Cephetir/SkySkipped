@@ -81,7 +81,7 @@ public class DiscordRPCManager implements IPCListener {
                 .setState(stateLine)
                 .setDetails(detailsLine)
                 .setStartTimestamp(startTimestamp)
-                .setLargeImage("large", "SkySkipped v"+ SkySkipped.VERSION)
+                .setLargeImage("large", "SkySkipped v" + SkySkipped.VERSION)
                 .build();
         client.sendRichPresence(presence);
     }
@@ -115,6 +115,7 @@ public class DiscordRPCManager implements IPCListener {
     }
 
     private int tickCounter;
+
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         tickCounter++;

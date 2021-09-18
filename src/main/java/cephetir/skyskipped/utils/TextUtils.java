@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("all")
 public class TextUtils {
     private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)§[0-9A-FK-OR]");
 
@@ -37,15 +38,12 @@ public class TextUtils {
         return SCOREBOARD_CHARACTERS.matcher(text).replaceAll("");
     }
 
-    @SuppressWarnings("all")
     private static final TreeMap<Long, String> suffixes = new TreeMap<Long, String>();
 
-    @SuppressWarnings("unused")
     public static String keepIntegerCharactersOnly(String text) {
         return INTEGER_CHARACTERS.matcher(text).replaceAll("");
     }
 
-    @SuppressWarnings("all")
     public static String join(List list, String delimeter) {
         if (list.isEmpty()) return "";
         StringBuilder stringBuilder = new StringBuilder();
@@ -62,7 +60,6 @@ public class TextUtils {
         suffixes.put(1000000000L, "b");
     }
 
-    @SuppressWarnings("all")
     public static String format(long value) {
 //        return String.valueOf(value);
         if (value == Long.MIN_VALUE)
@@ -79,7 +76,6 @@ public class TextUtils {
         return hasDecimal ? ((truncated / 10.0D) + suffix) : ((truncated / 10L) + suffix);
     }
 
-    @SuppressWarnings("all")
     public static long reverseFormat(String str2) {
         String str = str2.toLowerCase();
         String integerPart = str.substring(0, str.length() - 1);
@@ -91,11 +87,12 @@ public class TextUtils {
         return (long) (Double.parseDouble(integerPart) * multiplier);
     }
 
-    @SuppressWarnings("all")
     public static String formatTime(long ms) {
         long seconds = (long) Math.ceil(ms / 1000.0);
-        long hr = seconds / (60 * 60); seconds -= hr * 60 * 60;
-        long min = seconds / 60; seconds -= min * 60;
+        long hr = seconds / (60 * 60);
+        seconds -= hr * 60 * 60;
+        long min = seconds / 60;
+        seconds -= min * 60;
 
         StringBuilder stringBuilder = new StringBuilder();
         if (hr > 0) {
@@ -111,7 +108,6 @@ public class TextUtils {
         return stringBuilder.toString();
     }
 
-    @SuppressWarnings("all")
     public static String insertDashUUID(String uuid) {
         StringBuilder sb = new StringBuilder(uuid);
         sb.insert(8, "-");
@@ -124,5 +120,4 @@ public class TextUtils {
 
         return sb.toString();
     }
-
 }

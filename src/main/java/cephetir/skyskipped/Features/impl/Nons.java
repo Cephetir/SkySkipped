@@ -1,25 +1,25 @@
 /*
- * SkySkipped - Hypixel Skyblock mod
- * Copyright (C) 2021  Cephetir
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+ * Version 2, December 2004
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * Copyright (C) 2021 Cephetir
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Everyone is permitted to copy and distribute verbatim or modified
+ * copies of this license document, and changing it is allowed as long
+ * as the name is changed.
+ *
+ * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+ * TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+ *
+ *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
 package cephetir.skyskipped.Features.impl;
 
 import cephetir.skyskipped.Features.Feature;
 import cephetir.skyskipped.config.Config;
+import gg.essential.api.EssentialAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -46,7 +46,7 @@ public class Nons extends Feature {
 
     @SubscribeEvent
     public void doThings(ClientChatReceivedEvent event) {
-        if (!Config.nons) return;
+        if (!Config.nons && !EssentialAPI.getMinecraftUtil().isHypixel()) return;
         ChatComponentText text = (ChatComponentText) event.message;
         String unformattedText = EnumChatFormatting.getTextWithoutFormattingCodes(text.getUnformattedText());
         Matcher matcher = regex.matcher(unformattedText);
