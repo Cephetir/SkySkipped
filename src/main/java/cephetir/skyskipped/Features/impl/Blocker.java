@@ -20,6 +20,7 @@ package cephetir.skyskipped.Features.impl;
 import cephetir.skyskipped.Features.Feature;
 import cephetir.skyskipped.config.Cache;
 import cephetir.skyskipped.config.Config;
+import cephetir.skyskipped.utils.TextUtils;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -33,7 +34,7 @@ public class Blocker extends Feature {
         if (!Cache.inSkyblock || !Config.gsBlock) return;
         if (event.entity != mc.thePlayer || event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) return;
         String item = Cache.itemheld;
-        if (!item.contains("Giant's Sword")) return;
+        if (!TextUtils.stripColor(item).toLowerCase().contains("giant's sword")) return;
         mc.thePlayer.playSound("random.orb", 0.8f, 1f);
         event.setCanceled(true);
     }
