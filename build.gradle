@@ -76,7 +76,7 @@ dependencies {
         exclude module: 'log4j'
     })
 
-    implementation('gg.essential:essential-1.8.9-forge:1470+')
+    implementation('gg.essential:essential-1.8.9-forge:1486+')
     implementation('org.projectlombok:lombok:1.18.20')
     annotationProcessor('org.projectlombok:lombok:1.18.20')
     implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
