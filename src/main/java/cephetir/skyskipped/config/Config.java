@@ -18,10 +18,6 @@
 package cephetir.skyskipped.config;
 
 import cephetir.skyskipped.Features.impl.discordrpc.RPC;
-import cephetir.skyskipped.gui.hud.HUDManager;
-import cephetir.skyskipped.gui.hud.ScreenPosition;
-import cephetir.skyskipped.gui.hud.impl.FPSHud;
-import cephetir.skyskipped.gui.hud.impl.PingHud;
 import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
@@ -111,66 +107,81 @@ public class Config extends Vigilant {
     )
     public static String BotName = "";
 
-    @SuppressWarnings("unused")
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "FPS",
-            category = "HUD", subcategory = "HUD",
-            description = "Shows your fps."
-    )
+//    @SuppressWarnings("unused")
+//    @Property(
+//            type = PropertyType.SWITCH,
+//            name = "FPS",
+//            category = "HUD", subcategory = "HUD",
+//            description = "Shows your fps."
+//    )
     public static boolean fpsHud = false;
 
-    @Property(
-            type = PropertyType.NUMBER,
-            name = "FPS Pos X",
-            category = "HUD", subcategory = "HUD",
-            description = "Where on screen hud will be."
-    )
+//    @Property(
+//            type = PropertyType.NUMBER,
+//            name = "FPS Pos X",
+//            category = "HUD", subcategory = "HUD",
+//            description = "Where on screen hud will be."
+//    )
     public static int fpsPosX = 1;
 
-    @Property(
-            type = PropertyType.NUMBER,
-            name = "FPS Pos Y",
-            category = "HUD", subcategory = "HUD",
-            description = "Where on screen hud will be."
-    )
+//    @Property(
+//            type = PropertyType.NUMBER,
+//            name = "FPS Pos Y",
+//            category = "HUD", subcategory = "HUD",
+//            description = "Where on screen hud will be."
+//    )
     public static int fpsPosY = 1;
 
-    @SuppressWarnings("unused")
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Ping",
-            category = "HUD", subcategory = "HUD",
-            description = "Shows your ping."
-    )
+//    @SuppressWarnings("unused")
+//    @Property(
+//            type = PropertyType.SWITCH,
+//            name = "Ping",
+//            category = "HUD", subcategory = "HUD",
+//            description = "Shows your ping."
+//    )
     public static boolean pingHud = false;
 
-    @Property(
-            type = PropertyType.NUMBER,
-            name = "Ping Pos X",
-            category = "HUD", subcategory = "HUD",
-            description = "Where on screen hud will be."
-    )
+//    @Property(
+//            type = PropertyType.NUMBER,
+//            name = "Ping Pos X",
+//            category = "HUD", subcategory = "HUD",
+//            description = "Where on screen hud will be."
+//    )
     public static int pingPosX = 1;
 
-    @Property(
-            type = PropertyType.NUMBER,
-            name = "Ping Pos Y",
-            category = "HUD", subcategory = "HUD",
-            description = "Where on screen hud will be."
-    )
+//    @Property(
+//            type = PropertyType.NUMBER,
+//            name = "Ping Pos Y",
+//            category = "HUD", subcategory = "HUD",
+//            description = "Where on screen hud will be."
+//    )
     public static int pingPosY = 1;
 
-    private long timer = 0;
-    public static final FPSHud fpsHudClass = new FPSHud();
-    public static final PingHud pingHudClass = new PingHud();
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Rabbit Hat Notifier",
+            category = "Dungeons", subcategory = "Dungeons",
+            description = "Notifies you when watcher is cleared."
+    )
+    public static boolean rabHat = false;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Watcher Notifier",
+            category = "Dungeons", subcategory = "Dungeons",
+            description = "Notifies you when watcher spawned all mobs."
+    )
+    public static boolean watcher = false;
+
+    private long timer = 0;
+//    public static final FPSHud fpsHudClass = new FPSHud();
+//    public static final PingHud pingHudClass = new PingHud();
     public Config() {
         super(new File("./config/skyskipped.toml"));
-        addDependency("fpsPosX", "fpsHud");
-        addDependency("fpsPosY", "fpsHud");
-        addDependency("pingPosX", "pingHud");
-        addDependency("pingPosY", "pingHud");
+//        addDependency("fpsPosX", "fpsHud");
+//        addDependency("fpsPosY", "fpsHud");
+//        addDependency("pingPosX", "pingHud");
+//        addDependency("pingPosY", "pingHud");
         registerListener("DRPC", (Consumer<Boolean>) aBoolean -> {
             if (aBoolean && (!RPC.getINSTANCE().getDiscordRPCManager().isActive())) {
                 if (System.currentTimeMillis() - timer < 4000) return;
@@ -180,22 +191,22 @@ public class Config extends Vigilant {
                 RPC.getINSTANCE().getDiscordRPCManager().stop();
             }
         });
-        registerListener("fpsHud", (Consumer<Boolean>) aBoolean -> {
-            if (aBoolean) {
-                fpsHudClass.save(ScreenPosition.fromAbsolute(fpsPosX, fpsPosY));
-                HUDManager.getINSTANCE().register(fpsHudClass);
-            } else {
-                HUDManager.getINSTANCE().unregister(fpsHudClass);
-            }
-        });
-        registerListener("pingHud", (Consumer<Boolean>) aBoolean -> {
-            if (aBoolean) {
-                pingHudClass.save(ScreenPosition.fromAbsolute(pingPosX, pingPosY));
-                HUDManager.getINSTANCE().register(pingHudClass);
-            } else {
-                HUDManager.getINSTANCE().unregister(pingHudClass);
-            }
-        });
+//        registerListener("fpsHud", (Consumer<Boolean>) aBoolean -> {
+//            if (aBoolean) {
+//                fpsHudClass.save(ScreenPosition.fromAbsolute(fpsPosX, fpsPosY));
+//                HUDManager.getINSTANCE().register(fpsHudClass);
+//            } else {
+//                HUDManager.getINSTANCE().unregister(fpsHudClass);
+//            }
+//        });
+//        registerListener("pingHud", (Consumer<Boolean>) aBoolean -> {
+//            if (aBoolean) {
+//                pingHudClass.save(ScreenPosition.fromAbsolute(pingPosX, pingPosY));
+//                HUDManager.getINSTANCE().register(pingHudClass);
+//            } else {
+//                HUDManager.getINSTANCE().unregister(pingHudClass);
+//            }
+//        });
         initialize();
     }
 }

@@ -23,31 +23,24 @@ import cephetir.skyskipped.Features.impl.fragrun.LeaveCommand;
 import cephetir.skyskipped.Features.impl.fragrun.PartyCommand;
 import cephetir.skyskipped.commands.SkySkippedCommand;
 import cephetir.skyskipped.config.Config;
-import cephetir.skyskipped.gui.hud.HUDManager;
 import cephetir.skyskipped.listeners.Status;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.GameSettings;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.lwjgl.input.Keyboard;
 
 @Mod(modid = SkySkipped.MODID, name = SkySkipped.MOD_NAME, version = SkySkipped.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
 public class SkySkipped {
     public static final String MODID = "skyskipped";
     public static final String MOD_NAME = "SkySkipped";
-    public static final String VERSION = "2.0";
+    public static final String VERSION = "2.1";
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static Config config = new Config();
     private static final Features features = new Features();
-    private final KeyBinding locGuiKey = new KeyBinding("Open GUI", Keyboard.KEY_B, MOD_NAME);
+    //private final KeyBinding locGuiKey = new KeyBinding("Open GUI", Keyboard.KEY_B, MOD_NAME);
 
     @SuppressWarnings("unused")
     @Mod.Instance(MODID)
@@ -69,14 +62,14 @@ public class SkySkipped {
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
         ClientCommandHandler.instance.registerCommand(new LeaveCommand());
         ClientCommandHandler.instance.registerCommand(new PartyCommand());
-        ClientRegistry.registerKeyBinding(locGuiKey);
+        //ClientRegistry.registerKeyBinding(locGuiKey);
     }
 
-    @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event) {
-        if (mc.currentScreen != null || mc.theWorld == null || mc.thePlayer == null) return;
-        if (GameSettings.isKeyDown(locGuiKey)) HUDManager.getINSTANCE().openConfigScreen();
-    }
+//    @SubscribeEvent
+//    public void onTick(TickEvent.ClientTickEvent event) {
+//        if (mc.currentScreen != null || mc.theWorld == null || mc.thePlayer == null) return;
+//        if (GameSettings.isKeyDown(locGuiKey)) HUDManager.getINSTANCE().openConfigScreen();
+//    }
 
     @Mod.EventHandler
     public void stop(FMLModDisabledEvent event) {
