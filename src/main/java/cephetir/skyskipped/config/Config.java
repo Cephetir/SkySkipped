@@ -157,22 +157,6 @@ public class Config extends Vigilant {
 //    )
     public static int pingPosY = 1;
 
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Rabbit Hat Notifier",
-            category = "Dungeons", subcategory = "Dungeons",
-            description = "Notifies you when watcher is cleared."
-    )
-    public static boolean rabHat = false;
-
-    @Property(
-            type = PropertyType.SWITCH,
-            name = "Watcher Notifier",
-            category = "Dungeons", subcategory = "Dungeons",
-            description = "Notifies you when watcher spawned all mobs."
-    )
-    public static boolean watcher = false;
-
     private long timer = 0;
 //    public static final FPSHud fpsHudClass = new FPSHud();
 //    public static final PingHud pingHudClass = new PingHud();
