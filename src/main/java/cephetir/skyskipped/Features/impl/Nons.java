@@ -18,8 +18,8 @@
 package cephetir.skyskipped.Features.impl;
 
 import cephetir.skyskipped.Features.Feature;
+import cephetir.skyskipped.config.Cache;
 import cephetir.skyskipped.config.Config;
-import gg.essential.api.EssentialAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -46,7 +46,7 @@ public class Nons extends Feature {
 
     @SubscribeEvent
     public void doThings(ClientChatReceivedEvent event) {
-        if (!Config.nons || !EssentialAPI.getMinecraftUtil().isHypixel()) return;
+        if (!Config.nons || !Cache.isHypixel) return;
         ChatComponentText text = (ChatComponentText) event.message;
         String unformattedText = EnumChatFormatting.getTextWithoutFormattingCodes(text.getUnformattedText());
         Matcher matcher = regex.matcher(unformattedText);

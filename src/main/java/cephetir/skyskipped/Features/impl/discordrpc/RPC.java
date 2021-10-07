@@ -62,7 +62,7 @@ public class RPC {
             if (Cache.inSkyblock) {
                 discordRPCManager.setDetailsLine("Playing on Hypixel Skyblock");
                 discordRPCManager.setStateLine("Holding: " + Cache.itemheld);
-            } else if (Minecraft.getMinecraft().getCurrentServerData().serverIP.toLowerCase().contains("hypixel.net")) {
+            } else if (Cache.isHypixel) {
                 discordRPCManager.setDetailsLine("Playing on Hypixel");
                 discordRPCManager.setStateLine("In game");
             } else {

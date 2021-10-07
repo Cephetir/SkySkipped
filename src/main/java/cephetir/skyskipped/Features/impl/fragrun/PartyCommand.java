@@ -17,8 +17,8 @@
 
 package cephetir.skyskipped.Features.impl.fragrun;
 
+import cephetir.skyskipped.config.Cache;
 import cephetir.skyskipped.config.Config;
-import gg.essential.api.EssentialAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -63,7 +63,7 @@ public class PartyCommand extends CommandBase {
     }
 
     public void start() {
-        if (started || !EssentialAPI.getMinecraftUtil().isHypixel()) return;
+        if (started || !Cache.isHypixel) return;
         started = true;
 
         new Thread(() -> {
