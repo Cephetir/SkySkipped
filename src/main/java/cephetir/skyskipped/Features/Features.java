@@ -38,7 +38,6 @@ public class Features {
         features.add(new Blocker());
         features.add(new Ping());
         features.add(new FragRun());
-        features.add(new Watcher());
         features.forEach(MinecraftForge.EVENT_BUS::register);
     }
 }
