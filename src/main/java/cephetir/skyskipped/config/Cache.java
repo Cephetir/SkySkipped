@@ -25,5 +25,4 @@ public class Cache {
     public static boolean inSkyblock = false;
     public static String itemheld = "";
     public static String lastCrit = "0";
-    public static boolean isHypixel = false;
 }

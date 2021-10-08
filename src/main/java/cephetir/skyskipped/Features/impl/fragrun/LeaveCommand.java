@@ -17,8 +17,8 @@
 
 package cephetir.skyskipped.Features.impl.fragrun;
 
-import cephetir.skyskipped.config.Cache;
 import cephetir.skyskipped.utils.TextUtils;
+import gg.essential.api.EssentialAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -68,7 +68,7 @@ public class LeaveCommand extends CommandBase {
     }
 
     public void start() {
-        if (started || !Cache.isHypixel) return;
+        if (started || !EssentialAPI.getMinecraftUtil().isHypixel()) return;
         started = true;
 
         new Thread(() -> {
