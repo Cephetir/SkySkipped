@@ -19,8 +19,8 @@ package cephetir.skyskipped.commands;
 
 import cephetir.skyskipped.SkySkipped;
 import cephetir.skyskipped.config.Cache;
+import gg.essential.api.EssentialAPI;
 import gg.essential.universal.UChat;
-import gg.essential.universal.UScreen;
 import gg.essential.universal.wrappers.message.UTextComponent;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -64,9 +64,9 @@ public class SkySkippedCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length == 0) {
-            UScreen.displayScreen(SkySkipped.config.gui());
+            EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui());
         } else if (args[0].equals("gui")) {
-            UScreen.displayScreen(SkySkipped.config.gui());
+            EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui());
         } else if (args[0].equals("github")) {
             UTextComponent text = new UTextComponent("§cSkySkipped §f:: §eGithub: §fhttps://github.com/Cephetir/SkySkipped");
             text.setHover(HoverEvent.Action.SHOW_TEXT, "§9Open URL in browser.");

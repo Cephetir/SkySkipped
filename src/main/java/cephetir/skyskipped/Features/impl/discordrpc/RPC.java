@@ -18,6 +18,7 @@
 package cephetir.skyskipped.Features.impl.discordrpc;
 
 import cephetir.skyskipped.config.Cache;
+import gg.essential.api.EssentialAPI;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -62,7 +63,7 @@ public class RPC {
             if (Cache.inSkyblock) {
                 discordRPCManager.setDetailsLine("Playing on Hypixel Skyblock");
                 discordRPCManager.setStateLine("Holding: " + Cache.itemheld);
-            } else if (Cache.isHypixel) {
+            } else if (EssentialAPI.getMinecraftUtil().isHypixel()) {
                 discordRPCManager.setDetailsLine("Playing on Hypixel");
                 discordRPCManager.setStateLine("In game");
             } else {
