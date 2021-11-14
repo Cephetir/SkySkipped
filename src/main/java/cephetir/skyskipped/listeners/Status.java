@@ -34,7 +34,7 @@ public class Status {
 
     @SubscribeEvent
     public void update(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && !Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null && !EssentialAPI.getMinecraftUtil().isHypixel()) {
+        if (event.phase == TickEvent.Phase.START && !Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null && EssentialAPI.getMinecraftUtil().isHypixel()) {
             try {
                 boolean foundDungeon = false;
                 boolean foundSkyblock = false;

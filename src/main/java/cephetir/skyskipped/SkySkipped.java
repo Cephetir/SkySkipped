@@ -36,7 +36,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class SkySkipped {
     public static final String MODID = "skyskipped";
     public static final String MOD_NAME = "SkySkipped";
-    public static final String VERSION = "2.1";
+    public static final String VERSION = "2.2";
     public static final Minecraft mc = Minecraft.getMinecraft();
     public static Config config = new Config();
     private static final Features features = new Features();
