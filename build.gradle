@@ -85,7 +85,7 @@ dependencies {
     implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
         exclude module: 'log4j'
     }
-    include('org.spongepowered:mixin:0.7.11-SNAPSHOT')
+    include('org.spongepowered:mixin:0.8.5-SNAPSHOT')
     annotationProcessor('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 }
 
