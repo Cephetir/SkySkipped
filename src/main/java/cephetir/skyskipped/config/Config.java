@@ -27,13 +27,22 @@ import java.io.File;
 import java.util.function.Consumer;
 
 public class Config extends Vigilant {
+
     @Property(
             type = PropertyType.SWITCH,
-            name = "Chest closer",
-            category = "Dungeons", subcategory = "Dungeons",
+            name = "Chest Closer",
+            category = "Dungeons", subcategory = "Chest Closer",
             description = "Chests in dungeon will close automatically."
     )
     public static boolean chestCloser = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Chest Closer in Crystal Hollows",
+            category = "Dungeons", subcategory = "Chest Closer",
+            description = "Chests in Crystal Hollows will close automatically."
+    )
+    public static boolean chestCloserCH = false;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -63,7 +72,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Player ESP",
-            category = "Dungeons", subcategory = "Dungeons",
+            category = "Dungeons", subcategory = "Player ESP",
             description = "Shows players through walls."
     )
     public static boolean playerESP = false;
@@ -71,7 +80,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.COLOR,
             name = "Player ESP Color",
-            category = "Dungeons", subcategory = "Dungeons",
+            category = "Dungeons", subcategory = "Player ESP",
             description = "Outline color for Player ESP."
     )
     public static Color espColor = Color.GREEN;
@@ -79,7 +88,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Block GS ability",
-            category = "Slayers", subcategory = "Slayers",
+            category = "Hacks", subcategory = "Hacks",
             description = "Blocks Giant's sword ability."
     )
     public static boolean gsBlock = false;
@@ -95,7 +104,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Auto Leave Dungeon",
-            category = "Dungeons", subcategory = "Dungeons",
+            category = "Dungeons", subcategory = "Auto Leave",
             description = "Runs /leavedungeon command after run ends."
     )
     public static boolean EndLeave = false;
@@ -103,7 +112,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.SWITCH,
             name = "Auto Party FragBot when Dungeon ends",
-            category = "Dungeons", subcategory = "Dungeons",
+            category = "Dungeons", subcategory = "Auto Leave",
             description = "Runs /fragrun command after run ends."
     )
     public static boolean EndParty = false;
@@ -111,7 +120,7 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.TEXT,
             name = "FragBot Name",
-            category = "Dungeons", subcategory = "Dungeons",
+            category = "Dungeons", subcategory = "Auto Leave",
             description = "FragBot IGN."
     )
     public static String BotName = "";
@@ -129,6 +138,7 @@ public class Config extends Vigilant {
     public static int pingPosY = 1;
 
     private long timer = 0;
+
     public Config() {
         super(new File("./config/skyskipped.toml"), "SkySkipped");
         registerListener("DRPC", (Consumer<Boolean>) aBoolean -> {
