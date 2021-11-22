@@ -28,15 +28,18 @@ buildscript {
             url = "https://jitpack.io/"
         }
         maven { url "https://repo.sk1er.club/repository/maven-public" }
+        maven { url = "https://repo.spongepowered.org/maven" }
     }
     dependencies {
         classpath "com.github.Skytils:ForgeGradle:6f5327"
+        classpath 'com.github.LxGaming:MixinGradle:d75e32e'
         classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
     }
 }
 
 apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: "org.spongepowered.mixin"
 
 version = "2.2"
 group = "cephetir.skyskipped"
@@ -82,6 +85,12 @@ dependencies {
     implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
         exclude module: 'log4j'
     }
+    include('org.spongepowered:mixin:0.7.11-SNAPSHOT')
+    annotationProcessor('org.spongepowered:mixin:0.7.11-SNAPSHOT')
+}
+
+mixin {
+    add sourceSets.main, "mixins.sm.refmap.json"
 }
 
 jar {
@@ -103,7 +112,8 @@ shadowJar {
             "ForceLoadAsMod": true,
             'ModSide': 'CLIENT',
             "TweakClass": "gg.essential.loader.stage0.EssentialSetupTweaker",
-            "TweakOrder": "0"
+            "TweakOrder": "0",
+            'MixinConfigs': "mixins.sm.json",
     )
 }
 

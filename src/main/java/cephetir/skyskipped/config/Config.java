@@ -22,6 +22,7 @@ import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
 
+import java.awt.*;
 import java.io.File;
 import java.util.function.Consumer;
 
@@ -68,6 +69,14 @@ public class Config extends Vigilant {
     public static boolean playerESP = false;
 
     @Property(
+            type = PropertyType.COLOR,
+            name = "Player ESP Color",
+            category = "Dungeons", subcategory = "Dungeons",
+            description = "Outline color for Player ESP."
+    )
+    public static Color espColor = Color.GREEN;
+
+    @Property(
             type = PropertyType.SWITCH,
             name = "Block GS ability",
             category = "Slayers", subcategory = "Slayers",
@@ -107,65 +116,21 @@ public class Config extends Vigilant {
     )
     public static String BotName = "";
 
-//    @SuppressWarnings("unused")
-//    @Property(
-//            type = PropertyType.SWITCH,
-//            name = "FPS",
-//            category = "HUD", subcategory = "HUD",
-//            description = "Shows your fps."
-//    )
     public static boolean fpsHud = false;
 
-//    @Property(
-//            type = PropertyType.NUMBER,
-//            name = "FPS Pos X",
-//            category = "HUD", subcategory = "HUD",
-//            description = "Where on screen hud will be."
-//    )
     public static int fpsPosX = 1;
 
-//    @Property(
-//            type = PropertyType.NUMBER,
-//            name = "FPS Pos Y",
-//            category = "HUD", subcategory = "HUD",
-//            description = "Where on screen hud will be."
-//    )
     public static int fpsPosY = 1;
 
-//    @SuppressWarnings("unused")
-//    @Property(
-//            type = PropertyType.SWITCH,
-//            name = "Ping",
-//            category = "HUD", subcategory = "HUD",
-//            description = "Shows your ping."
-//    )
     public static boolean pingHud = false;
 
-//    @Property(
-//            type = PropertyType.NUMBER,
-//            name = "Ping Pos X",
-//            category = "HUD", subcategory = "HUD",
-//            description = "Where on screen hud will be."
-//    )
     public static int pingPosX = 1;
 
-//    @Property(
-//            type = PropertyType.NUMBER,
-//            name = "Ping Pos Y",
-//            category = "HUD", subcategory = "HUD",
-//            description = "Where on screen hud will be."
-//    )
     public static int pingPosY = 1;
 
     private long timer = 0;
-//    public static final FPSHud fpsHudClass = new FPSHud();
-//    public static final PingHud pingHudClass = new PingHud();
     public Config() {
-        super(new File("./config/skyskipped.toml"));
-//        addDependency("fpsPosX", "fpsHud");
-//        addDependency("fpsPosY", "fpsHud");
-//        addDependency("pingPosX", "pingHud");
-//        addDependency("pingPosY", "pingHud");
+        super(new File("./config/skyskipped.toml"), "SkySkipped");
         registerListener("DRPC", (Consumer<Boolean>) aBoolean -> {
             if (aBoolean && (!RPC.getINSTANCE().getDiscordRPCManager().isActive())) {
                 if (System.currentTimeMillis() - timer < 4000) return;
@@ -175,22 +140,7 @@ public class Config extends Vigilant {
                 RPC.getINSTANCE().getDiscordRPCManager().stop();
             }
         });
-//        registerListener("fpsHud", (Consumer<Boolean>) aBoolean -> {
-//            if (aBoolean) {
-//                fpsHudClass.save(ScreenPosition.fromAbsolute(fpsPosX, fpsPosY));
-//                HUDManager.getINSTANCE().register(fpsHudClass);
-//            } else {
-//                HUDManager.getINSTANCE().unregister(fpsHudClass);
-//            }
-//        });
-//        registerListener("pingHud", (Consumer<Boolean>) aBoolean -> {
-//            if (aBoolean) {
-//                pingHudClass.save(ScreenPosition.fromAbsolute(pingPosX, pingPosY));
-//                HUDManager.getINSTANCE().register(pingHudClass);
-//            } else {
-//                HUDManager.getINSTANCE().unregister(pingHudClass);
-//            }
-//        });
+        addDependency("espColor", "playerESP");
         initialize();
     }
 }
