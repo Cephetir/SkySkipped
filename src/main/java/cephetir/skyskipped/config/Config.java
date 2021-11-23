@@ -131,7 +131,7 @@ public class Config extends Vigilant {
             category = "Dungeons", subcategory = "Auto Leave",
             description = "Delay between going to lobby and to dungeon hub."
     )
-    public static long delay = 2000L;
+    public static int delay = 2000;
 
     public static boolean fpsHud = false;
 
