@@ -19,8 +19,6 @@ package cephetir.skyskipped;
 
 import cephetir.skyskipped.Features.Features;
 import cephetir.skyskipped.Features.impl.discordrpc.RPC;
-import cephetir.skyskipped.Features.impl.fragrun.LeaveCommand;
-import cephetir.skyskipped.Features.impl.fragrun.PartyCommand;
 import cephetir.skyskipped.commands.SkySkippedCommand;
 import cephetir.skyskipped.config.Config;
 import cephetir.skyskipped.listeners.Status;
@@ -37,7 +35,7 @@ public class SkySkipped {
     public static final String MOD_NAME = "SkySkipped";
     public static final String VERSION = "2.3";
     public static Config config = new Config();
-    private static final Features features = new Features();
+    public static final Features features = new Features();
 
     @SuppressWarnings("unused")
     @Mod.Instance(MODID)
@@ -57,8 +55,8 @@ public class SkySkipped {
         features.register();
         RPC.getINSTANCE().init();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
-        ClientCommandHandler.instance.registerCommand(new LeaveCommand());
-        ClientCommandHandler.instance.registerCommand(new PartyCommand());
+        ClientCommandHandler.instance.registerCommand(features.getLeaveCommand());
+        ClientCommandHandler.instance.registerCommand(features.getPartyCommand());
     }
 
     @Mod.EventHandler

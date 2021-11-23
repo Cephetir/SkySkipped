@@ -18,8 +18,9 @@
 package cephetir.skyskipped.Features.impl.fragrun;
 
 import cephetir.skyskipped.Features.Feature;
+import cephetir.skyskipped.SkySkipped;
 import cephetir.skyskipped.config.Config;
-import gg.essential.universal.wrappers.message.UTextComponent;
+import cephetir.skyskipped.utils.TextUtils;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.jetbrains.annotations.NotNull;
@@ -31,15 +32,7 @@ public class FragRun extends Feature {
 
     @SubscribeEvent
     public void onMessageReceived(@NotNull ClientChatReceivedEvent event) {
-        if (UTextComponent.Companion.stripFormatting(event.message.getUnformattedText()).trim().contains("> EXTRA STATS <"))
-            return;
-        if (Config.EndParty && !Config.BotName.equals("") && !Config.EndLeave) {
-            new PartyCommand().start();
-        } else if (Config.EndLeave && !Config.EndParty) {
-            new LeaveCommand().start();
-        } else if (Config.EndLeave) {
-            new PartyCommand().start();
-            new LeaveCommand().start();
-        }
+        if (TextUtils.stripColor(event.message.getUnformattedText()).trim().contains("> EXTRA STATS <")) return;
+        if (Config.EndLeave) SkySkipped.features.getLeaveCommand().start(false);
     }
 }

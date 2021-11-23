@@ -19,6 +19,8 @@ package cephetir.skyskipped.Features;
 
 import cephetir.skyskipped.Features.impl.*;
 import cephetir.skyskipped.Features.impl.fragrun.FragRun;
+import cephetir.skyskipped.Features.impl.fragrun.LeaveCommand;
+import cephetir.skyskipped.Features.impl.fragrun.PartyCommand;
 import lombok.Getter;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -27,6 +29,10 @@ import java.util.List;
 
 public class Features {
     @Getter
+    private final LeaveCommand leaveCommand = new LeaveCommand();
+    @Getter
+    private final PartyCommand partyCommand = new PartyCommand();
+
     public List<Feature> features = new ArrayList<>();
 
     public void register() {
