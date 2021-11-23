@@ -17,12 +17,16 @@
 
 package cephetir.skyskipped.Features.impl.fragrun;
 
+import cephetir.skyskipped.SkySkipped;
 import cephetir.skyskipped.config.Config;
 import gg.essential.api.EssentialAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.Collections;
 import java.util.List;
@@ -58,25 +62,47 @@ public class PartyCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length == 0) {
-            start();
+            SkySkipped.features.getLeaveCommand().start(true);
         }
     }
 
     public void start() {
         if (started || !EssentialAPI.getMinecraftUtil().isHypixel()) return;
         started = true;
+        MinecraftForge.EVENT_BUS.register(this);
+    }
 
+    private int step = 0;
+    private boolean startedd = false;
+    @SubscribeEvent
+    public void onTick(TickEvent.ClientTickEvent event) {
+        if(startedd) return;
         new Thread(() -> {
-            Minecraft.getMinecraft().thePlayer.sendChatMessage("/p leave");
-
-            try {
-                Thread.sleep(200L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            startedd = true;
+            switch (step) {
+                case 0: {
+                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/p leave");
+                    timer(200L);
+                    break;
+                }
+                case 1: {
+                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/p " + Config.BotName);
+                    MinecraftForge.EVENT_BUS.unregister(this);
+                    started = false;
+                    step = 0;
+                    break;
+                }
             }
-            Minecraft.getMinecraft().thePlayer.sendChatMessage("/p " + Config.BotName);
-
-            started = false;
+            startedd = false;
         }).start();
+    }
+
+    private void timer(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        step++;
     }
 }

@@ -125,6 +125,14 @@ public class Config extends Vigilant {
     )
     public static String BotName = "";
 
+    @Property(
+            type = PropertyType.NUMBER,
+            name = "Delay For \"Leave Dungeon\"",
+            category = "Dungeons", subcategory = "Auto Leave",
+            description = "Delay between going to lobby and to dungeon hub."
+    )
+    public static long delay = 2000L;
+
     public static boolean fpsHud = false;
 
     public static int fpsPosX = 1;
