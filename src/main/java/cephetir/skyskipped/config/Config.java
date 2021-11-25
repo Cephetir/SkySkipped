@@ -95,6 +95,14 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "§4[!]§r Block Rotation With Hyperion And AOTE",
+            category = "Hacks", subcategory = "Hacks",
+            description = "Blocks server from sending rotation packets.Blocks server from sending rotation packets."
+    )
+    public static boolean noRotate = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Name ping",
             category = "Chat", subcategory = "Chat",
             description = "Plays sound when someone says your name in chat."

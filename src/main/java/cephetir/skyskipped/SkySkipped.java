@@ -22,12 +22,15 @@ import cephetir.skyskipped.Features.impl.discordrpc.RPC;
 import cephetir.skyskipped.commands.SkySkippedCommand;
 import cephetir.skyskipped.config.Config;
 import cephetir.skyskipped.listeners.Status;
+import cephetir.skyskipped.utils.PacketUtils;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 @Mod(modid = SkySkipped.MODID, name = SkySkipped.MOD_NAME, version = SkySkipped.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
 public class SkySkipped {
@@ -52,6 +55,7 @@ public class SkySkipped {
     public void onInit(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(RPC.getINSTANCE());
         MinecraftForge.EVENT_BUS.register(new Status());
+        MinecraftForge.EVENT_BUS.register(new PacketUtils());
         features.register();
         RPC.getINSTANCE().init();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
@@ -62,5 +66,11 @@ public class SkySkipped {
     @Mod.EventHandler
     public void stop(FMLModDisabledEvent event) {
         RPC.getINSTANCE().shutdown();
+    }
+
+    @SubscribeEvent
+    public void onServerConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
+        event.manager.channel().pipeline().addBefore("packet_handler", "danker_packet_handler", new PacketUtils());
+        System.out.println("Added packet handler to channel pipeline.");
     }
 }
