@@ -26,7 +26,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class Blocker extends Feature {
     public Blocker() {
-        super("Blocker", "Slayers", "Blocks ability for specific items");
+        super("Blocker", "Hacks", "Blocks ability for specific items");
     }
 
     @SubscribeEvent
