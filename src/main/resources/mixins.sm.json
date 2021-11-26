@@ -1,5 +1,5 @@
 {
-  "package": "cephetir.skyskipped.mixins",
+  "package": "me.cephetir.skyskipped.mixins",
   "refmap": "mixins.sm.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
