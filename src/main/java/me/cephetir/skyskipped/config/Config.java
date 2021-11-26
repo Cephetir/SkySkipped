@@ -133,18 +133,6 @@ public class Config extends Vigilant {
     )
     public static int delay = 2000;
 
-    public static boolean fpsHud = false;
-
-    public static int fpsPosX = 1;
-
-    public static int fpsPosY = 1;
-
-    public static boolean pingHud = false;
-
-    public static int pingPosX = 1;
-
-    public static int pingPosY = 1;
-
     private long timer = 0;
 
     public Config() {
