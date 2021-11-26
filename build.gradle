@@ -41,8 +41,8 @@ apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: "org.spongepowered.mixin"
 
-version = "2.3"
-group = "cephetir.skyskipped"
+version = "2.4"
+group = "me.cephetir.skyskipped"
 archivesBaseName = "SkySkipped"
 
 sourceCompatibility = targetCompatibility = 1.8
@@ -74,17 +74,14 @@ repositories {
 }
 
 dependencies {
-    include "gg.essential:loader-launchwrapper:1.1.2"
-    include(implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
+    include('gg.essential:loader-launchwrapper:1.1.2')
+    include('com.github.jagrosh:DiscordIPC:e29d6d8') {
         exclude module: 'log4j'
-    })
+    }
 
     implementation('gg.essential:essential-1.8.9-forge:1579+')
     implementation('org.projectlombok:lombok:1.18.22')
     annotationProcessor('org.projectlombok:lombok:1.18.22')
-    implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
-        exclude module: 'log4j'
-    }
     include('org.spongepowered:mixin:0.7.11-SNAPSHOT')
     annotationProcessor('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 }
