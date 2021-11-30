@@ -79,7 +79,7 @@ dependencies {
         exclude module: 'log4j'
     }
 
-    implementation('gg.essential:essential-1.8.9-forge:1582+')
+    implementation('gg.essential:essential-1.8.9-forge:1588+')
     implementation('org.projectlombok:lombok:1.18.22')
     annotationProcessor('org.projectlombok:lombok:1.18.22')
     include('org.spongepowered:mixin:0.7.11-SNAPSHOT')
