@@ -22,7 +22,7 @@
 package me.cephetir.skyskipped.utils;
 
 import me.cephetir.skyskipped.config.Config;
-import me.cephetir.skyskipped.listeners.events.RenderEntityModelEvent;
+import me.cephetir.skyskipped.event.events.RenderEntityModelEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.GlStateManager;

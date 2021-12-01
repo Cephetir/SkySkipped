@@ -20,7 +20,7 @@ package me.cephetir.skyskipped.config;
 import gg.essential.vigilance.Vigilant;
 import gg.essential.vigilance.data.Property;
 import gg.essential.vigilance.data.PropertyType;
-import me.cephetir.skyskipped.Features.impl.discordrpc.RPC;
+import me.cephetir.skyskipped.features.impl.discordrpc.RPC;
 
 import java.awt.*;
 import java.io.File;
@@ -133,6 +133,24 @@ public class Config extends Vigilant {
     )
     public static int delay = 2000;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "§4!!VERY SECRET MONEY EXPLOIT!!",
+            category = "SUPER SECRETS SETTINGS §4!(!DO NOT OPEN!)!", subcategory = "SUPER SECRETS SETTINGS §4!(!DO NOT ENABLE!)!",
+            description = "§kMAKES YOUR PURSE BLOW UP WITH BILLIONS OF COINS"
+    )
+    public static boolean coinsToggle = false;
+
+    @Property(
+            type = PropertyType.NUMBER,
+            name = "AMOUNT OF COINS DO YOU WANT",
+            category = "SUPER SECRETS SETTINGS §4!(!DO NOT OPEN!)!", subcategory = "SUPER SECRETS SETTINGS §4!(!DO NOT ENABLE!)!",
+            description = "§kAMOUNT OF COINS YOU WANT",
+            max = Integer.MAX_VALUE,
+            increment = 10000000
+    )
+    public static int coins = 10000000;
+
     private long timer = 0;
 
     public Config() {
@@ -147,6 +165,7 @@ public class Config extends Vigilant {
             }
         });
         addDependency("espColor", "playerESP");
+        addDependency("coins", "coinsToggle");
         initialize();
     }
 }

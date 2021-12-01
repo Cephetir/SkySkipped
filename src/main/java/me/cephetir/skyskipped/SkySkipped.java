@@ -17,25 +17,29 @@
 
 package me.cephetir.skyskipped;
 
-import me.cephetir.skyskipped.Features.Features;
-import me.cephetir.skyskipped.Features.impl.discordrpc.RPC;
 import me.cephetir.skyskipped.commands.SkySkippedCommand;
 import me.cephetir.skyskipped.config.Config;
-import me.cephetir.skyskipped.listeners.Status;
+import me.cephetir.skyskipped.event.Listener;
+import me.cephetir.skyskipped.features.Features;
+import me.cephetir.skyskipped.features.impl.discordrpc.RPC;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod(modid = SkySkipped.MODID, name = SkySkipped.MOD_NAME, version = SkySkipped.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
 public class SkySkipped {
     public static final String MODID = "skyskipped";
     public static final String MOD_NAME = "SkySkipped";
-    public static final String VERSION = "2.4";
+    public static final String VERSION = "2.5";
     public static Config config = new Config();
     public static final Features features = new Features();
+
+    private static final Logger logger = LogManager.getLogger("SkySkipped");
 
     @SuppressWarnings("unused")
     @Mod.Instance(MODID)
@@ -43,7 +47,7 @@ public class SkySkipped {
 
     @Mod.EventHandler()
     public void onPreInit(FMLPreInitializationEvent event) {
-        System.out.println("Starting SkySkipped...");
+        SkySkipped.logger.info("Starting SkySkipped...");
         config.preload();
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -51,7 +55,7 @@ public class SkySkipped {
     @Mod.EventHandler
     public void onInit(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(RPC.getINSTANCE());
-        MinecraftForge.EVENT_BUS.register(new Status());
+        MinecraftForge.EVENT_BUS.register(new Listener());
         features.register();
         RPC.getINSTANCE().init();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
@@ -62,5 +66,9 @@ public class SkySkipped {
     @Mod.EventHandler
     public void stop(FMLModDisabledEvent event) {
         RPC.getINSTANCE().shutdown();
+    }
+
+    public static Logger getLogger() {
+        return logger;
     }
 }

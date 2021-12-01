@@ -15,12 +15,12 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.Features.impl;
+package me.cephetir.skyskipped.features.impl;
 
-import me.cephetir.skyskipped.Features.Feature;
 import me.cephetir.skyskipped.config.Cache;
 import me.cephetir.skyskipped.config.Config;
-import me.cephetir.skyskipped.listeners.events.RenderEntityModelEvent;
+import me.cephetir.skyskipped.event.events.RenderEntityModelEvent;
+import me.cephetir.skyskipped.features.Feature;
 import me.cephetir.skyskipped.utils.OutlineUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;

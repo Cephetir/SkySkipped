@@ -15,7 +15,7 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.listeners;
+package me.cephetir.skyskipped.event;
 
 import gg.essential.api.EssentialAPI;
 import me.cephetir.skyskipped.config.Cache;
@@ -25,14 +25,15 @@ import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.Collection;
 
-public class Status {
+public class Listener {
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public void update(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START && !Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null && EssentialAPI.getMinecraftUtil().isHypixel()) {
             try {
@@ -46,10 +47,7 @@ public class Status {
                 ScoreObjective scoreObjective = scoreboard.getObjectiveInDisplaySlot(1);
                 Collection<Score> scores = scoreboard.getSortedScores(scoreObjective);
 
-                String objectiveName = TextUtils.stripColor(scoreObjective.getDisplayName());
-                if (objectiveName.startsWith("SKYBLOCK")) {
-                    foundSkyblock = true;
-                }
+                if (TextUtils.stripColor(scoreObjective.getDisplayName()).startsWith("SKYBLOCK")) foundSkyblock = true;
 
                 if (foundSkyblock) {
                     for (Score sc : scores) {
@@ -57,13 +55,16 @@ public class Status {
                         String strippedLine = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()))).trim();
                         if (strippedLine.contains("Dungeon Cleared: ")) {
                             foundDungeon = true;
+                            continue;
                         }
                         if (Cache.isInDungeon) {
                             if (strippedLine.contains("Dungeon Cleared: ")) {
                                 percentage = Integer.parseInt(strippedLine.substring(17));
+                                continue;
                             }
                             if (ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()).startsWith(" §7⏣")) {
                                 dungeonName = strippedLine.trim();
+                                continue;
                             }
                         }
                     }

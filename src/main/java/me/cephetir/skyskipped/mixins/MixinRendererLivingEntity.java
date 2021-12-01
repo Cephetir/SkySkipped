@@ -17,7 +17,7 @@
 
 package me.cephetir.skyskipped.mixins;
 
-import me.cephetir.skyskipped.listeners.events.RenderEntityModelEvent;
+import me.cephetir.skyskipped.event.events.RenderEntityModelEvent;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.EntityLivingBase;
