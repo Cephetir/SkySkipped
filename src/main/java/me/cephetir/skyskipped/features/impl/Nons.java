@@ -15,11 +15,11 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.Features.impl;
+package me.cephetir.skyskipped.features.impl;
 
 import gg.essential.api.EssentialAPI;
-import me.cephetir.skyskipped.Features.Feature;
 import me.cephetir.skyskipped.config.Config;
+import me.cephetir.skyskipped.features.Feature;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;

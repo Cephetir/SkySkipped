@@ -15,7 +15,7 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.Features;
+package me.cephetir.skyskipped.features;
 
 import lombok.Getter;
 import net.minecraft.client.Minecraft;

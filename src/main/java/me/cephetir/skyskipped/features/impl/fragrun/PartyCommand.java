@@ -15,39 +15,33 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.Features.impl.fragrun;
+package me.cephetir.skyskipped.features.impl.fragrun;
 
 import gg.essential.api.EssentialAPI;
 import me.cephetir.skyskipped.SkySkipped;
 import me.cephetir.skyskipped.config.Config;
-import me.cephetir.skyskipped.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class LeaveCommand extends CommandBase {
+public class PartyCommand extends CommandBase {
     private boolean started = false;
 
     @Override
     public String getCommandName() {
-        return "leavedungeon";
+        return "fragrun";
     }
 
     @Override
     public List<String> getCommandAliases() {
-        return Collections.singletonList("ld");
+        return Collections.singletonList("frag");
     }
 
     @Override
@@ -68,16 +62,14 @@ public class LeaveCommand extends CommandBase {
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length == 0) {
-            start(false);
+            SkySkipped.features.getLeaveCommand().start(true);
         }
     }
 
-    private boolean party = false;
-    public void start(boolean party) {
+    public void start() {
         if (started || !EssentialAPI.getMinecraftUtil().isHypixel()) return;
         started = true;
         MinecraftForge.EVENT_BUS.register(this);
-        this.party = party;
     }
 
     private int step = 0;
@@ -89,33 +81,12 @@ public class LeaveCommand extends CommandBase {
             startedd = true;
             switch (step) {
                 case 0: {
-                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/lobby");
-                    timer(Config.delay);
+                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/p leave");
+                    timer(200L);
                     break;
                 }
                 case 1: {
-                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/play skyblock");
-                    timer(Config.delay);
-                    break;
-                }
-                case 2: {
-                    Scoreboard scoreboard = Minecraft.getMinecraft().thePlayer.getWorldScoreboard();
-                    ScoreObjective scoreObjective = scoreboard.getObjectiveInDisplaySlot(1);
-                    Collection<Score> scores = scoreboard.getSortedScores(scoreObjective);
-                    boolean ok = false;
-                    for (Score sc : scores) {
-                        ScorePlayerTeam scorePlayerTeam = scoreboard.getPlayersTeam(sc.getPlayerName());
-                        String strippedLine = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()))).trim();
-                        if (strippedLine.contains("Dungeon Hub")) {
-                            ok = true;
-                        }
-                    }
-
-                    if (!ok) {
-                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/warp dungeon_hub");
-                    }
-
-                    if ((Config.EndParty && !Config.BotName.equals("")) || party) SkySkipped.features.getPartyCommand().start();
+                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/p " + Config.BotName);
                     MinecraftForge.EVENT_BUS.unregister(this);
                     started = false;
                     step = 0;

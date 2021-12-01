@@ -15,7 +15,7 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.Features.impl.discordrpc;
+package me.cephetir.skyskipped.features.impl.discordrpc;
 
 import gg.essential.api.EssentialAPI;
 import lombok.Getter;

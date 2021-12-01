@@ -15,13 +15,13 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.Features;
+package me.cephetir.skyskipped.features;
 
 import lombok.Getter;
-import me.cephetir.skyskipped.Features.impl.*;
-import me.cephetir.skyskipped.Features.impl.fragrun.FragRun;
-import me.cephetir.skyskipped.Features.impl.fragrun.LeaveCommand;
-import me.cephetir.skyskipped.Features.impl.fragrun.PartyCommand;
+import me.cephetir.skyskipped.features.impl.*;
+import me.cephetir.skyskipped.features.impl.fragrun.FragRun;
+import me.cephetir.skyskipped.features.impl.fragrun.LeaveCommand;
+import me.cephetir.skyskipped.features.impl.fragrun.PartyCommand;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;

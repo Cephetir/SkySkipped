@@ -41,7 +41,7 @@ apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: "org.spongepowered.mixin"
 
-version = "2.4"
+version = "2.5"
 group = "me.cephetir.skyskipped"
 archivesBaseName = "SkySkipped"
 
@@ -88,6 +88,7 @@ dependencies {
 
 mixin {
     add sourceSets.main, "mixins.sm.refmap.json"
+    defaultObfuscationEnv = searge
 }
 
 jar {

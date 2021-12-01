@@ -15,7 +15,7 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.Features.impl.discordrpc;
+package me.cephetir.skyskipped.features.impl.discordrpc;
 
 import com.jagrosh.discordipc.IPCClient;
 import com.jagrosh.discordipc.IPCListener;
@@ -48,7 +48,7 @@ public class DiscordRPCManager implements IPCListener {
                 return;
             }
 
-            System.out.println("Starting Discord RP...");
+            SkySkipped.getLogger().info("Starting Discord RP...");
             stateLine = "Starting...";
             detailsLine = "";
             startTimestamp = OffsetDateTime.now();
@@ -57,10 +57,10 @@ public class DiscordRPCManager implements IPCListener {
             try {
                 client.connect();
             } catch (Exception e) {
-                System.out.println("Failed to connect to Discord RPC: " + e.getMessage());
+                SkySkipped.getLogger().info("Failed to connect to Discord RPC: " + e.getMessage());
             }
         } catch (Throwable ex) {
-            System.out.println("DiscordRP has thrown an unexpected error while trying to start...");
+            SkySkipped.getLogger().info("DiscordRP has thrown an unexpected error while trying to start...");
             ex.printStackTrace();
         }
     }
@@ -102,7 +102,7 @@ public class DiscordRPCManager implements IPCListener {
 
     @Override
     public void onReady(IPCClient client) {
-        System.out.println("Discord RPC started");
+        SkySkipped.getLogger().info("Discord RPC started");
         connected = true;
 //        updateTimer = new Timer();
 //        updateTimer.schedule(new TimerTask() {
@@ -127,7 +127,7 @@ public class DiscordRPCManager implements IPCListener {
 
     @Override
     public void onClose(IPCClient client, JSONObject json) {
-        System.out.println("Discord RPC closed");
+        SkySkipped.getLogger().info("Discord RPC closed");
         this.client = null;
         connected = false;
         //cancelTimer();
@@ -136,7 +136,7 @@ public class DiscordRPCManager implements IPCListener {
 
     @Override
     public void onDisconnect(IPCClient client, Throwable t) {
-        System.out.println("Discord RPC disconnected");
+        SkySkipped.getLogger().info("Discord RPC disconnected");
         this.client = null;
         connected = false;
         //cancelTimer();
