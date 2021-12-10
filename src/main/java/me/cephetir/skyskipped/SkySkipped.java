@@ -39,7 +39,7 @@ public class SkySkipped {
     public static Config config = new Config();
     public static final Features features = new Features();
 
-    private static final Logger logger = LogManager.getLogger("SkySkipped");
+    private static Logger logger = LogManager.getLogger("SkySkipped");
 
     @SuppressWarnings("unused")
     @Mod.Instance(MODID)
@@ -69,6 +69,7 @@ public class SkySkipped {
     }
 
     public static Logger getLogger() {
+        if(logger == null) logger = LogManager.getLogger("SkySkipped");
         return logger;
     }
 }
