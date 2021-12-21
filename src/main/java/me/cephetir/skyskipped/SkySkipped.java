@@ -48,7 +48,7 @@ public class SkySkipped {
     @Mod.EventHandler()
     public void onPreInit(FMLPreInitializationEvent event) {
         SkySkipped.logger.info("Starting SkySkipped...");
-        config.preload();
+        SkySkipped.config.preload();
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -56,11 +56,11 @@ public class SkySkipped {
     public void onInit(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(RPC.getINSTANCE());
         MinecraftForge.EVENT_BUS.register(new Listener());
-        features.register();
+        SkySkipped.features.register();
         RPC.getINSTANCE().init();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
-        ClientCommandHandler.instance.registerCommand(features.getLeaveCommand());
-        ClientCommandHandler.instance.registerCommand(features.getPartyCommand());
+        ClientCommandHandler.instance.registerCommand(SkySkipped.features.getLeaveCommand());
+        ClientCommandHandler.instance.registerCommand(SkySkipped.features.getPartyCommand());
     }
 
     @Mod.EventHandler
@@ -69,7 +69,7 @@ public class SkySkipped {
     }
 
     public static Logger getLogger() {
-        if(logger == null) logger = LogManager.getLogger("SkySkipped");
-        return logger;
+        if(SkySkipped.logger == null) SkySkipped.logger = LogManager.getLogger("SkySkipped");
+        return SkySkipped.logger;
     }
 }

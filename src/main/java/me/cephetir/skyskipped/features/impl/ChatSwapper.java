@@ -40,7 +40,7 @@ public class ChatSwapper extends Feature {
                 Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat all");
                 Cache.inParty = false;
             }
-        } else if (event.message.getUnformattedText().startsWith("You have joined") || event.message.getUnformattedText().startsWith("Party M") || event.message.getUnformattedText().contains("joined the ")) {
+        } else if (event.message.getUnformattedText().startsWith("You have joined") || event.message.getUnformattedText().startsWith("Party Members") || event.message.getUnformattedText().contains("joined the ")) {
             if (!Cache.inParty) {
                 Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat p");
                 Cache.inParty = true;
