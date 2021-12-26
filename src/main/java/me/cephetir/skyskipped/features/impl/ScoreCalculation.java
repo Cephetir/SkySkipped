@@ -40,17 +40,22 @@ public class ScoreCalculation extends Feature {
 
     public void score() {
         if (!Cache.isInDungeon) return;
-        if (Loader.isModLoaded("skyblock_dungeons_guide")) {
-            FeatureDungeonScore.ScoreCalculation score = FeatureRegistry.DUNGEON_SCORE.calculateScore();
-            Cache.totalScore = score.getTime() + score.getSkill() + score.getExplorer() + score.getBonus();
-        } else if (Loader.isModLoaded("skytils") && checkVersion()) {
-            skytils.skytilsmod.features.impl.dungeons.ScoreCalculation scoreCalculation = skytils.skytilsmod.features.impl.dungeons.ScoreCalculation.INSTANCE;
-            Cache.totalScore = scoreCalculation.getSpeedScore() + scoreCalculation.getSkillScore() + scoreCalculation.getDiscoveryScore() + scoreCalculation.getBonusScore();
-        }
-        if (Cache.totalScore >= 300 && !Cache.was) {
-            timer = 60;
-            mc.thePlayer.sendChatMessage("300 score reached! btw sbe is cringe");
-            Cache.was = true;
+        try {
+            if (Loader.isModLoaded("skyblock_dungeons_guide")) {
+                FeatureDungeonScore.ScoreCalculation score = FeatureRegistry.DUNGEON_SCORE.calculateScore();
+                Cache.totalScore = score.getTime() + score.getSkill() + score.getExplorer() + score.getBonus();
+            } else if (Loader.isModLoaded("skytils") && checkVersion()) {
+                skytils.skytilsmod.features.impl.dungeons.ScoreCalculation scoreCalculation = skytils.skytilsmod.features.impl.dungeons.ScoreCalculation.INSTANCE;
+                Cache.totalScore = scoreCalculation.getSpeedScore() + scoreCalculation.getSkillScore() + scoreCalculation.getDiscoveryScore() + scoreCalculation.getBonusScore();
+            }
+            if (Cache.totalScore >= 300 && !Cache.was) {
+                timer = 100;
+                mc.thePlayer.sendChatMessage("300 score reached! btw sbe is cringe");
+                mc.thePlayer.playSound("random.orb", 0.8f, 1f);
+                Cache.was = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
