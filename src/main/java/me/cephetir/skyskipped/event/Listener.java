@@ -67,7 +67,10 @@ public class Listener {
                     }
                 }
 
-                if(!Cache.isInDungeon && foundDungeon) Cache.was = false;
+                if(!Cache.isInDungeon && foundDungeon) {
+                    Cache.was = false;
+                    Cache.blood = "no";
+                }
                 Cache.inSkyblock = foundSkyblock;
                 Cache.isInDungeon = foundDungeon;
                 Cache.dungeonPercentage = percentage;
