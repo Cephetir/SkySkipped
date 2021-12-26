@@ -46,6 +46,14 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "300 Score Ping",
+            category = "Dungeons", subcategory = "General",
+            description = "SBE like 300 score ping."
+    )
+    public static boolean scorePing = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Party chat swapper",
             category = "Chat", subcategory = "Chat",
             description = "Automatically swaps between party chat and global chat."

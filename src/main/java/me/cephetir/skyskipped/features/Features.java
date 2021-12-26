@@ -32,6 +32,8 @@ public class Features {
     private final LeaveCommand leaveCommand = new LeaveCommand();
     @Getter
     private final PartyCommand partyCommand = new PartyCommand();
+    @Getter
+    private final ScoreCalculation scoreCalculation = new ScoreCalculation();
 
     public List<Feature> features = new ArrayList<>();
 
@@ -44,6 +46,7 @@ public class Features {
         features.add(new Blocker());
         features.add(new Ping());
         features.add(new FragRun());
+        features.add(getScoreCalculation());
         features.forEach(MinecraftForge.EVENT_BUS::register);
     }
 }

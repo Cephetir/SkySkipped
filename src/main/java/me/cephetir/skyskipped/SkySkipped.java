@@ -31,6 +31,9 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 @Mod(modid = SkySkipped.MODID, name = SkySkipped.MOD_NAME, version = SkySkipped.VERSION, acceptedMinecraftVersions = "[1.8.9]", clientSideOnly = true)
 public class SkySkipped {
     public static final String MODID = "skyskipped";
@@ -38,6 +41,7 @@ public class SkySkipped {
     public static final String VERSION = "2.5";
     public static Config config = new Config();
     public static final Features features = new Features();
+    public static Timer timer;
 
     private static Logger logger = LogManager.getLogger("SkySkipped");
 
@@ -61,6 +65,13 @@ public class SkySkipped {
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
         ClientCommandHandler.instance.registerCommand(SkySkipped.features.getLeaveCommand());
         ClientCommandHandler.instance.registerCommand(SkySkipped.features.getPartyCommand());
+        SkySkipped.timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                SkySkipped.features.getScoreCalculation().score();
+            }
+        }, 0, 5000L);
     }
 
     @Mod.EventHandler
@@ -69,7 +80,7 @@ public class SkySkipped {
     }
 
     public static Logger getLogger() {
-        if(SkySkipped.logger == null) SkySkipped.logger = LogManager.getLogger("SkySkipped");
+        if (SkySkipped.logger == null) SkySkipped.logger = LogManager.getLogger("SkySkipped");
         return SkySkipped.logger;
     }
 }

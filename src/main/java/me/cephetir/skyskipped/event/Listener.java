@@ -55,16 +55,10 @@ public class Listener {
                         String strippedLine = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()))).trim();
                         if (strippedLine.contains("Dungeon Cleared: ")) {
                             foundDungeon = true;
-                            continue;
-                        }
-                        if (Cache.isInDungeon) {
-                            if (strippedLine.contains("Dungeon Cleared: ")) {
-                                percentage = Integer.parseInt(strippedLine.substring(17));
-                                continue;
-                            }
+                            percentage = Integer.parseInt(strippedLine.substring(17));
+                        } else if (Cache.isInDungeon) {
                             if (ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()).startsWith(" §7⏣")) {
                                 dungeonName = strippedLine.trim();
-                                continue;
                             }
                         }
                     }
@@ -73,6 +67,7 @@ public class Listener {
                     }
                 }
 
+                if(!Cache.isInDungeon && foundDungeon) Cache.was = false;
                 Cache.inSkyblock = foundSkyblock;
                 Cache.isInDungeon = foundDungeon;
                 Cache.dungeonPercentage = percentage;
