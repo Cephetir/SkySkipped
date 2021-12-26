@@ -22,7 +22,6 @@ public class Cache {
     public static int dungeonPercentage = 0;
     public static String dungeonName = "";
     public static int totalScore = 0;
-    public static String blood = "no";
     public static boolean was = false;
 
     public static boolean inParty = false;
