@@ -17,15 +17,17 @@
 
 package me.cephetir.skyskipped.features.impl;
 
+import gg.essential.universal.ChatColor;
 import kr.syeyoung.dungeonsguide.features.FeatureRegistry;
 import kr.syeyoung.dungeonsguide.features.impl.dungeon.FeatureDungeonScore;
 import me.cephetir.skyskipped.config.Cache;
 import me.cephetir.skyskipped.config.Config;
 import me.cephetir.skyskipped.features.Feature;
-import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import skytils.skytilsmod.Skytils;
 
 //skid
@@ -44,10 +46,8 @@ public class ScoreCalculation extends Feature {
         } else if (Loader.isModLoaded("skytils") && checkVersion()) {
             skytils.skytilsmod.features.impl.dungeons.ScoreCalculation scoreCalculation = skytils.skytilsmod.features.impl.dungeons.ScoreCalculation.INSTANCE;
             Cache.totalScore = scoreCalculation.getSpeedScore() + scoreCalculation.getSkillScore() + scoreCalculation.getDiscoveryScore() + scoreCalculation.getBonusScore();
-            if (Cache.blood.equals("found")) Cache.totalScore += 2;
         }
-        if (Cache.totalScore >= 300) {
-            if (Cache.was) return;
+        if (Cache.totalScore >= 300 && !Cache.was) {
             timer = 60;
             mc.thePlayer.sendChatMessage("300 score reached! btw sbe is cringe");
             Cache.was = true;
@@ -56,23 +56,19 @@ public class ScoreCalculation extends Feature {
 
     @SubscribeEvent
     public void draw(RenderGameOverlayEvent event) {
-        if (!Config.scorePing) return;
-        if (!Cache.isInDungeon || (!Loader.isModLoaded("skytils") && !Loader.isModLoaded("skyblock_dungeons_guide")))
-            return;
-        if (timer == 0) return;
-        timer--;
-        mc.fontRendererObj.drawStringWithShadow("Score: " + Cache.totalScore,
-                event.resolution.getScaledWidth() / 2f - mc.fontRendererObj.getStringWidth("Score: " + Cache.totalScore) / 2f,
-                event.resolution.getScaledHeight() / 2f, -1);
+        if (!Config.scorePing || !Cache.isInDungeon || timer == 0) return;
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(1.5f, 1.5f, 1f);
+        mc.fontRendererObj.drawStringWithShadow(ChatColor.DARK_RED + "300 Score Reached!",
+                event.resolution.getScaledWidth() / 1.5f / 2f - mc.fontRendererObj.getStringWidth("300 Score Reached!") / 2f,
+                event.resolution.getScaledHeight() / 1.5f / 2f - 6.75f, -1);
+        GlStateManager.popMatrix();
     }
 
     @SubscribeEvent
-    public void onChat(ClientChatReceivedEvent event) {
-        if (!Cache.isInDungeon) return;
-        if (event.message.getUnformattedText().toLowerCase().contains("the blood door has been opened"))
-            Cache.blood = "found";
-        else if (event.message.getUnformattedText().toLowerCase().contains("you have proven yourself"))
-            Cache.blood = "done";
+    public void onTick(TickEvent.ClientTickEvent event) {
+        if (timer == 0 || event.phase != TickEvent.Phase.START) return;
+        timer--;
     }
 
     private boolean checkVersion() {

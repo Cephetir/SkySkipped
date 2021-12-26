@@ -25,6 +25,7 @@ import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -67,10 +68,7 @@ public class Listener {
                     }
                 }
 
-                if(!Cache.isInDungeon && foundDungeon) {
-                    Cache.was = false;
-                    Cache.blood = "no";
-                }
+                if(!Cache.isInDungeon && foundDungeon) Cache.was = false;
                 Cache.inSkyblock = foundSkyblock;
                 Cache.isInDungeon = foundDungeon;
                 Cache.dungeonPercentage = percentage;
@@ -79,5 +77,10 @@ public class Listener {
             } catch (NullPointerException ignored) {
             }
         }
+    }
+
+    @SubscribeEvent
+    public void onWorldLoad(WorldEvent.Load event) {
+        Cache.was = false;
     }
 }
