@@ -1,6 +1,7 @@
 {
   "package": "me.cephetir.skyskipped.mixins",
   "refmap": "mixins.sm.refmap.json",
+  "minVersion": "0.7.11",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinRendererLivingEntity",

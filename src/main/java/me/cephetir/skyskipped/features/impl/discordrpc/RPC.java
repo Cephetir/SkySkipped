@@ -57,7 +57,7 @@ public class RPC {
         if (!(event.phase == TickEvent.Phase.START) && !discordRPCManager.isActive()) return;
 
         if (Cache.isInDungeon) {
-            discordRPCManager.setDetailsLine("Playing Dungeons");
+            discordRPCManager.setDetailsLine("Playing " + Cache.dungeonName);
             discordRPCManager.setStateLine("Cleared: " + Cache.dungeonPercentage + " %");
         } else if ((!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
             if (Cache.inSkyblock) {
