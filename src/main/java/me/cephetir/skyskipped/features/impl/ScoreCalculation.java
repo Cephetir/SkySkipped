@@ -22,6 +22,7 @@ import kr.syeyoung.dungeonsguide.features.impl.dungeon.FeatureDungeonScore;
 import me.cephetir.skyskipped.config.Cache;
 import me.cephetir.skyskipped.config.Config;
 import me.cephetir.skyskipped.features.Feature;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -36,16 +37,17 @@ public class ScoreCalculation extends Feature {
     }
 
     public void score() {
-        if (!Cache.isInDungeon || !Config.scorePing) return;
-        if (Loader.isModLoaded("skytils") && checkVersion()) {
-            skytils.skytilsmod.features.impl.dungeons.ScoreCalculation scoreCalculation = skytils.skytilsmod.features.impl.dungeons.ScoreCalculation.INSTANCE;
-            Cache.totalScore = scoreCalculation.getSpeedScore() + scoreCalculation.getSkillScore() + scoreCalculation.getDiscoveryScore() + scoreCalculation.getBonusScore();
-        } else if (Loader.isModLoaded("skyblock_dungeons_guide")) {
+        if (!Cache.isInDungeon) return;
+        if (Loader.isModLoaded("skyblock_dungeons_guide")) {
             FeatureDungeonScore.ScoreCalculation score = FeatureRegistry.DUNGEON_SCORE.calculateScore();
             Cache.totalScore = score.getTime() + score.getSkill() + score.getExplorer() + score.getBonus();
+        } else if (Loader.isModLoaded("skytils") && checkVersion()) {
+            skytils.skytilsmod.features.impl.dungeons.ScoreCalculation scoreCalculation = skytils.skytilsmod.features.impl.dungeons.ScoreCalculation.INSTANCE;
+            Cache.totalScore = scoreCalculation.getSpeedScore() + scoreCalculation.getSkillScore() + scoreCalculation.getDiscoveryScore() + scoreCalculation.getBonusScore();
+            if (Cache.blood.equals("found")) Cache.totalScore += 2;
         }
         if (Cache.totalScore >= 300) {
-            if(Cache.was) return;
+            if (Cache.was) return;
             timer = 60;
             mc.thePlayer.sendChatMessage("300 score reached! btw sbe is cringe");
             Cache.was = true;
@@ -61,7 +63,16 @@ public class ScoreCalculation extends Feature {
         timer--;
         mc.fontRendererObj.drawStringWithShadow("Score: " + Cache.totalScore,
                 event.resolution.getScaledWidth() / 2f - mc.fontRendererObj.getStringWidth("Score: " + Cache.totalScore) / 2f,
-                event.resolution.getScaledHeight() / 2f - 9 / 2f, -1);
+                event.resolution.getScaledHeight() / 2f, -1);
+    }
+
+    @SubscribeEvent
+    public void onChat(ClientChatReceivedEvent event) {
+        if (!Cache.isInDungeon) return;
+        if (event.message.getUnformattedText().toLowerCase().contains("the blood door has been opened"))
+            Cache.blood = "found";
+        else if (event.message.getUnformattedText().toLowerCase().contains("you have proven yourself"))
+            Cache.blood = "done";
     }
 
     private boolean checkVersion() {
