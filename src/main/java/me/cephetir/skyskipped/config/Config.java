@@ -137,7 +137,9 @@ public class Config extends Vigilant {
             type = PropertyType.NUMBER,
             name = "Delay For \"Leave Dungeon\"",
             category = "Dungeons", subcategory = "Auto Leave",
-            description = "Delay between going to lobby and to dungeon hub."
+            description = "Delay between going to lobby and to dungeon hub.",
+            increment = 10,
+            max = 10000
     )
     public static int delay = 2000;
 
