@@ -20,6 +20,7 @@ package me.cephetir.skyskipped.features.impl.discordrpc;
 import gg.essential.api.EssentialAPI;
 import lombok.Getter;
 import me.cephetir.skyskipped.config.Cache;
+import me.cephetir.skyskipped.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -44,11 +45,12 @@ public class RPC {
     private final DiscordRPCManager discordRPCManager = new DiscordRPCManager();
 
     public void init() {
-        // if (!Config.DRPC) return; TODO Config is not working?
+        if (!Config.DRPC || RPC.getINSTANCE().getDiscordRPCManager().isActive()) return;
         discordRPCManager.start();
     }
 
     public void shutdown() {
+        if (!RPC.getINSTANCE().getDiscordRPCManager().isActive()) return;
         discordRPCManager.stop();
     }
 
