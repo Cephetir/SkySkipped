@@ -51,7 +51,15 @@ public class ScoreCalculation extends Feature {
             if (Cache.totalScore >= 300 && !Cache.was) {
                 timer = 100;
                 mc.thePlayer.sendChatMessage("300 score reached! btw sbe is cringe");
-                mc.thePlayer.playSound("random.orb", 0.8f, 1f);
+                new Thread(() -> {
+                    for (int i = 0; i < 10; i++) {
+                        mc.thePlayer.playSound("random.orb", 1f, 1f);
+                        try {
+                            Thread.sleep(100l);
+                        } catch (InterruptedException ignored) {
+                        }
+                    }
+                }).start();
                 Cache.was = true;
             }
         } catch (Exception e) {
