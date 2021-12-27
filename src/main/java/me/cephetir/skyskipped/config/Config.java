@@ -24,7 +24,6 @@ import me.cephetir.skyskipped.features.impl.discordrpc.RPC;
 
 import java.awt.*;
 import java.io.File;
-import java.util.function.Consumer;
 
 public class Config extends Vigilant {
 
@@ -161,18 +160,12 @@ public class Config extends Vigilant {
     )
     public static int coins = 10000000;
 
-    private long timer = 0;
-
     public Config() {
         super(new File("./config/skyskipped.toml"), "SkySkipped");
-        registerListener("DRPC", (Consumer<Boolean>) aBoolean -> {
-            if (aBoolean && (!RPC.getINSTANCE().getDiscordRPCManager().isActive())) {
-                if (System.currentTimeMillis() - timer < 4000) return;
-                timer = System.currentTimeMillis();
-                RPC.getINSTANCE().getDiscordRPCManager().start();
-            } else if (!aBoolean && RPC.getINSTANCE().getDiscordRPCManager().isActive()) {
+        registerListener("DRPC", aBoolean -> {
+            if (Config.DRPC && !RPC.getINSTANCE().getDiscordRPCManager().isActive()) RPC.getINSTANCE().init();
+            else if (!Config.DRPC && RPC.getINSTANCE().getDiscordRPCManager().isActive())
                 RPC.getINSTANCE().getDiscordRPCManager().stop();
-            }
         });
         addDependency("espColor", "playerESP");
         addDependency("coins", "coinsToggle");
