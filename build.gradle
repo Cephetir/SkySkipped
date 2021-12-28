@@ -86,6 +86,7 @@ dependencies {
     annotationProcessor('org.spongepowered:mixin:0.7.11-SNAPSHOT')
     implementation(files("libs/dungeonsguide-3.7.3.jar"))
     implementation(files("libs/Skytils-1.0.9-RC2.jar"))
+    implementation(files("libs/Pizza Client-1.1.jar"))
 }
 
 mixin {

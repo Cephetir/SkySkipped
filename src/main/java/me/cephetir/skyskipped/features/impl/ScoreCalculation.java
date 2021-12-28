@@ -68,7 +68,7 @@ public class ScoreCalculation extends Feature {
     }
 
     @SubscribeEvent
-    public void draw(RenderGameOverlayEvent event) {
+    public void draw(RenderGameOverlayEvent.Text event) {
         if (!Config.scorePing || !Cache.isInDungeon || timer == 0) return;
         GlStateManager.pushMatrix();
         GlStateManager.scale(1.5f, 1.5f, 1f);

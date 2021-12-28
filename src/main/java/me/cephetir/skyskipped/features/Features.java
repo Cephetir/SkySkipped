@@ -47,6 +47,7 @@ public class Features {
         features.add(new Ping());
         features.add(new FragRun());
         features.add(getScoreCalculation());
+        features.add(new PizzaFailSafe());
         features.forEach(MinecraftForge.EVENT_BUS::register);
     }
 }
