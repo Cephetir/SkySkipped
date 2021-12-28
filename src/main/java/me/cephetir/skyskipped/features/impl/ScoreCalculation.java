@@ -55,7 +55,7 @@ public class ScoreCalculation extends Feature {
                     for (int i = 0; i < 10; i++) {
                         mc.thePlayer.playSound("random.orb", 1f, 1f);
                         try {
-                            Thread.sleep(100l);
+                            Thread.sleep(100L);
                         } catch (InterruptedException ignored) {
                         }
                     }
@@ -84,6 +84,7 @@ public class ScoreCalculation extends Feature {
         timer--;
     }
 
+    @SuppressWarnings("all")
     private boolean checkVersion() {
         return Skytils.VERSION.equals("1.0.9-RC2");
     }
