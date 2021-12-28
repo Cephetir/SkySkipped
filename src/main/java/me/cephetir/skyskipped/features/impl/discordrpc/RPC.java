@@ -18,7 +18,6 @@
 package me.cephetir.skyskipped.features.impl.discordrpc;
 
 import gg.essential.api.EssentialAPI;
-import lombok.Getter;
 import me.cephetir.skyskipped.config.Cache;
 import me.cephetir.skyskipped.config.Config;
 import net.minecraft.client.Minecraft;
@@ -26,58 +25,45 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class RPC {
+    public static final DiscordRPCManager discordRPCManager = new DiscordRPCManager();
 
-    private static RPC INSTANCE = null;
-
-    // Make this a Singleton
-    public static RPC getINSTANCE() {
-        if (RPC.INSTANCE == null) {
-            RPC.INSTANCE = new RPC();
-        }
-
-        return RPC.INSTANCE;
+    public static void init() {
+        RPC.discordRPCManager.start();
     }
 
-    private RPC() {
+    public static void shutdown() {
+        RPC.discordRPCManager.stop();
     }
 
-    @Getter
-    private final DiscordRPCManager discordRPCManager = new DiscordRPCManager();
-
-    public void init() {
-        if (!Config.DRPC || RPC.getINSTANCE().getDiscordRPCManager().isActive()) return;
-        discordRPCManager.start();
-    }
-
-    public void shutdown() {
-        if (!RPC.getINSTANCE().getDiscordRPCManager().isActive()) return;
-        discordRPCManager.stop();
+    public static void reset() {
+        if (Config.DRPC && !RPC.discordRPCManager.isActive()) RPC.discordRPCManager.start();
+        else if (!Config.DRPC && RPC.discordRPCManager.isActive()) RPC.discordRPCManager.stop();
     }
 
     @SubscribeEvent
     public void update(TickEvent.ClientTickEvent event) {
-        if (!(event.phase == TickEvent.Phase.START) && !discordRPCManager.isActive()) return;
+        if (!(event.phase == TickEvent.Phase.START) && !RPC.discordRPCManager.isActive()) return;
 
         if (Cache.isInDungeon) {
-            discordRPCManager.setDetailsLine("Playing " + Cache.dungeonName);
-            discordRPCManager.setStateLine("Cleared: " + Cache.dungeonPercentage + " %");
+            RPC.discordRPCManager.setDetailsLine("Playing " + Cache.dungeonName);
+            RPC.discordRPCManager.setStateLine("Cleared: " + Cache.dungeonPercentage + " %");
         } else if ((!Minecraft.getMinecraft().isSingleplayer()) && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null) {
             if (Cache.inSkyblock) {
-                discordRPCManager.setDetailsLine("Playing on Hypixel Skyblock");
-                discordRPCManager.setStateLine("Holding: " + Cache.itemheld);
+                RPC.discordRPCManager.setDetailsLine("Playing on Hypixel Skyblock");
+                RPC.discordRPCManager.setStateLine("Holding: " + Cache.itemheld);
             } else if (EssentialAPI.getMinecraftUtil().isHypixel()) {
-                discordRPCManager.setDetailsLine("Playing on Hypixel");
-                discordRPCManager.setStateLine("In game");
+                RPC.discordRPCManager.setDetailsLine("Playing on Hypixel");
+                RPC.discordRPCManager.setStateLine("In game");
             } else {
-                discordRPCManager.setDetailsLine("Playing on " + Minecraft.getMinecraft().getCurrentServerData().serverIP);
-                discordRPCManager.setStateLine("In game");
+                RPC.discordRPCManager.setDetailsLine("Playing on " + Minecraft.getMinecraft().getCurrentServerData().serverIP);
+                RPC.discordRPCManager.setStateLine("In game");
             }
         } else if (Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null) {
-            discordRPCManager.setDetailsLine("Playing Singleplayer");
-            discordRPCManager.setStateLine("In game");
+            RPC.discordRPCManager.setDetailsLine("Playing Singleplayer");
+            RPC.discordRPCManager.setStateLine("In game");
         } else {
-            discordRPCManager.setDetailsLine("In main menu");
-            discordRPCManager.setStateLine("Idle");
+            RPC.discordRPCManager.setDetailsLine("In main menu");
+            RPC.discordRPCManager.setStateLine("Idle");
         }
     }
 }

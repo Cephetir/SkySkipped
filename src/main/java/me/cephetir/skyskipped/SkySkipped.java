@@ -58,10 +58,10 @@ public class SkySkipped {
 
     @Mod.EventHandler
     public void onInit(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(RPC.getINSTANCE());
+        MinecraftForge.EVENT_BUS.register(new RPC());
         MinecraftForge.EVENT_BUS.register(new Listener());
         SkySkipped.features.register();
-        RPC.getINSTANCE().init();
+        RPC.reset();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
         ClientCommandHandler.instance.registerCommand(SkySkipped.features.getLeaveCommand());
         ClientCommandHandler.instance.registerCommand(SkySkipped.features.getPartyCommand());
@@ -76,7 +76,7 @@ public class SkySkipped {
 
     @Mod.EventHandler
     public void stop(FMLModDisabledEvent event) {
-        RPC.getINSTANCE().shutdown();
+        RPC.shutdown();
     }
 
     public static Logger getLogger() {

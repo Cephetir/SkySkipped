@@ -38,15 +38,11 @@ public class DiscordRPCManager implements IPCListener {
     private String detailsLine;
     private String stateLine;
     private OffsetDateTime startTimestamp;
-
-    //private Timer updateTimer;
     private boolean connected;
 
     public void start() {
         try {
-            if (isActive()) {
-                return;
-            }
+            if (isActive()) return;
 
             SkySkipped.getLogger().info("Starting Discord RP...");
             stateLine = "Starting...";
@@ -57,10 +53,10 @@ public class DiscordRPCManager implements IPCListener {
             try {
                 client.connect();
             } catch (Exception e) {
-                SkySkipped.getLogger().info("Failed to connect to Discord RPC: " + e.getMessage());
+                SkySkipped.getLogger().error("Failed to connect to Discord RPC: " + e.getMessage());
             }
         } catch (Throwable ex) {
-            SkySkipped.getLogger().info("DiscordRP has thrown an unexpected error while trying to start...");
+            SkySkipped.getLogger().error("DiscordRP has thrown an unexpected error while trying to start...");
             ex.printStackTrace();
         }
     }
@@ -88,29 +84,16 @@ public class DiscordRPCManager implements IPCListener {
 
     public void setStateLine(String status) {
         this.stateLine = status;
-//        if (isActive()) {
-//            updatePresence();
-//        }
     }
 
     public void setDetailsLine(String status) {
         this.detailsLine = status;
-//        if (isActive()) {
-//            updatePresence();
-//        }
     }
 
     @Override
     public void onReady(IPCClient client) {
         SkySkipped.getLogger().info("Discord RPC started");
         connected = true;
-//        updateTimer = new Timer();
-//        updateTimer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                updatePresence();
-//            }
-//        }, 0, UPDATE_PERIOD);
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -130,7 +113,6 @@ public class DiscordRPCManager implements IPCListener {
         SkySkipped.getLogger().info("Discord RPC closed");
         this.client = null;
         connected = false;
-        //cancelTimer();
         MinecraftForge.EVENT_BUS.unregister(this);
     }
 
@@ -139,14 +121,6 @@ public class DiscordRPCManager implements IPCListener {
         SkySkipped.getLogger().info("Discord RPC disconnected");
         this.client = null;
         connected = false;
-        //cancelTimer();
         MinecraftForge.EVENT_BUS.unregister(this);
     }
-
-//    private void cancelTimer() {
-//        if(updateTimer != null) {
-//            updateTimer.cancel();
-//            updateTimer = null;
-//        }
-//    }
 }
