@@ -67,14 +67,13 @@ public class Config extends Vigilant {
     )
     public static boolean nons = false;
 
-    @SuppressWarnings("unused")
     @Property(
             type = PropertyType.SWITCH,
             name = "Discord RPC",
             category = "Discord", subcategory = "Discord RPC",
             description = "Shows status in discord."
     )
-    public static boolean DRPC = false;
+    public static boolean DRPC = true;
 
     @Property(
             type = PropertyType.SWITCH,
@@ -163,9 +162,14 @@ public class Config extends Vigilant {
     public Config() {
         super(new File("./config/skyskipped.toml"), "SkySkipped");
         registerListener("DRPC", aBoolean -> {
-            if (Config.DRPC && !RPC.getINSTANCE().getDiscordRPCManager().isActive()) RPC.getINSTANCE().init();
-            else if (!Config.DRPC && RPC.getINSTANCE().getDiscordRPCManager().isActive())
-                RPC.getINSTANCE().getDiscordRPCManager().stop();
+            new Thread(() -> {
+                try {
+                    Thread.sleep(100L);
+                    RPC.reset();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
         });
         addDependency("espColor", "playerESP");
         addDependency("coins", "coinsToggle");
