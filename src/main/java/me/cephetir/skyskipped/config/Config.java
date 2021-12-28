@@ -93,6 +93,22 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "Pizza Fail Safe",
+            category = "Hacks", subcategory = "Hacks",
+            description = "Failsafe macros in Pizza client."
+    )
+    public static boolean failSafe = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Jump When Stuck",
+            category = "Hacks", subcategory = "Hacks",
+            description = "Jump in fail safe."
+    )
+    public static boolean failsafeJump = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Block GS ability",
             category = "Hacks", subcategory = "Hacks",
             description = "Blocks Giant's sword ability."
