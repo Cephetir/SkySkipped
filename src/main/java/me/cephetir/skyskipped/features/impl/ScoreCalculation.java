@@ -55,7 +55,7 @@ public class ScoreCalculation extends Feature {
                     for (int i = 0; i < 10; i++) {
                         mc.thePlayer.playSound("random.orb", 1f, 1f);
                         try {
-                            Thread.sleep(100L);
+                            Thread.sleep(200L);
                         } catch (InterruptedException ignored) {
                         }
                     }
