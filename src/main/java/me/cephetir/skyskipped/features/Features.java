@@ -48,6 +48,7 @@ public class Features {
         features.add(new FragRun());
         features.add(getScoreCalculation());
         features.add(new PizzaFailSafe());
+        features.add(new HidePetCandies());
         features.forEach(MinecraftForge.EVENT_BUS::register);
     }
 }
