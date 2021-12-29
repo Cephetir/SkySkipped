@@ -29,4 +29,8 @@ public class Cache {
     public static String itemheld = "";
 
     public static String lastCrit = "0";
+
+    public static String prevIP = "";
+    public static String prevName = "";
+    public static boolean prevIsLan = false;
 }

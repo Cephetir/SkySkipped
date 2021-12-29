@@ -5,6 +5,9 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [],
   "client": [
+    "IMixinGuiScreen",
+    "MixinGuiDisconnected",
+    "MixinGuiMultiplayer",
     "MixinRendererLivingEntity",
     "MixinScorePlayerTeam"
   ]
