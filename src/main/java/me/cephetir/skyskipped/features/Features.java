@@ -18,10 +18,20 @@
 package me.cephetir.skyskipped.features;
 
 import lombok.Getter;
-import me.cephetir.skyskipped.features.impl.*;
-import me.cephetir.skyskipped.features.impl.fragrun.FragRun;
-import me.cephetir.skyskipped.features.impl.fragrun.LeaveCommand;
-import me.cephetir.skyskipped.features.impl.fragrun.PartyCommand;
+import me.cephetir.skyskipped.commands.fragrun.FragRun;
+import me.cephetir.skyskipped.commands.fragrun.LeaveCommand;
+import me.cephetir.skyskipped.commands.fragrun.PartyCommand;
+import me.cephetir.skyskipped.features.impl.LastCrit;
+import me.cephetir.skyskipped.features.impl.chat.ChatSwapper;
+import me.cephetir.skyskipped.features.impl.chat.Nons;
+import me.cephetir.skyskipped.features.impl.chat.Ping;
+import me.cephetir.skyskipped.features.impl.dungeons.ChestCloser;
+import me.cephetir.skyskipped.features.impl.dungeons.PizzaFailSafe;
+import me.cephetir.skyskipped.features.impl.dungeons.PlayerESP;
+import me.cephetir.skyskipped.features.impl.dungeons.ScoreCalculation;
+import me.cephetir.skyskipped.features.impl.hacks.Blocker;
+import me.cephetir.skyskipped.features.impl.visual.HidePetCandies;
+import me.cephetir.skyskipped.features.impl.visual.PetsOverlay;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
@@ -49,6 +59,7 @@ public class Features {
         features.add(getScoreCalculation());
         features.add(new PizzaFailSafe());
         features.add(new HidePetCandies());
+        features.add(new PetsOverlay());
         features.forEach(MinecraftForge.EVENT_BUS::register);
     }
 }

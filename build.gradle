@@ -87,6 +87,7 @@ dependencies {
     implementation(files("libs/dungeonsguide-3.7.3.jar"))
     implementation(files("libs/Skytils-1.0.9-RC2.jar"))
     implementation(files("libs/Pizza Client-1.1.jar"))
+    implementation(files("libs/NotEnoughUpdates-2.1-pepeDS.jar"))
 }
 
 mixin {

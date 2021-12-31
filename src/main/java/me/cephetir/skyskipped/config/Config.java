@@ -183,6 +183,14 @@ public class Config extends Vigilant {
     )
     public static boolean hidePetCandies = false;
 
+    @Property(
+            type = PropertyType.SWITCH,
+            name = "Pets Overlay",
+            category = "Visual", subcategory = "Visual",
+            description = "Good looking overlay for pets menu."
+    )
+    public static boolean petsOverlay = true;
+
     public Config() {
         super(new File("./config/skyskipped.toml"), "SkySkipped");
         registerListener("DRPC", aBoolean -> {
