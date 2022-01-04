@@ -181,7 +181,7 @@ public class Config extends Vigilant {
             category = "Visual", subcategory = "Visual",
             description = "Text to show when 300 score reached."
     )
-    public static String pingText = "300 score reached!";
+    public static String pingText = "300 score reached! Btw sbe is cringe";
 
     @Property(
             type = PropertyType.SWITCH,

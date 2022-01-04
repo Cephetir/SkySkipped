@@ -50,7 +50,7 @@ public class ScoreCalculation extends Feature {
             }
             if (Cache.totalScore >= 300 && !Cache.was) {
                 timer = 100;
-                mc.thePlayer.sendChatMessage(Config.pingText + " btw sbe is cringe");
+                mc.thePlayer.sendChatMessage(Config.pingText);
                 new Thread(() -> {
                     for (int i = 0; i < 10; i++) {
                         mc.thePlayer.playSound("random.orb", 1f, 1f);
