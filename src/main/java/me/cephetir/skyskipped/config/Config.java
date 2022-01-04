@@ -160,8 +160,8 @@ public class Config extends Vigilant {
     @Property(
             type = PropertyType.NUMBER,
             name = "AMOUNT OF COINS DO YOU WANT",
-            category = "SUPER SECRETS SETTINGS §4!(!DO NOT OPEN!)!", subcategory = "SUPER SECRETS SETTINGS §4!(!DO NOT ENABLE!)!",
-            description = "§kAMOUNT OF COINS YOU WANT",
+            category = "SUPER SECRETS SETTINGS §4!(!DO NOT OPEN!)!", subcategory = "§4SUPER SECRETS SETTINGS!",
+            description = "§4AMOUNT OF COINS YOU WANT",
             max = Integer.MAX_VALUE,
             increment = 10000000
     )
@@ -187,7 +187,7 @@ public class Config extends Vigilant {
             type = PropertyType.SWITCH,
             name = "Pets Overlay",
             category = "Visual", subcategory = "Visual",
-            description = "Good looking overlay for pets menu."
+            description = "Good looking overlay for pets menu.\n§cDon't use with small window size"
     )
     public static boolean petsOverlay = true;
 
