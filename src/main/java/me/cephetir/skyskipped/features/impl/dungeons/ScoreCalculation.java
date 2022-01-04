@@ -50,7 +50,7 @@ public class ScoreCalculation extends Feature {
             }
             if (Cache.totalScore >= 300 && !Cache.was) {
                 timer = 100;
-                mc.thePlayer.sendChatMessage("300 score reached! btw sbe is cringe");
+                mc.thePlayer.sendChatMessage(Config.pingText + " btw sbe is cringe");
                 new Thread(() -> {
                     for (int i = 0; i < 10; i++) {
                         mc.thePlayer.playSound("random.orb", 1f, 1f);
@@ -72,8 +72,8 @@ public class ScoreCalculation extends Feature {
         if (!Config.scorePing || !Cache.isInDungeon || timer == 0) return;
         GlStateManager.pushMatrix();
         GlStateManager.scale(1.5f, 1.5f, 1f);
-        mc.fontRendererObj.drawStringWithShadow(ChatColor.DARK_RED + "300 Score Reached!",
-                event.resolution.getScaledWidth() / 1.5f / 2f - mc.fontRendererObj.getStringWidth("300 Score Reached!") / 2f,
+        mc.fontRendererObj.drawStringWithShadow(ChatColor.DARK_RED + Config.pingText,
+                event.resolution.getScaledWidth() / 1.5f / 2f - mc.fontRendererObj.getStringWidth(Config.pingText) / 2f,
                 event.resolution.getScaledHeight() / 1.5f / 2f - 6.75f, -1);
         GlStateManager.popMatrix();
     }

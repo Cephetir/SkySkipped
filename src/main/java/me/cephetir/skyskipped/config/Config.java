@@ -176,6 +176,14 @@ public class Config extends Vigilant {
     public static boolean scorePing = false;
 
     @Property(
+            type = PropertyType.TEXT,
+            name = "300 Score Ping Text",
+            category = "Visual", subcategory = "Visual",
+            description = "Text to show when 300 score reached."
+    )
+    public static String pingText = "300 score reached!";
+
+    @Property(
             type = PropertyType.SWITCH,
             name = "Hide Pet Candies",
             category = "Visual", subcategory = "Visual",
@@ -193,6 +201,7 @@ public class Config extends Vigilant {
 
     public Config() {
         super(new File("./config/skyskipped.toml"), "SkySkipped");
+
         registerListener("DRPC", aBoolean -> {
             new Thread(() -> {
                 try {
@@ -203,8 +212,11 @@ public class Config extends Vigilant {
                 }
             }).start();
         });
+
         addDependency("espColor", "playerESP");
         addDependency("coins", "coinsToggle");
+        addDependency("pingText", "scorePing");
+
         initialize();
     }
 }
