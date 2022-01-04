@@ -202,16 +202,14 @@ public class Config extends Vigilant {
     public Config() {
         super(new File("./config/skyskipped.toml"), "SkySkipped");
 
-        registerListener("DRPC", aBoolean -> {
-            new Thread(() -> {
-                try {
-                    Thread.sleep(100L);
-                    RPC.reset();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        });
+        registerListener("DRPC", aBoolean -> new Thread(() -> {
+            try {
+                Thread.sleep(100L);
+                RPC.reset();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start());
 
         addDependency("espColor", "playerESP");
         addDependency("coins", "coinsToggle");
