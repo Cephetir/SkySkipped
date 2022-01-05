@@ -17,6 +17,7 @@
 
 package me.cephetir.skyskipped;
 
+import me.cephetir.skyskipped.commands.PetMacroCommand;
 import me.cephetir.skyskipped.commands.SkySkippedCommand;
 import me.cephetir.skyskipped.config.Config;
 import me.cephetir.skyskipped.event.Listener;
@@ -65,6 +66,7 @@ public class SkySkipped {
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());
         ClientCommandHandler.instance.registerCommand(SkySkipped.features.getLeaveCommand());
         ClientCommandHandler.instance.registerCommand(SkySkipped.features.getPartyCommand());
+        ClientCommandHandler.instance.registerCommand(new PetMacroCommand());
         SkySkipped.timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override

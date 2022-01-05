@@ -61,9 +61,7 @@ public class PartyCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        if (args.length == 0) {
-            SkySkipped.features.getLeaveCommand().start(true);
-        }
+        SkySkipped.features.getLeaveCommand().start(true);
     }
 
     public void start() {
