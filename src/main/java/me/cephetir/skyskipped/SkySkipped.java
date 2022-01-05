@@ -39,7 +39,7 @@ import java.util.TimerTask;
 public class SkySkipped {
     public static final String MODID = "skyskipped";
     public static final String MOD_NAME = "SkySkipped";
-    public static final String VERSION = "2.4";
+    public static final String VERSION = "2.5";
     public static Config config = new Config();
     public static final Features features = new Features();
     public static Timer timer;
