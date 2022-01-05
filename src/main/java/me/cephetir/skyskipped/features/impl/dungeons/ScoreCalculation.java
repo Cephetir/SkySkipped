@@ -72,7 +72,7 @@ public class ScoreCalculation extends Feature {
         if (!Config.scorePing || !Cache.isInDungeon || timer == 0) return;
         GlStateManager.pushMatrix();
         GlStateManager.scale(1.5f, 1.5f, 1f);
-        mc.fontRendererObj.drawStringWithShadow(ChatColor.DARK_RED + Config.pingText,
+        mc.fontRendererObj.drawStringWithShadow(ChatColor.DARK_RED + "300 score reached!",
                 event.resolution.getScaledWidth() / 1.5f / 2f - mc.fontRendererObj.getStringWidth(Config.pingText) / 2f,
                 event.resolution.getScaledHeight() / 1.5f / 2f - 6.75f, -1);
         GlStateManager.popMatrix();

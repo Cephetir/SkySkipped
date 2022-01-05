@@ -47,6 +47,7 @@ import java.util.regex.Pattern;
 
 public class PetsOverlay extends Feature {
     private GuiPetsOverlay petsOverlay = null;
+    public int auto = -1;
 
     public PetsOverlay() {
         super("PetsOverlay", "Visual", "Good looking overlay for pets menu");
@@ -107,6 +108,28 @@ public class PetsOverlay extends Feature {
         }
     }
 
+    public static Slot getPet(int index, GuiChest chest) {
+        int i = 0;
+        if (!chest.inventorySlots.inventorySlots.isEmpty()) {
+            System.out.println("GETTING");
+            for (Slot slot : chest.inventorySlots.inventorySlots) {
+                if (slot.slotNumber > 53) break;
+                if (slot.getHasStack()) {
+                    System.out.println("GETTING NAME");
+                    NBTTagCompound compound = slot.getStack().getTagCompound().getCompoundTag("display");
+                    String displayName = compound.getString("Name");
+                    System.out.println("CHECKING NAME");
+                    if (displayName.toLowerCase().contains("[lvl ")) {
+                        i++;
+                        if (i == index) return slot;
+                        System.out.println("NEXT");
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public class GuiPetsOverlay {
         private GuiChest chest;
         private List<Pet> pets = new ArrayList<>();
@@ -149,6 +172,15 @@ public class PetsOverlay extends Feature {
                         pets1.add(new Pet(rectWidth1 + 5 + k * 32, rectHeight1 + 5 + j * 32, displayName, slot, i, slot.getStack()));
                         i++;
                         k++;
+
+                        if(auto == i) {
+                            System.out.println("GOT PET");
+                            IMixinGuiContainer container = (IMixinGuiContainer) chest;
+                            container.handleMouseClick(slot, slot.slotNumber, 0, 0);
+                            System.out.println("CLICKED");
+                            auto = -1;
+                            mc.thePlayer.closeScreen();
+                        }
 
                         for (String text : slot.getStack().getTooltip(mc.thePlayer, false)) {
                             if (text.contains("Click to summon")) {
@@ -209,45 +241,51 @@ public class PetsOverlay extends Feature {
             GlStateManager.scale(0.5f, 0.5f, 0.5f);
 
             GlStateManager.resetColor();
-            if (autopet != null) {
-                int h = height - rectHeight;
+            int h = height - rectHeight;
 
-                if (nextPage != null) {
-                    Gui.drawRect(width / 2 - 50 - 12 - 100 - 12 - 100, h - 25, width / 2 - 50 - 12 - 100 - 12, h - 25 + 20, new Color(255, 255, 255, 150).getRGB());
-                    mc.fontRendererObj.drawStringWithShadow("NEXT", width / 2f - 50 - 12 - 100 - 12 - 50 - mc.fontRendererObj.getStringWidth("NEXT") / 2f, h - 25 - 3, -1);
+            if (nextPage != null) {
+                Gui.drawRect(width / 2 - 50 - 12 - 100 - 12 - 100, h - 25, width / 2 - 50 - 12 - 100 - 12, h - 25 + 20, new Color(255, 255, 255, 150).getRGB());
+                mc.fontRendererObj.drawStringWithShadow("NEXT", width / 2f - 50 - 12 - 100 - 12 - 50 - mc.fontRendererObj.getStringWidth("NEXT") / 2f, h - 25 - 3, -1);
+                GlStateManager.scale(2f, 2f, 2f);
+                renderItem(nextPage.getStack(), (width / 2 - 50 - 12 - 100 - 12 - 66) / 2, (h - 25 - 6) / 2);
+                GlStateManager.scale(0.5f, 0.5f, 0.5f);
+                if (previousPage != null) {
+                    Gui.drawRect(width / 2 - 50 - 12 - 100 - 12 - 100, h - 25 - 30, width / 2 - 50 - 12 - 100 - 12, h - 25 - 30 + 20, new Color(255, 255, 255, 150).getRGB());
+                    mc.fontRendererObj.drawStringWithShadow("PREVIOUS", width / 2f - 50 - 12 - 100 - 12 - 50 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f, h - 25 - 30 - 3, -1);
                     GlStateManager.scale(2f, 2f, 2f);
-                    renderItem(nextPage.getStack(), (width / 2 - 50 - 12 - 100 - 12 - 66) / 2, (h - 25 - 6) / 2);
-                    GlStateManager.scale(0.5f, 0.5f, 0.5f);
-                    if (previousPage != null) {
-                        Gui.drawRect(width / 2 - 50 - 12 - 100 - 12 - 100, h - 25 - 30, width / 2 - 50 - 12 - 100 - 12, h - 25 - 30 + 20, new Color(255, 255, 255, 150).getRGB());
-                        mc.fontRendererObj.drawStringWithShadow("PREVIOUS", width / 2f - 50 - 12 - 100 - 12 - 50 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f, h - 25 - 30 - 3, -1);
-                        GlStateManager.scale(2f, 2f, 2f);
-                        renderItem(previousPage.getStack(), (width / 2 - 50 - 12 - 100 - 12 - 66) / 2, (h - 25 - 30 - 6) / 2);
-                        GlStateManager.scale(0.5f, 0.5f, 0.5f);
-                    }
-                } else if (previousPage != null) {
-                    Gui.drawRect(width / 2 - 50 - 12 - 100 - 12 - 100, h - 25, width / 2 - 50 - 12 - 100 - 12, h - 25 + 20, new Color(255, 255, 255, 150).getRGB());
-                    mc.fontRendererObj.drawStringWithShadow("PREVIOUS", width / 2f - 50 - 12 - 100 - 12 - 50 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f, h - 25 - 3, -1);
-                    GlStateManager.scale(2f, 2f, 2f);
-                    renderItem(previousPage.getStack(), (width / 2 - 50 - 12 - 100 - 12 - 66) / 2, (h - 25 - 6) / 2);
+                    renderItem(previousPage.getStack(), (width / 2 - 50 - 12 - 100 - 12 - 66) / 2, (h - 25 - 30 - 6) / 2);
                     GlStateManager.scale(0.5f, 0.5f, 0.5f);
                 }
+            } else if (previousPage != null) {
+                Gui.drawRect(width / 2 - 50 - 12 - 100 - 12 - 100, h - 25, width / 2 - 50 - 12 - 100 - 12, h - 25 + 20, new Color(255, 255, 255, 150).getRGB());
+                mc.fontRendererObj.drawStringWithShadow("PREVIOUS", width / 2f - 50 - 12 - 100 - 12 - 50 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f, h - 25 - 3, -1);
+                GlStateManager.scale(2f, 2f, 2f);
+                renderItem(previousPage.getStack(), (width / 2 - 50 - 12 - 100 - 12 - 66) / 2, (h - 25 - 6) / 2);
+                GlStateManager.scale(0.5f, 0.5f, 0.5f);
+            }
 
+            if (autopet != null) {
                 Gui.drawRect(width / 2 - 50 - 12 - 100, h - 25, width / 2 - 50 - 12, h - 25 + 20, new Color(255, 255, 255, 150).getRGB());
                 GlStateManager.scale(2f, 2f, 2f);
                 renderItem(autopet.getStack(), (width / 2 - 50 - 12 - 66) / 2, (h - 25 - 6) / 2);
                 GlStateManager.scale(0.5f, 0.5f, 0.5f);
+            }
 
+            if (close != null) {
                 Gui.drawRect(width / 2 - 50, h - 25, width / 2 + 50, h - 25 + 20, new Color(255, 255, 255, 150).getRGB());
                 GlStateManager.scale(2f, 2f, 2f);
                 renderItem(close.getStack(), (width / 2 - 50 + 50 - 16) / 2, (h - 25 - 6) / 2);
                 GlStateManager.scale(0.5f, 0.5f, 0.5f);
+            }
 
+            if (convert != null) {
                 Gui.drawRect(width / 2 + 50 + 12, h - 25, width / 2 + 50 + 12 + 100, h - 25 + 20, new Color(255, 255, 255, 150).getRGB());
                 GlStateManager.scale(2f, 2f, 2f);
                 renderItem(convert.getStack(), (width / 2 + 50 + 12 + 50 - 16) / 2, (h - 25 - 6) / 2);
                 GlStateManager.scale(0.5f, 0.5f, 0.5f);
+            }
 
+            if (hide != null) {
                 Gui.drawRect(width / 2 + 50 + 12 + 100 + 12, h - 25, width / 2 + 50 + 12 + 100 + 12 + 100, h - 25 + 20, new Color(255, 255, 255, 150).getRGB());
                 GlStateManager.scale(2f, 2f, 2f);
                 renderItem(hide.getStack(), (width / 2 + 50 + 12 + 100 + 12 + 50 - 16) / 2, (h - 25 - 6) / 2);

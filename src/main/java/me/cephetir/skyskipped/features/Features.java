@@ -44,6 +44,8 @@ public class Features {
     private final PartyCommand partyCommand = new PartyCommand();
     @Getter
     private final ScoreCalculation scoreCalculation = new ScoreCalculation();
+    @Getter
+    private final PetsOverlay petsOverlay = new PetsOverlay();
 
     public List<Feature> features = new ArrayList<>();
 
@@ -59,7 +61,7 @@ public class Features {
         features.add(getScoreCalculation());
         features.add(new PizzaFailSafe());
         features.add(new HidePetCandies());
-        features.add(new PetsOverlay());
+        features.add(getPetsOverlay());
         features.forEach(MinecraftForge.EVENT_BUS::register);
     }
 }
