@@ -116,12 +116,12 @@ public class ScoreCalculation extends Feature {
             } else {
                 Cache.totalScore = totalScore;
             }
-            if (Cache.totalScore >= 300 && !Cache.was) {
+            if (Cache.totalScore >= 300 && !Cache.was && Config.scorePing) {
                 new PingUtils(100, "300 score reached!");
                 mc.thePlayer.sendChatMessage(Config.pingText);
                 Cache.was = true;
             }
-            if (bloodCleared && !Cache.was2) {
+            if (bloodCleared && !Cache.was2 && Config.rabbitPing) {
                 new PingUtils(100, "Rabbit Hat!");
                 Cache.was2 = true;
             }

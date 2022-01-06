@@ -185,6 +185,14 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
+            name = "300 Score Ping",
+            category = "Visual", subcategory = "Visual",
+            description = "SBE like 300 score ping."
+    )
+    public static boolean rabbitPing = false;
+
+    @Property(
+            type = PropertyType.SWITCH,
             name = "Hide Pet Candies",
             category = "Visual", subcategory = "Visual",
             description = "Hide pet's candies counter in tooltip."
