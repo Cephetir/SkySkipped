@@ -69,8 +69,7 @@ public class PetsOverlay extends Feature {
                 Thread.sleep(50L);
                 petsOverlay.setSize(chest);
                 petsOverlay.getPets();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception ignored) {
             }
         }).start();
     }
