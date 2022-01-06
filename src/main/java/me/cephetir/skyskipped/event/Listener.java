@@ -18,6 +18,7 @@
 package me.cephetir.skyskipped.event;
 
 import gg.essential.api.EssentialAPI;
+import me.cephetir.skyskipped.SkySkipped;
 import me.cephetir.skyskipped.config.Cache;
 import me.cephetir.skyskipped.utils.TextUtils;
 import net.minecraft.client.Minecraft;
@@ -68,7 +69,16 @@ public class Listener {
                     }
                 }
 
-                if(!Cache.isInDungeon && foundDungeon) Cache.was = false;
+                if(!Cache.isInDungeon && foundDungeon) {
+                    Cache.was = false;
+                    Cache.was2 = false;
+                    SkySkipped.features.getScoreCalculation().mimicKilled = false;
+                    SkySkipped.features.getScoreCalculation().firstDeathHadSpirit = false;
+                    SkySkipped.features.getScoreCalculation().floorReq = SkySkipped.features.getScoreCalculation().floorRequirements.get("default");
+                    SkySkipped.features.getScoreCalculation().perRoomPercentage = 0.0;
+                    SkySkipped.features.getScoreCalculation().bloodOpened = false;
+                    SkySkipped.features.getScoreCalculation().bloodCleared = false;
+                }
                 Cache.inSkyblock = foundSkyblock;
                 Cache.isInDungeon = foundDungeon;
                 Cache.dungeonPercentage = percentage;
