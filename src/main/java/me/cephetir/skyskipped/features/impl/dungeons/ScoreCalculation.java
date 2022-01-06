@@ -125,6 +125,7 @@ public class ScoreCalculation extends Feature {
                 new PingUtils(100, "Rabbit Hat!");
                 Cache.was2 = true;
             }
+        } catch (NullPointerException ignored) {
         } catch (Exception e) {
             e.printStackTrace();
         }
