@@ -21,6 +21,7 @@ import me.cephetir.skyskipped.SkySkipped;
 import me.cephetir.skyskipped.config.Config;
 import me.cephetir.skyskipped.features.impl.visual.PetsOverlay;
 import me.cephetir.skyskipped.mixins.IMixinGuiContainer;
+import me.cephetir.skyskipped.utils.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.inventory.GuiChest;
@@ -52,8 +53,7 @@ public class PetMacroCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        if (args.length > 0 && isNumeric(args[0])) {
-            System.out.println("START");
+        if (args.length > 0 && TextUtils.isNumeric(args[0])) {
             EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
             if(Config.petsOverlay) SkySkipped.features.getPetsOverlay().auto = Integer.parseInt(args[0]);
             else {
@@ -61,26 +61,18 @@ public class PetMacroCommand extends CommandBase {
                 index = Integer.parseInt(args[0]);
             }
             player.sendChatMessage("/pets");
-            System.out.println("SENT COMMAND");
         }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Pre event) {
         if(!(event.gui instanceof GuiChest)) return;
-        System.out.println("GOT GUI");
         GuiChest chest = (GuiChest) event.gui;
         Slot slot = PetsOverlay.getPet(index, chest);
         if(slot == null) return;
-        System.out.println("GOT PET");
         IMixinGuiContainer container = (IMixinGuiContainer) chest;
         container.handleMouseClick(slot, slot.slotNumber, 0, 0);
-        System.out.println("CLICKED");
         Minecraft.getMinecraft().thePlayer.closeScreen();
         MinecraftForge.EVENT_BUS.unregister(this);
-    }
-
-    private boolean isNumeric(String str) {
-        return str.matches("-?\\d+(\\.\\d+)?"); // ty stackoverflow
     }
 }

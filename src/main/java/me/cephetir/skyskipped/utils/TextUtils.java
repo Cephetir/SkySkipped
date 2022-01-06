@@ -38,6 +38,10 @@ public class TextUtils {
         return SCOREBOARD_CHARACTERS.matcher(text).replaceAll("");
     }
 
+    public static boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?"); // ty stackoverflow
+    }
+
     private static final TreeMap<Long, String> suffixes = new TreeMap<Long, String>();
 
     public static String keepIntegerCharactersOnly(String text) {

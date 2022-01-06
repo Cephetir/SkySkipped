@@ -111,18 +111,14 @@ public class PetsOverlay extends Feature {
     public static Slot getPet(int index, GuiChest chest) {
         int i = 0;
         if (!chest.inventorySlots.inventorySlots.isEmpty()) {
-            System.out.println("GETTING");
             for (Slot slot : chest.inventorySlots.inventorySlots) {
                 if (slot.slotNumber > 53) break;
                 if (slot.getHasStack()) {
-                    System.out.println("GETTING NAME");
                     NBTTagCompound compound = slot.getStack().getTagCompound().getCompoundTag("display");
                     String displayName = compound.getString("Name");
-                    System.out.println("CHECKING NAME");
                     if (displayName.toLowerCase().contains("[lvl ")) {
                         i++;
                         if (i == index) return slot;
-                        System.out.println("NEXT");
                     }
                 }
             }
@@ -174,10 +170,8 @@ public class PetsOverlay extends Feature {
                         k++;
 
                         if(auto == i) {
-                            System.out.println("GOT PET");
                             IMixinGuiContainer container = (IMixinGuiContainer) chest;
                             container.handleMouseClick(slot, slot.slotNumber, 0, 0);
-                            System.out.println("CLICKED");
                             auto = -1;
                             mc.thePlayer.closeScreen();
                         }

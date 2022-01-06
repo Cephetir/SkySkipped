@@ -25,6 +25,7 @@ import me.cephetir.skyskipped.features.Features;
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
@@ -61,6 +62,8 @@ public class SkySkipped {
     public void onInit(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new RPC());
         MinecraftForge.EVENT_BUS.register(new Listener());
+        SkySkipped.features.getScoreCalculation().isDGLoaded = Loader.isModLoaded("skyblock_dungeons_guide");
+        SkySkipped.features.getScoreCalculation().isSTLoaded = Loader.isModLoaded("skytils");
         SkySkipped.features.register();
         RPC.reset();
         ClientCommandHandler.instance.registerCommand(new SkySkippedCommand());

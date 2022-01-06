@@ -23,6 +23,7 @@ public class Cache {
     public static String dungeonName = "";
     public static int totalScore = 0;
     public static boolean was = false;
+    public static boolean was2 = false;
 
     public static boolean inParty = false;
     public static boolean inSkyblock = false;
