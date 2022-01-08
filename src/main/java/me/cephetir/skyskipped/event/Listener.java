@@ -31,6 +31,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 public class Listener {
@@ -75,7 +76,7 @@ public class Listener {
                     SkySkipped.features.getScoreCalculation().mimicKilled = false;
                     SkySkipped.features.getScoreCalculation().firstDeathHadSpirit = false;
                     SkySkipped.features.getScoreCalculation().floorReq = SkySkipped.features.getScoreCalculation().floorRequirements.get("default");
-                    SkySkipped.features.getScoreCalculation().perRoomPercentage = 0.0;
+                    SkySkipped.features.getScoreCalculation().perRoomPercentage = BigDecimal.ZERO;
                     SkySkipped.features.getScoreCalculation().bloodOpened = false;
                     SkySkipped.features.getScoreCalculation().bloodCleared = false;
                 }

@@ -36,6 +36,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import skytils.skytilsmod.features.impl.handlers.MayorInfo;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -53,7 +55,7 @@ public class ScoreCalculation extends Feature {
     private int ticks = 0;
     private final Pattern deathsTabPattern = Pattern.compile("§r§a§lDeaths: §r§f\\((?<deaths>\\d+)\\)§r");
     private final Pattern missingPuzzlePattern = Pattern.compile("§r (?<puzzle>.+): §r§7\\[§r§6§l✦§r§7] ?§r");
-    private final Pattern failedPuzzlePattern = Pattern.compile("§r (?<puzzle>.+): §r§7\\[§r§c§l✖§r§7] §r§f(?:\\((?:§r(?<player>.+))?§r§f\\)|\\(§r§f})§r");
+    private final Pattern failedPuzzlePattern = Pattern.compile("§r (?<puzzle>.+): §r§7\\[§r§c§l✖§r§7] §.+");
     private final Pattern secretsFoundPattern = Pattern.compile("§r Secrets Found: §r§b(?<secrets>\\d+)§r");
     private final Pattern secretsFoundPercentagePattern = Pattern.compile("§r Secrets Found: §r§[ae](?<percentage>[\\d.]+)%§r");
     private final Pattern cryptsPattern = Pattern.compile("§r Crypts: §r§6(?<crypts>\\d+)§r");
@@ -80,11 +82,15 @@ public class ScoreCalculation extends Feature {
     int discoveryScore = 0;
     int speedScore = 0;
     int bonusScore = 0;
-    public double perRoomPercentage = 0.0;
+    public BigDecimal perRoomPercentage = BigDecimal.ZERO;
     int completedRooms = 0;
     int totalRooms = 0;
 
     public FloorRequirement floorReq;
+
+    private final BigDecimal oneHundred = new BigDecimal(100);
+    private final BigDecimal sixty = new BigDecimal(60);
+    private final BigDecimal eighty = new BigDecimal(80);
 
     public ScoreCalculation() {
         super("ScoreCalculation", "Dungeons", "skid score from other mods");
@@ -195,23 +201,25 @@ public class ScoreCalculation extends Feature {
                     Matcher matcher = roomCompletedPattern.matcher(name);
                     if (matcher.matches()) completedRooms = Integer.parseInt(matcher.group("count"));
                     if (completedRooms > 0) {
-                        perRoomPercentage = ((double) clearedPercentage / (double) completedRooms);
-                        totalRooms = (int) (100 / perRoomPercentage);
+                        perRoomPercentage = new BigDecimal(clearedPercentage).divide(new BigDecimal(completedRooms), MathContext.DECIMAL128);
+                        totalRooms = oneHundred.divide(perRoomPercentage).intValue();
                     }
                 }
             }
             int calcingCompletedRooms = completedRooms + (bloodOpened ? 2 : 0);
-            double calcingClearedPercentage = RangesKt.coerceAtMost(perRoomPercentage * calcingCompletedRooms, 100.0);
+            BigDecimal calcingClearedPercentage = RangesKt.coerceAtMost(new BigDecimal(calcingCompletedRooms).multiply(perRoomPercentage), oneHundred);
             if (isSTLoaded)
                 isPaul = (Objects.equals(MayorInfo.INSTANCE.getCurrentMayor(), "Paul") && MayorInfo.INSTANCE.getMayorPerks().contains("EZPZ")) || (MayorInfo.INSTANCE.getJerryMayor() != null && MayorInfo.INSTANCE.getJerryMayor().getName().equals("Paul"));
-            skillScore = RangesKt.coerceIn(100 - (2 * deaths - (firstDeathHadSpirit ? 1 : 0)) - 10 * (missingPuzzles + failedPuzzles) - 4 * (totalRooms - calcingCompletedRooms), 0, 100);
-            totalSecretsNeeded = (totalSecrets * floorReq.secretPercentage);
+            int deathPenalty = (2 * deaths) - (firstDeathHadSpirit ? 1 : 0);
+            int puzzlePenalty = 10 * (missingPuzzles + failedPuzzles);
+            skillScore = RangesKt.coerceIn(20 + (calcingClearedPercentage.multiply(eighty)).intValue() - deathPenalty - puzzlePenalty, 20, 100);
+            totalSecretsNeeded = Math.ceil(totalSecrets * floorReq.secretPercentage);
             percentageSecretsFound = foundSecrets / totalSecretsNeeded;
-            discoveryScore = (int) (Math.floor(
-                    RangesKt.coerceIn(60 * (calcingClearedPercentage / 100f), 0.0, 60.0)
-            ) + ((totalSecrets <= 0) ? 0.0 : Math.floor(
-                    RangesKt.coerceIn(40f * percentageSecretsFound, 0.0, 40.0)
-            )));
+            discoveryScore = (int)
+                    (RangesKt.coerceIn(calcingClearedPercentage.divide(oneHundred).multiply(sixty), BigDecimal.ZERO, sixty).intValue()
+                            + ((totalSecrets <= 0) ? 0.0 : Math.floor(RangesKt.coerceIn(
+                            (40f * percentageSecretsFound), 0.0, 40.0))
+                    ));
             bonusScore = ((mimicKilled) ? 2 : 0) + RangesKt.coerceAtMost(crypts, 5) + (isPaul ? 10 : 0);
             speedScore = (int) (100 - RangesKt.coerceIn((secondsElapsed - floorReq.speed) / 3f, 0.0, 100.0));
 
