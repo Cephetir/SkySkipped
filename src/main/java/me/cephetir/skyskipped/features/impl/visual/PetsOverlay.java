@@ -214,7 +214,7 @@ public class PetsOverlay extends Feature {
             Gui.drawRect(rectWidth - 20, rectHeight, width - rectWidth + 20, height - rectHeight, new Color(0, 0, 0, 105).getRGB());
 
             GlStateManager.scale(1.5f, 1.5f, 1.5f);
-            mc.fontRendererObj.drawString("PETS", (rectWidth - 20 + 3) / 1.5f, (rectHeight - 15) / 1.5f, new Color(0, 0, 0).getRGB(), false);
+            mc.fontRendererObj.drawString("PETS", (rectWidth - 20 + 3) / 1.5f, (rectHeight - 15) / 1.5f, -1, false);
 
             GlStateManager.scale(2f / 1.5f, 2f / 1.5f, 2f / 1.5f);
             if (!pets.isEmpty()) for (Pet pet : pets) {
