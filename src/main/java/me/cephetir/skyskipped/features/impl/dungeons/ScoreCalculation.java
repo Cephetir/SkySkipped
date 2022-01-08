@@ -118,10 +118,14 @@ public class ScoreCalculation extends Feature {
         try {
             if (isDGLoaded) {
                 FeatureDungeonScore.ScoreCalculation score = FeatureRegistry.DUNGEON_SCORE.calculateScore();
-                Cache.totalScore = score.getTime() + score.getSkill() + score.getExplorer() + score.getBonus();
+                Cache.totalScore = score.getSkill() + score.getExplorer() + score.getTime() + score.getBonus();
+            } else if (isSTLoaded) {
+                skytils.skytilsmod.features.impl.dungeons.ScoreCalculation scoreCalculation = skytils.skytilsmod.features.impl.dungeons.ScoreCalculation.INSTANCE;
+                Cache.totalScore = scoreCalculation.getSkillScore() + scoreCalculation.getDiscoveryScore() + scoreCalculation.getSpeedScore() + scoreCalculation.getBonusScore();
             } else {
                 Cache.totalScore = totalScore;
             }
+
             if (Cache.totalScore >= 300 && !Cache.was && Config.scorePing) {
                 new PingUtils(100, "300 score reached!");
                 mc.thePlayer.sendChatMessage(Config.pingText);
@@ -131,6 +135,7 @@ public class ScoreCalculation extends Feature {
                 new PingUtils(100, "Rabbit Hat!");
                 Cache.was2 = true;
             }
+
         } catch (NullPointerException ignored) {
         } catch (Exception e) {
             e.printStackTrace();
@@ -148,7 +153,7 @@ public class ScoreCalculation extends Feature {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
-        if (isDGLoaded) return;
+        if (isDGLoaded || isSTLoaded) return;
         ticks++;
         if (mc.thePlayer == null || mc.theWorld == null || !Cache.isInDungeon) return;
         if (ticks % 5 == 0) {
