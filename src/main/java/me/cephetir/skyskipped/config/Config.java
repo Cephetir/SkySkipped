@@ -185,9 +185,9 @@ public class Config extends Vigilant {
 
     @Property(
             type = PropertyType.SWITCH,
-            name = "300 Score Ping",
+            name = "Rabbit hat Ping",
             category = "Visual", subcategory = "Visual",
-            description = "SBE like 300 score ping."
+            description = "Ping on Watcher cleared."
     )
     public static boolean rabbitPing = false;
 
