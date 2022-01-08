@@ -91,6 +91,7 @@ public class ScoreCalculation extends Feature {
     private final BigDecimal oneHundred = new BigDecimal(100);
     private final BigDecimal sixty = new BigDecimal(60);
     private final BigDecimal eighty = new BigDecimal(80);
+    private final BigDecimal eightyPercent = eighty.divide(oneHundred);
 
     public ScoreCalculation() {
         super("ScoreCalculation", "Dungeons", "skid score from other mods");
@@ -217,7 +218,7 @@ public class ScoreCalculation extends Feature {
                 isPaul = (Objects.equals(MayorInfo.INSTANCE.getCurrentMayor(), "Paul") && MayorInfo.INSTANCE.getMayorPerks().contains("EZPZ")) || (MayorInfo.INSTANCE.getJerryMayor() != null && MayorInfo.INSTANCE.getJerryMayor().getName().equals("Paul"));
             int deathPenalty = (2 * deaths) - (firstDeathHadSpirit ? 1 : 0);
             int puzzlePenalty = 10 * (missingPuzzles + failedPuzzles);
-            skillScore = RangesKt.coerceIn(20 + (calcingClearedPercentage.multiply(eighty)).intValue() - deathPenalty - puzzlePenalty, 20, 100);
+            skillScore = RangesKt.coerceIn(20 + (calcingClearedPercentage.multiply(eightyPercent)).intValue() - deathPenalty - puzzlePenalty, 20, 100);
             totalSecretsNeeded = Math.ceil(totalSecrets * floorReq.secretPercentage);
             percentageSecretsFound = foundSecrets / totalSecretsNeeded;
             discoveryScore = (int)
@@ -226,7 +227,11 @@ public class ScoreCalculation extends Feature {
                             (40f * percentageSecretsFound), 0.0, 40.0))
                     ));
             bonusScore = ((mimicKilled) ? 2 : 0) + RangesKt.coerceAtMost(crypts, 5) + (isPaul ? 10 : 0);
-            speedScore = (int) (100 - RangesKt.coerceIn((secondsElapsed - floorReq.speed) / 3f, 0.0, 100.0));
+
+            double overtime = (secondsElapsed - floorReq.speed);
+            double t = 7;
+            int x = (int) (((-5.0 * t + Math.pow(Math.sqrt(5.0 * t), 2) + 20.0 * t * overtime)) / (10.0 * t));
+            speedScore = RangesKt.coerceIn((int)(100 - 10 * x - (overtime - (5 * t * x + 5 * t * x * x)) / ((x + 1) * t)), 0, 100);
 
             totalScore = (skillScore + discoveryScore + speedScore + bonusScore);
 //            System.out.println("NEW -------------------- NEW");
