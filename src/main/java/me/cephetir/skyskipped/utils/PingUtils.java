@@ -47,7 +47,7 @@ public class PingUtils {
         if(ticks % 2 == 0) mc.thePlayer.playSound("random.orb", 1f, 1f);
         GlStateManager.pushMatrix();
         GlStateManager.scale(1.5f, 1.5f, 1.5f);
-        mc.fontRendererObj.drawStringWithShadow(ChatColor.DARK_RED + text,
+        mc.fontRendererObj.drawStringWithShadow(ChatColor.DARK_RED.toString() + ChatColor.BOLD + text,
                 event.resolution.getScaledWidth() / 1.5f / 2f - mc.fontRendererObj.getStringWidth(text) / 2f,
                 event.resolution.getScaledHeight() / 1.5f / 2f - 6.75f, -1);
         GlStateManager.popMatrix();
