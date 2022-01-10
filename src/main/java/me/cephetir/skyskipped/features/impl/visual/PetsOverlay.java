@@ -133,6 +133,8 @@ public class PetsOverlay extends Feature {
         private int rectWidth1;
         private int rectHeight;
         private int rectHeight1;
+        private int bottom;
+        private int j = 0;
 
         private Slot autopet;
         private Slot close;
@@ -200,6 +202,7 @@ public class PetsOverlay extends Feature {
             }
 
             pets = pets1;
+            this.j = j;
         }
 
         public void onDrawScreen(int mouseX, int mouseY) {
@@ -207,11 +210,12 @@ public class PetsOverlay extends Feature {
             GlStateManager.enableBlend();
             GlStateManager.disableTexture2D();
 
-            rectWidth = width < 900 ? 0 : width / 5;
-            rectWidth1 = width < 900 ? 0 : width / 2 / 5;
-            rectHeight = height < 460 ? 0 : height / 5;
-            rectHeight1 = height < 460 ? 0 : height / 2 / 5;
-            Gui.drawRect(rectWidth - 20, rectHeight, width - rectWidth + 20, height - rectHeight, new Color(0, 0, 0, 105).getRGB());
+            rectWidth = width / 5;
+            rectWidth1 = width / 2 / 5;
+            rectHeight = height / 5;
+            rectHeight1 = height / 2 / 5;
+            bottom = Math.max(height - height / 5, height / 5 + 5 + j * 32); // WHY NO WORK AAAAAAAAAA
+            Gui.drawRect(rectWidth - 20, rectHeight, width - rectWidth + 20, bottom, new Color(0, 0, 0, 105).getRGB());
 
             GlStateManager.scale(1.5f, 1.5f, 1.5f);
             mc.fontRendererObj.drawString("PETS", (rectWidth - 20 + 3) / 1.5f, (rectHeight - 15) / 1.5f, -1, false);
