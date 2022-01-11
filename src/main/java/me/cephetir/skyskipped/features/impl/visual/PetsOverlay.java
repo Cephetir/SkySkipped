@@ -147,8 +147,8 @@ public class PetsOverlay extends Feature {
 
         public GuiPetsOverlay(GuiChest chest) {
             this.chest = chest;
-            this.width = chest.width;
-            this.height = chest.height;
+            this.width = mc.displayWidth;
+            this.height = mc.displayHeight;
         }
 
         public void getPets() {
@@ -214,7 +214,11 @@ public class PetsOverlay extends Feature {
             rectWidth1 = width / 2 / 5;
             rectHeight = height / 5;
             rectHeight1 = height / 2 / 5;
-            bottom = Math.max(height - height / 5, height / 5 + 5 + j * 32); // WHY NO WORK AAAAAAAAAA
+
+            int d = height - height / 5;
+            int n = height * 2 / 5 + 10 + (j+1) * 32;
+            bottom = Math.max(d, n);
+
             Gui.drawRect(rectWidth - 20, rectHeight, width - rectWidth + 20, bottom, new Color(0, 0, 0, 105).getRGB());
 
             GlStateManager.scale(1.5f, 1.5f, 1.5f);
@@ -238,7 +242,7 @@ public class PetsOverlay extends Feature {
             GlStateManager.scale(0.5f, 0.5f, 0.5f);
 
             GlStateManager.resetColor();
-            int h = height - rectHeight;
+            int h = bottom;
 
             if (nextPage != null) {
                 Gui.drawRect(width / 2 - 50 - 12 - 100 - 12 - 100, h - 25, width / 2 - 50 - 12 - 100 - 12, h - 25 + 20, new Color(255, 255, 255, 150).getRGB());
