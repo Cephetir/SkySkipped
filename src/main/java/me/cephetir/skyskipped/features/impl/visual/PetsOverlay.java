@@ -147,8 +147,8 @@ public class PetsOverlay extends Feature {
 
         public GuiPetsOverlay(GuiChest chest) {
             this.chest = chest;
-            this.width = mc.displayWidth;
-            this.height = mc.displayHeight;
+            this.width = chest.width;
+            this.height = chest.height;
         }
 
         public void getPets() {
@@ -170,7 +170,7 @@ public class PetsOverlay extends Feature {
                         i++;
                         k++;
 
-                        if(auto == i) {
+                        if (auto == i) {
                             IMixinGuiContainer container = (IMixinGuiContainer) chest;
                             container.handleMouseClick(slot, slot.slotNumber, 0, 0);
                             auto = -1;
@@ -216,7 +216,7 @@ public class PetsOverlay extends Feature {
             rectHeight1 = height / 2 / 5;
 
             int d = height - height / 5;
-            int n = height * 2 / 5 + 10 + (j+1) * 32;
+            int n = (rectHeight1 + 5 + (j + 1) * 32) * 2 + 20;
             bottom = Math.max(d, n);
 
             Gui.drawRect(rectWidth - 20, rectHeight, width - rectWidth + 20, bottom, new Color(0, 0, 0, 105).getRGB());
