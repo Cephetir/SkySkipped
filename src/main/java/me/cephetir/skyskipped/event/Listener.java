@@ -3,7 +3,7 @@
  * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
  * Version 2, December 2004
  *
- * Copyright (C) 2021 Cephetir
+ * Copyright (C) 2022 Cephetir
  *
  * Everyone is permitted to copy and distribute verbatim or modified
  * copies of this license document, and changing it is allowed as long
@@ -20,25 +20,24 @@ package me.cephetir.skyskipped.event;
 import gg.essential.api.EssentialAPI;
 import me.cephetir.skyskipped.SkySkipped;
 import me.cephetir.skyskipped.config.Cache;
-import me.cephetir.skyskipped.utils.TextUtils;
+import me.cephetir.skyskipped.utils.ScoreboardUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.scoreboard.Scoreboard;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.math.BigDecimal;
-import java.util.Collection;
+import java.util.List;
+
+import static me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters;
+import static me.cephetir.skyskipped.utils.TextUtils.stripColor;
 
 public class Listener {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void update(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START && !Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null && EssentialAPI.getMinecraftUtil().isHypixel()) {
+        if (event.phase == TickEvent.Phase.START && !Minecraft.getMinecraft().isSingleplayer() && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().getNetHandler() != null && EssentialAPI.getMinecraftUtil().isHypixel() && Minecraft.getMinecraft().thePlayer.getWorldScoreboard() != null) {
             try {
                 boolean foundDungeon = false;
                 boolean foundSkyblock = false;
@@ -46,40 +45,23 @@ public class Listener {
                 String dungeonName = "";
                 String itemheld = "Nothing";
 
-                Scoreboard scoreboard = Minecraft.getMinecraft().thePlayer.getWorldScoreboard();
-                ScoreObjective scoreObjective = scoreboard.getObjectiveInDisplaySlot(1);
-                Collection<Score> scores = scoreboard.getSortedScores(scoreObjective);
+                ScoreObjective scoreObjective = Minecraft.getMinecraft().thePlayer.getWorldScoreboard().getObjectiveInDisplaySlot(1);
+                List<String> scores = ScoreboardUtils.fetchScoreboardLines();
 
-                if (TextUtils.stripColor(scoreObjective.getDisplayName()).startsWith("SKYBLOCK")) foundSkyblock = true;
+                if (stripColor(scoreObjective.getDisplayName()).startsWith("SKYBLOCK")) foundSkyblock = true;
 
                 if (foundSkyblock) {
-                    for (Score sc : scores) {
-                        ScorePlayerTeam scorePlayerTeam = scoreboard.getPlayersTeam(sc.getPlayerName());
-                        String strippedLine = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()))).trim();
+                    for (String text : scores) {
+                        String strippedLine = keepScoreboardCharacters(stripColor(text)).trim();
                         if (strippedLine.contains("Dungeon Cleared: ")) {
                             foundDungeon = true;
                             percentage = Integer.parseInt(strippedLine.substring(17));
-                        } else if (Cache.isInDungeon) {
-                            if (ScorePlayerTeam.formatPlayerName(scorePlayerTeam, sc.getPlayerName()).startsWith(" §7⏣")) {
-                                dungeonName = strippedLine.trim();
-                            }
-                        }
+                        } else if (text.startsWith(" §7⏣")) dungeonName = strippedLine.trim();
                     }
-                    if (Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null) {
-                        itemheld = TextUtils.stripColor(Minecraft.getMinecraft().thePlayer.getHeldItem().getDisplayName());
-                    }
+                    if (Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null)
+                        itemheld = keepScoreboardCharacters(stripColor(Minecraft.getMinecraft().thePlayer.getHeldItem().getDisplayName())).trim();
                 }
 
-                if(!Cache.isInDungeon && foundDungeon) {
-                    Cache.was = false;
-                    Cache.was2 = false;
-                    SkySkipped.features.getScoreCalculation().mimicKilled = false;
-                    SkySkipped.features.getScoreCalculation().firstDeathHadSpirit = false;
-                    SkySkipped.features.getScoreCalculation().floorReq = SkySkipped.features.getScoreCalculation().floorRequirements.get("default");
-                    SkySkipped.features.getScoreCalculation().perRoomPercentage = BigDecimal.ZERO;
-                    SkySkipped.features.getScoreCalculation().bloodOpened = false;
-                    SkySkipped.features.getScoreCalculation().bloodCleared = false;
-                }
                 Cache.inSkyblock = foundSkyblock;
                 Cache.isInDungeon = foundDungeon;
                 Cache.dungeonPercentage = percentage;
@@ -92,6 +74,10 @@ public class Listener {
 
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
+        Cache.inSkyblock = false;
+        Cache.isInDungeon = false;
         Cache.was = false;
+        Cache.was2 = false;
+        SkySkipped.features.getScoreCalculation().bloodCleared = false;
     }
 }
