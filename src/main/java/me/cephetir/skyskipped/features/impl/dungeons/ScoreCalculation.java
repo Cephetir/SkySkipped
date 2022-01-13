@@ -42,8 +42,8 @@ public class ScoreCalculation extends Feature {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        ticks++;
         if (!Cache.isInDungeon || event.phase != TickEvent.Phase.START) return;
+        ticks++;
         if(ticks < 20) return;
         ticks = 0;
         try {
