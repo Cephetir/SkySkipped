@@ -10,6 +10,7 @@
     "MixinGuiDisconnected",
     "MixinGuiMultiplayer",
     "MixinRendererLivingEntity",
-    "MixinScorePlayerTeam"
+    "MixinScorePlayerTeam",
+    "MixinNetworkManager"
   ]
 }

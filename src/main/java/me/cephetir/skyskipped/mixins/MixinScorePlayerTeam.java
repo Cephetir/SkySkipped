@@ -35,9 +35,9 @@ public class MixinScorePlayerTeam {
     @Inject(method = "formatPlayerName", at = @At(value = "RETURN"), cancellable = true)
     private static void formatPlayerName(Team p_96667_0_, String p_96667_1_, CallbackInfoReturnable<String> cir) {
         String text = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(cir.getReturnValue())).trim();
-        if (Config.coinsToggle && text.startsWith("Purse: ")) {
+        if (Config.Companion.getCoinsToggle() && text.startsWith("Purse: ")) {
             double coins = Double.parseDouble(text.substring(7).split(" ")[0].replace(",", ""));
-            double needed = coins + Config.coins;
+            double needed = coins + Config.Companion.getCoins();
             DecimalFormat format = new DecimalFormat("###,###.##");
             String s = format.format(needed).replace(" ", ",");
             cir.setReturnValue("Purse: " + ChatColor.GOLD + s);
