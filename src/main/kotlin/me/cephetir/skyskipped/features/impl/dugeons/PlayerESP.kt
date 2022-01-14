@@ -34,7 +34,9 @@ class PlayerESP : Feature() {
 
     override fun onEntityJoinWorld(event: EntityJoinWorldEvent) {
         if (!Cache.isInDungeon || event.entity !is EntityPlayer) return
-        val scorePlayerTeam = (event.entity as EntityPlayer).team as ScorePlayerTeam
+        val player = event.entity as EntityPlayer
+        if (player.team == null) return
+        val scorePlayerTeam = player.team as ScorePlayerTeam
         if (scorePlayerTeam.nameTagVisibility == Team.EnumVisible.NEVER) return
         event.entity.isInvisible = false
         highlightedEntities.add(event.entity)
