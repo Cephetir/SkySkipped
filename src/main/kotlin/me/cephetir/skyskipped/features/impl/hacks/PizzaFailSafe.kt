@@ -46,7 +46,7 @@ class PizzaFailSafe : Feature() {
             }
         } else last = mc.thePlayer.position
 
-        if (ticks >= 60 && !called && PizzaClient.config.macroKey == 2 && MacroBuilder.isToggled()) {
+        if (ticks >= 60 && !called && MacroBuilder.isToggled()) {
             called = true
             Thread {
                 try {

@@ -20,7 +20,7 @@ package me.cephetir.skyskipped.features.impl.visual
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinGuiContainer
-import me.cephetir.skyskipped.utils.RarityUtils.Companion.byBaseColor
+import me.cephetir.skyskipped.utils.ItemRarity.Companion.byBaseColor
 import me.cephetir.skyskipped.utils.RoundUtils.drawRoundedOutline
 import me.cephetir.skyskipped.utils.RoundUtils.drawRoundedRect
 import net.minecraft.client.gui.Gui
@@ -169,7 +169,7 @@ class PetsOverlay : Feature() {
                         }
                         val m = PET_PATTERN.matcher(displayName)
                         if (m.matches()) pets1[i - 1].rarity =
-                            byBaseColor(m.group("color"))?.colorToRender?.rgb ?: Color(255, 255, 255, 255).rgb
+                            byBaseColor(m.group("color"))?.color?.rgb ?: Color(255, 255, 255, 255).rgb
                     } else if (displayName.lowercase(Locale.getDefault()).contains("autopet")) autopet =
                         slot else if (displayName.lowercase(
                             Locale.getDefault()

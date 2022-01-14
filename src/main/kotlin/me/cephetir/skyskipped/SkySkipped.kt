@@ -53,14 +53,14 @@ class SkySkipped {
     }
 
     @Mod.EventHandler
-    fun onPreInit(event: FMLPreInitializationEvent?) {
+    fun onPreInit(event: FMLPreInitializationEvent) {
         logger.info("Starting SkySkipped...")
         config.preload()
         MinecraftForge.EVENT_BUS.register(this)
     }
 
     @Mod.EventHandler
-    fun onInit(event: FMLInitializationEvent?) {
+    fun onInit(event: FMLInitializationEvent) {
         MinecraftForge.EVENT_BUS.register(RPC())
         MinecraftForge.EVENT_BUS.register(Listener())
 
@@ -76,5 +76,5 @@ class SkySkipped {
     }
 
     @Mod.EventHandler
-    fun stop(event: FMLModDisabledEvent?) = RPC.shutdown()
+    fun stop(event: FMLModDisabledEvent) = RPC.shutdown()
 }

@@ -30,6 +30,7 @@ import net.minecraft.network.play.server.S38PacketPlayerListItem
 import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
 import skytils.skytilsmod.features.impl.handlers.MayorInfo
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -39,6 +40,9 @@ class ScoreCalculation : Feature() {
     var isSTLoaded = false
 
     var bloodCleared = false
+    var bloodFound = false
+    var hasBossSpawned = false
+    var floor = "default"
 
     private val deathsTabPattern = Regex("§r§a§lDeaths: §r§f\\((?<deaths>\\d+)\\)§r")
     private val missingPuzzlePattern = Regex("§r§b§lPuzzles: §r§f\\((?<count>\\d)\\)§r")
@@ -85,7 +89,7 @@ class ScoreCalculation : Feature() {
         totalRoomMap.toList().maxByOrNull { it.second }!!.first
     }
     val calcingCompletedRooms = completedRooms.map {
-        it + if(!bloodCleared) 2 else 0
+        it + (!bloodFound).ifTrue(1) + (!hasBossSpawned).ifTrue(1)
     }
     val calcingClearPercentage = calcingCompletedRooms.map { complete ->
         val total = totalRooms.get()
@@ -120,7 +124,7 @@ class ScoreCalculation : Feature() {
     var deaths = BasicState(0)
     var firstDeathHadSpirit = BasicState(false)
     val deathPenalty = (deaths.zip(firstDeathHadSpirit)).map { (deathCount, spirit) ->
-        (2 * deathCount) - (if(spirit) 1 else 0)
+        (2 * deathCount) - (if (spirit) 1 else 0)
     }
 
     var missingPuzzles = BasicState(0)
@@ -153,7 +157,8 @@ class ScoreCalculation : Feature() {
 
     var crypts = BasicState(0)
     var mimicKilled = BasicState(false)
-    var isPaul = BasicState(if (isSTLoaded) (MayorInfo.currentMayor == "Paul" && MayorInfo.mayorPerks.contains("EZPZ")) || MayorInfo.jerryMayor?.name == "Paul" else false)
+    var isPaul =
+        BasicState(if (isSTLoaded) (MayorInfo.currentMayor == "Paul" && MayorInfo.mayorPerks.contains("EZPZ")) || MayorInfo.jerryMayor?.name == "Paul" else false)
     val bonusScore = (crypts.zip(mimicKilled.zip(isPaul))).map { (crypts, bools) ->
         (if (bools.first) 2 else 0) + crypts.coerceAtMost(5) + if (bools.second) 10 else 0
     }
@@ -161,19 +166,6 @@ class ScoreCalculation : Feature() {
     val totalScore =
         ((skillScore.zip(discoveryScore)).zip(speedScore.zip(bonusScore))).map { (first, second) ->
             first.first.coerceIn(20, 100) + first.second + second.first + second.second
-        }.also { state ->
-            state.onSetValue { score ->
-                if (!Cache.isInDungeon) return@onSetValue
-                if (score >= 300 && !Cache.was && Config.scorePing) {
-                    PingUtils(100, "300 score reached!")
-                    mc.thePlayer.sendChatMessage(Config.pingText)
-                    Cache.was = true
-                }
-                if (bloodCleared && !Cache.was2 && Config.rabbitPing) {
-                    PingUtils(100, "Rabbit Hat!")
-                    Cache.was2 = true
-                }
-            }
         }
 
     override fun onScoreboardChange(event: PacketReceive) {
@@ -194,8 +186,7 @@ class ScoreCalculation : Feature() {
                 clearedPercentage.set(matcher.groups["percentage"]?.value?.toIntOrNull() ?: 0)
                 return
             }
-        }
-        if (line.startsWith("Time Elapsed:")) {
+        } else if (line.startsWith("Time Elapsed:")) {
             val matcher = timeElapsedPattern.find(line)
             if (matcher != null) {
                 val hours = matcher.groups["hrs"]?.value?.toIntOrNull() ?: 0
@@ -204,6 +195,9 @@ class ScoreCalculation : Feature() {
                 secondsElapsed.set((hours * 3600 + minutes * 60 + seconds).toDouble())
                 return
             }
+        } else if (line.contains("The Catacombs (")) {
+            floor = line.substringAfter("(").substringBefore(")")
+            floorReq.set(floorRequirements[floor] ?: floorRequirements["default"]!!)
         }
     }
 
@@ -286,29 +280,65 @@ class ScoreCalculation : Feature() {
     override fun onChat(event: ClientChatReceivedEvent) {
         if (!Cache.isInDungeon || mc.theWorld == null) return
         val unformatted: String = event.message.unformattedText.stripColor()
-            if (unformatted.startsWith("Party > ")) {
-                if (unformatted.contains("\$SKYTILS-DUNGEON-SCORE-MIMIC$") || (unformatted.containsAny(
-                        "Mimic dead!", "Mimic Killed!", "Mimic Dead!"
-                    ))
-                ) {
-                    mimicKilled.set(true)
-                    return
-                }
-                if (unformatted.contains("\$SKYTILS-DUNGEON-SCORE-ROOM$")) {
-                    event.isCanceled = true
-                    return
-                }
-            } else if (unformatted.contains(":") && !unformatted.contains(">") && unformatted.containsAny(
-                    "Mimic dead!",
-                    "Mimic Killed!",
-                    "Mimic Dead!"
-                )
+        if (unformatted.startsWith("Party > ")) {
+            if (unformatted.contains("\$SKYTILS-DUNGEON-SCORE-MIMIC$") || (unformatted.containsAny(
+                    "Mimic dead!", "Mimic Killed!", "Mimic Dead!"
+                ))
             ) {
                 mimicKilled.set(true)
                 return
             }
-        if (unformatted.contains("You have proven yourself. You may pass")) bloodCleared = true
+            if (unformatted.contains("\$SKYTILS-DUNGEON-SCORE-ROOM$")) {
+                event.isCanceled = true
+                return
+            }
+        } else if (unformatted.contains(":") && !unformatted.contains(">") && unformatted.containsAny(
+                "Mimic dead!",
+                "Mimic Killed!",
+                "Mimic Dead!"
+            )
+        ) {
+            mimicKilled.set(true)
+            return
+        } else if (unformatted.contains("You have proven yourself. You may pass")) bloodCleared = true
+        else if (unformatted.lowercase() == "the blood door has been opened!") bloodFound = true
+        else if (unformatted.startsWith("[BOSS]") && unformatted.contains(":")) {
+            val bossName = unformatted.substringAfter("[BOSS] ").substringBefore(":").trim()
+            if (!hasBossSpawned && bossName != "The Watcher" && floor != "default" && checkBossName(floor, bossName))
+                hasBossSpawned = true
+        }
+    }
+
+    override fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START || !Cache.isInDungeon) return
+        if (totalScore.get() >= 300 && !Cache.was && Config.scorePing) {
+            PingUtils(100, "300 score reached!")
+            mc.thePlayer.sendChatMessage(Config.pingText)
+            Cache.was = true
+        }
+        if (bloodCleared && !Cache.was2 && Config.rabbitPing) {
+            PingUtils(100, "Rabbit Hat!")
+            Cache.was2 = true
+        }
     }
 
     data class FloorRequirement(val secretPercentage: Double = 1.0, val speed: Int = 10 * 60)
+
+    private fun Boolean.ifTrue(num: Int) = if (this) num else 0
+
+    private fun checkBossName(floor: String, bossName: String): Boolean {
+        val correctBoss = when (floor) {
+            "E" -> "The Watcher"
+            "F1", "M1" -> "Bonzo"
+            "F2", "M2" -> "Scarf"
+            "F3", "M3" -> "The Professor"
+            "F4", "M4" -> "Thorn"
+            "F5", "M5" -> "Livid"
+            "F6", "M6" -> "Sadan"
+            "F7", "M7" -> "Necron"
+            else -> null
+        } ?: return false
+
+        return bossName.endsWith(correctBoss)
+    }
 }
