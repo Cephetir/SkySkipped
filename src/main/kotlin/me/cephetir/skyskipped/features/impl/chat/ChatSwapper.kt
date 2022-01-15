@@ -25,15 +25,13 @@ import net.minecraft.client.Minecraft
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 
 class ChatSwapper : Feature() {
-    private val partyLeave = Regex("^(?:You have been kicked from the party by (?:\\[.+] )?\\w{1,16}|(?:\\[.+] )?\\w{1,16} has disbanded the party!|You left the party(?:\\[.+] )?\\w{0,16}|(?:\\[.+] )?(?:.*)The party was disbanded(?:.*))$")
-    private val partyJoin = Regex("^(?:You have joined (?:\\[.+] )?(?:.*)|Party Members(?:\\[.+] )?\\w{1,100}|(?:\\[.+] )?\\w{1,100} joined the(?:.*))$")
 
     override fun onChat(event: ClientChatReceivedEvent) {
         if (!EssentialAPI.getMinecraftUtil().isHypixel()) return
-        if (partyLeave.matches(event.message.unformattedText) && Cache.inParty) {
+        if ((event.message.unformattedText.startsWith("You have been kicked from the party") || event.message.unformattedText.contains("has disbanded") || event.message.unformattedText.startsWith("You left the party") || event.message.unformattedText.contains("was disbanded")) && Cache.inParty) {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat all")
             Cache.inParty = false
-        } else if (partyJoin.matches(event.message.unformattedText) && !Cache.inParty) {
+        } else if ((event.message.unformattedText.startsWith("You have joined") || event.message.unformattedText.startsWith("Party Members") || event.message.unformattedText.contains("joined the ")) && !Cache.inParty) {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat p")
             Cache.inParty = true
         }

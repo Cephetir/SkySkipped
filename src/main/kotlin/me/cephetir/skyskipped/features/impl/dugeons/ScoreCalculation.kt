@@ -274,7 +274,7 @@ class ScoreCalculation : Feature() {
 
 
     override fun isEnabled(): Boolean {
-        return Config.scorePing || Config.rabbitPing
+        return true
     }
 
     override fun onChat(event: ClientChatReceivedEvent) {
@@ -311,7 +311,8 @@ class ScoreCalculation : Feature() {
 
     override fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || !Cache.isInDungeon) return
-        if (totalScore.get() >= 300 && !Cache.was && Config.scorePing) {
+
+        if (totalScore.get()-1 >=300 && !Cache.was && Config.scorePing) {
             PingUtils(100, "300 score reached!")
             mc.thePlayer.sendChatMessage(Config.pingText)
             Cache.was = true
