@@ -33,14 +33,14 @@ class PingUtils(private var ticks: Int, private val text: String) {
     }
 
     @SubscribeEvent
-    fun onTick(event: ClientTickEvent?) {
+    fun onTick(event: ClientTickEvent) {
         if (ticks <= 0) MinecraftForge.EVENT_BUS.unregister(this)
+        if (ticks % 4 == 0) mc.thePlayer.playSound("random.orb", 1f, 1f)
         ticks--
     }
 
     @SubscribeEvent
     fun draw(event: RenderGameOverlayEvent.Text) {
-        if (ticks % 4 == 0) mc.thePlayer.playSound("random.orb", 1f, 1f)
         GlStateManager.pushMatrix()
         GlStateManager.scale(1.5f, 1.5f, 1.5f)
         mc.fontRendererObj.drawStringWithShadow(
