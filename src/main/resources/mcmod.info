@@ -2,13 +2,13 @@
   {
     "modid": "skyskipped",
     "name": "SkySkipped",
-    "description": "",
+    "description": "QOL focused Hypixel Skyblock mod",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "https://github.com/Cephetir/SkySkipped",
     "updateUrl": "https://github.com/Cephetir/SkySkipped/releases/latest",
     "authorList": ["Cephetir"],
-    "credits": "",
+    "credits": "Cephetir",
     "logoFile": "",
     "screenshots": [],
     "dependencies": []
