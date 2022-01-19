@@ -25,8 +25,6 @@ object Cache {
     @JvmField
     var dungeonName = ""
     @JvmField
-    var totalScore = 0
-    @JvmField
     var was = false
     @JvmField
     var was2 = false
@@ -35,6 +33,8 @@ object Cache {
     var inParty = false
     @JvmField
     var inSkyblock = false
+    @JvmField
+    var inWorkshop = false
     @JvmField
     var itemheld = ""
     @JvmField

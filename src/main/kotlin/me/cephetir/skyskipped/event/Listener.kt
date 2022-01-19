@@ -18,7 +18,6 @@
 package me.cephetir.skyskipped.event
 
 import gg.essential.api.EssentialAPI
-import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.utils.ScoreboardUtils
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
@@ -39,6 +38,7 @@ class Listener {
             try {
                 var foundDungeon = false
                 var foundSkyblock = false
+                var foundWorkshop = false
                 var percentage = 0
                 var dungeonName = ""
                 var itemheld = "Nothing"
@@ -55,6 +55,7 @@ class Listener {
                             foundDungeon = true
                             percentage = strippedLine.substring(17).toInt()
                         } else if (text.startsWith(" §7⏣")) dungeonName = strippedLine.trim { it <= ' ' }
+                        else if(text.contains(" ")) foundWorkshop = true // TODO: ADD REGEX
                     }
 
                     if (Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null) itemheld =
@@ -64,6 +65,7 @@ class Listener {
 
                 Cache.inSkyblock = foundSkyblock
                 Cache.isInDungeon = foundDungeon
+                Cache.inWorkshop = foundWorkshop
                 Cache.dungeonPercentage = percentage
                 Cache.dungeonName = dungeonName
                 Cache.itemheld = itemheld
@@ -78,6 +80,5 @@ class Listener {
         Cache.isInDungeon = false
         Cache.was = false
         Cache.was2 = false
-        SkySkipped.features.scoreCalculation.bloodCleared = false
     }
 }

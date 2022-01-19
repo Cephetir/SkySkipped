@@ -39,6 +39,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             }.start()
         }
         addDependency("espColor", "playerESP")
+        addDependency("presents", "presentsColor")
         addDependency("coins", "coinsToggle")
         addDependency("pingText", "scorePing")
         initialize()
@@ -71,15 +72,6 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             description = "Automatically swaps between party chat and global chat."
         )
         var chatSwapper = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "[NON] Rank",
-            category = "Chat",
-            subcategory = "Chat",
-            description = "Adds the [NON] rank, given to people without a rank."
-        )
-        var nons = false
 
         @Property(
             type = PropertyType.SWITCH,
@@ -205,8 +197,8 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.SWITCH,
             name = "300 Score Ping",
-            category = "Visual",
-            subcategory = "Visual",
+            category = "Dungeons",
+            subcategory = "Ping",
             description = "SBE like 300 score ping."
         )
         var scorePing = false
@@ -214,8 +206,8 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.TEXT,
             name = "300 Score Ping Text",
-            category = "Visual",
-            subcategory = "Visual",
+            category = "Dungeons",
+            subcategory = "Ping",
             description = "Text to show when 300 score reached."
         )
         var pingText = "300 score reached! Btw sbe is cringe"
@@ -223,8 +215,8 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.SWITCH,
             name = "Rabbit hat Ping",
-            category = "Visual",
-            subcategory = "Visual",
+            category = "Dungeons",
+            subcategory = "Ping",
             description = "Ping on Watcher cleared."
         )
         var rabbitPing = false
@@ -246,5 +238,23 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             description = "Good looking overlay for pets menu.\n§cDon't use with small window size"
         )
         var petsOverlay = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Highlight Presents in Jerry Workshop",
+            category = "Visual",
+            subcategory = "Visual",
+            description = "Highlights presents in Jerry Workshop."
+        )
+        var presents = true
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "Highlight Presents Color",
+            category = "Visual",
+            subcategory = "Visual",
+            description = "Color for presents highlight."
+        )
+        var presentsColor: Color = Color.GREEN
     }
 }

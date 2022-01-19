@@ -90,7 +90,7 @@ class PetsOverlay : Feature() {
         petsOverlay!!.onMouseClicked(i.toDouble(), j.toDouble(), Mouse.getEventButton())
     }
 
-    var ticks = 0
+    private var ticks = 0
     override fun onTick(event: ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
         if (!Config.petsOverlay) return
@@ -396,7 +396,7 @@ class PetsOverlay : Feature() {
             }
         }
 
-        fun onHover(mouseX: Int, mouseY: Int) {
+        private fun onHover(mouseX: Int, mouseY: Int) {
             for (pet in pets) if (mouseX / 2 > pet.x && mouseY / 2 > pet.y && mouseX / 2 < pet.x + 16 && mouseY / 2 < pet.y + 16) {
                 var max = 0
                 val tooltip = pet.itemStack.getTooltip(mc.thePlayer, false)
@@ -418,7 +418,7 @@ class PetsOverlay : Feature() {
             }
         }
 
-        fun renderItem(itemStack: ItemStack?, x: Int, y: Int) {
+        private fun renderItem(itemStack: ItemStack?, x: Int, y: Int) {
             val itemRender: RenderItem = mc.renderItem
             RenderHelper.enableGUIStandardItemLighting()
             itemRender.zLevel = -145f //Negates the z-offset of the below method.
@@ -440,11 +440,10 @@ class PetsOverlay : Feature() {
             var name: String,
             var slot: Slot,
             var id: Int,
-            var itemStack: ItemStack
-        ) {
-            var rarity: Int = -1
+            var itemStack: ItemStack,
+            var rarity: Int = -1,
             var last: Boolean = false
-        }
+        )
     }
 
     companion object {
