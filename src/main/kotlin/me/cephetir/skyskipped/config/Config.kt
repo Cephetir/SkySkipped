@@ -39,7 +39,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             }.start()
         }
         addDependency("espColor", "playerESP")
-        addDependency("presents", "presentsColor")
+        addDependency("presentsColor", "presents")
         addDependency("coins", "coinsToggle")
         addDependency("pingText", "scorePing")
         initialize()
