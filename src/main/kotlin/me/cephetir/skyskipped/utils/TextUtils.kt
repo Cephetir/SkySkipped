@@ -42,8 +42,8 @@ object TextUtils {
     }
 
     fun CharSequence?.containsAny(vararg sequences: CharSequence?): Boolean {
-        if (this == null) return false
-        return sequences.any { it != null && this.contains(it) }
+        return if (this == null) false
+        else sequences.any { it != null && this.contains(it, true) }
     }
 
     private val suffixes = TreeMap<Long, String>()

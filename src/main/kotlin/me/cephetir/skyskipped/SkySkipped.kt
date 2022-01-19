@@ -67,6 +67,7 @@ class SkySkipped {
         features.scoreCalculation.isSTLoaded = Loader.isModLoaded("skytils")
         MinecraftForge.EVENT_BUS.register(features)
         MinecraftForge.EVENT_BUS.register(features.petsOverlay)
+        MinecraftForge.EVENT_BUS.register(features.presentHighlight)
 
         RPC.reset()
         ClientCommandHandler.instance.registerCommand(SkySkippedCommand())

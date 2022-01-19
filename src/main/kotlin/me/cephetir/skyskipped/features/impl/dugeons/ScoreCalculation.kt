@@ -26,11 +26,14 @@ import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.PingUtils
 import me.cephetir.skyskipped.utils.TextUtils.containsAny
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import net.minecraft.entity.monster.EntityZombie
 import net.minecraft.network.play.server.S38PacketPlayerListItem
 import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraftforge.client.event.ClientChatReceivedEvent
+import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import org.lwjgl.input.Keyboard
 import skytils.skytilsmod.features.impl.handlers.MayorInfo
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -168,90 +171,81 @@ class ScoreCalculation : Feature() {
             first.first.coerceIn(20, 100) + first.second + second.first + second.second
         }
 
-    override fun onScoreboardChange(event: PacketReceive) {
-        if (
-            !Cache.inSkyblock ||
-            event.packet !is S3EPacketTeams
-        ) return
-        val packet = event.packet as S3EPacketTeams
-        if (packet.action != 2) return
-        val line = packet.players.joinToString(
-            " ",
-            prefix = packet.prefix,
-            postfix = packet.suffix
-        ).stripColor()
-        if (line.startsWith("Dungeon Cleared: ")) {
-            val matcher = dungeonClearedPattern.find(line)
-            if (matcher != null) {
-                clearedPercentage.set(matcher.groups["percentage"]?.value?.toIntOrNull() ?: 0)
-                return
+    override fun onPacket(event: PacketReceive) {
+        if (!Cache.isInDungeon) return
+        if (event.packet is S3EPacketTeams) {
+            val packet = event.packet as S3EPacketTeams
+            if (packet.action != 2) return
+            val line = packet.players.joinToString(
+                " ",
+                prefix = packet.prefix,
+                postfix = packet.suffix
+            ).stripColor()
+            if (line.startsWith("Dungeon Cleared: ")) {
+                val matcher = dungeonClearedPattern.find(line)
+                if (matcher != null) {
+                    clearedPercentage.set(matcher.groups["percentage"]?.value?.toIntOrNull() ?: 0)
+                    return
+                }
+            } else if (line.startsWith("Time Elapsed:")) {
+                val matcher = timeElapsedPattern.find(line)
+                if (matcher != null) {
+                    val hours = matcher.groups["hrs"]?.value?.toIntOrNull() ?: 0
+                    val minutes = matcher.groups["min"]?.value?.toIntOrNull() ?: 0
+                    val seconds = matcher.groups["sec"]?.value?.toIntOrNull() ?: 0
+                    secondsElapsed.set((hours * 3600 + minutes * 60 + seconds).toDouble())
+                    return
+                }
+            } else if (line.contains("The Catacombs (")) {
+                floor = line.substringAfter("(").substringBefore(")")
+                floorReq.set(floorRequirements[floor] ?: floorRequirements["default"]!!)
             }
-        } else if (line.startsWith("Time Elapsed:")) {
-            val matcher = timeElapsedPattern.find(line)
-            if (matcher != null) {
-                val hours = matcher.groups["hrs"]?.value?.toIntOrNull() ?: 0
-                val minutes = matcher.groups["min"]?.value?.toIntOrNull() ?: 0
-                val seconds = matcher.groups["sec"]?.value?.toIntOrNull() ?: 0
-                secondsElapsed.set((hours * 3600 + minutes * 60 + seconds).toDouble())
-                return
-            }
-        } else if (line.contains("The Catacombs (")) {
-            floor = line.substringAfter("(").substringBefore(")")
-            floorReq.set(floorRequirements[floor] ?: floorRequirements["default"]!!)
-        }
-    }
-
-    override fun onTabChange(event: PacketReceive) {
-        if (
-            !Cache.isInDungeon ||
-            event.packet !is S38PacketPlayerListItem ||
-            ((event.packet as S38PacketPlayerListItem).action != S38PacketPlayerListItem.Action.UPDATE_DISPLAY_NAME &&
-                    (event.packet as S38PacketPlayerListItem).action != S38PacketPlayerListItem.Action.ADD_PLAYER)
-        ) return
-        val packet = event.packet as S38PacketPlayerListItem
-        packet.entries.forEach { playerData ->
-            val name = playerData?.displayName?.formattedText ?: playerData?.profile?.name ?: return@forEach
-            when {
-                name.contains("Deaths:") -> {
-                    val matcher = deathsTabPattern.find(name) ?: return@forEach
-                    deaths.set(matcher.groups["deaths"]?.value?.toIntOrNull() ?: 0)
-                }
-                name.contains("Puzzles:") -> {
-                    println(name)
-                    val matcher = missingPuzzlePattern.find(name) ?: return@forEach
-                    missingPuzzles.set(matcher.groups["count"]?.value?.toIntOrNull() ?: 0)
-                }
-                name.contains("✔") -> {
-                    if (solvedPuzzlePattern.containsMatchIn(name)) {
-                        missingPuzzles.set((missingPuzzles.get() - 1).coerceAtLeast(0))
+        } else if (event.packet is S38PacketPlayerListItem && ((event.packet as S38PacketPlayerListItem).action == S38PacketPlayerListItem.Action.UPDATE_DISPLAY_NAME || (event.packet as S38PacketPlayerListItem).action == S38PacketPlayerListItem.Action.ADD_PLAYER)) {
+            val packet = event.packet as S38PacketPlayerListItem
+            packet.entries.forEach { playerData ->
+                val name = playerData?.displayName?.formattedText ?: playerData?.profile?.name ?: return@forEach
+                when {
+                    name.contains("Deaths:") -> {
+                        val matcher = deathsTabPattern.find(name) ?: return@forEach
+                        deaths.set(matcher.groups["deaths"]?.value?.toIntOrNull() ?: 0)
                     }
-                }
-                name.contains("✖") -> {
-                    if (failedPuzzlePattern.containsMatchIn(name)) {
-                        missingPuzzles.set((missingPuzzles.get() - 1).coerceAtLeast(0))
-                        failedPuzzles.set(failedPuzzles.get() + 1)
+                    name.contains("Puzzles:") -> {
+                        println(name)
+                        val matcher = missingPuzzlePattern.find(name) ?: return@forEach
+                        missingPuzzles.set(matcher.groups["count"]?.value?.toIntOrNull() ?: 0)
                     }
-                }
-                name.contains("Secrets Found:") -> {
-                    if (name.contains("%")) {
-                        val matcher = secretsFoundPercentagePattern.find(name) ?: return@forEach
-                        val percentagePer = (matcher.groups["percentage"]?.value?.toDoubleOrNull()
-                            ?: 0.0)
-                        totalSecrets.set(
-                            if (foundSecrets.get() > 0 && percentagePer > 0) floor(100f / percentagePer * foundSecrets.get() + 0.5).toInt() else 0
-                        )
-                    } else {
-                        val matcher = secretsFoundPattern.find(name) ?: return@forEach
-                        foundSecrets.set(matcher.groups["secrets"]?.value?.toIntOrNull() ?: 0)
+                    name.contains("✔") -> {
+                        if (solvedPuzzlePattern.containsMatchIn(name)) {
+                            missingPuzzles.set((missingPuzzles.get() - 1).coerceAtLeast(0))
+                        }
                     }
-                }
-                name.contains("Crypts:") -> {
-                    val matcher = cryptsPattern.find(name) ?: return@forEach
-                    crypts.set(matcher.groups["crypts"]?.value?.toIntOrNull() ?: 0)
-                }
-                name.contains("Completed Rooms") -> {
-                    val matcher = roomCompletedPattern.find(name) ?: return@forEach
-                    completedRooms.set(matcher.groups["count"]?.value?.toIntOrNull() ?: return@forEach)
+                    name.contains("✖") -> {
+                        if (failedPuzzlePattern.containsMatchIn(name)) {
+                            missingPuzzles.set((missingPuzzles.get() - 1).coerceAtLeast(0))
+                            failedPuzzles.set(failedPuzzles.get() + 1)
+                        }
+                    }
+                    name.contains("Secrets Found:") -> {
+                        if (name.contains("%")) {
+                            val matcher = secretsFoundPercentagePattern.find(name) ?: return@forEach
+                            val percentagePer = (matcher.groups["percentage"]?.value?.toDoubleOrNull()
+                                ?: 0.0)
+                            totalSecrets.set(
+                                if (foundSecrets.get() > 0 && percentagePer > 0) floor(100f / percentagePer * foundSecrets.get() + 0.5).toInt() else 0
+                            )
+                        } else {
+                            val matcher = secretsFoundPattern.find(name) ?: return@forEach
+                            foundSecrets.set(matcher.groups["secrets"]?.value?.toIntOrNull() ?: 0)
+                        }
+                    }
+                    name.contains("Crypts:") -> {
+                        val matcher = cryptsPattern.find(name) ?: return@forEach
+                        crypts.set(matcher.groups["crypts"]?.value?.toIntOrNull() ?: 0)
+                    }
+                    name.contains("Completed Rooms") -> {
+                        val matcher = roomCompletedPattern.find(name) ?: return@forEach
+                        completedRooms.set(matcher.groups["count"]?.value?.toIntOrNull() ?: return@forEach)
+                    }
                 }
             }
         }
@@ -270,6 +264,7 @@ class ScoreCalculation : Feature() {
         deaths.set(0)
         crypts.set(0)
         totalRoomMap.clear()
+        bloodCleared = false
     }
 
 
@@ -278,26 +273,29 @@ class ScoreCalculation : Feature() {
     }
 
     override fun onChat(event: ClientChatReceivedEvent) {
-        if (!Cache.isInDungeon || mc.theWorld == null) return
+        if (!Cache.isInDungeon) return
         val unformatted: String = event.message.unformattedText.stripColor()
         if (unformatted.startsWith("Party > ")) {
-            if (unformatted.contains("\$SKYTILS-DUNGEON-SCORE-MIMIC$") || (unformatted.containsAny(
-                    "Mimic dead!", "Mimic Killed!", "Mimic Dead!"
+            if (unformatted.contains("SKYTILS-DUNGEON-SCORE-MIMIC$") || (unformatted.containsAny(
+                    "Mimic dead!", "Mimic Killed!"
                 ))
             ) {
+                println("MIMIC!!!")
                 mimicKilled.set(true)
                 return
             }
-            if (unformatted.contains("\$SKYTILS-DUNGEON-SCORE-ROOM$")) {
+            if (unformatted.contains("SKYTILS-DUNGEON-SCORE-ROOM$")) {
                 event.isCanceled = true
                 return
             }
-        } else if (unformatted.contains(":") && !unformatted.contains(">") && unformatted.containsAny(
+        } else if (unformatted.contains(":") && unformatted.containsAny(
                 "Mimic dead!",
                 "Mimic Killed!",
-                "Mimic Dead!"
+                "Mimic Dead!",
+                "SKYTILS-DUNGEON-SCORE-MIMIC$"
             )
         ) {
+            println("MIMIC!!!")
             mimicKilled.set(true)
             return
         } else if (unformatted.contains("You have proven yourself. You may pass")) bloodCleared = true
@@ -309,10 +307,21 @@ class ScoreCalculation : Feature() {
         }
     }
 
+    override fun onEntityDeath(event: LivingDeathEvent) {
+        if (!Cache.isInDungeon) return
+        if (event.entity is EntityZombie) {
+            val entity = event.entity as EntityZombie
+            if (entity.isChild && entity.getCurrentArmor(0) == null && entity.getCurrentArmor(1) == null && entity.getCurrentArmor(
+                    2
+                ) == null && entity.getCurrentArmor(3) == null
+            ) if (!mimicKilled.get()) mimicKilled.set(true)
+        }
+    }
+
     override fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || !Cache.isInDungeon) return
 
-        if (totalScore.get()-1 >=300 && !Cache.was && Config.scorePing) {
+        if (totalScore.get() - 1 >= 300 && !Cache.was && Config.scorePing) {
             PingUtils(100, "300 score reached!")
             mc.thePlayer.sendChatMessage(Config.pingText)
             Cache.was = true
@@ -320,6 +329,10 @@ class ScoreCalculation : Feature() {
         if (bloodCleared && !Cache.was2 && Config.rabbitPing) {
             PingUtils(100, "Rabbit Hat!")
             Cache.was2 = true
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_N)) { // TODO: FIX MIMIC DETECTION
+            println("Crypts ${crypts.get()} Mimic ${mimicKilled.get()} Paul ${isPaul.get()}")
+            println("Total Score ${totalScore.get()} Skill ${skillScore.get()} Discovery ${discoveryScore.get()} Speed ${speedScore.get()} Bonus ${bonusScore.get()}")
         }
     }
 

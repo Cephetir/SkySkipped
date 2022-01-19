@@ -22,7 +22,9 @@ import me.cephetir.skyskipped.event.events.RenderEntityModelEvent
 import net.minecraft.client.Minecraft
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.GuiOpenEvent
+import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.EntityJoinWorldEvent
+import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.entity.player.ItemTooltipEvent
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.event.world.WorldEvent
@@ -38,8 +40,9 @@ abstract class Feature {
     open fun onRenderEntityModel(event: RenderEntityModelEvent) {}
     open fun onEntityJoinWorld(event: EntityJoinWorldEvent) {}
     open fun onWorldLoad(event: WorldEvent.Load) {}
-    open fun onScoreboardChange(event: PacketReceive) {}
-    open fun onTabChange(event: PacketReceive) {}
+    open fun onPacket(event: PacketReceive) {}
     open fun onPlayerInteract(event: PlayerInteractEvent) {}
     open fun onTooltip(event: ItemTooltipEvent) {}
+    open fun onEntityDeath(event: LivingDeathEvent) {}
+    open fun onWorldRender(event: RenderWorldLastEvent) {}
 }
