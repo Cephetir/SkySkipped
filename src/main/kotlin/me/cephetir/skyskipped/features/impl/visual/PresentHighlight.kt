@@ -82,14 +82,23 @@ class PresentHighlight : Feature() {
     fun onAttackEntityEvent(e: AttackEntityEvent) = interact(e.entityPlayer, e.target)
 
     @SubscribeEvent
-    fun onPlayerEvent(e: PlayerEvent) = interact(e.entityPlayer, Minecraft.getMinecraft().objectMouseOver.entityHit)
+    fun onPlayerEvent(e: PlayerEvent) {
+        if (Minecraft.getMinecraft().objectMouseOver != null && Minecraft.getMinecraft().objectMouseOver.entityHit != null) interact(
+            e.entityPlayer,
+            Minecraft.getMinecraft().objectMouseOver.entityHit
+        )
+    }
 
     @SubscribeEvent
     fun onEntityInteractEvent(e: EntityInteractEvent) = interact(e.entityPlayer, e.target)
 
     @SubscribeEvent
-    fun onPlayerUseItemEvent(e: PlayerUseItemEvent) =
-        interact(e.entityPlayer, Minecraft.getMinecraft().objectMouseOver.entityHit)
+    fun onPlayerUseItemEvent(e: PlayerUseItemEvent) {
+        if (Minecraft.getMinecraft().objectMouseOver.entityHit != null) interact(
+            e.entityPlayer,
+            Minecraft.getMinecraft().objectMouseOver.entityHit
+        )
+    }
 
     private fun interact(p: EntityPlayer, e: Entity) {
         if (e is EntityArmorStand && shouldDraw(e)) lastArmorStand = e
