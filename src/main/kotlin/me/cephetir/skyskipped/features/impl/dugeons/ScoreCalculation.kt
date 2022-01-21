@@ -33,7 +33,6 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import org.lwjgl.input.Keyboard
 import skytils.skytilsmod.features.impl.handlers.MayorInfo
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -280,7 +279,6 @@ class ScoreCalculation : Feature() {
                     "Mimic dead!", "Mimic Killed!"
                 ))
             ) {
-                println("MIMIC!!!")
                 mimicKilled.set(true)
                 return
             }
@@ -295,7 +293,6 @@ class ScoreCalculation : Feature() {
                 "SKYTILS-DUNGEON-SCORE-MIMIC$"
             )
         ) {
-            println("MIMIC!!!")
             mimicKilled.set(true)
             return
         } else if (unformatted.contains("You have proven yourself. You may pass")) bloodCleared = true
@@ -329,10 +326,6 @@ class ScoreCalculation : Feature() {
         if (bloodCleared && !Cache.was2 && Config.rabbitPing) {
             PingUtils(100, "Rabbit Hat!")
             Cache.was2 = true
-        }
-        if (Keyboard.isKeyDown(Keyboard.KEY_N)) { // TODO: FIX MIMIC DETECTION
-            println("Crypts ${crypts.get()} Mimic ${mimicKilled.get()} Paul ${isPaul.get()}")
-            println("Total Score ${totalScore.get()} Skill ${skillScore.get()} Discovery ${discoveryScore.get()} Speed ${speedScore.get()} Bonus ${bonusScore.get()}")
         }
     }
 
