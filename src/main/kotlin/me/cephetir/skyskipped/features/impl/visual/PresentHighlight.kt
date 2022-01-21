@@ -23,13 +23,12 @@ import me.cephetir.skyskipped.utils.RenderUtils
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityArmorStand
-import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.Items
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.player.AttackEntityEvent
 import net.minecraftforge.event.entity.player.EntityInteractEvent
-import net.minecraftforge.event.entity.player.PlayerEvent
+import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.event.entity.player.PlayerUseItemEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -79,28 +78,22 @@ class PresentHighlight : Feature() {
     }
 
     @SubscribeEvent
-    fun onAttackEntityEvent(e: AttackEntityEvent) = interact(e.entityPlayer, e.target)
+    fun onAttackEntityEvent(e: AttackEntityEvent) = interact(e.target)
 
     @SubscribeEvent
-    fun onPlayerEvent(e: PlayerEvent) {
-        if (Minecraft.getMinecraft().objectMouseOver != null && Minecraft.getMinecraft().objectMouseOver.entityHit != null) interact(
-            e.entityPlayer,
-            Minecraft.getMinecraft().objectMouseOver.entityHit
-        )
+    fun onPlayerEvent(e: PlayerInteractEvent) {
+        if (mc.objectMouseOver != null && mc.objectMouseOver.entityHit != null) interact(mc.objectMouseOver.entityHit)
     }
 
     @SubscribeEvent
-    fun onEntityInteractEvent(e: EntityInteractEvent) = interact(e.entityPlayer, e.target)
+    fun onEntityInteractEvent(e: EntityInteractEvent) = interact(e.target)
 
     @SubscribeEvent
     fun onPlayerUseItemEvent(e: PlayerUseItemEvent) {
-        if (Minecraft.getMinecraft().objectMouseOver.entityHit != null) interact(
-            e.entityPlayer,
-            Minecraft.getMinecraft().objectMouseOver.entityHit
-        )
+        if (mc.objectMouseOver.entityHit != null) interact(mc.objectMouseOver.entityHit)
     }
 
-    private fun interact(p: EntityPlayer, e: Entity) {
+    private fun interact(e: Entity) {
         if (e is EntityArmorStand && shouldDraw(e)) lastArmorStand = e
     }
 
