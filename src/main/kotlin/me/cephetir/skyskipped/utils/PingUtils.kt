@@ -34,6 +34,11 @@ class PingUtils(private var ticks: Int, private val text: String) {
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
+        if (mc.theWorld == null || mc.thePlayer == null) {
+            MinecraftForge.EVENT_BUS.unregister(this)
+            return
+        }
+
         if (ticks <= 0) MinecraftForge.EVENT_BUS.unregister(this)
         if (ticks % 4 == 0) mc.thePlayer.playSound("random.orb", 1f, 1f)
         ticks--
