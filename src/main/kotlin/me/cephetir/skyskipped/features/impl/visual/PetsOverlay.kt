@@ -40,8 +40,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.input.Mouse
 import java.awt.Color
-import java.util.*
 import java.util.regex.Pattern
+import kotlin.math.roundToInt
 
 class PetsOverlay : Feature() {
     private var petsOverlay: GuiPetsOverlay? = null
@@ -135,15 +135,15 @@ class PetsOverlay : Feature() {
                 if (slot.hasStack) {
                     val compound = slot.stack.tagCompound.getCompoundTag("display")
                     val displayName = compound.getString("Name")
-                    if (displayName.lowercase(Locale.getDefault()).contains("[lvl ")) {
-                        if (rectWidth1 + 5 + k * 32 > width / 2 - rectWidth1) {
+                    if (displayName.contains("[lvl ", true)) {
+                        if (rectWidth1 + 10 + k * 24 > width / 1.5f - rectWidth1) {
                             k = 0
                             j++
                         }
                         pets1.add(
                             Pet(
-                                rectWidth1 + 5 + k * 32,
-                                rectHeight1 + 5 + j * 32,
+                                rectWidth1 + 5 + k * 24,
+                                rectHeight1 + 5 + j * 24,
                                 displayName,
                                 slot,
                                 i,
@@ -170,22 +170,12 @@ class PetsOverlay : Feature() {
                         val m = PET_PATTERN.matcher(displayName)
                         if (m.matches()) pets1[i - 1].rarity =
                             byBaseColor(m.group("color"))?.color?.rgb ?: Color(255, 255, 255, 255).rgb
-                    } else if (displayName.lowercase(Locale.getDefault()).contains("autopet")) autopet =
-                        slot else if (displayName.lowercase(
-                            Locale.getDefault()
-                        ).contains("close")
-                    ) close = slot else if (displayName.lowercase(Locale.getDefault())
-                            .contains("convert pet")
-                    ) convert = slot else if (displayName.lowercase(
-                            Locale.getDefault()
-                        ).contains("hide pets")
-                    ) hide = slot else if (displayName.lowercase(
-                            Locale.getDefault()
-                        ).contains("next page")
-                    ) nextPage = slot else if (displayName.lowercase(
-                            Locale.getDefault()
-                        ).contains("previous page")
-                    ) previousPage = slot
+                    } else if (displayName.contains("autopet", true)) autopet = slot
+                    else if (displayName.contains("close", true)) close = slot
+                    else if (displayName.contains("convert pet", true)) convert = slot
+                    else if (displayName.contains("hide pets", true)) hide = slot
+                    else if (displayName.contains("next page", true)) nextPage = slot
+                    else if (displayName.contains("previous page", true)) previousPage = slot
                 }
             }
             pets = pets1
@@ -196,17 +186,18 @@ class PetsOverlay : Feature() {
             GlStateManager.pushMatrix()
             GlStateManager.enableBlend()
             GlStateManager.disableTexture2D()
-            rectWidth = width / 5
-            rectWidth1 = width / 2 / 5
-            rectHeight = height / 5
-            rectHeight1 = height / 2 / 5
-            val d = height - height / 5
-            val n = (rectHeight1 + 5 + (j + 1) * 32) * 2 + 20
-            bottom = d.coerceAtLeast(n)
-            Gui.drawRect(rectWidth - 20, rectHeight, width - rectWidth + 20, bottom, Color(0, 0, 0, 105).rgb)
+            rectWidth = width / 3
+            rectWidth1 = (width / 1.5 / 3).roundToInt()
+            rectHeight = height / 4
+            rectHeight1 = (height / 1.5 / 4).roundToInt()
+            val d = height - height / 4
+            val n = (rectHeight1 + 5 + (j + 1) * 24) * 1.5 + 20
+            bottom = d.coerceAtLeast(n.roundToInt())
+            Gui.drawRect(0, 0, width, height, Color(0, 0, 0, 135).rgb)
+            Gui.drawRect(rectWidth - 20, rectHeight, width - rectWidth + 20, bottom, Config.petsBg.rgb)
+            drawRoundedOutline(rectWidth - 20f, rectHeight - 0.5f, width - rectWidth + 20f, bottom.toFloat(), 3f, Config.petsBorderWidth, Config.petsBorderColor.rgb)
             GlStateManager.scale(1.5f, 1.5f, 1.5f)
-            mc.fontRendererObj.drawString("PETS", (rectWidth - 20 + 3) / 1.5f, (rectHeight - 15) / 1.5f, -1, false)
-            GlStateManager.scale(2f / 1.5f, 2f / 1.5f, 2f / 1.5f)
+            mc.fontRendererObj.drawString("PETS", (rectWidth - 20 + 3) / 1.5f, (rectHeight - 15) / 1.5f, Color(223, 223, 233, 255).rgb, false)
             if (pets.isNotEmpty()) for (pet in pets) {
                 renderItem(pet.itemStack, pet.x, pet.y)
                 if (pet.last) {
@@ -222,111 +213,127 @@ class PetsOverlay : Feature() {
                     )
                 }
                 drawRoundedOutline(pet.x - 0.5f, pet.y - 0.5f, pet.x + 16.5f, pet.y + 16.5f, 6f, 2.5f, pet.rarity)
-                GlStateManager.scale(0.25f, 0.25f, 0.25f)
-                mc.fontRendererObj.drawStringWithShadow(
-                    pet.name,
-                    (pet.x + 8) * 2f * 2f - mc.fontRendererObj.getStringWidth(pet.name) / 2f,
-                    (pet.y + 18) * 2f * 2f,
-                    pet.rarity
-                )
-                GlStateManager.scale(4f, 4f, 4f)
+                GlStateManager.scale(0.5f / 1.5f, 0.5f / 1.5f, 0.5f / 1.5f)
+//                mc.fontRendererObj.drawStringWithShadow(
+//                    pet.name,
+//                    (pet.x + 8) * 2f * 1.5f - mc.fontRendererObj.getStringWidth(pet.name) / 2f,
+//                    (pet.y + 18) * 2f * 1.5f,
+//                    pet.rarity
+//                )
+                GlStateManager.scale(3f, 3f, 3f)
             }
-            GlStateManager.scale(0.5f, 0.5f, 0.5f)
+            GlStateManager.scale(1f / 1.5f, 1f / 1.5f, 1f / 1.5f)
             GlStateManager.resetColor()
             val h = bottom
             if (nextPage != null) {
                 Gui.drawRect(
-                    width / 2 - 50 - 12 - 100 - 12 - 100,
+                    width / 2 - 20 - 12 - 40 - 12 - 40,
                     h - 25,
-                    width / 2 - 50 - 12 - 100 - 12,
+                    width / 2 - 20 - 12 - 40 - 12,
                     h - 25 + 20,
                     Color(255, 255, 255, 150).rgb
                 )
                 mc.fontRendererObj.drawStringWithShadow(
                     "NEXT",
-                    width / 2f - 50 - 12 - 100 - 12 - 50 - mc.fontRendererObj.getStringWidth("NEXT") / 2f,
+                    width / 2f - 20 - 12 - 40 - 12 - 20 - mc.fontRendererObj.getStringWidth("NEXT") / 2f,
                     (h - 25 - 3).toFloat(),
                     -1
                 )
                 GlStateManager.scale(2f, 2f, 2f)
-                renderItem(nextPage!!.stack, (width / 2 - 50 - 12 - 100 - 12 - 66) / 2, (h - 25 - 6) / 2)
+                renderItem(nextPage!!.stack, (width / 2 - 20 - 12 - 40 - 12 - 36) / 2, (h - 25 - 6) / 2)
                 GlStateManager.scale(0.5f, 0.5f, 0.5f)
                 if (previousPage != null) {
                     Gui.drawRect(
-                        width / 2 - 50 - 12 - 100 - 12 - 100,
+                        width / 2 - 20 - 12 - 40 - 12 - 40,
                         h - 25 - 30,
-                        width / 2 - 50 - 12 - 100 - 12,
+                        width / 2 - 20 - 12 - 40 - 12,
                         h - 25 - 30 + 20,
                         Color(255, 255, 255, 150).rgb
                     )
                     mc.fontRendererObj.drawStringWithShadow(
                         "PREVIOUS",
-                        width / 2f - 50 - 12 - 100 - 12 - 50 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f,
+                        width / 2f - 20 - 12 - 40 - 12 - 20 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f,
                         (h - 25 - 30 - 3).toFloat(),
                         -1
                     )
                     GlStateManager.scale(2f, 2f, 2f)
-                    renderItem(previousPage!!.stack, (width / 2 - 50 - 12 - 100 - 12 - 66) / 2, (h - 25 - 30 - 6) / 2)
+                    renderItem(
+                        previousPage!!.stack,
+                        (width / 2 - 20 - 12 - 40 - 12 - 36) / 2,
+                        (h - 25 - 30 - 6) / 2
+                    )
                     GlStateManager.scale(0.5f, 0.5f, 0.5f)
                 }
             } else if (previousPage != null) {
                 Gui.drawRect(
-                    width / 2 - 50 - 12 - 100 - 12 - 100,
+                    width / 2 - 20 - 12 - 40 - 12 - 40,
                     h - 25,
-                    width / 2 - 50 - 12 - 100 - 12,
+                    width / 2 - 20 - 12 - 40 - 12,
                     h - 25 + 20,
                     Color(255, 255, 255, 150).rgb
                 )
                 mc.fontRendererObj.drawStringWithShadow(
                     "PREVIOUS",
-                    width / 2f - 50 - 12 - 100 - 12 - 50 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f,
+                    width / 2f - 20 - 12 - 40 - 12 - 20 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f,
                     (h - 25 - 3).toFloat(),
                     -1
                 )
                 GlStateManager.scale(2f, 2f, 2f)
-                renderItem(previousPage!!.stack, (width / 2 - 50 - 12 - 100 - 12 - 66) / 2, (h - 25 - 6) / 2)
+                renderItem(
+                    previousPage!!.stack,
+                    (width / 2 - 20 - 12 - 40 - 12 - 36) / 2,
+                    (h - 25 - 6) / 2
+                )
                 GlStateManager.scale(0.5f, 0.5f, 0.5f)
             }
             if (autopet != null) {
                 Gui.drawRect(
-                    width / 2 - 50 - 12 - 100,
+                    width / 2 - 20 - 12 - 40,
                     h - 25,
-                    width / 2 - 50 - 12,
+                    width / 2 - 20 - 12,
                     h - 25 + 20,
                     Color(255, 255, 255, 150).rgb
                 )
                 GlStateManager.scale(2f, 2f, 2f)
-                renderItem(autopet!!.stack, (width / 2 - 50 - 12 - 66) / 2, (h - 25 - 6) / 2)
+                renderItem(autopet!!.stack, (width / 2 - 20 - 12 - 36) / 2, (h - 25 - 6) / 2)
                 GlStateManager.scale(0.5f, 0.5f, 0.5f)
             }
             if (close != null) {
-                Gui.drawRect(width / 2 - 50, h - 25, width / 2 + 50, h - 25 + 20, Color(255, 255, 255, 150).rgb)
+                Gui.drawRect(width / 2 - 20, h - 25, width / 2 + 20, h - 25 + 20, Color(255, 255, 255, 150).rgb)
                 GlStateManager.scale(2f, 2f, 2f)
-                renderItem(close!!.stack, (width / 2 - 50 + 50 - 16) / 2, (h - 25 - 6) / 2)
+                renderItem(close!!.stack, (width / 2 - 20 + 20 - 16) / 2, (h - 25 - 6) / 2)
                 GlStateManager.scale(0.5f, 0.5f, 0.5f)
             }
             if (convert != null) {
                 Gui.drawRect(
-                    width / 2 + 50 + 12,
+                    width / 2 + 20 + 12,
                     h - 25,
-                    width / 2 + 50 + 12 + 100,
+                    width / 2 + 20 + 12 + 40,
                     h - 25 + 20,
                     Color(255, 255, 255, 150).rgb
                 )
                 GlStateManager.scale(2f, 2f, 2f)
-                renderItem(convert!!.stack, (width / 2 + 50 + 12 + 50 - 16) / 2, (h - 25 - 6) / 2)
+                renderItem(
+                    convert!!.stack,
+                    (width / 2 + 20 + 12 + 20 - 16) / 2,
+                    (h - 25 - 6) / 2
+                )
                 GlStateManager.scale(0.5f, 0.5f, 0.5f)
             }
             if (hide != null) {
                 Gui.drawRect(
-                    width / 2 + 50 + 12 + 100 + 12,
+                    width / 2 + 20 + 12 + 40 + 12,
                     h - 25,
-                    width / 2 + 50 + 12 + 100 + 12 + 100,
+                    width / 2 + 20 + 12 + 40 + 12 + 40,
                     h - 25 + 20,
                     Color(255, 255, 255, 150).rgb
                 )
                 GlStateManager.scale(2f, 2f, 2f)
-                renderItem(hide!!.stack, (width / 2 + 50 + 12 + 100 + 12 + 50 - 16) / 2, (h - 25 - 6) / 2)
+                renderItem(
+                    hide!!.stack,
+                    (width / 2 + 20 + 12 + 40 + 12 + 20 - 16) / 2,
+                    (h - 25 - 6) / 2
+                )
                 GlStateManager.scale(0.5f, 0.5f, 0.5f)
             }
             GlStateManager.resetColor()
@@ -340,46 +347,46 @@ class PetsOverlay : Feature() {
             var mouseX = mouseX
             var mouseY = mouseY
             if (button == -1 || !Mouse.isButtonDown(button)) return
-            mouseX /= 2.0
-            mouseY /= 2.0
+            mouseX /= 1.5
+            mouseY /= 1.5
             val container = chest as IMixinGuiContainer
             for (pet in pets) if (mouseX > pet.x && mouseY > pet.y && mouseX < pet.x + 16 && mouseY < pet.y + 16) {
                 container.handleMouseClick(pet.slot, pet.slot.slotNumber, button, 0)
                 mc.thePlayer.closeScreen()
                 return
             }
-            mouseX *= 2.0
-            mouseY *= 2.0
-            val h = height - rectHeight
-            if (mouseX > width / 2f - 50 - 12 - 100 && mouseY > h - 25 && mouseX < width / 2f - 50 - 12 && mouseY < h - 25 + 20) container.handleMouseClick(
+            mouseX *= 1.5
+            mouseY *= 1.5
+            val h = bottom
+            if (mouseX > width / 2f - 20 - 12 - 40 && mouseY > h - 25 && mouseX < width / 2f - 20 - 12 && mouseY < h - 25 + 20) container.handleMouseClick(
                 autopet,
                 autopet!!.slotNumber,
                 button,
                 0
-            ) else if (mouseX > width / 2f - 50 && mouseY > h - 25 && mouseX < width / 2f + 50 && mouseY < h - 25 + 20) container.handleMouseClick(
+            ) else if (mouseX > width / 2f - 20 && mouseY > h - 25 && mouseX < width / 2f + 20 && mouseY < h - 25 + 20) container.handleMouseClick(
                 close,
                 close!!.slotNumber,
                 button,
                 0
-            ) else if (mouseX > width / 2f + 50 + 12 && mouseY > h - 25 && mouseX < width / 2f + 50 + 12 + 100 && mouseY < h - 25 + 20) container.handleMouseClick(
+            ) else if (mouseX > width / 2f + 20 + 12 && mouseY > h - 25 && mouseX < width / 2f + 20 + 12 + 40 && mouseY < h - 25 + 20) container.handleMouseClick(
                 convert,
                 convert!!.slotNumber,
                 button,
                 0
-            ) else if (mouseX > width / 2f + 50 + 12 + 100 + 12 && mouseY > h - 25 && mouseX < width / 2f + 50 + 12 + 100 + 12 + 100 && mouseY < h - 25 + 20) container.handleMouseClick(
+            ) else if (mouseX > width / 2f + 20 + 12 + 40 + 12 && mouseY > h - 25 && mouseX < width / 2f + 20 + 12 + 40 + 12 + 40 && mouseY < h - 25 + 20) container.handleMouseClick(
                 hide,
                 hide!!.slotNumber,
                 button,
                 0
             ) else if (nextPage != null) {
-                if (mouseX > width / 2f - 50 - 12 - 100 - 12 - 100 && mouseY > h - 25 && mouseX < width / 2f - 50 - 12 - 100 - 12 && mouseY < h - 25 + 20) container.handleMouseClick(
+                if (mouseX > width / 2f - 20 - 12 - 40 - 12 - 40 && mouseY > h - 25 && mouseX < width / 2f - 20 - 12 - 40 - 12 && mouseY < h - 25 + 20) container.handleMouseClick(
                     nextPage,
                     nextPage!!.slotNumber,
                     button,
                     0
                 )
                 if (previousPage != null) {
-                    if (mouseX > width / 2f - 50 - 12 - 100 - 12 - 100 && mouseY > h - 25 - 30 && mouseX < width / 2f - 50 - 12 - 100 - 12 && mouseY < h - 25 - 30 + 20) container.handleMouseClick(
+                    if (mouseX > width / 2f - 20 - 12 - 40 - 12 - 40 && mouseY > h - 25 - 30 && mouseX < width / 2f - 20 - 12 - 40 - 12 && mouseY < h - 25 - 30 + 20) container.handleMouseClick(
                         previousPage,
                         previousPage!!.slotNumber,
                         button,
@@ -387,7 +394,7 @@ class PetsOverlay : Feature() {
                     )
                 }
             } else if (previousPage != null) {
-                if (mouseX > width / 2f - 50 - 12 - 100 - 12 - 100 && mouseY > h - 25 && mouseX < width / 2f - 50 - 12 - 100 - 12 && mouseY < h - 25 + 20) container.handleMouseClick(
+                if (mouseX > width / 2f - 20 - 12 - 40 - 12 - 40 && mouseY > h - 25 && mouseX < width / 2f - 20 - 12 - 40 - 12 && mouseY < h - 25 + 20) container.handleMouseClick(
                     previousPage,
                     previousPage!!.slotNumber,
                     button,
@@ -397,14 +404,16 @@ class PetsOverlay : Feature() {
         }
 
         private fun onHover(mouseX: Int, mouseY: Int) {
-            for (pet in pets) if (mouseX / 2 > pet.x && mouseY / 2 > pet.y && mouseX / 2 < pet.x + 16 && mouseY / 2 < pet.y + 16) {
+            for (pet in pets) if (mouseX / 1.5f > pet.x && mouseY / 1.5f > pet.y && mouseX / 1.5f < pet.x + 16 && mouseY / 1.5f < pet.y + 16) {
                 var max = 0
                 val tooltip = pet.itemStack.getTooltip(mc.thePlayer, false)
                 GlStateManager.translate(0f, 0f, 150f)
                 for ((i, text) in tooltip.withIndex()) {
                     if (mc.fontRendererObj.getStringWidth(text) > max) max = mc.fontRendererObj.getStringWidth(text)
-                    mc.fontRendererObj.drawStringWithShadow(text, (mouseX + 5 + 5).toFloat(),
-                        (mouseY + 5 + i * 10 - 8).toFloat(), -1)
+                    mc.fontRendererObj.drawStringWithShadow(
+                        text, (mouseX + 5 + 5).toFloat(),
+                        (mouseY + 5 + i * 10 - 8).toFloat(), -1
+                    )
                 }
                 GlStateManager.translate(0f, 0f, -5f)
                 Gui.drawRect(
@@ -412,7 +421,7 @@ class PetsOverlay : Feature() {
                     mouseY - 8,
                     mouseX + 5 + max + 10,
                     mouseY + tooltip.size * 10 + 10 - 8,
-                    Color(0, 0, 0, 150).rgb
+                    Color(0, 0, 0, 200).rgb
                 )
                 GlStateManager.translate(0f, 0f, -145f)
             }
@@ -455,7 +464,7 @@ class PetsOverlay : Feature() {
                     if (slot.hasStack) {
                         val compound = slot.stack.tagCompound.getCompoundTag("display")
                         val displayName = compound.getString("Name")
-                        if (displayName.lowercase(Locale.getDefault()).contains("[lvl ")) {
+                        if (displayName.contains("[lvl ", true)) {
                             i++
                             if (i == index) return slot
                         }

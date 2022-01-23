@@ -38,10 +38,17 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
                 }
             }.start()
         }
+
         addDependency("espColor", "playerESP")
         addDependency("presentsColor", "presents")
+
+        addDependency("petsBg", "petsOverlay")
+        addDependency("petsBorderColor", "petsOverlay")
+        addDependency("petsBorderWidth", "petsOverlay")
+
         addDependency("coins", "coinsToggle")
         addDependency("pingText", "scorePing")
+
         initialize()
     }
 
@@ -235,9 +242,39 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Pets Overlay",
             category = "Visual",
             subcategory = "Visual",
-            description = "Good looking overlay for pets menu.\n§cDon't use with small window size"
+            description = "Nice looking overlay for pets menu.\n§cDon't use with small window size"
         )
         var petsOverlay = true
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "Pets Overlay Background Color",
+            category = "Visual",
+            subcategory = "Visual",
+            description = "Color for pets overlay background."
+        )
+        var petsBg: Color = Color(223, 223, 233, 155)
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "Pets Overlay Border Color",
+            category = "Visual",
+            subcategory = "Visual",
+            description = "Color for pets overlay border."
+        )
+        var petsBorderColor: Color = Color(87, 0, 247, 255)
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Pets Overlay Border Width",
+            category = "Visual",
+            subcategory = "Visual",
+            description = "Width for pets overlay border.",
+            minF = 1f,
+            maxF = 6f,
+            decimalPlaces = 1
+        )
+        var petsBorderWidth = 2f
 
         @Property(
             type = PropertyType.SWITCH,
