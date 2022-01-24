@@ -92,7 +92,8 @@ class PetsOverlay : Feature() {
     }
 
     private var ticks = 0
-    override fun onTick(event: ClientTickEvent) {
+    @SubscribeEvent
+    fun onTick(event: ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
         if (!Config.petsOverlay) return
         if (petsOverlay == null) return
