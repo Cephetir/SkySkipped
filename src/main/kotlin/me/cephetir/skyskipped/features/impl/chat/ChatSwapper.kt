@@ -23,10 +23,12 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import net.minecraft.client.Minecraft
 import net.minecraftforge.client.event.ClientChatReceivedEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class ChatSwapper : Feature() {
 
-    override fun onChat(event: ClientChatReceivedEvent) {
+    @SubscribeEvent
+    fun onChat(event: ClientChatReceivedEvent) {
         if (!EssentialAPI.getMinecraftUtil().isHypixel()) return
         if ((event.message.unformattedText.startsWith("You have been kicked from the party") || event.message.unformattedText.contains("has disbanded") || event.message.unformattedText.startsWith("You left the party") || event.message.unformattedText.contains("was disbanded")) && Cache.inParty) {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat all")

@@ -24,10 +24,12 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.inventory.ContainerChest
 import net.minecraftforge.client.event.GuiOpenEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class ChestCloser : Feature() {
 
-    override fun onDrawBackground(event: GuiOpenEvent) {
+    @SubscribeEvent
+    fun onDrawBackground(event: GuiOpenEvent) {
         if (event.gui is GuiChest && Cache.inSkyblock) {
             val chestName =
                 ((event.gui as GuiChest).inventorySlots as ContainerChest).lowerChestInventory.displayName.unformattedText

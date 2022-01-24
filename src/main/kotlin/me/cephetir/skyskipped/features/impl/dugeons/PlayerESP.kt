@@ -28,11 +28,13 @@ import net.minecraft.scoreboard.ScorePlayerTeam
 import net.minecraft.scoreboard.Team
 import net.minecraftforge.event.entity.EntityJoinWorldEvent
 import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class PlayerESP : Feature() {
     private val highlightedEntities = ArrayList<Entity>()
 
-    override fun onEntityJoinWorld(event: EntityJoinWorldEvent) {
+    @SubscribeEvent
+    fun onEntityJoinWorld(event: EntityJoinWorldEvent) {
         if (!Cache.isInDungeon || event.entity !is EntityPlayer) return
         val player = event.entity as EntityPlayer
         if (player.team == null) return
@@ -42,13 +44,15 @@ class PlayerESP : Feature() {
         highlightedEntities.add(event.entity)
     }
 
-    override fun onRenderEntityModel(event: RenderEntityModelEvent) {
+    @SubscribeEvent
+    fun onRenderEntityModel(event: RenderEntityModelEvent) {
         if (!Cache.isInDungeon || highlightedEntities.isEmpty() || !highlightedEntities.contains(event.entity))
             return
         outlineEntity(event)
     }
 
-    override fun onWorldLoad(event: WorldEvent.Load) {
+    @SubscribeEvent
+    fun onWorldUnload(event: WorldEvent.Unload) {
         highlightedEntities.clear()
     }
 

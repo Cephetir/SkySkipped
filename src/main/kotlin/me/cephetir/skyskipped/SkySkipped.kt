@@ -17,7 +17,6 @@
 
 package me.cephetir.skyskipped
 
-import me.cephetir.skyskipped.commands.PetMacroCommand
 import me.cephetir.skyskipped.commands.SkySkippedCommand
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.Listener
@@ -65,15 +64,12 @@ class SkySkipped {
         MinecraftForge.EVENT_BUS.register(Listener())
 
         features.scoreCalculation.isSTLoaded = Loader.isModLoaded("skytils")
-        MinecraftForge.EVENT_BUS.register(features)
-        MinecraftForge.EVENT_BUS.register(features.petsOverlay)
-        MinecraftForge.EVENT_BUS.register(features.presentHighlight)
+        features.register()
 
         RPC.reset()
         ClientCommandHandler.instance.registerCommand(SkySkippedCommand())
         ClientCommandHandler.instance.registerCommand(features.leaveCommand)
         ClientCommandHandler.instance.registerCommand(features.partyCommand)
-        ClientCommandHandler.instance.registerCommand(PetMacroCommand())
     }
 
     @Mod.EventHandler

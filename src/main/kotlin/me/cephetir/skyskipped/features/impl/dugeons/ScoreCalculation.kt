@@ -32,7 +32,10 @@ import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.common.eventhandler.EventPriority
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import org.lwjgl.input.Keyboard
 import skytils.skytilsmod.features.impl.handlers.MayorInfo
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -170,7 +173,8 @@ class ScoreCalculation : Feature() {
             first.first.coerceIn(20, 100) + first.second + second.first + second.second
         }
 
-    override fun onPacket(event: PacketReceive) {
+    @SubscribeEvent
+    fun onPacket(event: PacketReceive) {
         if (!Cache.isInDungeon) return
         if (event.packet is S3EPacketTeams) {
             val packet = event.packet as S3EPacketTeams
@@ -250,7 +254,7 @@ class ScoreCalculation : Feature() {
         }
     }
 
-    override fun onWorldLoad(event: WorldEvent.Load) {
+    fun onWorldUnload(event: WorldEvent.Unload) {
         mimicKilled.set(false)
         firstDeathHadSpirit.set(false)
         floorReq.set(floorRequirements["default"]!!)
@@ -271,7 +275,8 @@ class ScoreCalculation : Feature() {
         return true
     }
 
-    override fun onChat(event: ClientChatReceivedEvent) {
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    fun onChat(event: ClientChatReceivedEvent) {
         if (!Cache.isInDungeon) return
         val unformatted: String = event.message.unformattedText.stripColor()
         if (unformatted.startsWith("Party > ")) {
@@ -304,7 +309,8 @@ class ScoreCalculation : Feature() {
         }
     }
 
-    override fun onEntityDeath(event: LivingDeathEvent) {
+    @SubscribeEvent
+    fun onEntityDeath(event: LivingDeathEvent) {
         if (!Cache.isInDungeon) return
         if (event.entity is EntityZombie) {
             val entity = event.entity as EntityZombie
@@ -315,7 +321,8 @@ class ScoreCalculation : Feature() {
         }
     }
 
-    override fun onTick(event: TickEvent.ClientTickEvent) {
+    @SubscribeEvent
+    fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || !Cache.isInDungeon) return
 
         if ((totalScore.get() >= 300) && !Cache.was && Config.scorePing) {
@@ -327,6 +334,11 @@ class ScoreCalculation : Feature() {
         if (bloodCleared && !Cache.was2 && Config.rabbitPing) {
             PingUtils(100, "Rabbit Hat!")
             Cache.was2 = true
+        }
+
+        if (Keyboard.isKeyDown(Keyboard.KEY_N)) { // TODO: FIX CALC IDK FUCK THIS SHIT
+            println("Crypts ${crypts.get()} Mimic ${mimicKilled.get()} Paul ${isPaul.get()}")
+            println("Total Score ${totalScore.get()} Skill ${skillScore.get()} Discovery ${discoveryScore.get()} Speed ${speedScore.get()} Bonus ${bonusScore.get()}")
         }
     }
 

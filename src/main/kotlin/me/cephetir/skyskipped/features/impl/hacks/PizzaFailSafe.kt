@@ -17,13 +17,13 @@
 
 package me.cephetir.skyskipped.features.impl.hacks
 
-import QolSkyblockMod.PizzaClient.PizzaClient
 import QolSkyblockMod.PizzaClient.features.skills.macros.builder.MacroBuilder
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.util.BlockPos
 import net.minecraftforge.fml.common.Loader
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
@@ -36,8 +36,9 @@ class PizzaFailSafe : Feature() {
         return Config.failSafe
     }
 
-    override fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !(Loader.isModLoaded("pizzaclient") && PizzaClient.VERSION == "1.1") || mc.thePlayer == null || mc.theWorld == null) return
+    @SubscribeEvent
+    fun onTick(event: ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START || !Loader.isModLoaded("pizzaclient") || mc.thePlayer == null || mc.theWorld == null || !MacroBuilder.isToggled()) return
 
         if (last != null) {
             if (checkPos(mc.thePlayer.position)) ticks++ else {
@@ -46,7 +47,7 @@ class PizzaFailSafe : Feature() {
             }
         } else last = mc.thePlayer.position
 
-        if (ticks >= 60 && !called && MacroBuilder.isToggled()) {
+        if (ticks >= 60 && !called) {
             called = true
             Thread {
                 try {

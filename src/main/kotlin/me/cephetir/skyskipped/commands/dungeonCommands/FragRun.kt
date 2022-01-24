@@ -22,10 +22,12 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraftforge.client.event.ClientChatReceivedEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class FragRun : Feature() {
 
-    override fun onChat(event: ClientChatReceivedEvent) {
+    @SubscribeEvent
+    fun onChat(event: ClientChatReceivedEvent) {
         if (event.message.unformattedText.stripColor().trim().contains("> EXTRA STATS <")) SkySkipped.features.leaveCommand.start(false)
     }
 

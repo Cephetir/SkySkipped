@@ -23,6 +23,7 @@ import me.cephetir.skyskipped.mixins.IMixinGuiContainer
 import me.cephetir.skyskipped.utils.ItemRarity.Companion.byBaseColor
 import me.cephetir.skyskipped.utils.RoundUtils.drawRoundedOutline
 import me.cephetir.skyskipped.utils.RoundUtils.drawRoundedRect
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.renderer.GlStateManager
@@ -195,9 +196,23 @@ class PetsOverlay : Feature() {
             bottom = d.coerceAtLeast(n.roundToInt())
             Gui.drawRect(0, 0, width, height, Color(0, 0, 0, 135).rgb)
             Gui.drawRect(rectWidth - 20, rectHeight, width - rectWidth + 20, bottom, Config.petsBg.rgb)
-            drawRoundedOutline(rectWidth - 20f, rectHeight - 0.5f, width - rectWidth + 20f, bottom.toFloat(), 3f, Config.petsBorderWidth, Config.petsBorderColor.rgb)
+            drawRoundedOutline(
+                rectWidth - 20f,
+                rectHeight - 0.5f,
+                width - rectWidth + 20f,
+                bottom.toFloat(),
+                3f,
+                Config.petsBorderWidth,
+                Config.petsBorderColor.rgb
+            )
             GlStateManager.scale(1.5f, 1.5f, 1.5f)
-            mc.fontRendererObj.drawString("PETS", (rectWidth - 20 + 3) / 1.5f, (rectHeight - 15) / 1.5f, Color(223, 223, 233, 255).rgb, false)
+            mc.fontRendererObj.drawString(
+                "PETS",
+                (rectWidth - 20 + 3) / 1.5f,
+                (rectHeight - 15) / 1.5f,
+                Color(223, 223, 233, 255).rgb,
+                false
+            )
             if (pets.isNotEmpty()) for (pet in pets) {
                 renderItem(pet.itemStack, pet.x, pet.y)
                 if (pet.last) {
@@ -456,22 +471,41 @@ class PetsOverlay : Feature() {
     }
 
     companion object {
-        fun getPet(index: Int, chest: GuiChest): Slot? {
+        fun getPet(index: Int, chest: GuiChest) {
             var i = 0
+            val container = chest as IMixinGuiContainer
             if (chest.inventorySlots.inventorySlots.isNotEmpty()) {
-                for (slot in chest.inventorySlots.inventorySlots) {
-                    if (slot.slotNumber > 53) break
-                    if (slot.hasStack) {
-                        val compound = slot.stack.tagCompound.getCompoundTag("display")
-                        val displayName = compound.getString("Name")
-                        if (displayName.contains("[lvl ", true)) {
-                            i++
-                            if (i == index) return slot
+                if (index > 28) {
+                    for (slot in chest.inventorySlots.inventorySlots) {
+                        if (slot.slotNumber > 53) break
+                        if (slot.hasStack) {
+                            val compound = slot.stack.tagCompound.getCompoundTag("display")
+                            val displayName = compound.getString("Name")
+                            if (displayName.contains("next page", true)) {
+                                container.handleMouseClick(slot, slot.slotNumber, 0, 0)
+                                Thread {
+                                    Thread.sleep(100L)
+                                    getPet(index - 28, Minecraft.getMinecraft().currentScreen as GuiChest)
+                                }.start()
+                                break
+                            }
+                        }
+                    }
+
+                } else {
+                    for (slot in chest.inventorySlots.inventorySlots) {
+                        if (slot.slotNumber > 53) break
+                        if (slot.hasStack) {
+                            val compound = slot.stack.tagCompound.getCompoundTag("display")
+                            val displayName = compound.getString("Name")
+                            if (displayName.contains("[lvl ", true)) {
+                                i++
+                                if (i == index) container.handleMouseClick(slot, slot.slotNumber, 0, 0)
+                            }
                         }
                     }
                 }
             }
-            return null
         }
     }
 }

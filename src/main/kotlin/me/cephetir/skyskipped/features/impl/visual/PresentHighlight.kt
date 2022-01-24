@@ -45,7 +45,8 @@ class PresentHighlight : Feature() {
         return Config.presents
     }
 
-    override fun onWorldRender(event: RenderWorldLastEvent) {
+    @SubscribeEvent
+    fun onWorldRender(event: RenderWorldLastEvent) {
         if (Minecraft.getMinecraft().theWorld == null/* || !Cache.inWorkshop*/) return
         val entities: List<Entity> = Minecraft.getMinecraft().theWorld.loadedEntityList
         for (entity in entities) {
@@ -72,7 +73,8 @@ class PresentHighlight : Feature() {
         return false
     }
 
-    override fun onWorldLoad(event: WorldEvent.Load) {
+    @SubscribeEvent
+    fun onWorldUnload(event: WorldEvent.Unload) {
         clicked = ArrayList()
         lastArmorStand = null
     }

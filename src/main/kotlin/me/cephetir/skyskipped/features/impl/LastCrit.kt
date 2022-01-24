@@ -23,11 +23,13 @@ import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.item.EntityArmorStand
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class LastCrit : Feature() {
     private val damagePattern = Regex("✧*(\\d+[⚔+✧❤♞☄✷]*)")
 
-    override fun onRenderEntityModel(event: RenderEntityModelEvent) {
+    @SubscribeEvent
+    fun onRenderEntityModel(event: RenderEntityModelEvent) {
         if (!Cache.inSkyblock) return
         val entity: EntityLivingBase = event.entity as? EntityArmorStand ?: return
         if (!entity.hasCustomName()) return
