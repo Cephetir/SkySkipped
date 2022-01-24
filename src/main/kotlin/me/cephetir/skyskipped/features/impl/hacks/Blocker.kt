@@ -22,10 +22,12 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class Blocker : Feature() {
 
-    override fun onPlayerInteract(event: PlayerInteractEvent) {
+    @SubscribeEvent
+    fun onPlayerInteract(event: PlayerInteractEvent) {
         if (!Cache.inSkyblock) return
         if (event.entity !== mc.thePlayer || event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) return
         val item = Cache.itemheld

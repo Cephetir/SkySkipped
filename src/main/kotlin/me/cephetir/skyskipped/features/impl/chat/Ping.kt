@@ -22,6 +22,7 @@ import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraft.util.ChatComponentText
 import net.minecraftforge.client.event.ClientChatReceivedEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.apache.commons.lang3.StringUtils
 import java.util.regex.Pattern
 
@@ -29,7 +30,8 @@ class Ping : Feature() {
     var regex: Pattern =
         Pattern.compile("^(?:[\\w\\- ]+ )?(?:(?<chatTypePrefix>[A-Za-z]+) > |)(?<tags>(?:\\[[^]]+] ?)*)(?<senderUsername>\\w{1,16})(?: [\\w\\- ]+)?: (?<message>.+)$")
 
-    override fun onChat(event: ClientChatReceivedEvent) {
+    @SubscribeEvent
+    fun onChat(event: ClientChatReceivedEvent) {
         val text = event.message as ChatComponentText
         val unformattedText = text.unformattedText.stripColor()
         val matcher = regex.matcher(unformattedText)

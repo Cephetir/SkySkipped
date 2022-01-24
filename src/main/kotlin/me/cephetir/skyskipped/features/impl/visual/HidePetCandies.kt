@@ -20,10 +20,12 @@ package me.cephetir.skyskipped.features.impl.visual
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import net.minecraftforge.event.entity.player.ItemTooltipEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class HidePetCandies : Feature() {
 
-    override fun onTooltip(event: ItemTooltipEvent) {
+    @SubscribeEvent
+    fun onTooltip(event: ItemTooltipEvent) {
         for (i in 0 until event.toolTip.size - 1) {
             if (event.toolTip[i].contains("Pet Candy Used")) {
                 event.toolTip.removeAt(i)

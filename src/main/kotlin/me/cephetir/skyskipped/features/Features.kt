@@ -20,8 +20,6 @@ package me.cephetir.skyskipped.features
 import me.cephetir.skyskipped.commands.dungeonCommands.FragRun
 import me.cephetir.skyskipped.commands.dungeonCommands.LeaveCommand
 import me.cephetir.skyskipped.commands.dungeonCommands.PartyCommand
-import me.cephetir.skyskipped.event.events.PacketReceive
-import me.cephetir.skyskipped.event.events.RenderEntityModelEvent
 import me.cephetir.skyskipped.features.impl.LastCrit
 import me.cephetir.skyskipped.features.impl.chat.ChatSwapper
 import me.cephetir.skyskipped.features.impl.chat.Ping
@@ -33,18 +31,7 @@ import me.cephetir.skyskipped.features.impl.hacks.PizzaFailSafe
 import me.cephetir.skyskipped.features.impl.visual.HidePetCandies
 import me.cephetir.skyskipped.features.impl.visual.PetsOverlay
 import me.cephetir.skyskipped.features.impl.visual.PresentHighlight
-import net.minecraftforge.client.event.ClientChatReceivedEvent
-import net.minecraftforge.client.event.GuiOpenEvent
-import net.minecraftforge.client.event.RenderWorldLastEvent
-import net.minecraftforge.event.entity.EntityJoinWorldEvent
-import net.minecraftforge.event.entity.living.LivingDeathEvent
-import net.minecraftforge.event.entity.player.ItemTooltipEvent
-import net.minecraftforge.event.entity.player.PlayerInteractEvent
-import net.minecraftforge.event.world.WorldEvent
-import net.minecraftforge.fml.common.eventhandler.EventPriority
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
-import java.util.function.Consumer
+import net.minecraftforge.common.MinecraftForge
 
 class Features {
 
@@ -52,7 +39,6 @@ class Features {
     val partyCommand = PartyCommand()
     val scoreCalculation = ScoreCalculation()
     val petsOverlay = PetsOverlay()
-    val presentHighlight = PresentHighlight()
 
     var features: MutableList<Feature> = mutableListOf(
         ChestCloser(),
@@ -66,47 +52,19 @@ class Features {
         PizzaFailSafe(),
         HidePetCandies(),
         petsOverlay,
-        presentHighlight
+        PresentHighlight()
     )
 
-    @SubscribeEvent
-    fun onTick(event: TickEvent.ClientTickEvent) =
-        features.forEach(Consumer { f -> if (f.isEnabled()) f.onTick(event) })
-
-    @SubscribeEvent
-    fun onDrawBackground(event: GuiOpenEvent) =
-        features.forEach(Consumer { f -> if (f.isEnabled()) f.onDrawBackground(event) })
-
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    fun onChat(event: ClientChatReceivedEvent) = features.forEach(Consumer { f -> if (f.isEnabled()) f.onChat(event) })
-
-    @SubscribeEvent
-    fun onRenderEntityModel(event: RenderEntityModelEvent) =
-        features.forEach(Consumer { f -> if (f.isEnabled()) f.onRenderEntityModel(event) })
-
-    @SubscribeEvent
-    fun onEntityJoinWorld(event: EntityJoinWorldEvent) =
-        features.forEach(Consumer { f -> if (f.isEnabled()) f.onEntityJoinWorld(event) })
-
-    @SubscribeEvent
-    fun onWorldLoad(event: WorldEvent.Load) =
-        features.forEach(Consumer { f -> if (f.isEnabled()) f.onWorldLoad(event) })
-
-    @SubscribeEvent
-    fun onPacket(event: PacketReceive) = features.forEach(Consumer { f -> if (f.isEnabled()) f.onPacket(event) })
-
-    @SubscribeEvent
-    fun onPlayerInteract(event: PlayerInteractEvent) =
-        features.forEach(Consumer { f -> if (f.isEnabled()) f.onPlayerInteract(event) })
-
-    @SubscribeEvent
-    fun onTooltip(event: ItemTooltipEvent) = features.forEach(Consumer { f -> if (f.isEnabled()) f.onTooltip(event) })
-
-    @SubscribeEvent
-    fun onEntityDeath(event: LivingDeathEvent) =
-        features.forEach(Consumer { f -> if (f.isEnabled()) f.onEntityDeath(event) })
-
-    @SubscribeEvent
-    fun onWorldRender(event: RenderWorldLastEvent) =
-        features.forEach(Consumer { f -> if (f.isEnabled()) f.onWorldRender(event) })
+    fun register() {
+        features.forEach {
+            if (!it.isEnabled() && it.isRegistered) {
+                MinecraftForge.EVENT_BUS.unregister(it)
+                it.isRegistered = false
+            }
+            if (it.isEnabled() && !it.isRegistered) {
+                MinecraftForge.EVENT_BUS.register(it)
+                it.isRegistered = true
+            }
+        }
+    }
 }
