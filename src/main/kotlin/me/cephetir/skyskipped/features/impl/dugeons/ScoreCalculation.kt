@@ -32,6 +32,7 @@ import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -254,7 +255,8 @@ class ScoreCalculation : Feature() {
         }
     }
 
-    fun onWorldUnload(event: WorldEvent.Unload) {
+    @SubscribeEvent
+    fun onWorldLoad(event: WorldEvent.Load) {
         mimicKilled.set(false)
         firstDeathHadSpirit.set(false)
         floorReq.set(floorRequirements["default"]!!)
@@ -268,6 +270,7 @@ class ScoreCalculation : Feature() {
         crypts.set(0)
         totalRoomMap.clear()
         bloodCleared = false
+        isSTLoaded = Loader.isModLoaded("skytils")
     }
 
 

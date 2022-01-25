@@ -24,7 +24,6 @@ import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent
@@ -62,11 +61,9 @@ class SkySkipped {
     fun onInit(event: FMLInitializationEvent) {
         MinecraftForge.EVENT_BUS.register(RPC())
         MinecraftForge.EVENT_BUS.register(Listener())
-
-        features.scoreCalculation.isSTLoaded = Loader.isModLoaded("skytils")
         features.register()
-
         RPC.reset()
+
         ClientCommandHandler.instance.registerCommand(SkySkippedCommand())
         ClientCommandHandler.instance.registerCommand(features.leaveCommand)
         ClientCommandHandler.instance.registerCommand(features.partyCommand)
