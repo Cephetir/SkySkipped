@@ -41,8 +41,8 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             }.start()
         }
 
-        val list: MutableList<Field> = javaClass.fields.toMutableList()
-        list.remove(javaClass.getField("DRPC"))
+        val list: MutableList<Field> = Companion::class.java.fields.toMutableList()
+        list.remove(Companion::class.java.getField("DRPC"))
         list.forEach { registerListener<Any>(it) { SkySkipped.features.register() } }
 
         addDependency("espColor", "playerESP")
