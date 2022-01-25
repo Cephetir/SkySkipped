@@ -24,7 +24,7 @@ import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import java.awt.Color
 import java.io.File
-import java.lang.reflect.Field
+import kotlin.reflect.full.memberProperties
 
 class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
     init {
@@ -41,9 +41,8 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             }.start()
         }
 
-        val list: MutableList<Field> = Companion::class.java.fields.toMutableList()
-        list.remove(Companion::class.java.getField("DRPC"))
-        list.forEach { registerListener<Any>(it) { SkySkipped.features.register() } }
+        Companion::class.memberProperties.filter { it.name != "DRPC" }.toMutableList()
+            .forEach { registerListener<Any>(it.name) { if (SkySkipped.features != null) SkySkipped.features.register() } }
 
         addDependency("espColor", "playerESP")
         addDependency("presentsColor", "presents")
