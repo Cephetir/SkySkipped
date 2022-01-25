@@ -37,7 +37,6 @@ class Features {
 
     val leaveCommand = LeaveCommand()
     val partyCommand = PartyCommand()
-    val scoreCalculation = ScoreCalculation()
     val petsOverlay = PetsOverlay()
 
     var features: MutableList<Feature> = mutableListOf(
@@ -48,7 +47,7 @@ class Features {
         Blocker(),
         Ping(),
         FragRun(),
-        scoreCalculation,
+        ScoreCalculation(),
         PizzaFailSafe(),
         HidePetCandies(),
         petsOverlay,
