@@ -54,16 +54,5 @@ class Features {
         PresentHighlight()
     )
 
-    fun register() {
-        features.forEach {
-            if (!it.isEnabled() && it.isRegistered) {
-                MinecraftForge.EVENT_BUS.unregister(it)
-                it.isRegistered = false
-            }
-            if (it.isEnabled() && !it.isRegistered) {
-                MinecraftForge.EVENT_BUS.register(it)
-                it.isRegistered = true
-            }
-        }
-    }
+    fun register() = features.forEach { MinecraftForge.EVENT_BUS.register(it) }
 }

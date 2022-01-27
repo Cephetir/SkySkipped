@@ -85,7 +85,6 @@ class SkySkippedCommand : CommandBase() {
                     §cSkySkipped §f:: §e/sm crit §f- §eShows last critical hit
                     §cSkySkipped §f:: §e/sm help §f- §eShow this message
                     §cSkySkipped §f:: §e/sm pet [pet index (start counting from 1)] §f- §eAuto select pet quickly
-                    
                     """.trimIndent()
             )
         } else {
@@ -97,7 +96,6 @@ class SkySkippedCommand : CommandBase() {
                     §cSkySkipped §f:: §e/sm crit §f- §eShows last critical hit
                     §cSkySkipped §f:: §e/sm help §f- §eShows this message
                     §cSkySkipped §f:: §e/sm pet [pet index (start counting from 1)] §f- §eAuto select pet quickly
-                    
                     """.trimIndent()
             )
         }

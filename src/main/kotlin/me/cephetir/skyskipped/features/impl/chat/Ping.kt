@@ -32,6 +32,7 @@ class Ping : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
+        if(!Config.ping) return
         val text = event.message as ChatComponentText
         val unformattedText = text.unformattedText.stripColor()
         val matcher = regex.matcher(unformattedText)
@@ -41,9 +42,5 @@ class Ping : Feature() {
             if (substringBefore.lowercase().contains(mc.thePlayer.name.lowercase()))
                 mc.thePlayer.playSound("random.pop", 0.8f, 1f)
         }
-    }
-
-    override fun isEnabled(): Boolean {
-        return Config.ping
     }
 }

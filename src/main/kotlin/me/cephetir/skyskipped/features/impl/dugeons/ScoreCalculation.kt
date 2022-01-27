@@ -41,9 +41,9 @@ import skytils.skytilsmod.features.impl.handlers.MayorInfo
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
+import kotlin.reflect.full.memberProperties
 
 class ScoreCalculation : Feature() {
-    var isSTLoaded = false
 
     var bloodCleared = false
     var bloodFound = false
@@ -124,13 +124,13 @@ class ScoreCalculation : Feature() {
     }
 
     val discoveryScore = (roomClearScore.zip(secretScore)).map { (clear, secret) ->
-        (clear + secret).toInt()
+        clear.toInt() + secret.toInt()
     }
 
     var deaths = BasicState(0)
     var firstDeathHadSpirit = BasicState(false)
     val deathPenalty = (deaths.zip(firstDeathHadSpirit)).map { (deathCount, spirit) ->
-        (2 * deathCount) - (if (spirit) 1 else 0)
+        (2 * deathCount) - spirit.ifTrue(1)
     }
 
     var missingPuzzles = BasicState(0)
@@ -164,9 +164,10 @@ class ScoreCalculation : Feature() {
     var crypts = BasicState(0)
     var mimicKilled = BasicState(false)
     var isPaul =
-        BasicState(if (isSTLoaded) (MayorInfo.currentMayor == "Paul" && MayorInfo.mayorPerks.contains("EZPZ")) || MayorInfo.jerryMayor?.name == "Paul" else false)
-    val bonusScore = (crypts.zip(mimicKilled.zip(isPaul))).map { (crypts, bools) ->
-        (if (bools.first) 2 else 0) + crypts.coerceAtMost(5) + if (bools.second) 10 else 0
+        if (Loader.isModLoaded("skytils")) (MayorInfo.currentMayor == "Paul" && MayorInfo.mayorPerks.contains("EZPZ")) || MayorInfo.jerryMayor?.name == "Paul" else false
+
+    val bonusScore = (crypts.zip(mimicKilled)).map { (crypts, bools) ->
+        bools.ifTrue(2) + crypts.coerceAtMost(5) + isPaul.ifTrue(10)
     }
 
     val totalScore =
@@ -270,12 +271,8 @@ class ScoreCalculation : Feature() {
         crypts.set(0)
         totalRoomMap.clear()
         bloodCleared = false
-        isSTLoaded = Loader.isModLoaded("skytils")
-    }
-
-
-    override fun isEnabled(): Boolean {
-        return true
+        isPaul =
+            if (Loader.isModLoaded("skytils")) (MayorInfo.currentMayor == "Paul" && MayorInfo.mayorPerks.contains("EZPZ")) || MayorInfo.jerryMayor?.name == "Paul" else false
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -329,7 +326,6 @@ class ScoreCalculation : Feature() {
         if (event.phase != TickEvent.Phase.START || !Cache.isInDungeon) return
 
         if ((totalScore.get() >= 300) && !Cache.was && Config.scorePing) {
-            println(totalScore.get())
             PingUtils(100, "300 score reached!")
             mc.thePlayer.sendChatMessage(Config.pingText)
             Cache.was = true
@@ -340,7 +336,7 @@ class ScoreCalculation : Feature() {
         }
 
         if (Keyboard.isKeyDown(Keyboard.KEY_N)) { // TODO: FIX CALC IDK FUCK THIS SHIT
-            println("Crypts ${crypts.get()} Mimic ${mimicKilled.get()} Paul ${isPaul.get()}")
+            ScoreCalculation::class.memberProperties.forEach { if(it is State<*>) println(it.name + ": " + it.get()) }
             println("Total Score ${totalScore.get()} Skill ${skillScore.get()} Discovery ${discoveryScore.get()} Speed ${speedScore.get()} Bonus ${bonusScore.get()}")
         }
     }

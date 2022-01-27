@@ -48,10 +48,6 @@ class PetsOverlay : Feature() {
     private var petsOverlay: GuiPetsOverlay? = null
     var auto = -1
 
-    override fun isEnabled(): Boolean {
-        return Config.petsOverlay
-    }
-
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onGuiOpen(event: GuiOpenEvent) {
         petsOverlay = null

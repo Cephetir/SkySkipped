@@ -35,7 +35,7 @@ class PlayerESP : Feature() {
 
     @SubscribeEvent
     fun onEntityJoinWorld(event: EntityJoinWorldEvent) {
-        if (!Cache.isInDungeon || event.entity !is EntityPlayer) return
+        if (!Cache.isInDungeon || event.entity !is EntityPlayer || !Config.playerESP) return
         val player = event.entity as EntityPlayer
         if (player.team == null) return
         val scorePlayerTeam = player.team as ScorePlayerTeam
@@ -46,7 +46,7 @@ class PlayerESP : Feature() {
 
     @SubscribeEvent
     fun onRenderEntityModel(event: RenderEntityModelEvent) {
-        if (!Cache.isInDungeon || highlightedEntities.isEmpty() || !highlightedEntities.contains(event.entity))
+        if (!Cache.isInDungeon || highlightedEntities.isEmpty() || !highlightedEntities.contains(event.entity) || !Config.playerESP)
             return
         outlineEntity(event)
     }
@@ -54,9 +54,5 @@ class PlayerESP : Feature() {
     @SubscribeEvent
     fun onWorldUnload(event: WorldEvent.Unload) {
         highlightedEntities.clear()
-    }
-
-    override fun isEnabled(): Boolean {
-        return Config.playerESP
     }
 }

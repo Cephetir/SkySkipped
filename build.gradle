@@ -73,7 +73,7 @@ dependencies {
     implementation('org.spongepowered:mixin:0.8.5-SNAPSHOT')
     annotationProcessor('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 
-    implementation(files("libs/Skytils-1.1.0.jar"))
+    implementation(files("libs/Skytils-1.1.2.jar"))
     implementation(files("libs/Pizza Client-1.1.jar"))
 }
 
