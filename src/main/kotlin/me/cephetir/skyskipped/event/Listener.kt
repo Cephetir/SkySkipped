@@ -32,8 +32,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 class Listener {
     @SubscribeEvent(priority = EventPriority.HIGH)
     fun update(event: ClientTickEvent) {
-        if (event.phase == TickEvent.Phase.START && !Minecraft.getMinecraft().isSingleplayer && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().netHandler != null && EssentialAPI.getMinecraftUtil()
-                .isHypixel() && Minecraft.getMinecraft().thePlayer.worldScoreboard != null
+        if (event.phase == TickEvent.Phase.START && !Minecraft.getMinecraft().isSingleplayer && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().netHandler != null &&
+            EssentialAPI.getMinecraftUtil().isHypixel() && Minecraft.getMinecraft().thePlayer.worldScoreboard != null
         ) {
             try {
                 var foundDungeon = false
@@ -50,17 +50,17 @@ class Listener {
 
                 if (foundSkyblock) {
                     for (text in scores) {
-                        val strippedLine = text.stripColor().keepScoreboardCharacters().trim { it <= ' ' }
+                        val strippedLine = text.stripColor().keepScoreboardCharacters().trim()
                         if (strippedLine.contains("Dungeon Cleared: ")) {
                             foundDungeon = true
                             percentage = strippedLine.substring(17).toInt()
-                        } else if (text.startsWith(" §7⏣")) dungeonName = strippedLine.trim { it <= ' ' }
-                        else if(text.contains(" ")) foundWorkshop = true // TODO: ADD REGEX
+                        } else if (text.startsWith(" §7⏣")) dungeonName = strippedLine.trim()
+                        else if(strippedLine.contains("Jerry's Workshop")) foundWorkshop = true
                     }
 
                     if (Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null) itemheld =
                         Minecraft.getMinecraft().thePlayer.heldItem.displayName.stripColor().keepScoreboardCharacters()
-                            .trim { it <= ' ' }
+                            .trim()
                 }
 
                 Cache.inSkyblock = foundSkyblock

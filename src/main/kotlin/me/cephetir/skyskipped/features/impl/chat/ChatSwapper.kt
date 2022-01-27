@@ -29,7 +29,7 @@ class ChatSwapper : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!EssentialAPI.getMinecraftUtil().isHypixel()) return
+        if (!EssentialAPI.getMinecraftUtil().isHypixel() || !Config.chatSwapper) return
         if ((event.message.unformattedText.startsWith("You have been kicked from the party") || event.message.unformattedText.contains("has disbanded") || event.message.unformattedText.startsWith("You left the party") || event.message.unformattedText.contains("was disbanded")) && Cache.inParty) {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat all")
             Cache.inParty = false
@@ -37,9 +37,5 @@ class ChatSwapper : Feature() {
             Minecraft.getMinecraft().thePlayer.sendChatMessage("/chat p")
             Cache.inParty = true
         }
-    }
-
-    override fun isEnabled(): Boolean {
-        return Config.chatSwapper
     }
 }

@@ -20,11 +20,9 @@ package me.cephetir.skyskipped.config
 import gg.essential.vigilance.Vigilant
 import gg.essential.vigilance.data.Property
 import gg.essential.vigilance.data.PropertyType
-import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import java.awt.Color
 import java.io.File
-import kotlin.reflect.full.memberProperties
 
 class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
     init {
@@ -40,9 +38,6 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
                 }
             }.start()
         }
-
-        Companion::class.memberProperties.filter { it.name != "DRPC" }.toMutableList()
-            .forEach { registerListener<Any>(it.name) { if (SkySkipped.features != null) SkySkipped.features.register() } }
 
         addDependency("espColor", "playerESP")
         addDependency("presentsColor", "presents")

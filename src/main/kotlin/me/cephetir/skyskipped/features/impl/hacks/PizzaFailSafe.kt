@@ -32,13 +32,9 @@ class PizzaFailSafe : Feature() {
     private var last: BlockPos? = null
     private var called = false
 
-    override fun isEnabled(): Boolean {
-        return Config.failSafe
-    }
-
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Loader.isModLoaded("pizzaclient") || mc.thePlayer == null || mc.theWorld == null || !MacroBuilder.isToggled()) return
+        if (event.phase != TickEvent.Phase.START || !Loader.isModLoaded("pizzaclient") || mc.thePlayer == null || mc.theWorld == null || !MacroBuilder.isToggled() || !Config.failSafe) return
 
         if (last != null) {
             if (checkPos(mc.thePlayer.position)) ticks++ else {

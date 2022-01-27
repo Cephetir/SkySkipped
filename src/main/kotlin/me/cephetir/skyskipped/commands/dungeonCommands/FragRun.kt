@@ -28,10 +28,7 @@ class FragRun : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if (event.message.unformattedText.stripColor().trim().contains("> EXTRA STATS <")) SkySkipped.features.leaveCommand.start(false)
-    }
-
-    override fun isEnabled(): Boolean {
-        return Config.EndLeave
+        if (event.message.unformattedText.stripColor().trim().contains("> EXTRA STATS <") && Config.EndLeave)
+            SkySkipped.features.leaveCommand.start(false)
     }
 }

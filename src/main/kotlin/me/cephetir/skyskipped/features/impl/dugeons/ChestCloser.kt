@@ -41,8 +41,4 @@ class ChestCloser : Feature() {
             }
         }
     }
-
-    override fun isEnabled(): Boolean {
-        return Config.chestCloser || Config.chestCloserCH
-    }
 }

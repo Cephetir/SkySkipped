@@ -17,6 +17,7 @@
 
 package me.cephetir.skyskipped.features.impl.visual
 
+import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.RenderUtils
@@ -41,13 +42,9 @@ class PresentHighlight : Feature() {
     private var clicked: MutableList<EntityArmorStand> = ArrayList()
     private var lastArmorStand: EntityArmorStand? = null
 
-    override fun isEnabled(): Boolean {
-        return Config.presents
-    }
-
     @SubscribeEvent
     fun onWorldRender(event: RenderWorldLastEvent) {
-        if (Minecraft.getMinecraft().theWorld == null/* || !Cache.inWorkshop*/) return
+        if (Minecraft.getMinecraft().theWorld == null || !Cache.inWorkshop || !Config.presents) return
         val entities: List<Entity> = Minecraft.getMinecraft().theWorld.loadedEntityList
         for (entity in entities) {
             if (entity is EntityArmorStand && shouldDraw(entity) && !clicked.contains(entity)) RenderUtils.drawBox(

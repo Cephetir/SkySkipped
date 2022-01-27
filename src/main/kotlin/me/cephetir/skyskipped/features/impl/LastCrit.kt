@@ -37,8 +37,4 @@ class LastCrit : Feature() {
         val strippedName: String = entity.customNameTag.stripColor()
         if (damagePattern.matches(strippedName) && strippedName.contains("✧")) Cache.lastCrit = strippedName
     }
-
-    override fun isEnabled(): Boolean {
-        return true
-    }
 }

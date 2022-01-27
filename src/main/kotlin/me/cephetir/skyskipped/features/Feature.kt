@@ -21,6 +21,4 @@ import net.minecraft.client.Minecraft
 
 abstract class Feature {
     val mc: Minecraft = Minecraft.getMinecraft()
-    abstract fun isEnabled(): Boolean
-    var isRegistered = false
 }
