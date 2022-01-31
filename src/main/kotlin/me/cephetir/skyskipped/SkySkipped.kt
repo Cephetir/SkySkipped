@@ -65,8 +65,8 @@ class SkySkipped {
         RPC.reset()
 
         ClientCommandHandler.instance.registerCommand(SkySkippedCommand())
-        ClientCommandHandler.instance.registerCommand(features.leaveCommand)
-        ClientCommandHandler.instance.registerCommand(features.partyCommand)
+        ClientCommandHandler.instance.registerCommand(Features.leaveCommand)
+        ClientCommandHandler.instance.registerCommand(Features.partyCommand)
     }
 
     @Mod.EventHandler

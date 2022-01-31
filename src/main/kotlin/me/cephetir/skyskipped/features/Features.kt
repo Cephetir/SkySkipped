@@ -26,6 +26,7 @@ import me.cephetir.skyskipped.features.impl.chat.Ping
 import me.cephetir.skyskipped.features.impl.dugeons.ChestCloser
 import me.cephetir.skyskipped.features.impl.dugeons.PlayerESP
 import me.cephetir.skyskipped.features.impl.dugeons.ScoreCalculation
+import me.cephetir.skyskipped.features.impl.dugeons.TermsDisplay
 import me.cephetir.skyskipped.features.impl.hacks.Blocker
 import me.cephetir.skyskipped.features.impl.hacks.PizzaFailSafe
 import me.cephetir.skyskipped.features.impl.visual.HidePetCandies
@@ -35,9 +36,12 @@ import net.minecraftforge.common.MinecraftForge
 
 class Features {
 
-    val leaveCommand = LeaveCommand()
-    val partyCommand = PartyCommand()
-    val petsOverlay = PetsOverlay()
+    companion object {
+        val leaveCommand = LeaveCommand()
+        val partyCommand = PartyCommand()
+        val petsOverlay = PetsOverlay()
+        val termsDisplay = TermsDisplay()
+    }
 
     var features: MutableList<Feature> = mutableListOf(
         ChestCloser(),
@@ -51,7 +55,8 @@ class Features {
         PizzaFailSafe(),
         HidePetCandies(),
         petsOverlay,
-        PresentHighlight()
+        PresentHighlight(),
+        termsDisplay
     )
 
     fun register() = features.forEach { MinecraftForge.EVENT_BUS.register(it) }

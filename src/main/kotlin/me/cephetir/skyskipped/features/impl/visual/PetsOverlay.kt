@@ -38,7 +38,6 @@ import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.input.Mouse
 import java.awt.Color
 import java.util.regex.Pattern
@@ -50,20 +49,17 @@ class PetsOverlay : Feature() {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onGuiOpen(event: GuiOpenEvent) {
-        petsOverlay = null
         if (!Config.petsOverlay) return
         if (event.gui !is GuiChest) return
-        val chest = event.gui as GuiChest
-        val container = chest.inventorySlots as ContainerChest
-        val containerName = container.lowerChestInventory.displayName.unformattedText
-        if (!containerName.endsWith("Pets")) return
-        petsOverlay = GuiPetsOverlay(chest)
+        val container = (event.gui as GuiChest).inventorySlots as ContainerChest
+        if (!container.lowerChestInventory.displayName.unformattedText.endsWith("Pets")) return
+        petsOverlay = GuiPetsOverlay(event.gui as GuiChest)
         Thread {
             try {
                 Thread.sleep(50L)
-                petsOverlay!!.setSize(chest)
                 petsOverlay!!.getPets()
-            } catch (ignored: Exception) {
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }.start()
     }
@@ -71,7 +67,10 @@ class PetsOverlay : Feature() {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onDrawScreen(event: DrawScreenEvent.Pre) {
         if (!Config.petsOverlay) return
+        if (event.gui !is GuiChest) return
         if (petsOverlay == null) return
+        val container = (event.gui as GuiChest).inventorySlots as ContainerChest
+        if (!container.lowerChestInventory.displayName.unformattedText.endsWith("Pets")) return
         event.isCanceled = true
         petsOverlay!!.setSize(event.gui as GuiChest)
         petsOverlay!!.onDrawScreen(event.mouseX, event.mouseY)
@@ -80,7 +79,10 @@ class PetsOverlay : Feature() {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onActionPerformed(event: GuiScreenEvent.MouseInputEvent) {
         if (!Config.petsOverlay) return
+        if (event.gui !is GuiChest) return
         if (petsOverlay == null) return
+        val container = (event.gui as GuiChest).inventorySlots as ContainerChest
+        if (!container.lowerChestInventory.displayName.unformattedText.endsWith("Pets")) return
         event.isCanceled = true
         val i: Int = Mouse.getEventX() * event.gui.width / this.mc.displayWidth
         val j: Int = event.gui.height - Mouse.getEventY() * event.gui.height / this.mc.displayHeight - 1
@@ -89,7 +91,7 @@ class PetsOverlay : Feature() {
 
     private var ticks = 0
     @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
+    fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
         if (!Config.petsOverlay) return
         if (petsOverlay == null) return
@@ -133,11 +135,13 @@ class PetsOverlay : Feature() {
                 if (slot.hasStack) {
                     val compound = slot.stack.tagCompound.getCompoundTag("display")
                     val displayName = compound.getString("Name")
-                    if (displayName.contains("[lvl ", true)) {
+                    val matcher = PET_PATTERN.matcher(displayName)
+                    if (matcher.matches()) {
                         if (rectWidth1 + 10 + k * 24 > width / 1.5f - rectWidth1) {
                             k = 0
                             j++
                         }
+                        val rarity = byBaseColor(matcher.group("color")).color.rgb
                         pets1.add(
                             Pet(
                                 rectWidth1 + 5 + k * 24,
@@ -145,7 +149,8 @@ class PetsOverlay : Feature() {
                                 displayName,
                                 slot,
                                 i,
-                                slot.stack
+                                slot.stack,
+                                rarity
                             )
                         )
                         i++
@@ -157,17 +162,11 @@ class PetsOverlay : Feature() {
                             mc.thePlayer.closeScreen()
                         }
                         for (text in slot.stack.getTooltip(mc.thePlayer, false)) {
-                            if (text.contains("Click to summon")) {
-                                pets1[i - 1].last = false
-                                break
-                            } else if (text.contains("Click to despawn")) {
+                            if (text.contains("Click to despawn")) {
                                 pets1[i - 1].last = true
                                 break
                             }
                         }
-                        val m = PET_PATTERN.matcher(displayName)
-                        if (m.matches()) pets1[i - 1].rarity =
-                            byBaseColor(m.group("color"))?.color?.rgb ?: Color(255, 255, 255, 255).rgb
                     } else if (displayName.contains("autopet", true)) autopet = slot
                     else if (displayName.contains("close", true)) close = slot
                     else if (displayName.contains("convert pet", true)) convert = slot
@@ -191,7 +190,7 @@ class PetsOverlay : Feature() {
             val d = height - height / 4
             val n = (rectHeight1 + 5 + (j + 1) * 24) * 1.5 + 20
             bottom = d.coerceAtLeast(n.roundToInt())
-            Gui.drawRect(0, 0, width, height, Color(0, 0, 0, 135).rgb)
+            Gui.drawRect(0, 0, width, height, Color(0, 0, 0, 150).rgb)
             Gui.drawRect(rectWidth - 20, rectHeight, width - rectWidth + 20, bottom, Config.petsBg.rgb)
             drawRoundedOutline(
                 rectWidth - 20f,
@@ -226,12 +225,6 @@ class PetsOverlay : Feature() {
                 }
                 drawRoundedOutline(pet.x - 0.5f, pet.y - 0.5f, pet.x + 16.5f, pet.y + 16.5f, 6f, 2.5f, pet.rarity)
                 GlStateManager.scale(0.5f / 1.5f, 0.5f / 1.5f, 0.5f / 1.5f)
-//                mc.fontRendererObj.drawStringWithShadow(
-//                    pet.name,
-//                    (pet.x + 8) * 2f * 1.5f - mc.fontRendererObj.getStringWidth(pet.name) / 2f,
-//                    (pet.y + 18) * 2f * 1.5f,
-//                    pet.rarity
-//                )
                 GlStateManager.scale(3f, 3f, 3f)
             }
             GlStateManager.scale(1f / 1.5f, 1f / 1.5f, 1f / 1.5f)
@@ -416,7 +409,7 @@ class PetsOverlay : Feature() {
         }
 
         private fun onHover(mouseX: Int, mouseY: Int) {
-            for (pet in pets) if (mouseX / 1.5f > pet.x && mouseY / 1.5f > pet.y && mouseX / 1.5f < pet.x + 16 && mouseY / 1.5f < pet.y + 16) {
+            if (pets.isNotEmpty()) for (pet in pets) if (mouseX / 1.5f > pet.x && mouseY / 1.5f > pet.y && mouseX / 1.5f < pet.x + 16 && mouseY / 1.5f < pet.y + 16) {
                 var max = 0
                 val tooltip = pet.itemStack.getTooltip(mc.thePlayer, false)
                 GlStateManager.translate(0f, 0f, 150f)
@@ -462,7 +455,7 @@ class PetsOverlay : Feature() {
             var slot: Slot,
             var id: Int,
             var itemStack: ItemStack,
-            var rarity: Int = -1,
+            var rarity: Int,
             var last: Boolean = false
         )
     }

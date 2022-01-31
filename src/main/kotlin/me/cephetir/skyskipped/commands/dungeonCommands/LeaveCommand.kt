@@ -18,8 +18,8 @@
 package me.cephetir.skyskipped.commands.dungeonCommands
 
 import gg.essential.api.EssentialAPI
-import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraft.client.Minecraft
@@ -100,7 +100,7 @@ class LeaveCommand : CommandBase() {
                     if (!ok) {
                         Minecraft.getMinecraft().thePlayer.sendChatMessage("/warp dungeon_hub")
                     }
-                    if (Config.EndParty && Config.BotName != "" || party) SkySkipped.features.partyCommand
+                    if (Config.EndParty && Config.BotName != "" || party) Features.partyCommand
                         .start()
                     MinecraftForge.EVENT_BUS.unregister(this)
                     started = false

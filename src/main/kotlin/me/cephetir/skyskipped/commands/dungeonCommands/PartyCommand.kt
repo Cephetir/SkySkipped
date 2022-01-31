@@ -18,8 +18,8 @@
 package me.cephetir.skyskipped.commands.dungeonCommands
 
 import gg.essential.api.EssentialAPI
-import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.features.Features
 import net.minecraft.client.Minecraft
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
@@ -47,7 +47,7 @@ class PartyCommand : CommandBase() {
     }
 
     override fun processCommand(sender: ICommandSender, args: Array<String>) {
-        SkySkipped.features.leaveCommand.start(true)
+        Features.leaveCommand.start(true)
     }
 
     fun start() {

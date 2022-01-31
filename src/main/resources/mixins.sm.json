@@ -7,10 +7,11 @@
   "client": [
     "IMixinGuiContainer",
     "IMixinGuiScreen",
+    "MixinEntityPlayer",
     "MixinGuiDisconnected",
     "MixinGuiMultiplayer",
+    "MixinNetworkManager",
     "MixinRendererLivingEntity",
-    "MixinScorePlayerTeam",
-    "MixinNetworkManager"
+    "MixinScorePlayerTeam"
   ]
 }
