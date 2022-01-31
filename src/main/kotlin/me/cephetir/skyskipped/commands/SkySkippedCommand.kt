@@ -23,6 +23,7 @@ import gg.essential.universal.wrappers.message.UTextComponent
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.hacks.PetMacro
 import me.cephetir.skyskipped.utils.TextUtils.isNumeric
 import net.minecraft.client.Minecraft
@@ -71,7 +72,7 @@ class SkySkippedCommand : CommandBase() {
         } else if (args[0] == "pet") {
             if ((args.size >= 2) && args[1].isNumeric() && args[1].toInt() > 0) {
                 val player = Minecraft.getMinecraft().thePlayer
-                if (Config.petsOverlay) SkySkipped.features.petsOverlay.auto = args[1].toInt()
+                if (Config.petsOverlay) Features.petsOverlay.auto = args[1].toInt()
                 else MinecraftForge.EVENT_BUS.register(PetMacro(args[1].toInt()))
                 player.sendChatMessage("/pets")
             } else

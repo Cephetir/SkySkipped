@@ -20,7 +20,7 @@ package me.cephetir.skyskipped.utils
 import net.minecraft.util.EnumChatFormatting
 import java.awt.Color
 
-enum class ItemRarity(val rarityName: String, val baseColor: EnumChatFormatting, val color: Color) {
+enum class ItemRarity(val rarityName: String = "COMMON", val baseColor: EnumChatFormatting = EnumChatFormatting.WHITE, val color: Color = Color.WHITE) {
     COMMON("COMMON", EnumChatFormatting.WHITE, Color(255, 255, 255)),
     UNCOMMON("UNCOMMON", EnumChatFormatting.GREEN, Color(77, 231, 77)),
     RARE("RARE", EnumChatFormatting.BLUE, Color(85, 85, 255)),
@@ -33,15 +33,11 @@ enum class ItemRarity(val rarityName: String, val baseColor: EnumChatFormatting,
     VERY_SPECIAL("VERY SPECIAL", EnumChatFormatting.RED, Color(170, 0, 0));
 
     companion object {
-        private val VALUES = values().sortedBy { obj: ItemRarity -> obj.ordinal }.toMutableList()
-        private val RARITY_PATTERN: Regex
+        private val VALUES = values().sortedBy { it.ordinal }.toMutableList()
+        val RARITY_PATTERN: Regex = Regex("(?:§[\\da-f]§l§ka§r )?(?<rarity>${VALUES.joinToString("|") { "(?:${it.baseColor}§l)+${it.rarityName}" }})")
 
-        fun byBaseColor(color: String) = values().find { rarity -> rarity.baseColor.toString() == color }
-
-        init {
-            values().forEach { rarity -> VALUES[rarity.ordinal] = rarity }
-            RARITY_PATTERN =
-                Regex("(?:§[\\da-f]§l§ka§r )?(?<rarity>${VALUES.joinToString("|") { "(?:${it.baseColor}§l)+${it.rarityName}" }})")
+        fun byBaseColor(color: String): ItemRarity {
+            return VALUES.find { it.baseColor.toString() == color } ?: COMMON
         }
     }
 

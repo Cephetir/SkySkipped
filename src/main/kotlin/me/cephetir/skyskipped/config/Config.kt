@@ -293,5 +293,14 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             description = "Color for presents highlight."
         )
         var presentsColor: Color = Color.GREEN
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Terminals Display",
+            category = "Dungeons",
+            subcategory = "Visual",
+            description = "Display called terminals in player's nametag."
+        )
+        var terms = true
     }
 }

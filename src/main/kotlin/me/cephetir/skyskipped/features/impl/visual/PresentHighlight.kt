@@ -34,7 +34,6 @@ import net.minecraftforge.event.entity.player.PlayerUseItemEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
-
 /*
 *   Huge Thanks to Sylvezar!
 */
