@@ -61,7 +61,7 @@ repositories {
 
 dependencies {
     include('gg.essential:loader-launchwrapper:1.1.3')
-    implementation('gg.essential:essential-1.8.9-forge:1813')
+    implementation('gg.essential:essential-1.8.9-forge:1815')
 
     include('com.github.jagrosh:DiscordIPC:e29d6d8') {
         exclude module: 'log4j'
