@@ -22,6 +22,7 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
+import me.cephetir.skyskipped.utils.BlurUtils
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
@@ -63,6 +64,7 @@ class SkySkipped {
         MinecraftForge.EVENT_BUS.register(Listener())
         features.register()
         RPC.reset()
+        BlurUtils.registerListener()
 
         ClientCommandHandler.instance.registerCommand(SkySkippedCommand())
         ClientCommandHandler.instance.registerCommand(Features.leaveCommand)
