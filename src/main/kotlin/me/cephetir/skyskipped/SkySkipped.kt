@@ -17,18 +17,24 @@
 
 package me.cephetir.skyskipped
 
+import gg.essential.api.utils.WebUtil
+import gg.essential.universal.UChat
+import gg.essential.universal.wrappers.message.UTextComponent
 import me.cephetir.skyskipped.commands.SkySkippedCommand
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.utils.BlurUtils
+import net.minecraft.event.ClickEvent
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -73,4 +79,28 @@ class SkySkipped {
 
     @Mod.EventHandler
     fun stop(event: FMLModDisabledEvent) = RPC.shutdown()
+
+    var checked = false
+    @SubscribeEvent
+    fun onWorldLoad(event: WorldEvent.Load) {
+        if(checked) return
+        checked = true
+        logger.info("Checking for updates...")
+        Thread {
+            val version = WebUtil.fetchString("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt") ?: return@Thread
+            if (version == "Failed to fetch") return@Thread
+            if (VERSION.toDouble() < version.toDouble()) {
+                logger.info("New version detected!")
+                UChat.chat(
+                    UTextComponent("""
+                    §4§l-----------------------------------------
+                    §cSkySkipped §f:: §eNew Version Detected: §c ${version.toDouble()}
+                    §b[Download]
+                    §4§l-----------------------------------------
+                    """.trimIndent())
+                        .setClick(ClickEvent.Action.OPEN_URL, "https://github.com/Cephetir/SkySkipped/releases/latest")
+                )
+            }
+        }
+    }
 }
