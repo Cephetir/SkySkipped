@@ -42,7 +42,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         addDependency("espColor", "playerESP")
         addDependency("presentsColor", "presents")
 
-        addDependency("petsBg", "petsOverlay")
+        addDependency("petsBgBlur", "petsOverlay")
         addDependency("petsBorderColor", "petsOverlay")
         addDependency("petsBorderWidth", "petsOverlay")
 
@@ -247,13 +247,16 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         var petsOverlay = true
 
         @Property(
-            type = PropertyType.COLOR,
-            name = "Pets Overlay Background Color",
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Pets Overlay Background Strength",
             category = "Visual",
             subcategory = "Visual",
-            description = "Color for pets overlay background."
+            description = "Strength for pets overlay background.",
+            minF = 5f,
+            maxF = 25f,
+            decimalPlaces = 1
         )
-        var petsBg: Color = Color(223, 223, 233, 155)
+        var petsBgBlur = 12.5f
 
         @Property(
             type = PropertyType.COLOR,

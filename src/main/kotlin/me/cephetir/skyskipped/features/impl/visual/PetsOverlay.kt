@@ -20,6 +20,7 @@ package me.cephetir.skyskipped.features.impl.visual
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinGuiContainer
+import me.cephetir.skyskipped.utils.BlurUtils
 import me.cephetir.skyskipped.utils.ItemRarity.Companion.byBaseColor
 import me.cephetir.skyskipped.utils.RoundUtils.drawRoundedOutline
 import me.cephetir.skyskipped.utils.RoundUtils.drawRoundedRect
@@ -190,14 +191,14 @@ class PetsOverlay : Feature() {
             val d = height - height / 4
             val n = (rectHeight1 + 5 + (j + 1) * 24) * 1.5 + 20
             bottom = d.coerceAtLeast(n.roundToInt())
+            BlurUtils.renderBlurredBackground(Config.petsBgBlur, width.toFloat(), height.toFloat(), rectWidth.toFloat() - 20, rectHeight.toFloat(), width.toFloat() - rectWidth.toFloat() + 40 - rectWidth.toFloat(), bottom.toFloat() - rectHeight.toFloat())
             Gui.drawRect(0, 0, width, height, Color(0, 0, 0, 150).rgb)
-            Gui.drawRect(rectWidth - 20, rectHeight, width - rectWidth + 20, bottom, Config.petsBg.rgb)
             drawRoundedOutline(
                 rectWidth - 20f,
                 rectHeight - 0.5f,
                 width - rectWidth + 20f,
                 bottom.toFloat(),
-                3f,
+                4.5f,
                 Config.petsBorderWidth,
                 Config.petsBorderColor.rgb
             )
@@ -244,9 +245,7 @@ class PetsOverlay : Feature() {
                     (h - 25 - 3).toFloat(),
                     -1
                 )
-                GlStateManager.scale(2f, 2f, 2f)
-                renderItem(nextPage!!.stack, (width / 2 - 20 - 12 - 40 - 12 - 36) / 2, (h - 25 - 6) / 2)
-                GlStateManager.scale(0.5f, 0.5f, 0.5f)
+                renderItem(nextPage!!.stack, (width / 2 - 20 - 12 - 40 - 12 - 28), (h - 25 + 10 - 8))
                 if (previousPage != null) {
                     Gui.drawRect(
                         width / 2 - 20 - 12 - 40 - 12 - 40,
@@ -261,13 +260,11 @@ class PetsOverlay : Feature() {
                         (h - 25 - 30 - 3).toFloat(),
                         -1
                     )
-                    GlStateManager.scale(2f, 2f, 2f)
                     renderItem(
                         previousPage!!.stack,
-                        (width / 2 - 20 - 12 - 40 - 12 - 36) / 2,
-                        (h - 25 - 30 - 6) / 2
+                        (width / 2 - 20 - 12 - 40 - 12 - 28),
+                        (h - 25 - 30 + 10 - 8)
                     )
-                    GlStateManager.scale(0.5f, 0.5f, 0.5f)
                 }
             } else if (previousPage != null) {
                 Gui.drawRect(
@@ -283,13 +280,11 @@ class PetsOverlay : Feature() {
                     (h - 25 - 3).toFloat(),
                     -1
                 )
-                GlStateManager.scale(2f, 2f, 2f)
                 renderItem(
                     previousPage!!.stack,
-                    (width / 2 - 20 - 12 - 40 - 12 - 36) / 2,
-                    (h - 25 - 6) / 2
+                    (width / 2 - 20 - 12 - 40 - 12 - 28),
+                    (h - 25 + 10 - 8)
                 )
-                GlStateManager.scale(0.5f, 0.5f, 0.5f)
             }
             if (autopet != null) {
                 Gui.drawRect(
@@ -299,15 +294,11 @@ class PetsOverlay : Feature() {
                     h - 25 + 20,
                     Color(255, 255, 255, 150).rgb
                 )
-                GlStateManager.scale(2f, 2f, 2f)
-                renderItem(autopet!!.stack, (width / 2 - 20 - 12 - 36) / 2, (h - 25 - 6) / 2)
-                GlStateManager.scale(0.5f, 0.5f, 0.5f)
+                renderItem(autopet!!.stack, (width / 2 - 20 - 12 - 28), (h - 25 + 10 - 8))
             }
             if (close != null) {
                 Gui.drawRect(width / 2 - 20, h - 25, width / 2 + 20, h - 25 + 20, Color(255, 255, 255, 150).rgb)
-                GlStateManager.scale(2f, 2f, 2f)
-                renderItem(close!!.stack, (width / 2 - 20 + 20 - 16) / 2, (h - 25 - 6) / 2)
-                GlStateManager.scale(0.5f, 0.5f, 0.5f)
+                renderItem(close!!.stack, (width / 2 - 20 + 20 - 8), (h - 25 + 10 - 8))
             }
             if (convert != null) {
                 Gui.drawRect(
@@ -317,13 +308,11 @@ class PetsOverlay : Feature() {
                     h - 25 + 20,
                     Color(255, 255, 255, 150).rgb
                 )
-                GlStateManager.scale(2f, 2f, 2f)
                 renderItem(
                     convert!!.stack,
-                    (width / 2 + 20 + 12 + 20 - 16) / 2,
-                    (h - 25 - 6) / 2
+                    (width / 2 + 20 + 12 + 20 - 8),
+                    (h - 25 + 10 - 8)
                 )
-                GlStateManager.scale(0.5f, 0.5f, 0.5f)
             }
             if (hide != null) {
                 Gui.drawRect(
@@ -333,13 +322,11 @@ class PetsOverlay : Feature() {
                     h - 25 + 20,
                     Color(255, 255, 255, 150).rgb
                 )
-                GlStateManager.scale(2f, 2f, 2f)
                 renderItem(
                     hide!!.stack,
-                    (width / 2 + 20 + 12 + 40 + 12 + 20 - 16) / 2,
-                    (h - 25 - 6) / 2
+                    (width / 2 + 20 + 12 + 40 + 12 + 20 - 8),
+                    (h - 25 + 10 - 8)
                 )
-                GlStateManager.scale(0.5f, 0.5f, 0.5f)
             }
             GlStateManager.resetColor()
             onHover(mouseX, mouseY)
