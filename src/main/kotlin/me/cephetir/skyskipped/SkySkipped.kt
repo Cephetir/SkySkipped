@@ -17,6 +17,7 @@
 
 package me.cephetir.skyskipped
 
+import gg.essential.api.utils.Multithreading
 import gg.essential.api.utils.WebUtil
 import gg.essential.universal.UChat
 import gg.essential.universal.wrappers.message.UTextComponent
@@ -26,6 +27,7 @@ import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.utils.BlurUtils
+import net.minecraft.client.Minecraft
 import net.minecraft.event.ClickEvent
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.common.MinecraftForge
@@ -83,10 +85,10 @@ class SkySkipped {
     var checked = false
     @SubscribeEvent
     fun onWorldLoad(event: WorldEvent.Load) {
-        if(checked) return
+        if(checked || Minecraft.getMinecraft().theWorld == null) return
         checked = true
         logger.info("Checking for updates...")
-        Thread {
+        Multithreading.runAsync Thread@ {
             val version = WebUtil.fetchString("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt") ?: return@Thread
             if (version == "Failed to fetch") return@Thread
             if (VERSION.toDouble() < version.toDouble()) {
@@ -94,13 +96,12 @@ class SkySkipped {
                 UChat.chat(
                     UTextComponent("""
                     §4§l-----------------------------------------
-                    §cSkySkipped §f:: §eNew Version Detected: §c ${version.toDouble()}
-                    §b[Download]
+                    §cSkySkipped §f:: §eNew Version Detected: §c ${version.toDouble()} §8(Click to Download)
                     §4§l-----------------------------------------
                     """.trimIndent())
                         .setClick(ClickEvent.Action.OPEN_URL, "https://github.com/Cephetir/SkySkipped/releases/latest")
                 )
-            }
+            } else logger.info("Latest version!")
         }
     }
 }
