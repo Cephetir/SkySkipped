@@ -36,17 +36,14 @@ import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import org.lwjgl.input.Keyboard
 import skytils.skytilsmod.features.impl.handlers.MayorInfo
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
-import kotlin.reflect.full.memberProperties
 
 class ScoreCalculation : Feature() {
 
     var bloodCleared = false
-    var bloodFound = false
     var hasBossSpawned = false
     var floor = "default"
 
@@ -95,7 +92,7 @@ class ScoreCalculation : Feature() {
         totalRoomMap.toList().maxByOrNull { it.second }!!.first
     }
     val calcingCompletedRooms = completedRooms.map {
-        it + (!bloodFound).ifTrue(1) + (!hasBossSpawned).ifTrue(1)
+        it + (!hasBossSpawned).ifTrue(1)
     }
     val calcingClearPercentage = calcingCompletedRooms.map { complete ->
         val total = totalRooms.get()
@@ -163,11 +160,9 @@ class ScoreCalculation : Feature() {
 
     var crypts = BasicState(0)
     var mimicKilled = BasicState(false)
-    var isPaul =
-        if (Loader.isModLoaded("skytils")) (MayorInfo.currentMayor == "Paul" && MayorInfo.mayorPerks.contains("EZPZ")) || MayorInfo.jerryMayor?.name == "Paul" else false
-
-    val bonusScore = (crypts.zip(mimicKilled)).map { (crypts, bools) ->
-        bools.ifTrue(2) + crypts.coerceAtMost(5) + isPaul.ifTrue(10)
+    var isPaul = BasicState(false)
+    val bonusScore = (crypts.zip(mimicKilled.zip(isPaul))).map { (crypts, bools) ->
+        bools.first.ifTrue(2) + crypts.coerceAtMost(5) + bools.second.ifTrue(10)
     }
 
     val totalScore =
@@ -271,23 +266,24 @@ class ScoreCalculation : Feature() {
         crypts.set(0)
         totalRoomMap.clear()
         bloodCleared = false
-        isPaul =
+        isPaul.set(
             if (Loader.isModLoaded("skytils")) (MayorInfo.currentMayor == "Paul" && MayorInfo.mayorPerks.contains("EZPZ")) || MayorInfo.jerryMayor?.name == "Paul" else false
+        )
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onChat(event: ClientChatReceivedEvent) {
         if (!Cache.isInDungeon) return
-        val unformatted: String = event.message.unformattedText.stripColor()
+        val unformatted = event.message.unformattedText.stripColor()
         if (unformatted.startsWith("Party > ")) {
-            if (unformatted.contains("SKYTILS-DUNGEON-SCORE-MIMIC$") || (unformatted.containsAny(
+            if (unformatted.contains("\$SKYTILS-DUNGEON-SCORE-MIMIC$") || (unformatted.containsAny(
                     "Mimic dead!", "Mimic Killed!"
                 ))
             ) {
                 mimicKilled.set(true)
                 return
             }
-            if (unformatted.contains("SKYTILS-DUNGEON-SCORE-ROOM$")) {
+            if (unformatted.contains("\$SKYTILS-DUNGEON-SCORE-ROOM$")) {
                 event.isCanceled = true
                 return
             }
@@ -301,7 +297,6 @@ class ScoreCalculation : Feature() {
             mimicKilled.set(true)
             return
         } else if (unformatted.contains("You have proven yourself. You may pass")) bloodCleared = true
-        else if (unformatted.lowercase() == "the blood door has been opened!") bloodFound = true
         else if (unformatted.startsWith("[BOSS]") && unformatted.contains(":")) {
             val bossName = unformatted.substringAfter("[BOSS] ").substringBefore(":").trim()
             if (!hasBossSpawned && bossName != "The Watcher" && floor != "default" && checkBossName(floor, bossName))
@@ -335,10 +330,15 @@ class ScoreCalculation : Feature() {
             Cache.was2 = true
         }
 
-        if (Keyboard.isKeyDown(Keyboard.KEY_N)) { // TODO: FIX CALC IDK FUCK THIS SHIT
-            ScoreCalculation::class.memberProperties.forEach { if(it is State<*>) println(it.name + ": " + it.get()) }
-            println("Total Score ${totalScore.get()} Skill ${skillScore.get()} Discovery ${discoveryScore.get()} Speed ${speedScore.get()} Bonus ${bonusScore.get()}")
-        }
+//        if (Keyboard.isKeyDown(Keyboard.KEY_N)) { // TODO: FIX CALC IDK FUCK THIS SHIT
+//            try {
+//                ScoreCalculation::class.memberProperties.forEach {
+//                    if (it.get(this) is State<*>)
+//                        println(it.name + ": " + (it.get(this) as State<*>).get())
+//                }
+//            } catch (_: Exception) {}
+//            println("Total Score ${totalScore.get()} Skill ${skillScore.get()} Discovery ${discoveryScore.get()} Speed ${speedScore.get()} Bonus ${bonusScore.get()}")
+//        }
     }
 
     data class FloorRequirement(val secretPercentage: Double = 1.0, val speed: Int = 10 * 60)
