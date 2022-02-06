@@ -95,7 +95,7 @@ class BlurUtils {
                     val height = Minecraft.getMinecraft().displayHeight
                     val output = blurOutput.computeIfAbsent(
                         blur
-                    ) { k: Float? ->
+                    ) {
                         val fb =
                             Framebuffer(width, height, false)
                         fb.setFramebufferFilter(GL11.GL_NEAREST)
@@ -230,7 +230,7 @@ class BlurUtils {
             if (blurStrength < 0.5) return
             requestedBlurs.add(blurStrength)
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastBlur > 300) {
+            if (currentTime - lastBlur > 50) {
                 shouldBlur = true
                 if (currentTime - lastBlur > 400 && forcedUpdate) return
             }

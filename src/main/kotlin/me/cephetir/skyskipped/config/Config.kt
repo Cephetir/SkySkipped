@@ -320,8 +320,36 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Auto Ghost Block",
             category = "Dungeons",
             subcategory = "Auto Ghost Block",
-            description = "Automatically make ghost block when you're sneaking on stairs, upside down stairs, skulls, etc."
+            description = "Automatically make ghost block on stairs, upside down stairs, skulls, etc."
         )
         var autoGB = false
+
+        @Property(
+            type = PropertyType.SELECTOR,
+            name = "Auto Ghost Block",
+            category = "Dungeons",
+            subcategory = "Auto Ghost Block",
+            description = "Automatically make ghost block when you're sneaking on stairs, upside down stairs, skulls, etc.",
+            options = ["On sneak", "On key"]
+        )
+        var autoGBMode = 0
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Perspective Toggle",
+            category = "Visual",
+            subcategory = "Visual",
+            description = "Will activate 3rd perspective."
+        )
+        var betterPerspective = true
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Better Perspective Item",
+            category = "Visual",
+            subcategory = "Visual",
+            description = "On what item Perspective Toggle will work. Split with \", \"."
+        )
+        var betterPerspectiveItems = ""
     }
 }

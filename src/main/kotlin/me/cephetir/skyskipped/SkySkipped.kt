@@ -28,10 +28,12 @@ import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.utils.BlurUtils
 import net.minecraft.client.Minecraft
+import net.minecraft.client.settings.KeyBinding
 import net.minecraft.event.ClickEvent
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent
@@ -39,6 +41,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.lwjgl.input.Keyboard
 
 @Mod(
     modid = SkySkipped.MODID,
@@ -57,6 +60,9 @@ class SkySkipped {
         val config = Config()
         val features = Features()
         val logger: Logger = LogManager.getLogger("SkySkipped")
+
+        val autoGhostBlockKey = KeyBinding("Auto Ghost Block", Keyboard.KEY_NONE, "SkySkipped")
+        val perspectiveToggle = KeyBinding("Better Perspective", Keyboard.KEY_NONE, "SkySkipped")
     }
 
     @Mod.EventHandler
@@ -77,6 +83,9 @@ class SkySkipped {
         ClientCommandHandler.instance.registerCommand(SkySkippedCommand())
         ClientCommandHandler.instance.registerCommand(Features.leaveCommand)
         ClientCommandHandler.instance.registerCommand(Features.partyCommand)
+
+        ClientRegistry.registerKeyBinding(autoGhostBlockKey)
+        ClientRegistry.registerKeyBinding(perspectiveToggle)
     }
 
     @Mod.EventHandler

@@ -46,6 +46,11 @@ object TextUtils {
         else sequences.any { it != null && this.contains(it, true) }
     }
 
+    fun CharSequence?.containsAny(sequences: List<CharSequence>): Boolean {
+        return if (this == null) false
+        else sequences.any { it != "" && this.contains(it, true) }
+    }
+
     private val suffixes = TreeMap<Long, String>()
     fun String.keepIntegerCharactersOnly(): String {
         return INTEGER_CHARACTERS.matcher(this).replaceAll("")

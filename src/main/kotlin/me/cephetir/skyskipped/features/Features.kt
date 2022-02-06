@@ -27,6 +27,7 @@ import me.cephetir.skyskipped.features.impl.dugeons.*
 import me.cephetir.skyskipped.features.impl.hacks.Blocker
 import me.cephetir.skyskipped.features.impl.hacks.PizzaFailSafe
 import me.cephetir.skyskipped.features.impl.visual.HidePetCandies
+import me.cephetir.skyskipped.features.impl.visual.PerspectiveToggle
 import me.cephetir.skyskipped.features.impl.visual.PetsOverlay
 import me.cephetir.skyskipped.features.impl.visual.PresentHighlight
 import net.minecraftforge.common.MinecraftForge
@@ -54,7 +55,8 @@ class Features {
         petsOverlay,
         PresentHighlight(),
         termsDisplay,
-        AutoGhostBlock()
+        AutoGhostBlock(),
+        PerspectiveToggle()
     )
 
     fun register() = features.forEach { MinecraftForge.EVENT_BUS.register(it) }
