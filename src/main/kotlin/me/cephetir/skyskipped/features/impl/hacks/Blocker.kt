@@ -28,10 +28,10 @@ class Blocker : Feature() {
 
     @SubscribeEvent
     fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (!Cache.inSkyblock || !Config.gsBlock) return
+        if (!Cache.inSkyblock || !Config.block) return
         if (event.entity !== mc.thePlayer || event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) return
         val item = Cache.itemheld
-        if (!item.stripColor().lowercase().contains("giant's sword")) return
+        if (!Config.blockList.split(", ").any { item.stripColor().contains(it, true) }) return
         mc.thePlayer.playSound("random.orb", 0.8f, 1f)
         event.isCanceled = true
     }
