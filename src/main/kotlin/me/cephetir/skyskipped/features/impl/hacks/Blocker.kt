@@ -20,6 +20,7 @@ package me.cephetir.skyskipped.features.impl.hacks
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.TextUtils.containsAny
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -31,7 +32,7 @@ class Blocker : Feature() {
         if (!Cache.inSkyblock || !Config.block) return
         if (event.entity !== mc.thePlayer || event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) return
         val item = Cache.itemheld
-        if (!Config.blockList.split(", ").any { item.stripColor().contains(it, true) }) return
+        if (!item.stripColor().containsAny(Config.blockList.split(", "))) return
         mc.thePlayer.playSound("random.orb", 0.8f, 1f)
         event.isCanceled = true
     }

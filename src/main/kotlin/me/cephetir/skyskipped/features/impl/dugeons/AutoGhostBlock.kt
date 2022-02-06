@@ -17,6 +17,7 @@
 
 package me.cephetir.skyskipped.features.impl.dugeons
 
+import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
@@ -37,6 +38,14 @@ class AutoGhostBlock : Feature() {
     fun onPlayerTick(event: PlayerTickEvent) {
         if (mc.thePlayer == null || mc.theWorld == null || event.phase != TickEvent.Phase.START) return
         if (!Config.autoGB || !Cache.isInDungeon) return
+        when(Config.autoGBMode) {
+            0 -> onSneak()
+            1 -> onKey()
+            else -> onSneak()
+        }
+    }
+
+    private fun onSneak() {
         if (mc.gameSettings.keyBindSneak.isKeyDown) {
             val playerPos: BlockPos = mc.thePlayer.position
             val playerVec: Vec3 = mc.thePlayer.positionVector
@@ -68,6 +77,56 @@ class AutoGhostBlock : Feature() {
                 val diffX = abs(blockPos.x + 0.5 - playerVec.xCoord)
                 val diffZ = abs(blockPos.z + 0.5 - playerVec.zCoord)
                 val diffY = blockPos.y - playerVec.yCoord
+                if (diffX < 1 && diffZ < 1) {
+                    val blockState: IBlockState = mc.theWorld.getBlockState(blockPos)
+
+                    if (isStair(blockState) && diffY > 1.2 && diffY < 1.3)
+                        mc.theWorld.setBlockToAir(blockPos)
+                }
+            }
+        }
+    }
+
+    private fun onKey() {
+        if (SkySkipped.autoGhostBlockKey.isKeyDown) {
+            val playerPos: BlockPos = mc.thePlayer.position
+            val playerVec: Vec3 = mc.thePlayer.positionVector
+            val vec3i = Vec3i(3, 1, 3)
+            val vec3i2 = Vec3i(3, 2, 3)
+            for (blockPos in BlockPos.getAllInBox(playerPos.add(vec3i), playerPos.subtract(vec3i2))) {
+                val diffX = abs(blockPos.x + 0.5 - playerVec.xCoord)
+                val diffZ = abs(blockPos.z + 0.5 - playerVec.zCoord)
+                val diffY = blockPos.y - playerVec.yCoord
+                if (diffX < 1 && diffZ < 1) {
+                    val blockState: IBlockState = mc.theWorld.getBlockState(blockPos)
+
+                    if (isStair(blockState) && diffY == -0.5) {
+                        mc.theWorld.setBlockToAir(blockPos)
+                        return
+                    }
+                    else if (blockState.block == Blocks.skull && diffY == 0.0 && diffX < 0.5 && diffZ < 0.5) {
+                        mc.theWorld.setBlockToAir(blockPos)
+                        return
+                    }
+                    else if (blockState.block == Blocks.hopper && diffY == -0.625) {
+                        mc.theWorld.setBlockToAir(blockPos)
+                        return
+                    }
+                    else if (isFence(blockState) && diffY <= 0 && diffX < 0.5 && diffZ < 0.5) {
+                        mc.theWorld.setBlockToAir(blockPos)
+                        return
+                    }
+                }
+            }
+
+            val playerPos2: BlockPos = mc.thePlayer.position
+            val playerVec2: Vec3 = mc.thePlayer.positionVector
+            val vec3i4 = Vec3i(3, 2, 3)
+            val vec3i3 = Vec3i(3, 0, 3)
+            for (blockPos in BlockPos.getAllInBox(playerPos2.add(vec3i4), playerPos2.subtract(vec3i3))) {
+                val diffX = abs(blockPos.x + 0.5 - playerVec2.xCoord)
+                val diffZ = abs(blockPos.z + 0.5 - playerVec2.zCoord)
+                val diffY = blockPos.y - playerVec2.yCoord
                 if (diffX < 1 && diffZ < 1) {
                     val blockState: IBlockState = mc.theWorld.getBlockState(blockPos)
 
