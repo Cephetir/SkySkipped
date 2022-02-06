@@ -127,12 +127,21 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Block GS ability",
+            name = "Block ability",
             category = "Hacks",
             subcategory = "Hacks",
-            description = "Blocks Giant's sword ability."
+            description = "Blocks item ability."
         )
-        var gsBlock = false
+        var block = false
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Ability list",
+            category = "Hacks",
+            subcategory = "Hacks",
+            description = "List of items to block ability. Split with \", \"."
+        )
+        var blockList = ""
 
         @Property(
             type = PropertyType.SWITCH,
@@ -305,5 +314,14 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             description = "Display called terminals in player's nametag."
         )
         var terms = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Ghost Block",
+            category = "Dungeons",
+            subcategory = "Auto Ghost Block",
+            description = "Automatically make ghost block when you're sneaking on stairs, upside down stairs, skulls, etc."
+        )
+        var autoGB = false
     }
 }

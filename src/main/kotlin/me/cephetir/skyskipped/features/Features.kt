@@ -23,10 +23,7 @@ import me.cephetir.skyskipped.commands.dungeonCommands.PartyCommand
 import me.cephetir.skyskipped.features.impl.LastCrit
 import me.cephetir.skyskipped.features.impl.chat.ChatSwapper
 import me.cephetir.skyskipped.features.impl.chat.Ping
-import me.cephetir.skyskipped.features.impl.dugeons.ChestCloser
-import me.cephetir.skyskipped.features.impl.dugeons.PlayerESP
-import me.cephetir.skyskipped.features.impl.dugeons.ScoreCalculation
-import me.cephetir.skyskipped.features.impl.dugeons.TermsDisplay
+import me.cephetir.skyskipped.features.impl.dugeons.*
 import me.cephetir.skyskipped.features.impl.hacks.Blocker
 import me.cephetir.skyskipped.features.impl.hacks.PizzaFailSafe
 import me.cephetir.skyskipped.features.impl.visual.HidePetCandies
@@ -56,7 +53,8 @@ class Features {
         HidePetCandies(),
         petsOverlay,
         PresentHighlight(),
-        termsDisplay
+        termsDisplay,
+        AutoGhostBlock()
     )
 
     fun register() = features.forEach { MinecraftForge.EVENT_BUS.register(it) }
