@@ -17,7 +17,6 @@
 
 package me.cephetir.skyskipped.features.impl.hacks
 
-import QolSkyblockMod.PizzaClient.features.skills.macros.builder.MacroBuilder
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import net.minecraft.client.settings.KeyBinding
@@ -26,6 +25,7 @@ import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
+import qolskyblockmod.pizzaclient.features.macros.builder.MacroBuilder
 
 class PizzaFailSafe : Feature() {
     private var ticks = 0
@@ -34,7 +34,7 @@ class PizzaFailSafe : Feature() {
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Loader.isModLoaded("pizzaclient") || mc.thePlayer == null || mc.theWorld == null || !MacroBuilder.isToggled() || !Config.failSafe) return
+        if (event.phase != TickEvent.Phase.START || !Loader.isModLoaded("pizzaclient") || mc.thePlayer == null || mc.theWorld == null || !MacroBuilder.toggled || !Config.failSafe) return
 
         if (last != null) {
             if (checkPos(mc.thePlayer.position)) ticks++ else {
@@ -95,6 +95,7 @@ class PizzaFailSafe : Feature() {
                     )
                     MacroBuilder.onKey()
                     called = false
+                    ticks = 0
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
