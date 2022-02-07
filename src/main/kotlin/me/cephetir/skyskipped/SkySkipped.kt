@@ -91,7 +91,7 @@ class SkySkipped {
     @Mod.EventHandler
     fun stop(event: FMLModDisabledEvent) = RPC.shutdown()
 
-    var checked = false
+    private var checked = false
     @SubscribeEvent
     fun onWorldLoad(event: WorldEvent.Load) {
         if(checked || Minecraft.getMinecraft().theWorld == null) return

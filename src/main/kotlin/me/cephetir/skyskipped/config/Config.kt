@@ -42,6 +42,9 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         addDependency("espColor", "playerESP")
         addDependency("presentsColor", "presents")
 
+        addDependency("autoGBMode", "autoGB")
+        addDependency("betterPerspectiveItems", "betterPerspective")
+
         addDependency("petsBgBlur", "petsOverlay")
         addDependency("petsBorderColor", "petsOverlay")
         addDependency("petsBorderWidth", "petsOverlay")
@@ -241,7 +244,6 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Hide Pet Candies",
             category = "Visual",
-            subcategory = "Visual",
             description = "Hide pet's candies counter in tooltip."
         )
         var hidePetCandies = false
@@ -250,7 +252,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Pets Overlay",
             category = "Visual",
-            subcategory = "Visual",
+            subcategory = "Pets Overlay",
             description = "Nice looking overlay for pets menu.\n§cDon't use with small window size"
         )
         var petsOverlay = true
@@ -259,7 +261,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.DECIMAL_SLIDER,
             name = "Pets Overlay Background Strength",
             category = "Visual",
-            subcategory = "Visual",
+            subcategory = "Pets Overlay",
             description = "Strength for pets overlay background.",
             minF = 5f,
             maxF = 25f,
@@ -271,7 +273,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.COLOR,
             name = "Pets Overlay Border Color",
             category = "Visual",
-            subcategory = "Visual",
+            subcategory = "Pets Overlay",
             description = "Color for pets overlay border."
         )
         var petsBorderColor: Color = Color(87, 0, 247, 255)
@@ -280,7 +282,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.DECIMAL_SLIDER,
             name = "Pets Overlay Border Width",
             category = "Visual",
-            subcategory = "Visual",
+            subcategory = "Pets Overlay",
             description = "Width for pets overlay border.",
             minF = 1f,
             maxF = 6f,
@@ -292,7 +294,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Highlight Presents in Jerry Workshop",
             category = "Visual",
-            subcategory = "Visual",
+            subcategory = "Highlight Presents",
             description = "Highlights presents in Jerry Workshop."
         )
         var presents = true
@@ -301,7 +303,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.COLOR,
             name = "Highlight Presents Color",
             category = "Visual",
-            subcategory = "Visual",
+            subcategory = "Highlight Presents",
             description = "Color for presents highlight."
         )
         var presentsColor: Color = Color.GREEN
@@ -338,7 +340,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Perspective Toggle",
             category = "Visual",
-            subcategory = "Visual",
+            subcategory = "Perspective Toggle",
             description = "Will activate 3rd perspective."
         )
         var betterPerspective = true
@@ -347,7 +349,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.TEXT,
             name = "Better Perspective Item",
             category = "Visual",
-            subcategory = "Visual",
+            subcategory = "Perspective Toggle",
             description = "On what item Perspective Toggle will work. Split with \", \"."
         )
         var betterPerspectiveItems = ""
