@@ -87,7 +87,7 @@ class PresentHighlight : Feature() {
     fun onEntityInteractEvent(e: EntityInteractEvent) = interact(e.target)
 
     @SubscribeEvent
-    fun onPlayerUseItemEvent(e: PlayerUseItemEvent) {
+    fun onPlayerUseItemEvent(e: PlayerUseItemEvent.Start) {
         if (mc.objectMouseOver.entityHit != null) interact(mc.objectMouseOver.entityHit)
     }
 
