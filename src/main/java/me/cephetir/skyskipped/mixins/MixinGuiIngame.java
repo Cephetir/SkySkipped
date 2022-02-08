@@ -43,7 +43,7 @@ public class MixinGuiIngame {
             DecimalFormat format = new DecimalFormat("###,###.##");
             String s = format.format(needed).replace(" ", ",");
             return "Purse: " + ChatColor.GOLD + s;
-        } else if (Config.Companion.getCustomSbNumbers() && text.startsWith(EnumChatFormatting.RED + "") && Pattern.compile("\\d").matcher(txt).matches()) {
+        } else if (Config.Companion.getCustomSbNumbers() && text.startsWith(EnumChatFormatting.RED + "") && Pattern.compile("\\d+").matcher(txt).matches()) {
             return "";
         } else return text;
     }
