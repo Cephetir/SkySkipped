@@ -46,6 +46,9 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         addDependency("betterPerspectiveItems", "betterPerspective")
         addDependency("customSbText", "customSb")
 
+        addDependency("failsafe", "failsafeJump")
+        addDependency("block", "blockList")
+
         addDependency("petsBgBlur", "petsOverlay")
         addDependency("petsBorderColor", "petsOverlay")
         addDependency("petsBorderWidth", "petsOverlay")
@@ -113,10 +116,10 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Pizza Fail Safe",
+            name = "Pizza Unstuck",
             category = "Hacks",
             subcategory = "Hacks",
-            description = "Failsafe macros in Pizza client."
+            description = "Unstuck for Pizza client."
         )
         var failSafe = false
 
@@ -125,7 +128,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Jump When Stuck",
             category = "Hacks",
             subcategory = "Hacks",
-            description = "Jump in fail safe."
+            description = "Jump in unstuck."
         )
         var failsafeJump = false
 
@@ -329,7 +332,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SELECTOR,
-            name = "Auto Ghost Block",
+            name = "Auto Ghost Block Mode",
             category = "Dungeons",
             subcategory = "Auto Ghost Block",
             description = "Automatically make ghost block when you're sneaking on stairs, upside down stairs, skulls, etc.",
@@ -372,5 +375,14 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             description = "New text to display on scoreboard\nFor color codes use \"&\"."
         )
         var customSbText = "&cSkySkipped"
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Remove red ugly numbers",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Remove red ugly numbers."
+        )
+        var customSbNumbers = false
     }
 }
