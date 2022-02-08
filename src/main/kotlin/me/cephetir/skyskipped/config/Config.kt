@@ -62,7 +62,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Chest Closer",
             category = "Dungeons",
             subcategory = "Chest Closer",
-            description = "Chests in dungeon will close automatically."
+            description = "Auto close chests in dungeons."
         )
         var chestCloser = false
 
@@ -71,7 +71,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Chest Closer in Crystal Hollows",
             category = "Dungeons",
             subcategory = "Chest Closer",
-            description = "Chests in Crystal Hollows will close automatically."
+            description = "Auto close chests in Crystal Hollows."
         )
         var chestCloserCH = false
 
@@ -219,7 +219,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "300 Score Ping",
             category = "Dungeons",
             subcategory = "Ping",
-            description = "SBE like 300 score ping."
+            description = "Ping on 300 score reached."
         )
         var scorePing = false
 
@@ -243,7 +243,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Hide Pet Candies",
+            name = "Hide Pet's Candies",
             category = "Visual",
             description = "Hide pet's candies counter in tooltip."
         )
@@ -254,7 +254,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Pets Overlay",
             category = "Visual",
             subcategory = "Pets Overlay",
-            description = "Nice looking overlay for pets menu.\n§cDon't use with small window size"
+            description = "Good-looking overlay for pets menu.\n§cDon't use with small window size"
         )
         var petsOverlay = true
 
@@ -342,7 +342,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Perspective Toggle",
             category = "Visual",
             subcategory = "Perspective Toggle",
-            description = "Will activate 3rd perspective."
+            description = "Activates 3rd perspective on key."
         )
         var betterPerspective = true
 
@@ -360,7 +360,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Custom Scoreboard",
             category = "Visual",
             subcategory = "Scoreboard",
-            description = "Overrides \"www.hypixel.net\" text in scoreboard."
+            description = "Replaces \"www.hypixel.net\" text with custom one."
         )
         var customSb = false
 
