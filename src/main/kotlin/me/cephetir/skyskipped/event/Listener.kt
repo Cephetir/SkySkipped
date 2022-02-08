@@ -51,10 +51,10 @@ class Listener {
                 if (foundSkyblock) {
                     for (text in scores) {
                         val strippedLine = text.stripColor().keepScoreboardCharacters().trim()
-                        if (strippedLine.contains("Dungeon Cleared: ")) {
+                        if (text.startsWith(" §7⏣")) {
                             foundDungeon = true
-                            percentage = strippedLine.substring(17).toInt()
-                        } else if (text.startsWith(" §7⏣")) dungeonName = strippedLine.trim()
+                            dungeonName = strippedLine.trim()
+                        } else if (strippedLine.contains("Dungeon Cleared: ")) percentage = strippedLine.substring(17).toInt()
                         else if(strippedLine.contains("Jerry's Workshop")) foundWorkshop = true
                     }
 

@@ -9,9 +9,9 @@
     "IMixinGuiScreen",
     "MixinEntityPlayer",
     "MixinGuiDisconnected",
+    "MixinGuiIngame",
     "MixinGuiMultiplayer",
     "MixinNetworkManager",
-    "MixinRendererLivingEntity",
-    "MixinScorePlayerTeam"
+    "MixinRendererLivingEntity"
   ]
 }

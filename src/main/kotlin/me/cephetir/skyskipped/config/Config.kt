@@ -44,6 +44,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         addDependency("autoGBMode", "autoGB")
         addDependency("betterPerspectiveItems", "betterPerspective")
+        addDependency("customSbText", "customSb")
 
         addDependency("petsBgBlur", "petsOverlay")
         addDependency("petsBorderColor", "petsOverlay")
@@ -347,11 +348,29 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.TEXT,
-            name = "Better Perspective Item",
+            name = "Perspective Item",
             category = "Visual",
             subcategory = "Perspective Toggle",
-            description = "On what item Perspective Toggle will work. Split with \", \"."
+            description = "On what item Perspective Toggle will work. Split with \", \".\nLeave blank for toggle to work with any item."
         )
         var betterPerspectiveItems = ""
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Custom Scoreboard",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Overrides \"www.hypixel.net\" text in scoreboard."
+        )
+        var customSb = false
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Custom Scoreboard Text",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "New text to display on scoreboard\nFor color codes use \"&\"."
+        )
+        var customSbText = "&cSkySkipped"
     }
 }

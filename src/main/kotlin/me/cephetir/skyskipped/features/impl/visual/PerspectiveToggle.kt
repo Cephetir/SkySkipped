@@ -33,7 +33,7 @@ class PerspectiveToggle : Feature() {
         if (!Config.betterPerspective) return
         if (!Keyboard.getEventKeyState()) return
         if (Keyboard.getEventKey() == SkySkipped.perspectiveToggle.keyCode)
-            if (mc.thePlayer.heldItem.displayName.containsAny(Config.betterPerspectiveItems.split(", ")))
+            if (mc.thePlayer.heldItem.displayName.containsAny(Config.betterPerspectiveItems.split(", ")) || Config.betterPerspectiveItems == "")
                 mc.gameSettings.thirdPersonView = if (mc.gameSettings.thirdPersonView == 3) 0 else 3
     }
 }
