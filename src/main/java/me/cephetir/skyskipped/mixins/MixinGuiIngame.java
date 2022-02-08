@@ -21,11 +21,13 @@ import gg.essential.universal.ChatColor;
 import me.cephetir.skyskipped.config.Config;
 import me.cephetir.skyskipped.utils.TextUtils;
 import net.minecraft.client.gui.GuiIngame;
+import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import java.text.DecimalFormat;
+import java.util.regex.Pattern;
 
 @Mixin(GuiIngame.class)
 public class MixinGuiIngame {
@@ -41,6 +43,8 @@ public class MixinGuiIngame {
             DecimalFormat format = new DecimalFormat("###,###.##");
             String s = format.format(needed).replace(" ", ",");
             return "Purse: " + ChatColor.GOLD + s;
+        } else if (Config.Companion.getCustomSbNumbers() && text.startsWith(EnumChatFormatting.RED + "") && Pattern.compile("\\d").matcher(txt).matches()) {
+            return "";
         } else return text;
     }
 }
