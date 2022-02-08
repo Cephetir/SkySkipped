@@ -378,7 +378,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Remove red ugly numbers",
+            name = "Remove Red Ugly Numbers",
             category = "Visual",
             subcategory = "Scoreboard",
             description = "Remove red ugly numbers."

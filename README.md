@@ -56,6 +56,7 @@ Cephetir's cool mod for Hypixel and Skyblock
     - Activates 3rd perspective on key
 - Custom Scoreboard
     - Replaces "www.hypixel.net" text with custom one
+- Remove Red Numbers In Scoreboard
 </details>
 
 ## Commands
