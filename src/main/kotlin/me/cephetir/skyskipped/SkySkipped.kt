@@ -55,7 +55,7 @@ class SkySkipped {
     companion object {
         const val MODID = "skyskipped"
         const val MOD_NAME = "SkySkipped"
-        const val VERSION = "2.5"
+        const val VERSION = "2.6"
 
         val config = Config()
         val features = Features()
