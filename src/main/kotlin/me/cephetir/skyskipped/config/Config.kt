@@ -46,8 +46,8 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         addDependency("betterPerspectiveItems", "betterPerspective")
         addDependency("customSbText", "customSb")
 
-        addDependency("failsafe", "failsafeJump")
-        addDependency("block", "blockList")
+        addDependency("failsafeJump", "failSafe")
+        addDependency("blockList", "block")
 
         addDependency("petsBgBlur", "petsOverlay")
         addDependency("petsBorderColor", "petsOverlay")
