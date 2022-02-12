@@ -54,7 +54,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         addDependency("petsBorderWidth", "petsOverlay")
 
         addDependency("coins", "coinsToggle")
-        addDependency("pingText", "scorePing")
+        addDependency("mimicText", "mimic")
 
         initialize()
     }
