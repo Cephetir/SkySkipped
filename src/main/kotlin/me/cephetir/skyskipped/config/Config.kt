@@ -219,21 +219,21 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "300 Score Ping",
+            name = "Send Mimic Message On Mimic Death",
             category = "Dungeons",
             subcategory = "Ping",
-            description = "Ping on 300 score reached."
+            description = "Send mimic text on it's death."
         )
-        var scorePing = false
+        var mimic = false
 
         @Property(
             type = PropertyType.TEXT,
-            name = "300 Score Ping Text",
+            name = "Mimic Message Text",
             category = "Dungeons",
             subcategory = "Ping",
-            description = "Text to show when 300 score reached."
+            description = "Text for mimic message."
         )
-        var pingText = "300 score reached! Btw sbe is cringe"
+        var mimicText = "Mimic Killed!"
 
         @Property(
             type = PropertyType.SWITCH,
