@@ -2,7 +2,7 @@
   {
     "modid": "skyskipped",
     "name": "SkySkipped",
-    "description": "QOL focused Hypixel Skyblock mod",
+    "description": "Hypixel Skyblock QOL focused mod",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "https://github.com/Cephetir/SkySkipped",

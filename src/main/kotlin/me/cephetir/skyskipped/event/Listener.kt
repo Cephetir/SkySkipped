@@ -78,7 +78,5 @@ class Listener {
     fun onWorldLoad(event: WorldEvent.Load) {
         Cache.inSkyblock = false
         Cache.isInDungeon = false
-        Cache.was = false
-        Cache.was2 = false
     }
 }

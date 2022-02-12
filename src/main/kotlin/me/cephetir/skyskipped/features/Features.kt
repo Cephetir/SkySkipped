@@ -49,7 +49,7 @@ class Features {
         Blocker(),
         Ping(),
         FragRun(),
-        ScoreCalculation(),
+        Pings(),
         PizzaFailSafe(),
         HidePetCandies(),
         petsOverlay,

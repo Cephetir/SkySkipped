@@ -24,10 +24,6 @@ object Cache {
     var dungeonPercentage = 0
     @JvmField
     var dungeonName = ""
-    @JvmField
-    var was = false
-    @JvmField
-    var was2 = false
 
     @JvmField
     var inParty = false
