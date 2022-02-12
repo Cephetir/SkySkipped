@@ -219,7 +219,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Send Mimic Message On Mimic Death",
+            name = "Mimic Killed Message On Mimic Death",
             category = "Dungeons",
             subcategory = "Ping",
             description = "Send mimic text on it's death."

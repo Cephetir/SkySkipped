@@ -22,8 +22,8 @@ Cephetir's cool mod for Hypixel and Skyblock
     - Leaves dungeon on its end
 - Chest Closer
     - Auto close chests in dungeons and crystal hollows
-- 300 Score Ping
-    - Ping on 300 score reached (customizable message)
+- Mimic Killed Message On Mimic Death
+    - Send mimic death text on it's death
 - Rabbit Hat Ping
     - Ping on Watcher cleared
 - Player ESP
