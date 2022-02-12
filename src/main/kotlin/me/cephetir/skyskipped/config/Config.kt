@@ -82,7 +82,6 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Party chat swapper",
             category = "Chat",
-            subcategory = "Chat",
             description = "Automatically swaps between party chat and global chat."
         )
         var chatSwapper = false
@@ -154,7 +153,6 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Name ping",
             category = "Chat",
-            subcategory = "Chat",
             description = "Plays sound when someone says your name in chat."
         )
         var ping = false
@@ -384,5 +382,13 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             description = "Remove red ugly numbers."
         )
         var customSbNumbers = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Open Maddox Phone",
+            category = "Chat",
+            description = "Clicks in chat to open maddox phone."
+        )
+        var autoMaddox = false
     }
 }
