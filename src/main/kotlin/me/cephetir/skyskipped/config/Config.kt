@@ -257,7 +257,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             subcategory = "Pets Overlay",
             description = "Good-looking overlay for pets menu.\n§cDon't use with small window size"
         )
-        var petsOverlay = true
+        var petsOverlay = false
 
         @Property(
             type = PropertyType.DECIMAL_SLIDER,
@@ -299,7 +299,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             subcategory = "Highlight Presents",
             description = "Highlights presents in Jerry Workshop."
         )
-        var presents = true
+        var presents = false
 
         @Property(
             type = PropertyType.COLOR,
