@@ -17,12 +17,12 @@
 
 package me.cephetir.skyskipped.utils
 
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraft.client.Minecraft
 import net.minecraft.scoreboard.Score
 import net.minecraft.scoreboard.ScorePlayerTeam
 
 object ScoreboardUtils {
+    @JvmStatic
     fun fetchScoreboardLines(): List<String> {
         val scoreboard = Minecraft.getMinecraft().theWorld?.scoreboard ?: return emptyList()
         val objective = scoreboard.getObjectiveInDisplaySlot(1) ?: return emptyList()

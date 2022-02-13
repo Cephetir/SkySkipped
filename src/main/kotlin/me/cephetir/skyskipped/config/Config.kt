@@ -387,7 +387,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Auto Open Maddox Phone",
             category = "Chat",
-            description = "Clicks in chat to open maddox phone."
+            description = "Clicks on Batphone and in chat on slayer kill."
         )
         var autoMaddox = false
     }
