@@ -44,7 +44,11 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         addDependency("autoGBMode", "autoGB")
         addDependency("betterPerspectiveItems", "betterPerspective")
+
         addDependency("customSbText", "customSb")
+        addDependency("customSbBlur", "customSb")
+        addDependency("customSbOutline", "customSb")
+        addDependency("customSbOutlineColor", "customSbOutline")
 
         addDependency("failsafeJump", "failSafe")
         addDependency("blockList", "block")
@@ -261,10 +265,10 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.DECIMAL_SLIDER,
-            name = "Pets Overlay Background Strength",
+            name = "Pets Overlay Background Blur Strength",
             category = "Visual",
             subcategory = "Pets Overlay",
-            description = "Strength for pets overlay background.",
+            description = "Strength for pets overlay background blur.",
             minF = 5f,
             maxF = 25f,
             decimalPlaces = 1
@@ -361,16 +365,46 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Custom Scoreboard",
             category = "Visual",
             subcategory = "Scoreboard",
-            description = "Replaces \"www.hypixel.net\" text with custom one."
+            description = "Draw custom scoreboard."
         )
         var customSb = false
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Custom Scoreboard Background Blur Strength",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Strength for scoreboard background blur.",
+            minF = 5f,
+            maxF = 25f,
+            decimalPlaces = 1
+        )
+        var customSbBlur = 20f
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Draw Scoreboard Outline",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Draw scoreboard outline."
+        )
+        var customSbOutline = false
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "Scoreboard Outline Color",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Color for scoreboard outline."
+        )
+        var customSbOutlineColor: Color = Color(87, 0, 247, 255)
 
         @Property(
             type = PropertyType.TEXT,
             name = "Custom Scoreboard Text",
             category = "Visual",
             subcategory = "Scoreboard",
-            description = "New text to display on scoreboard\nFor color codes use \"&\"."
+            description = "Name text to display on scoreboard\nFor color codes use \"&\"."
         )
         var customSbText = "&cSkySkipped"
 
