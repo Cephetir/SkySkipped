@@ -17,31 +17,29 @@
 
 package me.cephetir.skyskipped
 
+import gg.essential.api.EssentialAPI
 import gg.essential.api.utils.Multithreading
 import gg.essential.api.utils.WebUtil
-import gg.essential.universal.UChat
-import gg.essential.universal.wrappers.message.UTextComponent
 import me.cephetir.skyskipped.commands.SkySkippedCommand
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.utils.BlurUtils
-import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
-import net.minecraft.event.ClickEvent
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent
 import net.minecraftforge.fml.common.event.FMLModDisabledEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.lwjgl.input.Keyboard
+import java.awt.Desktop
+import java.net.URI
 
 @Mod(
     modid = SkySkipped.MODID,
@@ -91,24 +89,19 @@ class SkySkipped {
     @Mod.EventHandler
     fun stop(event: FMLModDisabledEvent) = RPC.shutdown()
 
-    private var checked = false
-    @SubscribeEvent
-    fun onWorldLoad(event: WorldEvent.Load) {
-        if(checked || Minecraft.getMinecraft().theWorld == null) return
-        checked = true
+    @Mod.EventHandler
+    fun onWorldLoad(event: FMLLoadCompleteEvent) {
         logger.info("Checking for updates...")
-        Multithreading.runAsync Thread@ {
-            val version = WebUtil.fetchString("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt") ?: return@Thread
-            if (version == "Failed to fetch") return@Thread
+        Multithreading.runAsync {
+            val version = WebUtil.fetchString("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt") ?: return@runAsync
+            if (version == "Failed to fetch") return@runAsync
             if (VERSION.toDouble() < version.toDouble()) {
                 logger.info("New version detected!")
-                UChat.chat(
-                    UTextComponent("""
-                    §4§l-----------------------------------------
-                    §cSkySkipped §f:: §eNew Version Detected: §c ${version.toDouble()} §8(Click to Download)
-                    §4§l-----------------------------------------
-                    """.trimIndent())
-                        .setClick(ClickEvent.Action.OPEN_URL, "https://github.com/Cephetir/SkySkipped/releases/latest")
+                EssentialAPI.getNotifications().push(
+                    "SkySkipped",
+                    "New Version Detected: ${version.toDouble()}\nClick to Download",
+                    10f,
+                    action = { Desktop.getDesktop().browse(URI("https://github.com/Harry282/FunnyMap/releases")) }
                 )
             } else logger.info("Latest version!")
         }
