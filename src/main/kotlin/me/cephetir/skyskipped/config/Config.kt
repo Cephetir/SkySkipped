@@ -377,6 +377,15 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             subcategory = "Scoreboard",
             description = "Blur the background of scoreboard."
         )
+        var customSbLobby = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Blur Scoreboard Background",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Blur the background of scoreboard."
+        )
         var customSbBlurT = false
 
         @Property(
