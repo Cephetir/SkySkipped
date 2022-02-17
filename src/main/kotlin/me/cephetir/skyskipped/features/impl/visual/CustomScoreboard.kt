@@ -67,7 +67,7 @@ class CustomScoreboard : Feature() {
         val l1: Float = resolution.scaledWidth - width - k1
         val m: Float = resolution.scaledWidth - k1 + 2.0f
         val blur = Config.customSbBlur
-        BlurUtils.renderBlurredBackground(
+        if (Config.customSbBlurT) BlurUtils.renderBlurredBackground(
             blur,
             resolution.scaledWidth.toFloat(),
             resolution.scaledHeight.toFloat(),
@@ -76,17 +76,15 @@ class CustomScoreboard : Feature() {
             m - (l1 - 2.0f),
             (fontHeight * (collection.size + 1) + 4).toFloat()
         )
-        if (Config.customSbOutline) {
-            RoundUtils.drawRoundedOutline(
-                l1 - 2.0f,
-                j1 - collection.size * fontHeight - fontHeight - 3.0f,
-                (l1 - 2.0f) + (m - (l1 - 2.0f)),
-                (j1 - collection.size * fontHeight - fontHeight - 3.0f) + (fontHeight * (collection.size + 1) + 4).toFloat(),
-                5.0f,
-                2.5f,
-                Config.customSbOutlineColor.rgb,
-            )
-        }
+        if (Config.customSbOutline) RoundUtils.drawRoundedOutline(
+            l1 - 2.0f,
+            j1 - collection.size * fontHeight - fontHeight - 3.0f,
+            (l1 - 2.0f) + (m - (l1 - 2.0f)),
+            (j1 - collection.size * fontHeight - fontHeight - 3.0f) + (fontHeight * (collection.size + 1) + 4).toFloat(),
+            5.0f,
+            2.5f,
+            Config.customSbOutlineColor.rgb,
+        )
 
         var i2 = 0
         for (score2 in collection) {
