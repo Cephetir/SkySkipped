@@ -46,7 +46,8 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         addDependency("betterPerspectiveItems", "betterPerspective")
 
         addDependency("customSbText", "customSb")
-        addDependency("customSbBlur", "customSb")
+        addDependency("customSbBlurT", "customSb")
+        addDependency("customSbBlur", "customSbBlurT")
         addDependency("customSbOutline", "customSb")
         addDependency("customSbOutlineColor", "customSbOutline")
 
@@ -370,6 +371,15 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         var customSb = false
 
         @Property(
+            type = PropertyType.SWITCH,
+            name = "Blur Scoreboard Background",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Blur the background of scoreboard."
+        )
+        var customSbBlurT = false
+
+        @Property(
             type = PropertyType.DECIMAL_SLIDER,
             name = "Custom Scoreboard Background Blur Strength",
             category = "Visual",
@@ -406,7 +416,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             subcategory = "Scoreboard",
             description = "Name text to display on scoreboard\nFor color codes use \"&\"."
         )
-        var customSbText = "&cSkySkipped"
+        var customSbText = "SkySkipped"
 
         @Property(
             type = PropertyType.SWITCH,
