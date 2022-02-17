@@ -46,6 +46,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         addDependency("betterPerspectiveItems", "betterPerspective")
 
         addDependency("customSbText", "customSb")
+        addDependency("customSbLobby", "customSb")
         addDependency("customSbBlurT", "customSb")
         addDependency("customSbBlur", "customSbBlurT")
         addDependency("customSbOutline", "customSb")
@@ -372,10 +373,10 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Blur Scoreboard Background",
+            name = "Hide Server Number",
             category = "Visual",
             subcategory = "Scoreboard",
-            description = "Blur the background of scoreboard."
+            description = "Hide server number from scoreboard."
         )
         var customSbLobby = true
 
