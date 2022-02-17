@@ -17,6 +17,7 @@
 
 package me.cephetir.skyskipped.features.impl.visual
 
+import com.mojang.realmsclient.gui.ChatFormatting
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.events.ScoreboardRenderEvent
 import me.cephetir.skyskipped.features.Feature
@@ -28,6 +29,7 @@ import net.minecraft.scoreboard.*
 import net.minecraft.util.EnumChatFormatting
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
+import java.util.regex.Pattern
 
 class CustomScoreboard : Feature() {
 
@@ -90,9 +92,11 @@ class CustomScoreboard : Feature() {
         for (score2 in collection) {
             ++i2
             val scoreplayerteam2: ScorePlayerTeam = scoreboard.getPlayersTeam(score2.playerName)
-            val s2: String = ScorePlayerTeam.formatPlayerName(scoreplayerteam2 as Team, score2.playerName)
+            var s2: String = ScorePlayerTeam.formatPlayerName(scoreplayerteam2 as Team, score2.playerName)
                 .replace("§ewww.hypixel.ne\ud83c\udf82§et", Config.customSbText.replace("&", "§"))
             val k2 = j1 - i2 * fontHeight
+            val matcher = Pattern.compile("[0-9][0-9]/[0-9][0-9]/[0-9][0-9]").matcher(s2)
+            if (Config.customSbLobby && matcher.find()) s2 = ChatFormatting.GRAY.toString() + matcher.group()
             val flag = s2 == Config.customSbText.replace("&", "§")
             if (flag) mc.fontRendererObj.drawStringWithShadow(
                 s2,
