@@ -18,7 +18,6 @@
 package me.cephetir.skyskipped.features.impl.dugeons
 
 import me.cephetir.skyskipped.SkySkipped
-import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import net.minecraft.block.state.IBlockState
@@ -36,8 +35,7 @@ class AutoGhostBlock : Feature() {
 
     @SubscribeEvent
     fun onPlayerTick(event: PlayerTickEvent) {
-        if (mc.thePlayer == null || mc.theWorld == null || event.phase != TickEvent.Phase.START) return
-        if (!Config.autoGB || !Cache.isInDungeon) return
+        if (!Config.autoGB || mc.thePlayer == null || mc.theWorld == null || event.phase != TickEvent.Phase.START) return
         when(Config.autoGBMode) {
             0 -> onSneak()
             1 -> onKey()
