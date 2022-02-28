@@ -53,7 +53,7 @@ class SkySkipped {
     companion object {
         const val MODID = "skyskipped"
         const val MOD_NAME = "SkySkipped"
-        const val VERSION = "2.6"
+        const val VERSION = "2.7"
 
         val config = Config()
         val features = Features()
@@ -87,10 +87,10 @@ class SkySkipped {
     }
 
     @Mod.EventHandler
-    fun stop(event: FMLModDisabledEvent) = RPC.shutdown()
+    fun onStop(event: FMLModDisabledEvent) = RPC.shutdown()
 
     @Mod.EventHandler
-    fun onWorldLoad(event: FMLLoadCompleteEvent) {
+    fun onLoad(event: FMLLoadCompleteEvent) {
         logger.info("Checking for updates...")
         Multithreading.runAsync {
             val version = WebUtil.fetchString("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt") ?: return@runAsync
