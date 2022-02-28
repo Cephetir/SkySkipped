@@ -23,6 +23,7 @@ import com.jagrosh.discordipc.entities.RichPresence
 import me.cephetir.skyskipped.SkySkipped
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.json.JSONObject
 import java.time.OffsetDateTime
@@ -90,7 +91,8 @@ class DiscordRPCManager : IPCListener {
 
     private var tickCounter = 0
     @SubscribeEvent
-    fun onClientTick(event: ClientTickEvent?) {
+    fun onClientTick(event: ClientTickEvent) {
+        if(event.phase != TickEvent.Phase.START || !isActive) return
         tickCounter++
         if (tickCounter % 200 == 0) {
             updatePresence()
@@ -114,6 +116,5 @@ class DiscordRPCManager : IPCListener {
 
     companion object {
         private const val APPLICATION_ID = 867366183057752094L
-        private const val UPDATE_PERIOD = 4200L
     }
 }
