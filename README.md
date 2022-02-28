@@ -55,8 +55,16 @@ Cephetir's cool mod for Hypixel and Skyblock
 - Perspective Toggle
     - Activates 3rd perspective on key
 - Custom Scoreboard
-    - Replaces "www.hypixel.net" text with custom one
+    - Draw custom scoreboard instead vanilla
 - Remove Red Numbers In Scoreboard
+</details>
+
+<details>
+    <summary>Slayers</summary>
+
+### Slayers
+- Auto Maddox Phone
+  - Auto open batphone on boss kill or on message in chat
 </details>
 
 ## Commands
