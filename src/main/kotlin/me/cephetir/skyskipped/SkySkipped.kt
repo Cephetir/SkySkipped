@@ -101,7 +101,7 @@ class SkySkipped {
                     "SkySkipped",
                     "New Version Detected: ${version.toDouble()}\nClick to Download",
                     10f,
-                    action = { Desktop.getDesktop().browse(URI("https://github.com/Harry282/FunnyMap/releases")) }
+                    action = { Desktop.getDesktop().browse(URI("https://github.com/Cephetir/SkySkipped/releases")) }
                 )
             } else logger.info("Latest version!")
         }
