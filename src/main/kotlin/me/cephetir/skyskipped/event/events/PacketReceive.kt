@@ -21,5 +21,4 @@ import io.netty.channel.ChannelHandlerContext
 import net.minecraft.network.Packet
 import net.minecraftforge.fml.common.eventhandler.Event
 
-class PacketReceive(var context: ChannelHandlerContext, var packet: Packet<*>) : Event() {
-}
+class PacketReceive(val context: ChannelHandlerContext, val packet: Packet<*>) : Event()
