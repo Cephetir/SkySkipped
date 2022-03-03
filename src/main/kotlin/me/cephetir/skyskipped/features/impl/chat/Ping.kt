@@ -17,6 +17,7 @@
 
 package me.cephetir.skyskipped.features.impl.chat
 
+import gg.essential.api.EssentialAPI
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
@@ -32,7 +33,7 @@ class Ping : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if(!Config.ping) return
+        if(!Config.ping || !EssentialAPI.getMinecraftUtil().isHypixel()) return
         val text = event.message as ChatComponentText
         val unformattedText = text.unformattedText.stripColor()
         val matcher = regex.matcher(unformattedText)
