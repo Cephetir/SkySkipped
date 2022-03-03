@@ -27,24 +27,33 @@ import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.scoreboard.*
 import net.minecraft.util.EnumChatFormatting
+import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 import java.util.regex.Pattern
 
 class CustomScoreboard : Feature() {
+    var objective: ScoreObjective? = null
+    var resolution: ScaledResolution? = null
 
     @SubscribeEvent
     fun onDraw(event: ScoreboardRenderEvent) {
         if (!Config.customSb) return
         event.isCanceled = true
-        renderScoreboard(event.objective, event.resolution)
+        this.objective = event.objective
+        this.resolution = event.resolution
+        //renderScoreboard(event.objective, event.resolution)
+    }
+
+    @SubscribeEvent
+    fun onRender(event: RenderGameOverlayEvent.Post) {
+        if (event.type == RenderGameOverlayEvent.ElementType.CROSSHAIRS && Config.customSb && objective != null && resolution != null) renderScoreboard(objective!!, resolution!!)
     }
 
     private fun renderScoreboard(objective: ScoreObjective, resolution: ScaledResolution) {
         try {
             GlStateManager.pushMatrix()
-            GlStateManager.enableBlend()
-            GlStateManager.disableTexture2D()
+            GlStateManager.resetColor()
             val scoreboard: Scoreboard = objective.scoreboard
             var collection = scoreboard.getSortedScores(objective) as Collection<Score>
             val list = collection.filter { it.playerName != null && !it.playerName.startsWith("#") }
@@ -116,8 +125,7 @@ class CustomScoreboard : Feature() {
                     )
                 }
             }
-            GlStateManager.disableBlend()
-            GlStateManager.enableTexture2D()
+            GlStateManager.resetColor()
             GlStateManager.popMatrix()
         } catch (e: Exception) {
             e.printStackTrace()

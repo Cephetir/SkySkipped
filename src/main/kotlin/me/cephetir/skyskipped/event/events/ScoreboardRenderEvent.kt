@@ -23,4 +23,4 @@ import net.minecraftforge.fml.common.eventhandler.Cancelable
 import net.minecraftforge.fml.common.eventhandler.Event
 
 @Cancelable
-class ScoreboardRenderEvent(val objective: ScoreObjective, var resolution: ScaledResolution) : Event()
+class ScoreboardRenderEvent(val objective: ScoreObjective, val resolution: ScaledResolution) : Event()
