@@ -250,6 +250,15 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
+            name = "300 Score Ping",
+            category = "Dungeons",
+            subcategory = "Ping",
+            description = "Ping on 300 score reached."
+        )
+        var scorePing = false
+
+        @Property(
+            type = PropertyType.SWITCH,
             name = "Hide Pet's Candies",
             category = "Visual",
             description = "Hide pet's candies counter in tooltip."
