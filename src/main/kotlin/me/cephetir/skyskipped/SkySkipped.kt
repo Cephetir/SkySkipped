@@ -61,6 +61,8 @@ class SkySkipped {
 
         val autoGhostBlockKey = KeyBinding("Auto Ghost Block", Keyboard.KEY_NONE, "SkySkipped")
         val perspectiveToggle = KeyBinding("Better Perspective", Keyboard.KEY_NONE, "SkySkipped")
+
+        val cosmetics = hashMapOf<String, Pair<String, String>>()
     }
 
     @Mod.EventHandler
@@ -93,9 +95,9 @@ class SkySkipped {
     fun onLoad(event: FMLLoadCompleteEvent) {
         logger.info("Checking for updates...")
         Multithreading.runAsync {
-            val version = WebUtil.fetchString("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt") ?: return@runAsync
-            if (version == "Failed to fetch") return@runAsync
-            if (VERSION.toDouble() < version.toDouble()) {
+            val version = WebUtil.fetchString("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt")
+                ?: return@runAsync
+            if ((version != "Failed to fetch") && (VERSION.toDouble() < version.toDouble())) {
                 logger.info("New version detected!")
                 EssentialAPI.getNotifications().push(
                     "SkySkipped",
@@ -104,6 +106,14 @@ class SkySkipped {
                     action = { Desktop.getDesktop().browse(URI("https://github.com/Cephetir/SkySkipped/releases")) }
                 )
             } else logger.info("Latest version!")
+
+            val json = WebUtil.fetchJSON("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/n.json")
+            if (json.size == 0) logger.info("Failed to download cosmetics!")
+            else {
+                json.optJSONArray("list").toList().forEach { cosmetics[it.asJsonObject.getAsJsonPrimitive("name").asString] =
+                    Pair(it.asJsonObject.getAsJsonPrimitive("nick").asString, it.asJsonObject.getAsJsonPrimitive("prefix").asString) }
+                logger.info("Successfully downloaded cosmetics!")
+            }
         }
     }
 }
