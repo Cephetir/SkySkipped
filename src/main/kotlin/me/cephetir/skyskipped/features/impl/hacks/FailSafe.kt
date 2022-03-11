@@ -17,9 +17,13 @@
 
 package me.cephetir.skyskipped.features.impl.hacks
 
+import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.event.events.PacketReceive
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraft.client.settings.KeyBinding
+import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraft.util.BlockPos
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -169,6 +173,27 @@ class FailSafe : Feature() {
                     }
                 }.start()
             }
+        }
+    }
+
+    @SubscribeEvent
+    fun onScoreboard(event: PacketReceive) {
+        if (
+            !Cache.inSkyblock ||
+            event.packet !is S3EPacketTeams ||
+            !Config.failSafeJacob
+        ) return
+        if (event.packet.action != 2) return
+        val line = event.packet.players.joinToString(
+            " ",
+            prefix = event.packet.prefix,
+            postfix = event.packet.suffix
+        ).stripColor().trim()
+
+        if(line.startsWith("Jacob's Contest")) {
+            if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled) MacroBuilder.onKey()
+            else if (Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm"))
+                    (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onDisable()
         }
     }
 
