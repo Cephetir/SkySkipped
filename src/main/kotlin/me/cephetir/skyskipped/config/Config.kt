@@ -139,6 +139,15 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
+            name = "Jacob Falisafe",
+            category = "Hacks",
+            subcategory = "Hacks",
+            description = "Stop Pizza and Cheeto Clients' macros on jacob event start."
+        )
+        var failSafeJacob = false
+
+        @Property(
+            type = PropertyType.SWITCH,
             name = "Block ability",
             category = "Hacks",
             subcategory = "Hacks",
