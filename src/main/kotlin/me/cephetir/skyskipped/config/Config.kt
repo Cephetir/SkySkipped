@@ -121,7 +121,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Unstuck",
+            name = "Stuck Falisafe",
             category = "Hacks",
             subcategory = "Hacks",
             description = "Unstuck for Pizza and Cheeto Clients."
@@ -453,5 +453,21 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             description = "Clicks on Batphone and in chat on slayer kill."
         )
         var autoMaddox = false
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Name",
+            category = "Cosmetics",
+            description = "Name to display in nickname\nFor color codes use \"&\"."
+        )
+        var customName = "&4CatGirl"
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Prefix",
+            category = "Cosmetics",
+            description = "Prefix to display in nickname\nFor color codes use \"&\"."
+        )
+        var customPrefix = "&5[ADMIN]"
     }
 }
