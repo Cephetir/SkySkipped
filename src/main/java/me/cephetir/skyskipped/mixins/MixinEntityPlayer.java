@@ -18,10 +18,12 @@
 package me.cephetir.skyskipped.mixins;
 
 import com.mojang.realmsclient.gui.ChatFormatting;
+import me.cephetir.skyskipped.SkySkipped;
 import me.cephetir.skyskipped.config.Config;
 import me.cephetir.skyskipped.features.Features;
 import me.cephetir.skyskipped.utils.TextUtils;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,10 +34,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinEntityPlayer {
     @Inject(method = "getDisplayName", at = @At(value = "RETURN"), cancellable = true)
     public void getFormattedText(CallbackInfoReturnable<IChatComponent> cir) {
-        if(!Config.Companion.getTerms()/* || !Cache.isInDungeon*/) return;
+        if(!Config.Companion.getTerms()) return;
         IChatComponent toReturn = cir.getReturnValue();
-        if (Features.Companion.getTermsDisplay().getPlayers().containsKey(TextUtils.stripColor(toReturn.getUnformattedText())))
-            toReturn.appendText(" " + ChatFormatting.AQUA + Features.Companion.getTermsDisplay().getPlayers().get(TextUtils.stripColor(toReturn.getUnformattedText())));
+        String text = TextUtils.stripColor(toReturn.getUnformattedText()).trim();
+
+        if(SkySkipped.Companion.getCosmetics().containsKey(text))
+            toReturn = new ChatComponentText(SkySkipped.Companion.getCosmetics().get(text.trim()).component2().replace("&", "§") + " " + SkySkipped.Companion.getCosmetics().get(text.trim()).component1().replace("&", "§"));
+
+        if (Features.Companion.getTermsDisplay().getPlayers().containsKey(text))
+            toReturn.appendText(" " + ChatFormatting.AQUA + Features.Companion.getTermsDisplay().getPlayers().get(text));
+
         cir.setReturnValue(toReturn);
     }
 }

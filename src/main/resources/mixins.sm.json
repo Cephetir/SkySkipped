@@ -11,6 +11,7 @@
     "MixinGuiDisconnected",
     "MixinGuiIngame",
     "MixinGuiMultiplayer",
+    "MixinGuiNewChat",
     "MixinNetworkManager",
     "MixinRendererLivingEntity"
   ]
