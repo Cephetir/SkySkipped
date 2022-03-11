@@ -26,7 +26,7 @@ import me.cephetir.skyskipped.features.impl.chat.ChatSwapper
 import me.cephetir.skyskipped.features.impl.chat.Ping
 import me.cephetir.skyskipped.features.impl.dugeons.*
 import me.cephetir.skyskipped.features.impl.hacks.Blocker
-import me.cephetir.skyskipped.features.impl.hacks.PizzaFailSafe
+import me.cephetir.skyskipped.features.impl.hacks.FailSafe
 import me.cephetir.skyskipped.features.impl.visual.*
 import net.minecraftforge.common.MinecraftForge
 
@@ -48,7 +48,7 @@ class Features {
         Ping(),
         FragRun(),
         Pings(),
-        PizzaFailSafe(),
+        FailSafe(),
         HidePetCandies(),
         petsOverlay,
         PresentHighlight(),

@@ -121,10 +121,10 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Pizza Unstuck",
+            name = "Unstuck",
             category = "Hacks",
             subcategory = "Hacks",
-            description = "Unstuck for Pizza client."
+            description = "Unstuck for Pizza and Cheeto Clients."
         )
         var failSafe = false
 
@@ -133,7 +133,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Jump When Stuck",
             category = "Hacks",
             subcategory = "Hacks",
-            description = "Jump in unstuck."
+            description = "Jump when stuck."
         )
         var failsafeJump = false
 
