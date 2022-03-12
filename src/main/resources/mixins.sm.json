@@ -8,6 +8,7 @@
     "IMixinGuiContainer",
     "IMixinGuiScreen",
     "MixinEntityPlayer",
+    "MixinGuiContainer",
     "MixinGuiDisconnected",
     "MixinGuiIngame",
     "MixinGuiMultiplayer",
