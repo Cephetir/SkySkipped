@@ -33,12 +33,10 @@ class ChestCloser : Feature() {
         if (event.gui is GuiChest && Cache.inSkyblock) {
             val chestName =
                 ((event.gui as GuiChest).inventorySlots as ContainerChest).lowerChestInventory.displayName.unformattedText
-            if (Cache.isInDungeon && Config.chestCloser && chestName == "Chest") {
+            if (Cache.isInDungeon && Config.chestCloser && chestName == "Chest")
                 Minecraft.getMinecraft().thePlayer.closeScreen()
-            }
-            if (Cache.inSkyblock && Config.chestCloserCH && (chestName.contains("Loot Chest") || chestName.contains("Treasure Chest"))) {
+            else if (Cache.inSkyblock && Config.chestCloserCH && (chestName.contains("Loot Chest") || chestName.contains("Treasure Chest")))
                 Minecraft.getMinecraft().thePlayer.closeScreen()
-            }
         }
     }
 }

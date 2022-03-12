@@ -462,5 +462,13 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             description = "Clicks on Batphone and in chat on slayer kill."
         )
         var autoMaddox = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Delight Locked Gemstone Slots in AH",
+            category = "Visual",
+            description = "Make items with locked gemstone slots dark in ah."
+        )
+        var highlightSlots = false
     }
 }

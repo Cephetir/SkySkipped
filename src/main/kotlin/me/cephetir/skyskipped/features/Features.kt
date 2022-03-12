@@ -56,7 +56,8 @@ class Features {
         AutoGhostBlock(),
         PerspectiveToggle(),
         AutoMaddoxPhone(),
-        CustomScoreboard()
+        CustomScoreboard(),
+        HighlightUnlockedGemSots(),
     )
 
     fun register() = features.forEach { MinecraftForge.EVENT_BUS.register(it) }
