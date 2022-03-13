@@ -55,6 +55,9 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         addDependency("failsafeJump", "failSafe")
         addDependency("blockList", "block")
 
+        addDependency("armorFirst", "armorSwap")
+        addDependency("armorSecond", "armorSwap")
+
         addDependency("petsBgBlur", "petsOverlay")
         addDependency("petsBorderColor", "petsOverlay")
         addDependency("petsBorderWidth", "petsOverlay")
@@ -470,5 +473,32 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             description = "Make items with locked gemstone slots dark in ah."
         )
         var highlightSlots = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Enable Armor Swap Keybind",
+            category = "Hacks",
+            subcategory = "Hacks",
+            description = "Keybind will only work if this enabled."
+        )
+        var armorSwap = false
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "First Item to Swap",
+            category = "Hacks",
+            subcategory = "Hacks",
+            description = "First item that will be swapped."
+        )
+        var armorFirst = ""
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Second Item to Swap",
+            category = "Hacks",
+            subcategory = "Hacks",
+            description = "Second item that will be swapped."
+        )
+        var armorSecond = ""
     }
 }
