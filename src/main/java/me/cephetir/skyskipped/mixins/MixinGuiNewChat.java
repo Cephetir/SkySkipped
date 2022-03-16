@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 @Mixin(GuiNewChat.class)
 public class MixinGuiNewChat {
-    private final Pattern regex = Pattern.compile("(?:§.)+(?:(?:Party §8> |Guild > |G > |P §8> )(?:§.)+)?(?<prefix>\\[.+] )?(?<username>\\w+)(?: §.\\[.+])?(?:§.)+");
+    private final Pattern regex = Pattern.compile("(?:(?:§.)+)?(?:(?:Party §8> |Guild > |G > |P §8> )(?:§.)+)?(?<prefix>\\[.+] )?(?:(?:§.)+)?(?<username>\\w+)(?:(?:§.)+)?(?:\\[\\w+])?(?:(?:§.)+)?");
 
     @ModifyArg(method = "drawChat", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawStringWithShadow(Ljava/lang/String;FFI)I"), index = 0)
     private String onDrawString(String text) {
@@ -41,8 +41,9 @@ public class MixinGuiNewChat {
                 text = text.replace(name.trim(), SkySkipped.Companion.getCosmetics().get(name.trim()).component1().replace("&", "§"));
                 text = text.replace(prefix.trim(), SkySkipped.Companion.getCosmetics().get(name.trim()).component2().replace("&", "§"));
             }
-        } else if(text.contains(Minecraft.getMinecraft().thePlayer.getName()))
-            text = text.replace(Minecraft.getMinecraft().thePlayer.getName(), SkySkipped.Companion.getCosmetics().get(Minecraft.getMinecraft().thePlayer.getName()).component1().replace("&", "§"));
+        }
+        if(text.contains(Minecraft.getMinecraft().thePlayer.getDisplayNameString()))
+            text = text.replace(Minecraft.getMinecraft().thePlayer.getDisplayNameString(), SkySkipped.Companion.getCosmetics().get(Minecraft.getMinecraft().thePlayer.getDisplayNameString()).component1().replace("&", "§"));
         return text;
     }
 }
