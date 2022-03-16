@@ -36,7 +36,7 @@ public class MixinEntityPlayer {
     public void getFormattedText(CallbackInfoReturnable<IChatComponent> cir) {
         if(!Config.Companion.getTerms()) return;
         IChatComponent toReturn = cir.getReturnValue();
-        String text = TextUtils.stripColor(toReturn.getUnformattedText()).trim();
+        String text = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(toReturn.getUnformattedText())).trim();
 
         if(SkySkipped.Companion.getCosmetics().containsKey(text))
             toReturn = new ChatComponentText(SkySkipped.Companion.getCosmetics().get(text.trim()).component2().replace("&", "§") + " " + SkySkipped.Companion.getCosmetics().get(text.trim()).component1().replace("&", "§"));
