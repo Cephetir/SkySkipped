@@ -18,9 +18,11 @@
 package me.cephetir.skyskipped.mixins;
 
 import gg.essential.universal.ChatColor;
+import me.cephetir.skyskipped.SkySkipped;
 import me.cephetir.skyskipped.config.Config;
 import me.cephetir.skyskipped.event.events.ScoreboardRenderEvent;
 import me.cephetir.skyskipped.utils.TextUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -49,6 +51,8 @@ public class MixinGuiIngame {
             return "Purse: " + ChatColor.GOLD + s;
         } else if (Config.Companion.getCustomSbNumbers() && text.startsWith(EnumChatFormatting.RED + "") && Pattern.compile("\\d+").matcher(txt).matches())
             return "";
+        else if(text.contains(Minecraft.getMinecraft().thePlayer.getName()))
+            return text.replace(Minecraft.getMinecraft().thePlayer.getName(), SkySkipped.Companion.getCosmetics().get(Minecraft.getMinecraft().thePlayer.getName()).component1().replace("&", "§"));
         else return text;
     }
 

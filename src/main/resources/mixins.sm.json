@@ -13,6 +13,7 @@
     "MixinGuiIngame",
     "MixinGuiMultiplayer",
     "MixinGuiNewChat",
+    "MixinGuiPlayerTabOverlay",
     "MixinNetworkManager",
     "MixinRendererLivingEntity"
   ]
