@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 @Mixin(GuiNewChat.class)
 public class MixinGuiNewChat {
-    private final Pattern regex = Pattern.compile("(?:(?:§.)+)?(?:(?:Party §8> |Guild > |G > |P §8> )(?:§.)+)?(?<prefix>\\[.+] )?(?:(?:§.)+)?(?<username>\\w+)(?:(?:§.)+)?(?:\\[\\w+])?(?:(?:§.)+)?");
+    private final Pattern regex = Pattern.compile("(?:§.)*(?<prefix>\\[\\w\\w\\w(?:(?:§.)*\\+)*(?:§.)*])? *(?<username>\\w{3,16})(?:§.)* *:*");
 
     @ModifyArg(method = "drawChat", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawStringWithShadow(Ljava/lang/String;FFI)I"), index = 0)
     private String onDrawString(String text) {
@@ -37,9 +37,9 @@ public class MixinGuiNewChat {
         if(matcher.find()) {
             String name = matcher.group("username");
             String prefix = matcher.group("prefix");
-            if(name != null && prefix != null && SkySkipped.Companion.getCosmetics().containsKey(name.trim())) {
+            if(name != null && SkySkipped.Companion.getCosmetics().containsKey(name.trim())) {
                 text = text.replace(name.trim(), SkySkipped.Companion.getCosmetics().get(name.trim()).component1().replace("&", "§"));
-                text = text.replace(prefix.trim(), SkySkipped.Companion.getCosmetics().get(name.trim()).component2().replace("&", "§"));
+                if(prefix != null) text = text.replace(prefix.trim(), SkySkipped.Companion.getCosmetics().get(name.trim()).component2().replace("&", "§"));
             }
         }
         if(text.contains(Minecraft.getMinecraft().thePlayer.getDisplayNameString()))
