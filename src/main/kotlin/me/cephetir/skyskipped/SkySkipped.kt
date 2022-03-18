@@ -26,6 +26,7 @@ import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.utils.BlurUtils
+import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.common.MinecraftForge
@@ -64,6 +65,35 @@ class SkySkipped {
         val armorSwap = KeyBinding("Armor Swap", Keyboard.KEY_NONE, "SkySkipped")
 
         val cosmetics = hashMapOf<String, Pair<String, String>>()
+
+        val regex = Regex("(?:§.)*(?<prefix>\\[\\w\\w\\w(?:(?:§.)*\\+)*(?:§.)*])? *(?<username>\\w{3,16})(?:§.)* *:*")
+
+        @JvmStatic
+        fun getCosmetics(message: String): String {
+            var text = message
+            val result = regex.findAll(text)
+            for (matcher in result) {
+                val name = matcher.groups["username"]?.value?.trim() ?: continue
+                val prefix = matcher.groups["prefix"]?.value?.trim()
+                if (cosmetics.containsKey(name)) {
+                    text = text.replace(name, cosmetics[name]!!.component1().replace("&", "§"))
+                    if (prefix != null) text = text.replace(prefix, cosmetics[name]!!.component2().replace("&", "§"))
+                }
+            }
+            if (text.contains(Minecraft.getMinecraft().thePlayer.displayNameString)) text = text.replace(
+                Minecraft.getMinecraft().thePlayer.displayNameString,
+                cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]!!.component1().replace("&", "§")
+            )
+            return text
+        }
+
+        @JvmStatic
+        fun replaceCosmetics(message: String): String =
+            if (message.contains(Minecraft.getMinecraft().thePlayer.displayNameString) && cosmetics.containsKey(Minecraft.getMinecraft().thePlayer.displayNameString)) message.replace(
+                Minecraft.getMinecraft().thePlayer.displayNameString,
+                cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]!!.component1().replace("&", "§")
+            ) else message
+
     }
 
     @Mod.EventHandler
@@ -112,8 +142,13 @@ class SkySkipped {
             val json = WebUtil.fetchJSON("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/n.json")
             if (json.size == 0) logger.info("Failed to download cosmetics!")
             else {
-                json.optJSONArray("list").toList().forEach { cosmetics[it.asJsonObject.getAsJsonPrimitive("name").asString] =
-                    Pair(it.asJsonObject.getAsJsonPrimitive("nick").asString, it.asJsonObject.getAsJsonPrimitive("prefix").asString) }
+                json.optJSONArray("list").toList().forEach {
+                    cosmetics[it.asJsonObject.getAsJsonPrimitive("name").asString] =
+                        Pair(
+                            it.asJsonObject.getAsJsonPrimitive("nick").asString,
+                            it.asJsonObject.getAsJsonPrimitive("prefix").asString
+                        )
+                }
                 logger.info("Successfully downloaded cosmetics!")
             }
         }

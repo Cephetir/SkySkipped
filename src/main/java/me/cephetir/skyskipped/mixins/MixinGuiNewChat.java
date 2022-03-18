@@ -18,32 +18,16 @@
 package me.cephetir.skyskipped.mixins;
 
 import me.cephetir.skyskipped.SkySkipped;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiNewChat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 @Mixin(GuiNewChat.class)
 public class MixinGuiNewChat {
-    private final Pattern regex = Pattern.compile("(?:§.)*(?<prefix>\\[\\w\\w\\w(?:(?:§.)*\\+)*(?:§.)*])? *(?<username>\\w{3,16})(?:§.)* *:*");
 
     @ModifyArg(method = "drawChat", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawStringWithShadow(Ljava/lang/String;FFI)I"), index = 0)
     private String onDrawString(String text) {
-        Matcher matcher = regex.matcher(text);
-        if(matcher.find()) {
-            String name = matcher.group("username");
-            String prefix = matcher.group("prefix");
-            if(name != null && SkySkipped.Companion.getCosmetics().containsKey(name.trim())) {
-                text = text.replace(name.trim(), SkySkipped.Companion.getCosmetics().get(name.trim()).component1().replace("&", "§"));
-                if(prefix != null) text = text.replace(prefix.trim(), SkySkipped.Companion.getCosmetics().get(name.trim()).component2().replace("&", "§"));
-            }
-        }
-        if(text.contains(Minecraft.getMinecraft().thePlayer.getDisplayNameString()))
-            text = text.replace(Minecraft.getMinecraft().thePlayer.getDisplayNameString(), SkySkipped.Companion.getCosmetics().get(Minecraft.getMinecraft().thePlayer.getDisplayNameString()).component1().replace("&", "§"));
-        return text;
+        return SkySkipped.getCosmetics(text);
     }
 }
