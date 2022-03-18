@@ -27,6 +27,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 public class MixinGuiPlayerTabOverlay {
     @ModifyArg(method = "renderPlayerlist", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawStringWithShadow(Ljava/lang/String;FFI)I"), index = 0)
     private String onDrawString(String text) {
-        return SkySkipped.replaceCosmetics(text);
+        return SkySkipped.getCosmetics(text);
     }
 }
