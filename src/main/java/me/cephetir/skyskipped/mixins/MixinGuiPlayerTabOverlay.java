@@ -18,7 +18,6 @@
 package me.cephetir.skyskipped.mixins;
 
 import me.cephetir.skyskipped.SkySkipped;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiPlayerTabOverlay;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,8 +27,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 public class MixinGuiPlayerTabOverlay {
     @ModifyArg(method = "renderPlayerlist", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawStringWithShadow(Ljava/lang/String;FFI)I"), index = 0)
     private String onDrawString(String text) {
-        if(text.contains(Minecraft.getMinecraft().thePlayer.getDisplayNameString()))
-            return text.replace(Minecraft.getMinecraft().thePlayer.getDisplayNameString(), SkySkipped.Companion.getCosmetics().get(Minecraft.getMinecraft().thePlayer.getDisplayNameString()).component1().replace("&", "§"));
-        else return text;
+        return SkySkipped.replaceCosmetics(text);
     }
 }
