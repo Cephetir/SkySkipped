@@ -75,10 +75,12 @@ class SkySkipped {
             for (matcher in result) {
                 val name = matcher.groups["username"]?.value?.trim() ?: continue
                 val prefix = matcher.groups["prefix"]?.value?.trim()
-                if (cosmetics.containsKey(name)) {
-                    text = text.replace(name, cosmetics[name]!!.component1().replace("&", "§"))
-                    if (prefix != null) text = text.replace(prefix, cosmetics[name]!!.component2().replace("&", "§"))
-                }
+                val newName = cosmetics[name]?.component1()?.replace("&", "§") ?: continue
+                val newPrefix = cosmetics[name]?.component2()?.replace("&", "§") ?: continue
+                if (prefix != null) {
+                    text = text.replace(name, newName)
+                    text = text.replace(prefix, newPrefix)
+                } else text = text.replace(name, "$newPrefix $newName")
             }
             if (text.contains(Minecraft.getMinecraft().thePlayer.displayNameString)) text = text.replace(
                 Minecraft.getMinecraft().thePlayer.displayNameString,
@@ -88,11 +90,14 @@ class SkySkipped {
         }
 
         @JvmStatic
-        fun replaceCosmetics(message: String): String =
-            if (message.contains(Minecraft.getMinecraft().thePlayer.displayNameString) && cosmetics.containsKey(Minecraft.getMinecraft().thePlayer.displayNameString)) message.replace(
-                Minecraft.getMinecraft().thePlayer.displayNameString,
-                cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]!!.component1().replace("&", "§")
-            ) else message
+        fun replaceCosmetics(message: String): String {
+            if (message.contains(Minecraft.getMinecraft().thePlayer.displayNameString))
+                return message.replace(
+                    Minecraft.getMinecraft().thePlayer.displayNameString,
+                    cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§") ?: return message
+                )
+            else return message
+        }
 
     }
 
