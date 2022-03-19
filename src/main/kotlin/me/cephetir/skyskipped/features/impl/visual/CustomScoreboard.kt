@@ -18,36 +18,34 @@
 package me.cephetir.skyskipped.features.impl.visual
 
 import com.mojang.realmsclient.gui.ChatFormatting
+import gg.essential.universal.ChatColor
+import me.cephetir.skyskipped.SkySkipped.Companion.cosmetics
 import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.config.Config.Companion.coinsToggle
+import me.cephetir.skyskipped.config.Config.Companion.customSbNumbers
 import me.cephetir.skyskipped.event.events.ScoreboardRenderEvent
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.BlurUtils
 import me.cephetir.skyskipped.utils.RoundUtils
+import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
+import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.scoreboard.*
 import net.minecraft.util.EnumChatFormatting
-import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
+import java.text.DecimalFormat
 import java.util.regex.Pattern
 
 class CustomScoreboard : Feature() {
-    var objective: ScoreObjective? = null
-    var resolution: ScaledResolution? = null
 
     @SubscribeEvent
     fun onDraw(event: ScoreboardRenderEvent) {
         if (!Config.customSb) return
         event.isCanceled = true
-        this.objective = event.objective
-        this.resolution = event.resolution
-        //renderScoreboard(event.objective, event.resolution)
-    }
-
-    @SubscribeEvent
-    fun onRender(event: RenderGameOverlayEvent.Post) {
-        if (event.type == RenderGameOverlayEvent.ElementType.CROSSHAIRS && Config.customSb && objective != null && resolution != null) renderScoreboard(objective!!, resolution!!)
+        renderScoreboard(event.objective, event.resolution)
     }
 
     private fun renderScoreboard(objective: ScoreObjective, resolution: ScaledResolution) {
@@ -66,7 +64,7 @@ class CustomScoreboard : Feature() {
             var width = mc.fontRendererObj.getStringWidth(objective.displayName)
             val fontHeight = mc.fontRendererObj.FONT_HEIGHT
             for (score in collection) {
-                val scoreplayerteam = scoreboard.getPlayersTeam(score.playerName)
+                val scoreplayerteam = scoreboard.getPlayersTeam(score.playerName) ?: continue
                 val s = ScorePlayerTeam.formatPlayerName(
                     scoreplayerteam as Team,
                     score.playerName
@@ -114,7 +112,7 @@ class CustomScoreboard : Feature() {
                     k2,
                     Config.customSbOutlineColor.rgb
                 )
-                else mc.fontRendererObj.drawStringWithShadow(s2, l1, k2, 553648127)
+                else mc.fontRendererObj.drawStringWithShadow(a(s2), l1, k2, 553648127)
                 if (i2 == collection.size) {
                     val s3: String = objective.displayName
                     mc.fontRendererObj.drawStringWithShadow(
@@ -130,5 +128,22 @@ class CustomScoreboard : Feature() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun a(text: String): String {
+        val txt = text.stripColor().keepScoreboardCharacters().trim()
+        return if (coinsToggle && txt.startsWith("Purse: ")) {
+            val coins = txt.substring(7).split(" ").toTypedArray()[0].replace(",", "").toDouble()
+            val needed = coins + Config.coins
+            val format = DecimalFormat("###,###.##")
+            val s = format.format(needed).replace(" ", ",")
+            "Purse: " + ChatColor.GOLD + s
+        } else if (customSbNumbers && text.startsWith(EnumChatFormatting.RED.toString() + "") &&
+            Pattern.compile("\\d+").matcher(txt).matches()
+        ) ""
+        else if (text.contains(Minecraft.getMinecraft().thePlayer.name)) text.replace(
+            Minecraft.getMinecraft().thePlayer.name, cosmetics[Minecraft.getMinecraft().thePlayer.name]!!
+                .component1().replace("&", "§")
+        ) else text
     }
 }
