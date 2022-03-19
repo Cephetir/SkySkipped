@@ -77,10 +77,8 @@ class SkySkipped {
                 val prefix = matcher.groups["prefix"]?.value?.trim()
                 val newName = cosmetics[name]?.component1()?.replace("&", "§") ?: continue
                 val newPrefix = cosmetics[name]?.component2()?.replace("&", "§") ?: continue
-                if (prefix != null) {
-                    text = text.replace(name, newName)
-                    text = text.replace(prefix, newPrefix)
-                } else text = text.replace(name, "$newPrefix $newName")
+                text = text.replace(name, newName)
+                if (prefix != null) text = text.replace(prefix, newPrefix)
             }
             if (text.contains(Minecraft.getMinecraft().thePlayer.displayNameString)) text = text.replace(
                 Minecraft.getMinecraft().thePlayer.displayNameString,
