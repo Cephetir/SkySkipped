@@ -62,7 +62,7 @@ class SkySkipped {
 
         val autoGhostBlockKey = KeyBinding("Auto Ghost Block", Keyboard.KEY_NONE, "SkySkipped")
         val perspectiveToggle = KeyBinding("Better Perspective", Keyboard.KEY_NONE, "SkySkipped")
-        val armorSwap = KeyBinding("Armor Swap", Keyboard.KEY_NONE, "SkySkipped")
+        val armorSwap = KeyBinding("Item Swap", Keyboard.KEY_NONE, "SkySkipped")
 
         val cosmetics = hashMapOf<String, Pair<String, String>>()
 
