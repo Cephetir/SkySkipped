@@ -126,7 +126,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Stuck Falisafe",
             category = "Hacks",
-            subcategory = "Hacks",
+            subcategory = "Failsafes",
             description = "Unstuck for Pizza and Cheeto Clients."
         )
         var failSafe = false
@@ -135,7 +135,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Jump When Stuck",
             category = "Hacks",
-            subcategory = "Hacks",
+            subcategory = "Failsafes",
             description = "Jump when stuck."
         )
         var failsafeJump = false
@@ -144,7 +144,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Jacob Falisafe",
             category = "Hacks",
-            subcategory = "Hacks",
+            subcategory = "Failsafes",
             description = "Stop Pizza and Cheeto Clients' macros on jacob event start."
         )
         var failSafeJacob = false
@@ -153,7 +153,6 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Block ability",
             category = "Hacks",
-            subcategory = "Hacks",
             description = "Blocks item ability."
         )
         var block = false
@@ -162,7 +161,6 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.TEXT,
             name = "Ability list",
             category = "Hacks",
-            subcategory = "Hacks",
             description = "List of items to block ability. Split with \", \"."
         )
         var blockList = ""
@@ -467,9 +465,9 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Enable Armor Swap Keybind",
+            name = "Enable Item Swap Keybind",
             category = "Hacks",
-            subcategory = "Hacks",
+            subcategory = "Item Swap",
             description = "Keybind will only work if this enabled."
         )
         var armorSwap = false
@@ -478,7 +476,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.TEXT,
             name = "First Item to Swap",
             category = "Hacks",
-            subcategory = "Hacks",
+            subcategory = "Item Swap",
             description = "First item that will be swapped."
         )
         var armorFirst = ""
@@ -487,7 +485,7 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.TEXT,
             name = "Second Item to Swap",
             category = "Hacks",
-            subcategory = "Hacks",
+            subcategory = "Item Swap",
             description = "Second item that will be swapped."
         )
         var armorSecond = ""
