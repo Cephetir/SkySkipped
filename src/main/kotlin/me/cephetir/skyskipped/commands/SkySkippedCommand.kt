@@ -21,10 +21,10 @@ import gg.essential.api.EssentialAPI
 import gg.essential.universal.UChat.chat
 import gg.essential.universal.wrappers.message.UTextComponent
 import me.cephetir.skyskipped.SkySkipped
-import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.hacks.PetMacro
+import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import me.cephetir.skyskipped.utils.TextUtils.isNumeric
 import net.minecraft.client.Minecraft
 import net.minecraft.command.CommandBase
@@ -61,13 +61,12 @@ class SkySkippedCommand : CommandBase() {
             EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
         else if (args[0] == "gui")
             EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
+        else if(args[0] == "keybinds" || args[0] == "kb")
+            EssentialAPI.getGuiUtil().openScreen(GuiItemSwap())
         else if (args[0] == "github") {
             val text = UTextComponent("§cSkySkipped §f:: §eGithub: §fhttps://github.com/Cephetir/SkySkipped")
             text.setHover(HoverEvent.Action.SHOW_TEXT, "§9Open URL in browser.")
             text.setClick(ClickEvent.Action.OPEN_URL, "https://github.com/Cephetir/SkySkipped")
-            sender.addChatMessage(text)
-        } else if (args[0] == "crit") {
-            val text = UTextComponent("§cSkySkipped §f:: §eLast Crit: §f" + Cache.lastCrit)
             sender.addChatMessage(text)
         } else if (args[0] == "pet") {
             if ((args.size >= 2) && args[1].isNumeric() && args[1].toInt() > 0) {
@@ -82,8 +81,8 @@ class SkySkippedCommand : CommandBase() {
                 """
                     §cSkySkipped §f:: §eUsage:
                     §cSkySkipped §f:: §e/sm §for§e /sm gui §f- §eOpens GUI
+                    §cSkySkipped §f:: §e/sm keybinds §for§e /sm kb §f- §eOpens item swap keybinds GUI
                     §cSkySkipped §f:: §e/sm github §f- §eOpens official github page
-                    §cSkySkipped §f:: §e/sm crit §f- §eShows last critical hit
                     §cSkySkipped §f:: §e/sm pet [pet index (start counting from 1)] §f- §eAuto select pet quickly
                     §cSkySkipped §f:: §e/sm help §f- §eShow this message
                     """.trimIndent()
@@ -93,8 +92,8 @@ class SkySkippedCommand : CommandBase() {
                 """
                     §cSkySkipped §f:: §eUsage:
                     §cSkySkipped §f:: §e/sm §for§e /sm gui §f- §eOpens GUI
+                    §cSkySkipped §f:: §e/sm keybinds §for§e /sm kb §f- §eOpens item swap keybinds GUI
                     §cSkySkipped §f:: §e/sm github §f- §eOpens official github page
-                    §cSkySkipped §f:: §e/sm crit §f- §eShows last critical hit
                     §cSkySkipped §f:: §e/sm pet [pet index (start counting from 1)] §f- §eAuto select pet very fast
                     §cSkySkipped §f:: §e/sm help §f- §eShows this message
                     """.trimIndent()

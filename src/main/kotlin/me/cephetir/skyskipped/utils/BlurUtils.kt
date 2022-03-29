@@ -229,11 +229,7 @@ class BlurUtils {
             if (!OpenGlHelper.isFramebufferEnabled() || !OpenGlHelper.areShadersSupported()) return
             if (blurStrength < 0.5) return
             requestedBlurs.add(blurStrength)
-            val currentTime = System.currentTimeMillis()
-            if (currentTime - lastBlur > 50) {
-                shouldBlur = true
-                if (currentTime - lastBlur > 400 && forcedUpdate) return
-            }
+            shouldBlur = true
             if (blurOutput.isEmpty()) return
             var out = blurOutput[blurStrength]
             if (out == null) {

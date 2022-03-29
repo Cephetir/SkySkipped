@@ -25,6 +25,8 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
+import me.cephetir.skyskipped.features.impl.misc.Metrics
+import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import me.cephetir.skyskipped.utils.BlurUtils
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
@@ -34,7 +36,6 @@ import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent
-import net.minecraftforge.fml.common.event.FMLModDisabledEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -54,7 +55,7 @@ class SkySkipped {
     companion object {
         const val MODID = "skyskipped"
         const val MOD_NAME = "SkySkipped"
-        const val VERSION = "2.7"
+        const val VERSION = "2.8"
 
         val config = Config()
         val features = Features()
@@ -62,14 +63,17 @@ class SkySkipped {
 
         val autoGhostBlockKey = KeyBinding("Auto Ghost Block", Keyboard.KEY_NONE, "SkySkipped")
         val perspectiveToggle = KeyBinding("Better Perspective", Keyboard.KEY_NONE, "SkySkipped")
-        val armorSwap = KeyBinding("Item Swap", Keyboard.KEY_NONE, "SkySkipped")
 
+        val keybinds = HashSet<GuiItemSwap.Keybind>()
+
+        @JvmField
         val cosmetics = hashMapOf<String, Pair<String, String>>()
 
         val regex = Regex("(?:§.)*(?<prefix>\\[\\w\\w\\w(?:(?:§.)*\\+)*(?:§.)*])? *(?<username>\\w{3,16})(?:§.)* *:*")
 
         @JvmStatic
         fun getCosmetics(message: String): String {
+            if(Minecraft.getMinecraft().thePlayer == null) return message
             var text = message
             val result = regex.findAll(text)
             for (matcher in result) {
@@ -82,14 +86,14 @@ class SkySkipped {
             }
             if (text.contains(Minecraft.getMinecraft().thePlayer.displayNameString)) text = text.replace(
                 Minecraft.getMinecraft().thePlayer.displayNameString,
-                cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]!!.component1().replace("&", "§")
+                cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§") ?: return text
             )
             return text
         }
 
         @JvmStatic
         fun replaceCosmetics(message: String): String {
-            if (message.contains(Minecraft.getMinecraft().thePlayer.displayNameString))
+            if (Minecraft.getMinecraft().thePlayer != null && message.contains(Minecraft.getMinecraft().thePlayer.displayNameString))
                 return message.replace(
                     Minecraft.getMinecraft().thePlayer.displayNameString,
                     cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§") ?: return message
@@ -103,6 +107,7 @@ class SkySkipped {
     fun onPreInit(event: FMLPreInitializationEvent) {
         logger.info("Starting SkySkipped...")
         config.preload()
+        config.loadKeybinds()
         MinecraftForge.EVENT_BUS.register(this)
     }
 
@@ -120,11 +125,13 @@ class SkySkipped {
 
         ClientRegistry.registerKeyBinding(autoGhostBlockKey)
         ClientRegistry.registerKeyBinding(perspectiveToggle)
-        ClientRegistry.registerKeyBinding(armorSwap)
-    }
 
-    @Mod.EventHandler
-    fun onStop(event: FMLModDisabledEvent) = RPC.shutdown()
+        EssentialAPI.getShutdownHookUtil().register {
+            RPC.shutdown()
+            config.saveKeybinds()
+            Metrics.update(false)
+        }
+    }
 
     @Mod.EventHandler
     fun onLoad(event: FMLLoadCompleteEvent) {

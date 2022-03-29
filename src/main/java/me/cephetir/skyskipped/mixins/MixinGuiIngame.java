@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 @Mixin(GuiIngame.class)
 public class MixinGuiIngame {
 
-    @ModifyArg(method = "renderScoreboard", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I"), index = 0)
+    @ModifyArg(method = "renderScoreboard", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I"))
     public String a(String text) {
         String txt = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(text)).trim();
         if (Config.Companion.getCoinsToggle() && txt.startsWith("Purse: ")) {
@@ -51,8 +51,8 @@ public class MixinGuiIngame {
             return "Purse: " + ChatColor.GOLD + s;
         } else if (Config.Companion.getCustomSbNumbers() && text.startsWith(EnumChatFormatting.RED + "") && Pattern.compile("\\d+").matcher(txt).matches())
             return "";
-        else if(text.contains(Minecraft.getMinecraft().thePlayer.getName()))
-            return text.replace(Minecraft.getMinecraft().thePlayer.getName(), SkySkipped.Companion.getCosmetics().get(Minecraft.getMinecraft().thePlayer.getName()).component1().replace("&", "§"));
+        else if(Minecraft.getMinecraft().thePlayer != null && text.contains(Minecraft.getMinecraft().thePlayer.getDisplayNameString()))
+            return SkySkipped.getCosmetics(text);
         else return text;
     }
 

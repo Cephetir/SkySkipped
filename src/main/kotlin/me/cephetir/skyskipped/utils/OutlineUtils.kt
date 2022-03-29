@@ -17,7 +17,6 @@
 
 package me.cephetir.skyskipped.utils
 
-import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.events.RenderEntityModelEvent
 import net.minecraft.client.Minecraft
 import net.minecraft.client.model.ModelBase
@@ -45,21 +44,21 @@ object OutlineUtils {
         Minecraft.getMinecraft().gameSettings.fancyGraphics = false
         Minecraft.getMinecraft().gameSettings.gammaSetting = Float.MAX_VALUE
         GlStateManager.resetColor()
-        setColor(Config.espColor)
+        setColor(Color.GREEN)
         renderOne()
         model.render(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch, scaleFactor)
-        setColor(Config.espColor)
+        setColor(Color.GREEN)
         renderTwo()
         model.render(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch, scaleFactor)
-        setColor(Config.espColor)
+        setColor(Color.GREEN)
         renderThree()
         model.render(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch, scaleFactor)
-        setColor(Config.espColor)
-        renderFour(Config.espColor)
+        setColor(Color.GREEN)
+        renderFour(Color.GREEN)
         model.render(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch, scaleFactor)
-        setColor(Config.espColor)
+        setColor(Color.GREEN)
         renderFive()
-        setColor(Config.espColor)
+        setColor(Color.GREEN)
         Minecraft.getMinecraft().gameSettings.fancyGraphics = fancyGraphics
         Minecraft.getMinecraft().gameSettings.gammaSetting = gamma
     }

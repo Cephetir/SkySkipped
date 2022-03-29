@@ -38,8 +38,8 @@ public class MixinEntityPlayer {
         IChatComponent toReturn = cir.getReturnValue();
         String text = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(toReturn.getUnformattedText())).trim();
 
-        if(SkySkipped.Companion.getCosmetics().containsKey(text))
-            toReturn = new ChatComponentText(SkySkipped.Companion.getCosmetics().get(text.trim()).component2().replace("&", "§") + " " + SkySkipped.Companion.getCosmetics().get(text.trim()).component1().replace("&", "§"));
+        if(SkySkipped.cosmetics.containsKey(text))
+            toReturn = new ChatComponentText(SkySkipped.cosmetics.get(text.trim()).component2().replace("&", "§") + " " + SkySkipped.cosmetics.get(text.trim()).component1().replace("&", "§"));
 
         if (Features.Companion.getTermsDisplay().getPlayers().containsKey(text))
             toReturn.appendText(" " + ChatFormatting.AQUA + Features.Companion.getTermsDisplay().getPlayers().get(text));
