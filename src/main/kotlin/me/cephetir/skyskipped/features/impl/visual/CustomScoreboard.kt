@@ -65,10 +65,10 @@ class CustomScoreboard : Feature() {
             val fontHeight = mc.fontRendererObj.FONT_HEIGHT
             for (score in collection) {
                 val scoreplayerteam = scoreboard.getPlayersTeam(score.playerName) ?: continue
-                val s = ScorePlayerTeam.formatPlayerName(
+                val s = a(ScorePlayerTeam.formatPlayerName(
                     scoreplayerteam as Team,
                     score.playerName
-                ) + ": " + EnumChatFormatting.RED + score.scorePoints
+                ) + ": " + EnumChatFormatting.RED + score.scorePoints)
                 width = width.coerceAtLeast(mc.fontRendererObj.getStringWidth(s))
             }
             val i1 = (collection.size * fontHeight).toFloat()
@@ -141,7 +141,7 @@ class CustomScoreboard : Feature() {
         } else if (customSbNumbers && text.startsWith(EnumChatFormatting.RED.toString() + "") &&
             Pattern.compile("\\d+").matcher(txt).matches()
         ) ""
-        else if (text.contains(Minecraft.getMinecraft().thePlayer.name)) text.replace(
+        else if (Minecraft.getMinecraft().thePlayer != null && text.contains(Minecraft.getMinecraft().thePlayer.name)) text.replace(
             Minecraft.getMinecraft().thePlayer.name, cosmetics[Minecraft.getMinecraft().thePlayer.name]!!
                 .component1().replace("&", "§")
         ) else text

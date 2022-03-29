@@ -17,14 +17,21 @@
 
 package me.cephetir.skyskipped.config
 
+import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import gg.essential.vigilance.Vigilant
 import gg.essential.vigilance.data.Property
 import gg.essential.vigilance.data.PropertyType
+import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
+import me.cephetir.skyskipped.gui.impl.GuiItemSwap
+import net.minecraft.client.Minecraft
 import java.awt.Color
 import java.io.File
 
-class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
+class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
     init {
         registerListener<Any>(
             "DRPC"
@@ -39,7 +46,16 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             }.start()
         }
 
-        addDependency("espColor", "playerESP")
+        addDependency("playeresp", "esp")
+        addDependency("starredmobsesp", "esp")
+        addDependency("batsesp", "esp")
+        addDependency("chromaMode", "esp")
+        addDependency("playersespColor", "playeresp")
+        addDependency("mobsespColor", "starredmobsesp")
+        addDependency("batsespColor", "batsesp")
+
+        addDependency("fastBreakNumber", "fastBreak")
+
         addDependency("presentsColor", "presents")
 
         addDependency("autoGBMode", "autoGB")
@@ -55,9 +71,6 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         addDependency("failsafeJump", "failSafe")
         addDependency("blockList", "block")
 
-        addDependency("armorFirst", "armorSwap")
-        addDependency("armorSecond", "armorSwap")
-
         addDependency("petsBgBlur", "petsOverlay")
         addDependency("petsBorderColor", "petsOverlay")
         addDependency("petsBorderWidth", "petsOverlay")
@@ -68,7 +81,66 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
         initialize()
     }
 
+    private val gson = Gson()
+    private val file = File(modDir, "keybinds.json")
+    fun loadKeybinds() {
+        try {
+            if (!file.exists()) {
+                file.parentFile.mkdirs()
+                file.createNewFile()
+            }
+
+            file.reader().use { reader ->
+                SkySkipped.keybinds.clear()
+                val data = gson.fromJson(reader, JsonElement::class.java) as JsonArray
+                data.mapTo(SkySkipped.keybinds) {
+                    it as JsonObject
+                    GuiItemSwap.Keybind(
+                        it["message"].asString,
+                        it["keyCode"].asInt,
+                        GuiItemSwap.Modifiers.fromBitfield(it["modifiers"].asInt)
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            try {
+                this.file.writer().use { gson.toJson(JsonArray(), it) }
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        }
+        SkySkipped.logger.info("Loaded keybinds!")
+    }
+
+    fun saveKeybinds() {
+        try {
+            if (!file.exists()) {
+                file.parentFile.mkdirs()
+                file.createNewFile()
+            }
+
+            file.writer().use { writer ->
+                val arr = JsonArray()
+                for (s in SkySkipped.keybinds) {
+                    val obj = JsonObject()
+                    obj.addProperty("message", s.message)
+                    obj.addProperty("keyCode", s.keyCode)
+                    obj.addProperty("modifiers", s.modifiers)
+                    arr.add(obj)
+                }
+                gson.toJson(arr, writer)
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+        SkySkipped.logger.info("Saved keybinds!")
+    }
+
     companion object {
+        @JvmStatic
+        val modDir = File(File(Minecraft.getMinecraft().mcDataDir, "config"), "skyskipped")
+
         @Property(
             type = PropertyType.SWITCH,
             name = "Chest Closer",
@@ -99,35 +171,88 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Discord RPC",
             category = "Discord",
-            subcategory = "Discord RPC",
             description = "Shows status in discord."
         )
         var DRPC = true
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Player ESP",
+            name = "ESP",
             category = "Dungeons",
-            subcategory = "Player ESP",
-            description = "Shows players through walls."
+            subcategory = "ESP",
+            description = "Shows mobs through walls."
         )
-        var playerESP = false
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Player ESP Color",
-            category = "Dungeons",
-            subcategory = "Player ESP",
-            description = "Outline color for Player ESP."
-        )
-        var espColor: Color = Color.GREEN
+        var esp = false
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Stuck Falisafe",
+            name = "Player ESP",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Shows players through walls."
+        )
+        var playeresp = false
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "ESP Players Color",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Box color for ESP."
+        )
+        var playersespColor: Color = Color.PINK
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Starred Mobs ESP",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Shows starred mobs through walls."
+        )
+        var starredmobsesp = false
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "ESP Starred mobs Color",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Box color for ESP."
+        )
+        var mobsespColor: Color = Color.ORANGE
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Bats ESP",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Shows bats through walls."
+        )
+        var batsesp = false
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "ESP Bats Color",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Box color for ESP."
+        )
+        var batsespColor: Color = Color.GREEN
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Rainbow ESP Color",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Make all ESP colors rainbow."
+        )
+        var chromaMode = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Unstuck Falisafe",
             category = "Hacks",
             subcategory = "Failsafes",
-            description = "Unstuck for Pizza and Cheeto Clients."
+            description = "Prevent stucking in blocks for Pizza and Cheeto Clients."
         )
         var failSafe = false
 
@@ -145,9 +270,29 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             name = "Jacob Falisafe",
             category = "Hacks",
             subcategory = "Failsafes",
-            description = "Stop Pizza and Cheeto Clients' macros on jacob event start."
+            description = "Stops Pizza and Cheeto Clients' macros on jacob event start."
         )
         var failSafeJacob = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Desync Falisafe",
+            category = "Hacks",
+            subcategory = "Failsafes",
+            description = "Stops Pizza and Cheeto Clients' macros when hypixel decides to stop breaking crops."
+        )
+        var failSafeDesync = false
+
+        @Property(
+            type = PropertyType.NUMBER,
+            name = "Desync Falisafe Timeout",
+            category = "Hacks",
+            description = "Seconds to wait for failsafe to trigger.",
+            min = 1,
+            max = 15,
+            increment = 1
+        )
+        var failSafeDesyncTime = 5
 
         @Property(
             type = PropertyType.SWITCH,
@@ -164,6 +309,17 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
             description = "List of items to block ability. Split with \", \"."
         )
         var blockList = ""
+
+        @Property(
+            type = PropertyType.NUMBER,
+            name = "Item Swap Delay",
+            category = "Hacks",
+            description = "Delay between items swapping.",
+            increment = 10,
+            max = 1000,
+            min = 10
+        )
+        var swapDelay = 100
 
         @Property(
             type = PropertyType.SWITCH,
@@ -213,19 +369,17 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "§4!!VERY SECRET MONEY EXPLOIT!!",
-            category = "SUPER SECRETS SETTINGS §4!(!DO NOT OPEN!)!",
-            subcategory = "SUPER SECRETS SETTINGS §4!(!DO NOT ENABLE!)!",
+            name = "Super Secret Money Exploit!",
+            category = "Super Secret Settings",
             description = "§kMAKES YOUR PURSE BLOW UP WITH BILLIONS OF COINS"
         )
         var coinsToggle = false
 
         @Property(
             type = PropertyType.NUMBER,
-            name = "AMOUNT OF COINS DO YOU WANT",
-            category = "SUPER SECRETS SETTINGS §4!(!DO NOT OPEN!)!",
-            subcategory = "§4SUPER SECRETS SETTINGS!",
-            description = "§4AMOUNT OF COINS YOU WANT",
+            name = "Amount of Coins",
+            category = "Super Secret Settings",
+            description = "Amount of Coins to add in purse",
             max = Int.MAX_VALUE,
             increment = 10000000
         )
@@ -465,29 +619,29 @@ class Config : Vigilant(File("./config/skyskipped.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Enable Item Swap Keybind",
+            name = "Fast Break",
             category = "Hacks",
-            subcategory = "Item Swap",
-            description = "Keybind will only work if this enabled."
+            description = "Break extra blocks behind."
         )
-        var armorSwap = false
+        var fastBreak = false
 
         @Property(
-            type = PropertyType.TEXT,
-            name = "First Item to Swap",
+            type = PropertyType.NUMBER,
+            name = "Fast Break Block Number",
             category = "Hacks",
-            subcategory = "Item Swap",
-            description = "First item that will be swapped."
+            description = "How many extra blocks to break.",
+            min = 0,
+            max = 3,
+            increment = 1
         )
-        var armorFirst = ""
+        var fastBreakNumber = 3
 
         @Property(
-            type = PropertyType.TEXT,
-            name = "Second Item to Swap",
-            category = "Hacks",
-            subcategory = "Item Swap",
-            description = "Second item that will be swapped."
+            type = PropertyType.SWITCH,
+            name = "Stop fly",
+            category = "Misc",
+            description = "Stop flying on private island."
         )
-        var armorSecond = ""
+        var stopFly = false
     }
 }

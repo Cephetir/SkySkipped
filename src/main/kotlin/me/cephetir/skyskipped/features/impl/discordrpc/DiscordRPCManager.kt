@@ -100,7 +100,7 @@ class DiscordRPCManager : IPCListener {
         }
     }
 
-    override fun onClose(client: IPCClient, json: JSONObject) {
+    override fun onClose(client: IPCClient, json: JSONObject?) {
         SkySkipped.logger.info("Discord RPC closed")
         this.client = null
         connected = false

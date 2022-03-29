@@ -15,29 +15,20 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.config
+package me.cephetir.skyskipped.mixins;
 
-object Cache {
-    @JvmField
-    var isInDungeon = false
-    @JvmField
-    var dungeonPercentage = 0
-    @JvmField
-    var dungeonName = ""
+import net.minecraft.client.renderer.entity.RenderManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    @JvmField
-    var inParty = false
-    @JvmField
-    var inSkyblock = false
-    @JvmField
-    var inWorkshop = false
-    @JvmField
-    var itemheld = ""
+@Mixin(RenderManager.class)
+public interface IMixinRenderManager {
+    @Accessor
+    double getRenderPosX();
 
-    @JvmField
-    var prevIP = ""
-    @JvmField
-    var prevName = ""
-    @JvmField
-    var prevIsLan = false
+    @Accessor
+    double getRenderPosY();
+
+    @Accessor
+    double getRenderPosZ();
 }
