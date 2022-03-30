@@ -32,7 +32,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import qolskyblockmod.pizzaclient.features.macros.builder.MacroBuilder
-import qolskyblockmod.pizzaclient.features.macros.farming.CropAura
+import qolskyblockmod.pizzaclient.features.macros.builder.macros.FarmingMacro
 import xyz.apfelmus.cf4m.CF4M
 import xyz.apfelmus.cheeto.client.modules.world.AutoFarm
 
@@ -50,7 +50,7 @@ class FailSafe : Feature() {
         if(!Config.failSafe) ticks = 0
         if (!Config.failSafe || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
-        if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro !is CropAura) {
+        if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
             if (lastPos != null) {
                 if (checkPos(mc.thePlayer.position)) ticks++ else {
                     lastPos = mc.thePlayer.position
@@ -202,7 +202,7 @@ class FailSafe : Feature() {
         ).stripColor().trim()
 
         if (line.startsWith("Jacob's Contest")) {
-            if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled) {
+            if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
                 UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
                 MacroBuilder.onKey()
             }
@@ -219,7 +219,7 @@ class FailSafe : Feature() {
         if (!Config.failSafeDesync || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
         val ticksTimeout = Config.failSafeDesyncTime * 20
-        if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro !is CropAura) {
+        if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
             val stack = Minecraft.getMinecraft().thePlayer.heldItem
             var newCount = -1
             if (stack != null && stack.hasTagCompound()) {

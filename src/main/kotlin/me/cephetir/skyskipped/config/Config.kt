@@ -54,8 +54,6 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         addDependency("mobsespColor", "starredmobsesp")
         addDependency("batsespColor", "batsesp")
 
-        addDependency("fastBreakNumber", "fastBreak")
-
         addDependency("presentsColor", "presents")
 
         addDependency("autoGBMode", "autoGB")
@@ -69,6 +67,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         addDependency("customSbOutlineColor", "customSbOutline")
 
         addDependency("failsafeJump", "failSafe")
+        addDependency("fastBreakNumber", "fastBreak")
+        addDependency("failSafeDesyncTime", "failSafeDesync")
         addDependency("blockList", "block")
 
         addDependency("petsBgBlur", "petsOverlay")
@@ -284,15 +284,16 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         var failSafeDesync = false
 
         @Property(
-            type = PropertyType.NUMBER,
+            type = PropertyType.SLIDER,
             name = "Desync Falisafe Timeout",
             category = "Hacks",
+            subcategory = "Failsafes",
             description = "Seconds to wait for failsafe to trigger.",
-            min = 1,
-            max = 15,
+            min = 5,
+            max = 60,
             increment = 1
         )
-        var failSafeDesyncTime = 5
+        var failSafeDesyncTime = 20
 
         @Property(
             type = PropertyType.SWITCH,
@@ -311,7 +312,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         var blockList = ""
 
         @Property(
-            type = PropertyType.NUMBER,
+            type = PropertyType.SLIDER,
             name = "Item Swap Delay",
             category = "Hacks",
             description = "Delay between items swapping.",
@@ -357,7 +358,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         var BotName = ""
 
         @Property(
-            type = PropertyType.NUMBER,
+            type = PropertyType.SLIDER,
             name = "Delay For \"Leave Dungeon\"",
             category = "Dungeons",
             subcategory = "Auto Leave",
@@ -376,7 +377,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         var coinsToggle = false
 
         @Property(
-            type = PropertyType.NUMBER,
+            type = PropertyType.SLIDER,
             name = "Amount of Coins",
             category = "Super Secret Settings",
             description = "Amount of Coins to add in purse",
@@ -621,6 +622,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             type = PropertyType.SWITCH,
             name = "Fast Break",
             category = "Hacks",
+            subcategory = "Fast Break",
             description = "Break extra blocks behind."
         )
         var fastBreak = false
@@ -629,6 +631,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             type = PropertyType.NUMBER,
             name = "Fast Break Block Number",
             category = "Hacks",
+            subcategory = "Fast Break",
             description = "How many extra blocks to break.",
             min = 0,
             max = 3,
