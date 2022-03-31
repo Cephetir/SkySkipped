@@ -27,6 +27,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraft.util.BlockPos
+import net.minecraft.util.MathHelper
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -35,6 +36,7 @@ import qolskyblockmod.pizzaclient.features.macros.builder.MacroBuilder
 import qolskyblockmod.pizzaclient.features.macros.builder.macros.FarmingMacro
 import xyz.apfelmus.cf4m.CF4M
 import xyz.apfelmus.cheeto.client.modules.world.AutoFarm
+import kotlin.math.roundToInt
 
 class FailSafe : Feature() {
     private var ticks = 0
@@ -47,7 +49,7 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun unstuck(event: ClientTickEvent) {
-        if(!Config.failSafe) ticks = 0
+        if (!Config.failSafe) ticks = 0
         if (!Config.failSafe || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
         if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
@@ -205,8 +207,7 @@ class FailSafe : Feature() {
             if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
                 UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
                 MacroBuilder.onKey()
-            }
-            else if (Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")) {
+            } else if (Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")) {
                 UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
                 (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onDisable()
             }
@@ -215,7 +216,7 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun desync(event: ClientTickEvent) {
-        if(!Config.failSafeDesync) ticks2 = 0
+        if (!Config.failSafeDesync) ticks2 = 0
         if (!Config.failSafeDesync || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
         val ticksTimeout = Config.failSafeDesyncTime * 20
@@ -232,7 +233,7 @@ class FailSafe : Feature() {
                         newCount = ea.getInteger("farmed_cultivating")
                 }
             }
-            if(newCount != -1 && newCount > lastCount) lastCount = newCount
+            if (newCount != -1 && newCount > lastCount) lastCount = newCount
             else ticks2++
 
             if (ticks2 >= ticksTimeout && !called2) {
@@ -240,16 +241,21 @@ class FailSafe : Feature() {
                 Thread {
                     try {
                         UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
-
                         MacroBuilder.onKey()
+                        val yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw).roundToInt()
+                        val pitch = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationPitch).roundToInt()
+
                         mc.thePlayer.sendChatMessage("/sethome")
                         Thread.sleep(100L)
                         mc.thePlayer.sendChatMessage("/hub")
 
-                        Thread.sleep(1000L)
+                        Thread.sleep(5000L)
                         mc.thePlayer.sendChatMessage("/is")
 
                         Thread.sleep(1000L)
+                        mc.thePlayer.sendChatMessage("/setrotation $yaw $pitch")
+
+                        Thread.sleep(100L)
                         MacroBuilder.onKey()
 
                         called2 = false
@@ -272,7 +278,7 @@ class FailSafe : Feature() {
                         newCount = ea.getInteger("farmed_cultivating")
                 }
             }
-            if(newCount != -1 && newCount > lastCount) lastCount = newCount
+            if (newCount != -1 && newCount > lastCount) lastCount = newCount
             else ticks2++
 
             if (ticks2 >= ticksTimeout && !called2) {
@@ -280,13 +286,13 @@ class FailSafe : Feature() {
                 Thread {
                     try {
                         UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
-
                         (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onDisable()
+
                         mc.thePlayer.sendChatMessage("/sethome")
                         Thread.sleep(100L)
                         mc.thePlayer.sendChatMessage("/hub")
 
-                        Thread.sleep(1000L)
+                        Thread.sleep(5000L)
                         mc.thePlayer.sendChatMessage("/is")
 
                         Thread.sleep(1000L)
