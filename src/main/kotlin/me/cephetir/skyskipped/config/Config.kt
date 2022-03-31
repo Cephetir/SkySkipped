@@ -290,10 +290,10 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             subcategory = "Failsafes",
             description = "Seconds to wait for failsafe to trigger.",
             min = 5,
-            max = 60,
+            max = 120,
             increment = 1
         )
-        var failSafeDesyncTime = 20
+        var failSafeDesyncTime = 40
 
         @Property(
             type = PropertyType.SWITCH,
