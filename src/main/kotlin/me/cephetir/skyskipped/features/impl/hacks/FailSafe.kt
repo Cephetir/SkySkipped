@@ -36,9 +36,11 @@ import qolskyblockmod.pizzaclient.features.macros.builder.MacroBuilder
 import qolskyblockmod.pizzaclient.features.macros.builder.macros.FarmingMacro
 import xyz.apfelmus.cf4m.CF4M
 import xyz.apfelmus.cheeto.client.modules.world.AutoFarm
-import kotlin.math.roundToInt
 
 class FailSafe : Feature() {
+    private var stuck = false
+    private var desynced = false
+
     private var ticks = 0
     private var lastPos: BlockPos? = null
     private var called = false
@@ -49,14 +51,19 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun unstuck(event: ClientTickEvent) {
+        if(desynced) return
         if (!Config.failSafe) ticks = 0
         if (!Config.failSafe || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
         if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
             if (lastPos != null) {
-                if (checkPos(mc.thePlayer.position)) ticks++ else {
+                if (checkPos(mc.thePlayer.position)) {
+                    ticks++
+                    stuck = true
+                } else {
                     lastPos = mc.thePlayer.position
                     ticks = 0
+                    stuck = false
                 }
             } else lastPos = mc.thePlayer.position
 
@@ -216,6 +223,7 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun desync(event: ClientTickEvent) {
+        if(stuck) return
         if (!Config.failSafeDesync) ticks2 = 0
         if (!Config.failSafeDesync || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
@@ -233,8 +241,14 @@ class FailSafe : Feature() {
                         newCount = ea.getInteger("farmed_cultivating")
                 }
             }
-            if (newCount != -1 && newCount > lastCount) lastCount = newCount
-            else ticks2++
+            if (newCount != -1 && newCount > lastCount) {
+                lastCount = newCount
+                desynced = false
+            }
+            else {
+                ticks2++
+                desynced = true
+            }
 
             if (ticks2 >= ticksTimeout && !called2) {
                 called2 = true
@@ -242,8 +256,8 @@ class FailSafe : Feature() {
                     try {
                         UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
                         MacroBuilder.onKey()
-                        val yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw).roundToInt()
-                        val pitch = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationPitch).roundToInt()
+                        val yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
+                        val pitch = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationPitch)
 
                         mc.thePlayer.sendChatMessage("/sethome")
                         Thread.sleep(100L)
@@ -252,8 +266,9 @@ class FailSafe : Feature() {
                         Thread.sleep(5000L)
                         mc.thePlayer.sendChatMessage("/is")
 
-                        Thread.sleep(1000L)
-                        mc.thePlayer.sendChatMessage("/setrotation $yaw $pitch")
+                        Thread.sleep(2500L)
+                        mc.thePlayer.rotationYaw += yaw - MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
+                        mc.thePlayer.rotationPitch = pitch
 
                         Thread.sleep(100L)
                         MacroBuilder.onKey()
