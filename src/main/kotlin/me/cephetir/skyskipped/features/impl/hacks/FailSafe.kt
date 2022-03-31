@@ -51,7 +51,7 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun unstuck(event: ClientTickEvent) {
-        if(desynced) return
+        if (desynced) return
         if (!Config.failSafe) ticks = 0
         if (!Config.failSafe || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
@@ -223,29 +223,27 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun desync(event: ClientTickEvent) {
-        if(stuck) return
+        if (stuck) return
         if (!Config.failSafeDesync) ticks2 = 0
         if (!Config.failSafeDesync || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
+        val stack = Minecraft.getMinecraft().thePlayer.heldItem
+        if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey("ExtraAttributes", 10)) return
         val ticksTimeout = Config.failSafeDesyncTime * 20
         if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
-            val stack = Minecraft.getMinecraft().thePlayer.heldItem
             var newCount = -1
-            if (stack != null && stack.hasTagCompound()) {
-                val tag = stack.tagCompound
-                if (tag.hasKey("ExtraAttributes", 10)) {
-                    val ea = tag.getCompoundTag("ExtraAttributes")
-                    if (ea.hasKey("mined_crops", 99))
-                        newCount = ea.getInteger("mined_crops")
-                    else if (ea.hasKey("farmed_cultivating", 99))
-                        newCount = ea.getInteger("farmed_cultivating")
-                }
+            val tag = stack.tagCompound
+            if (tag.hasKey("ExtraAttributes", 10)) {
+                val ea = tag.getCompoundTag("ExtraAttributes")
+                if (ea.hasKey("mined_crops", 99))
+                    newCount = ea.getInteger("mined_crops")
+                else if (ea.hasKey("farmed_cultivating", 99))
+                    newCount = ea.getInteger("farmed_cultivating")
             }
             if (newCount != -1 && newCount > lastCount) {
                 lastCount = newCount
                 desynced = false
-            }
-            else {
+            } else {
                 ticks2++
                 desynced = true
             }
@@ -281,20 +279,22 @@ class FailSafe : Feature() {
                 }.start()
             }
         } else if (Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")) {
-            val stack = Minecraft.getMinecraft().thePlayer.heldItem
             var newCount = -1
-            if (stack != null && stack.hasTagCompound()) {
-                val tag = stack.tagCompound
-                if (tag.hasKey("ExtraAttributes", 10)) {
-                    val ea = tag.getCompoundTag("ExtraAttributes")
-                    if (ea.hasKey("mined_crops", 99))
-                        newCount = ea.getInteger("mined_crops")
-                    else if (ea.hasKey("farmed_cultivating", 99))
-                        newCount = ea.getInteger("farmed_cultivating")
-                }
+            val tag = stack.tagCompound
+            if (tag.hasKey("ExtraAttributes", 10)) {
+                val ea = tag.getCompoundTag("ExtraAttributes")
+                if (ea.hasKey("mined_crops", 99))
+                    newCount = ea.getInteger("mined_crops")
+                else if (ea.hasKey("farmed_cultivating", 99))
+                    newCount = ea.getInteger("farmed_cultivating")
             }
-            if (newCount != -1 && newCount > lastCount) lastCount = newCount
-            else ticks2++
+            if (newCount != -1 && newCount > lastCount) {
+                lastCount = newCount
+                desynced = false
+            } else {
+                ticks2++
+                desynced = true
+            }
 
             if (ticks2 >= ticksTimeout && !called2) {
                 called2 = true
