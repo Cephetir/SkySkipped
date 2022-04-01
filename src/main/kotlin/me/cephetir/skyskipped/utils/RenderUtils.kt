@@ -29,8 +29,6 @@ import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.Vec3
 import org.lwjgl.opengl.GL11
-import xyz.apfelmus.cf4m.CF4M
-import xyz.apfelmus.cheeto.client.modules.render.ESP
 import java.awt.Color
 
 
@@ -193,9 +191,7 @@ object RenderUtils {
         val r = (color shr 16 and 255).toFloat() / 255.0f
         val g = (color shr 8 and 255).toFloat() / 255.0f
         val b = (color and 255).toFloat() / 255.0f
-        val esp = CF4M.INSTANCE.moduleManager.getModule("ESP")
-        val es = esp as ESP
-        val opacity = es.boxOpacity.current
+        val opacity = 0.3f
         GlStateManager.color(r, g, b, a * opacity)
         worldrenderer.begin(7, DefaultVertexFormats.POSITION)
         worldrenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
