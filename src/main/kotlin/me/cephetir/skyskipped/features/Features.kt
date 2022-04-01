@@ -27,6 +27,7 @@ import me.cephetir.skyskipped.features.impl.dugeons.*
 import me.cephetir.skyskipped.features.impl.hacks.Blocker
 import me.cephetir.skyskipped.features.impl.hacks.FailSafe
 import me.cephetir.skyskipped.features.impl.hacks.ItemSwap
+import me.cephetir.skyskipped.features.impl.misc.AutoCookieClicker
 import me.cephetir.skyskipped.features.impl.misc.AutoStopFlying
 import me.cephetir.skyskipped.features.impl.misc.Metrics
 import me.cephetir.skyskipped.features.impl.visual.*
@@ -62,6 +63,7 @@ class Features {
         ItemSwap(),
         AutoStopFlying(),
         Metrics(),
+        AutoCookieClicker(),
     )
 
     fun register() = features.forEach { MinecraftForge.EVENT_BUS.register(it) }

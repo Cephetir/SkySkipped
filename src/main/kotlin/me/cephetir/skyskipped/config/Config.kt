@@ -646,5 +646,13 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             description = "Stop flying on private island."
         )
         var stopFly = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Cookie Clicker",
+            category = "Misc",
+            description = "Auto clicks in cookie clicker."
+        )
+        var cookieClicker = false
     }
 }
