@@ -29,7 +29,6 @@ import net.minecraft.inventory.Slot
 import net.minecraft.item.ItemStack
 import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import qolskyblockmod.pizzaclient.util.ItemUtil
 import java.awt.Color
 
 class HighlightUnlockedGemSots : Feature() {
@@ -86,5 +85,5 @@ class HighlightUnlockedGemSots : Feature() {
         )
     }
 
-    private fun ItemStack.getUUID(): String? = ItemUtil.getExtraAttributes(this)?.getString("uuid")?.ifEmpty { null }
+    private fun ItemStack.getUUID(): String? = if(this.hasTagCompound()) this.getSubCompound("ExtraAttributes", false).getString("uuid").ifEmpty { null } else null
 }
