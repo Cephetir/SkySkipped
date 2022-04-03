@@ -22,6 +22,7 @@ import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.events.PacketReceive
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.mixins.IMixinSugarCaneMacro
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
@@ -34,12 +35,15 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import qolskyblockmod.pizzaclient.features.macros.builder.MacroBuilder
 import qolskyblockmod.pizzaclient.features.macros.builder.macros.FarmingMacro
+import qolskyblockmod.pizzaclient.features.macros.farming.SugarCaneMacro
 import xyz.apfelmus.cf4m.CF4M
 import xyz.apfelmus.cheeto.client.modules.world.AutoFarm
 
 class FailSafe : Feature() {
-    private var stuck = false
-    private var desynced = false
+    companion object {
+        var stuck = false
+        var desynced = false
+    }
 
     private var ticks = 0
     private var lastPos: BlockPos? = null
@@ -48,6 +52,8 @@ class FailSafe : Feature() {
     private var ticks2 = 0
     private var lastCount = 0
     private var called2 = false
+
+    private var lastState = false
 
     @SubscribeEvent
     fun unstuck(event: ClientTickEvent) {
@@ -257,20 +263,15 @@ class FailSafe : Feature() {
                         val yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
                         val pitch = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationPitch)
 
-                        mc.thePlayer.sendChatMessage("/sethome")
-                        Thread.sleep(100L)
                         mc.thePlayer.sendChatMessage("/hub")
-
                         Thread.sleep(5000L)
                         mc.thePlayer.sendChatMessage("/is")
-
                         Thread.sleep(2500L)
                         mc.thePlayer.rotationYaw += yaw - MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
                         mc.thePlayer.rotationPitch = pitch
 
                         Thread.sleep(100L)
                         MacroBuilder.onKey()
-
                         called2 = false
                         ticks2 = 0
                     } catch (e: InterruptedException) {
@@ -303,22 +304,38 @@ class FailSafe : Feature() {
                         UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
                         (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onDisable()
 
-                        mc.thePlayer.sendChatMessage("/sethome")
                         Thread.sleep(100L)
                         mc.thePlayer.sendChatMessage("/hub")
-
                         Thread.sleep(5000L)
                         mc.thePlayer.sendChatMessage("/is")
-
                         Thread.sleep(1000L)
-                        (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onEnable()
 
+                        (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onEnable()
                         called2 = false
                         ticks2 = 0
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
                 }.start()
+            }
+        }
+    }
+
+    @SubscribeEvent
+    fun autoSetSpawn(event: ClientTickEvent) {
+        if (stuck || desynced) return
+        if (!Config.failSafeSpawn || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
+
+        if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is SugarCaneMacro) {
+            var switch = false
+            if (lastState != (MacroBuilder.currentMacro as IMixinSugarCaneMacro).state) {
+                lastState = (MacroBuilder.currentMacro as IMixinSugarCaneMacro).state
+                switch = true
+            }
+
+            if (switch) {
+                UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
+                mc.thePlayer.sendChatMessage("/sethome")
             }
         }
     }
