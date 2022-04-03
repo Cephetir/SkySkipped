@@ -252,7 +252,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             name = "Unstuck Falisafe",
             category = "Hacks",
             subcategory = "Failsafes",
-            description = "Prevent stucking in blocks for Pizza and Cheeto Clients."
+            description = "Prevent stucking in blocks for Pizza and Cheeto Client."
         )
         var failSafe = false
 
@@ -270,7 +270,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             name = "Jacob Falisafe",
             category = "Hacks",
             subcategory = "Failsafes",
-            description = "Stops Pizza and Cheeto Clients' macros on jacob event start."
+            description = "Stops Pizza and Cheeto Client's macros on jacob event start."
         )
         var failSafeJacob = false
 
@@ -279,7 +279,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             name = "Desync Falisafe",
             category = "Hacks",
             subcategory = "Failsafes",
-            description = "Stops Pizza and Cheeto Clients' macros when hypixel decides to stop breaking crops."
+            description = "Stops Pizza and Cheeto Client's macros when hypixel decides to stop breaking crops."
         )
         var failSafeDesync = false
 
@@ -294,6 +294,15 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             increment = 1
         )
         var failSafeDesyncTime = 40
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Set Spawn",
+            category = "Hacks",
+            subcategory = "Failsafes",
+            description = "Automatically sets home on layer switch when Pizza's or Cheeto Client's macro enabled."
+        )
+        var failSafeSpawn = false
 
         @Property(
             type = PropertyType.SWITCH,
