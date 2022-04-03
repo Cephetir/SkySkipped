@@ -85,5 +85,5 @@ class HighlightUnlockedGemSots : Feature() {
         )
     }
 
-    private fun ItemStack.getUUID(): String? = if(this.hasTagCompound()) this.getSubCompound("ExtraAttributes", false).getString("uuid").ifEmpty { null } else null
+    private fun ItemStack.getUUID(): String? = (if (!this.hasTagCompound()) null else this.getSubCompound("ExtraAttributes", false))?.getString("uuid")?.ifEmpty { null }
 }
