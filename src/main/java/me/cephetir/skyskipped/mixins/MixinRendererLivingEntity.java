@@ -43,7 +43,7 @@ public abstract class MixinRendererLivingEntity {
         if (MinecraftForge.EVENT_BUS.post(new RenderEntityModelEvent(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, this.mainModel))) ci.cancel();
     }
 
-    @ModifyArg(method = "renderName*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I"), index = 0)
+    @ModifyArg(method = "renderName*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I"))
     public String renderName(String text) {
         text = SkySkipped.replaceCosmetics(text);
 

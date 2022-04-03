@@ -99,7 +99,7 @@ class CustomScoreboard : Feature() {
             var i2 = 0
             for (score2 in collection) {
                 ++i2
-                val scoreplayerteam2: ScorePlayerTeam = scoreboard.getPlayersTeam(score2.playerName)
+                val scoreplayerteam2: ScorePlayerTeam = scoreboard.getPlayersTeam(score2.playerName) ?: continue
                 var s2: String = ScorePlayerTeam.formatPlayerName(scoreplayerteam2 as Team, score2.playerName)
                     .replace("§ewww.hypixel.ne\ud83c\udf82§et", Config.customSbText.replace("&", "§"))
                 val k2 = j1 - i2 * fontHeight
