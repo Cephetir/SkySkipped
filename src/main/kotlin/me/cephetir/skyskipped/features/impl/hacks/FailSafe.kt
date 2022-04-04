@@ -43,6 +43,8 @@ class FailSafe : Feature() {
     companion object {
         var stuck = false
         var desynced = false
+
+        var timer = System.currentTimeMillis()
     }
 
     private var ticks = 0
@@ -65,7 +67,7 @@ class FailSafe : Feature() {
             if (lastPos != null) {
                 if (checkPos(mc.thePlayer.position)) {
                     ticks++
-                    stuck = true
+                    if (ticks >= 10) stuck = true
                 } else {
                     lastPos = mc.thePlayer.position
                     ticks = 0
@@ -251,7 +253,7 @@ class FailSafe : Feature() {
                 desynced = false
             } else {
                 ticks2++
-                desynced = true
+                if (ticks2 >= ticksTimeout / 5) desynced = true
             }
 
             if (ticks2 >= ticksTimeout && !called2) {
@@ -333,9 +335,10 @@ class FailSafe : Feature() {
                 switch = true
             }
 
-            if (switch) {
+            if (switch && System.currentTimeMillis() - timer > 500) {
                 UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
                 mc.thePlayer.sendChatMessage("/sethome")
+                timer = System.currentTimeMillis()
             }
         }
     }

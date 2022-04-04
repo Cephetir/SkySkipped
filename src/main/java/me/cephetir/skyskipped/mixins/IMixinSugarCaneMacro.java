@@ -17,12 +17,16 @@
 
 package me.cephetir.skyskipped.mixins;
 
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import qolskyblockmod.pizzaclient.features.macros.farming.SugarCaneMacro;
 
+@Pseudo
 @Mixin(SugarCaneMacro.class)
 public interface IMixinSugarCaneMacro {
+    @Dynamic
     @Accessor(value = "caneMacroKey", remap = false)
     boolean getState();
 }
