@@ -37,7 +37,6 @@ import qolskyblockmod.pizzaclient.features.macros.builder.MacroBuilder
 import qolskyblockmod.pizzaclient.features.macros.builder.macros.FarmingMacro
 import qolskyblockmod.pizzaclient.features.macros.farming.SugarCaneMacro
 import xyz.apfelmus.cf4m.CF4M
-import xyz.apfelmus.cheeto.client.modules.world.AutoFarm
 
 class FailSafe : Feature() {
     companion object {
@@ -147,7 +146,7 @@ class FailSafe : Feature() {
                 Thread {
                     try {
                         UChat.chat("§cSkySkipped §f:: §eYou got stuck! Trying to prevent that...")
-                        (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onDisable()
+                        CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
                         if (Config.failsafeJump) KeyBinding.setKeyBindState(
                             mc.gameSettings.keyBindJump.keyCode,
                             true
@@ -193,7 +192,7 @@ class FailSafe : Feature() {
                             mc.gameSettings.keyBindJump.keyCode,
                             false
                         )
-                        (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onEnable()
+                        CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
                         called = false
                         ticks = 0
                     } catch (e: InterruptedException) {
@@ -224,7 +223,7 @@ class FailSafe : Feature() {
                 MacroBuilder.onKey()
             } else if (Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")) {
                 UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
-                (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onDisable()
+                CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
             }
         }
     }
@@ -304,7 +303,7 @@ class FailSafe : Feature() {
                 Thread {
                     try {
                         UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
-                        (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onDisable()
+                        CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
                         Thread.sleep(100L)
                         mc.thePlayer.sendChatMessage("/hub")
@@ -312,7 +311,7 @@ class FailSafe : Feature() {
                         mc.thePlayer.sendChatMessage("/is")
                         Thread.sleep(1000L)
 
-                        (CF4M.INSTANCE.moduleManager.getModule("AutoFarm") as AutoFarm).onEnable()
+                        CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
                         called2 = false
                         ticks2 = 0
                     } catch (e: InterruptedException) {
