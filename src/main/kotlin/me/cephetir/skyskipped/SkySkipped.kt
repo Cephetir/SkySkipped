@@ -93,7 +93,7 @@ class SkySkipped {
 
         @JvmStatic
         fun replaceCosmetics(message: String): String {
-            if (Minecraft.getMinecraft().thePlayer != null && message.contains(Minecraft.getMinecraft().thePlayer.displayNameString))
+            if (Minecraft.getMinecraft().thePlayer != null && message.contains(Minecraft.getMinecraft().thePlayer.displayName.formattedText))
                 return message.replace(
                     Minecraft.getMinecraft().thePlayer.displayNameString,
                     cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§") ?: return message

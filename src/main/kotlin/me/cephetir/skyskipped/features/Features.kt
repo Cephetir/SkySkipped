@@ -23,7 +23,10 @@ import me.cephetir.skyskipped.commands.dungeonCommands.PartyCommand
 import me.cephetir.skyskipped.features.impl.chat.AutoMaddoxPhone
 import me.cephetir.skyskipped.features.impl.chat.ChatSwapper
 import me.cephetir.skyskipped.features.impl.chat.Ping
-import me.cephetir.skyskipped.features.impl.dugeons.*
+import me.cephetir.skyskipped.features.impl.dugeons.AutoGhostBlock
+import me.cephetir.skyskipped.features.impl.dugeons.ChestCloser
+import me.cephetir.skyskipped.features.impl.dugeons.ESP
+import me.cephetir.skyskipped.features.impl.dugeons.Pings
 import me.cephetir.skyskipped.features.impl.hacks.Blocker
 import me.cephetir.skyskipped.features.impl.hacks.FailSafe
 import me.cephetir.skyskipped.features.impl.hacks.ItemSwap
@@ -39,7 +42,6 @@ class Features {
         val leaveCommand = LeaveCommand()
         val partyCommand = PartyCommand()
         val petsOverlay = PetsOverlay()
-        val termsDisplay = TermsDisplay()
     }
 
     var features: MutableList<Feature> = mutableListOf(
@@ -54,7 +56,6 @@ class Features {
         HidePetCandies(),
         petsOverlay,
         PresentHighlight(),
-        termsDisplay,
         AutoGhostBlock(),
         PerspectiveToggle(),
         AutoMaddoxPhone(),

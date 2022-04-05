@@ -10,7 +10,6 @@
     "IMixinRenderManager",
     "IMixinSugarCaneMacro",
     "MixinAutoFarm",
-    "MixinEntityPlayer",
     "MixinGuiContainer",
     "MixinGuiDisconnected",
     "MixinGuiIngame",
@@ -19,6 +18,7 @@
     "MixinGuiPlayerTabOverlay",
     "MixinMinecraft",
     "MixinNetworkManager",
+    "MixinRender",
     "MixinRendererLivingEntity",
     "MixinSShapedMacro"
   ]

@@ -492,15 +492,6 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Terminals Display",
-            category = "Dungeons",
-            subcategory = "Visual",
-            description = "Display called terminals in player's nametag."
-        )
-        var terms = true
-
-        @Property(
-            type = PropertyType.SWITCH,
             name = "Auto Ghost Block",
             category = "Dungeons",
             subcategory = "Auto Ghost Block",

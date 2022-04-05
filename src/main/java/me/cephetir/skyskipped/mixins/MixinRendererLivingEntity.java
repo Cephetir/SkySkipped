@@ -17,11 +17,8 @@
 
 package me.cephetir.skyskipped.mixins;
 
-import com.mojang.realmsclient.gui.ChatFormatting;
 import me.cephetir.skyskipped.SkySkipped;
-import me.cephetir.skyskipped.config.Config;
 import me.cephetir.skyskipped.event.events.RenderEntityModelEvent;
-import me.cephetir.skyskipped.features.Features;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.EntityLivingBase;
@@ -40,16 +37,12 @@ public abstract class MixinRendererLivingEntity {
 
     @Inject(method = "renderModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelBase;render(Lnet/minecraft/entity/Entity;FFFFFF)V"), cancellable = true)
     public void doRender(final EntityLivingBase entity, final float limbSwing, final float limbSwingAmount, final float ageInTicks, final float netHeadYaw, final float headPitch, final float scaleFactor, CallbackInfo ci) {
-        if (MinecraftForge.EVENT_BUS.post(new RenderEntityModelEvent(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, this.mainModel))) ci.cancel();
+        if (MinecraftForge.EVENT_BUS.post(new RenderEntityModelEvent(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, this.mainModel)))
+            ci.cancel();
     }
 
     @ModifyArg(method = "renderName*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I"))
     public String renderName(String text) {
-        text = SkySkipped.replaceCosmetics(text);
-
-        if (Config.Companion.getTerms() && Features.Companion.getTermsDisplay().getPlayers().containsKey(text))
-            text = text + " " + ChatFormatting.AQUA + Features.Companion.getTermsDisplay().getPlayers().get(text);
-
-        return text;
+        return SkySkipped.replaceCosmetics(text);
     }
 }
