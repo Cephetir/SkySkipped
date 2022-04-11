@@ -58,7 +58,6 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun unstuck(event: ClientTickEvent) {
-        if (desynced) return
         if (!Config.failSafe) ticks = 0
         if (!Config.failSafe || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
@@ -252,7 +251,7 @@ class FailSafe : Feature() {
                 desynced = false
             } else {
                 ticks2++
-                if (ticks2 >= ticksTimeout / 5) desynced = true
+                if (ticks2 >= ticksTimeout / 3) desynced = true
             }
 
             if (ticks2 >= ticksTimeout && !called2) {
@@ -295,7 +294,7 @@ class FailSafe : Feature() {
                 desynced = false
             } else {
                 ticks2++
-                desynced = true
+                if (ticks2 >= ticksTimeout / 3) desynced = true
             }
 
             if (ticks2 >= ticksTimeout && !called2) {

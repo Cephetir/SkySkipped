@@ -65,7 +65,7 @@ public class MixinMinecraft {
         if(!Config.Companion.getFastBreak()) return;
         int extraClicks = Config.Companion.getFastBreakNumber();
         boolean shouldClick = this.currentScreen == null && this.gameSettings.keyBindAttack.isKeyDown() && this.inGameHasFocus;
-        if (this.objectMouseOver != null && Config.Companion.getChatSwapper() && extraClicks > 0 && shouldClick)
+        if (this.objectMouseOver != null && extraClicks > 0 && shouldClick)
             for (int i = 0; i < extraClicks; i++) {
                 BlockPos clickedBlock = this.objectMouseOver.getBlockPos();
                 this.objectMouseOver = this.renderViewEntity.rayTrace(this.playerController.getBlockReachDistance(), 1.0F);
