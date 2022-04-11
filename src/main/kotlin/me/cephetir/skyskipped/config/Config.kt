@@ -249,7 +249,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Unstuck Falisafe",
+            name = "Unstuck Failsafe",
             category = "Hacks",
             subcategory = "Failsafes",
             description = "Prevent stucking in blocks for Pizza and Cheeto Client."
@@ -267,7 +267,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Jacob Falisafe",
+            name = "Jacob Failsafe",
             category = "Hacks",
             subcategory = "Failsafes",
             description = "Stops Pizza and Cheeto Client's macros on jacob event start."
@@ -276,7 +276,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Desync Falisafe",
+            name = "Desync Failsafe",
             category = "Hacks",
             subcategory = "Failsafes",
             description = "Stops Pizza and Cheeto Client's macros when hypixel decides to stop breaking crops."
@@ -285,7 +285,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SLIDER,
-            name = "Desync Falisafe Timeout",
+            name = "Desync Failsafe Timeout",
             category = "Hacks",
             subcategory = "Failsafes",
             description = "Seconds to wait for failsafe to trigger.",
