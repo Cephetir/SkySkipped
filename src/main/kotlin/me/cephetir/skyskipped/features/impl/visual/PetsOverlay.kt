@@ -210,126 +210,136 @@ class PetsOverlay : Feature() {
                 Color(223, 223, 233, 255).rgb,
                 false
             )
-            if (pets.isNotEmpty()) for (pet in pets) {
-                renderItem(pet.itemStack, pet.x, pet.y)
-                if (pet.last) {
-                    drawRoundedRect(pet.x - 0.3f, pet.y - 0.3f, pet.x + 16.3f, pet.y + 16.3f, 6f, pet.rarity)
-                    drawRoundedOutline(
-                        pet.x - 1f,
-                        pet.y - 1f,
-                        pet.x + 17f,
-                        pet.y + 17f,
-                        6f,
-                        3f,
-                        Color(23, 217, 7, 255).rgb
-                    )
+            if(close != null) {
+                if (pets.isNotEmpty()) for (pet in pets) {
+                    renderItem(pet.itemStack, pet.x, pet.y)
+                    if (pet.last) {
+                        drawRoundedRect(pet.x - 0.3f, pet.y - 0.3f, pet.x + 16.3f, pet.y + 16.3f, 6f, pet.rarity)
+                        drawRoundedOutline(
+                            pet.x - 1f,
+                            pet.y - 1f,
+                            pet.x + 17f,
+                            pet.y + 17f,
+                            6f,
+                            3f,
+                            Color(23, 217, 7, 255).rgb
+                        )
+                    }
+                    drawRoundedOutline(pet.x - 0.5f, pet.y - 0.5f, pet.x + 16.5f, pet.y + 16.5f, 6f, 2.5f, pet.rarity)
+                    GlStateManager.scale(0.5f / 1.5f, 0.5f / 1.5f, 0.5f / 1.5f)
+                    GlStateManager.scale(3f, 3f, 3f)
                 }
-                drawRoundedOutline(pet.x - 0.5f, pet.y - 0.5f, pet.x + 16.5f, pet.y + 16.5f, 6f, 2.5f, pet.rarity)
-                GlStateManager.scale(0.5f / 1.5f, 0.5f / 1.5f, 0.5f / 1.5f)
-                GlStateManager.scale(3f, 3f, 3f)
-            }
-            GlStateManager.scale(1f / 1.5f, 1f / 1.5f, 1f / 1.5f)
-            GlStateManager.resetColor()
-            val h = bottom
-            if (nextPage != null) {
-                Gui.drawRect(
-                    width / 2 - 20 - 12 - 40 - 12 - 40,
-                    h - 25,
-                    width / 2 - 20 - 12 - 40 - 12,
-                    h - 25 + 20,
-                    Color(255, 255, 255, 150).rgb
-                )
-                mc.fontRendererObj.drawStringWithShadow(
-                    "NEXT",
-                    width / 2f - 20 - 12 - 40 - 12 - 20 - mc.fontRendererObj.getStringWidth("NEXT") / 2f,
-                    (h - 25 - 3).toFloat(),
-                    -1
-                )
-                renderItem(nextPage!!.stack, (width / 2 - 20 - 12 - 40 - 12 - 28), (h - 25 + 10 - 8))
-                if (previousPage != null) {
+                GlStateManager.scale(1f / 1.5f, 1f / 1.5f, 1f / 1.5f)
+                GlStateManager.resetColor()
+                val h = bottom
+                if (nextPage != null) {
                     Gui.drawRect(
                         width / 2 - 20 - 12 - 40 - 12 - 40,
-                        h - 25 - 30,
+                        h - 25,
                         width / 2 - 20 - 12 - 40 - 12,
-                        h - 25 - 30 + 20,
+                        h - 25 + 20,
+                        Color(255, 255, 255, 150).rgb
+                    )
+                    mc.fontRendererObj.drawStringWithShadow(
+                        "NEXT",
+                        width / 2f - 20 - 12 - 40 - 12 - 20 - mc.fontRendererObj.getStringWidth("NEXT") / 2f,
+                        (h - 25 - 3).toFloat(),
+                        -1
+                    )
+                    renderItem(nextPage!!.stack, (width / 2 - 20 - 12 - 40 - 12 - 28), (h - 25 + 10 - 8))
+                    if (previousPage != null) {
+                        Gui.drawRect(
+                            width / 2 - 20 - 12 - 40 - 12 - 40,
+                            h - 25 - 30,
+                            width / 2 - 20 - 12 - 40 - 12,
+                            h - 25 - 30 + 20,
+                            Color(255, 255, 255, 150).rgb
+                        )
+                        mc.fontRendererObj.drawStringWithShadow(
+                            "PREVIOUS",
+                            width / 2f - 20 - 12 - 40 - 12 - 20 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f,
+                            (h - 25 - 30 - 3).toFloat(),
+                            -1
+                        )
+                        renderItem(
+                            previousPage!!.stack,
+                            (width / 2 - 20 - 12 - 40 - 12 - 28),
+                            (h - 25 - 30 + 10 - 8)
+                        )
+                    }
+                } else if (previousPage != null) {
+                    Gui.drawRect(
+                        width / 2 - 20 - 12 - 40 - 12 - 40,
+                        h - 25,
+                        width / 2 - 20 - 12 - 40 - 12,
+                        h - 25 + 20,
                         Color(255, 255, 255, 150).rgb
                     )
                     mc.fontRendererObj.drawStringWithShadow(
                         "PREVIOUS",
                         width / 2f - 20 - 12 - 40 - 12 - 20 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f,
-                        (h - 25 - 30 - 3).toFloat(),
+                        (h - 25 - 3).toFloat(),
                         -1
                     )
                     renderItem(
                         previousPage!!.stack,
                         (width / 2 - 20 - 12 - 40 - 12 - 28),
-                        (h - 25 - 30 + 10 - 8)
+                        (h - 25 + 10 - 8)
                     )
                 }
-            } else if (previousPage != null) {
-                Gui.drawRect(
-                    width / 2 - 20 - 12 - 40 - 12 - 40,
-                    h - 25,
-                    width / 2 - 20 - 12 - 40 - 12,
-                    h - 25 + 20,
-                    Color(255, 255, 255, 150).rgb
-                )
-                mc.fontRendererObj.drawStringWithShadow(
-                    "PREVIOUS",
-                    width / 2f - 20 - 12 - 40 - 12 - 20 - mc.fontRendererObj.getStringWidth("PREVIOUS") / 2f,
-                    (h - 25 - 3).toFloat(),
-                    -1
-                )
-                renderItem(
-                    previousPage!!.stack,
-                    (width / 2 - 20 - 12 - 40 - 12 - 28),
-                    (h - 25 + 10 - 8)
-                )
-            }
-            if (autopet != null) {
-                Gui.drawRect(
-                    width / 2 - 20 - 12 - 40,
-                    h - 25,
-                    width / 2 - 20 - 12,
-                    h - 25 + 20,
-                    Color(255, 255, 255, 150).rgb
-                )
-                renderItem(autopet!!.stack, (width / 2 - 20 - 12 - 28), (h - 25 + 10 - 8))
-            }
-            if (close != null) {
-                Gui.drawRect(width / 2 - 20, h - 25, width / 2 + 20, h - 25 + 20, Color(255, 255, 255, 150).rgb)
-                renderItem(close!!.stack, (width / 2 - 20 + 20 - 8), (h - 25 + 10 - 8))
-            }
-            if (convert != null) {
-                Gui.drawRect(
-                    width / 2 + 20 + 12,
-                    h - 25,
-                    width / 2 + 20 + 12 + 40,
-                    h - 25 + 20,
-                    Color(255, 255, 255, 150).rgb
-                )
-                renderItem(
-                    convert!!.stack,
-                    (width / 2 + 20 + 12 + 20 - 8),
-                    (h - 25 + 10 - 8)
-                )
-            }
-            if (hide != null) {
-                Gui.drawRect(
-                    width / 2 + 20 + 12 + 40 + 12,
-                    h - 25,
-                    width / 2 + 20 + 12 + 40 + 12 + 40,
-                    h - 25 + 20,
-                    Color(255, 255, 255, 150).rgb
-                )
-                renderItem(
-                    hide!!.stack,
-                    (width / 2 + 20 + 12 + 40 + 12 + 20 - 8),
-                    (h - 25 + 10 - 8)
+                if (autopet != null) {
+                    Gui.drawRect(
+                        width / 2 - 20 - 12 - 40,
+                        h - 25,
+                        width / 2 - 20 - 12,
+                        h - 25 + 20,
+                        Color(255, 255, 255, 150).rgb
+                    )
+                    renderItem(autopet!!.stack, (width / 2 - 20 - 12 - 28), (h - 25 + 10 - 8))
+                }
+                if (close != null) {
+                    Gui.drawRect(width / 2 - 20, h - 25, width / 2 + 20, h - 25 + 20, Color(255, 255, 255, 150).rgb)
+                    renderItem(close!!.stack, (width / 2 - 20 + 20 - 8), (h - 25 + 10 - 8))
+                }
+                if (convert != null) {
+                    Gui.drawRect(
+                        width / 2 + 20 + 12,
+                        h - 25,
+                        width / 2 + 20 + 12 + 40,
+                        h - 25 + 20,
+                        Color(255, 255, 255, 150).rgb
+                    )
+                    renderItem(
+                        convert!!.stack,
+                        (width / 2 + 20 + 12 + 20 - 8),
+                        (h - 25 + 10 - 8)
+                    )
+                }
+                if (hide != null) {
+                    Gui.drawRect(
+                        width / 2 + 20 + 12 + 40 + 12,
+                        h - 25,
+                        width / 2 + 20 + 12 + 40 + 12 + 40,
+                        h - 25 + 20,
+                        Color(255, 255, 255, 150).rgb
+                    )
+                    renderItem(
+                        hide!!.stack,
+                        (width / 2 + 20 + 12 + 40 + 12 + 20 - 8),
+                        (h - 25 + 10 - 8)
+                    )
+                }
+                GlStateManager.resetColor()
+                onHover(mouseX, mouseY)
+            } else {
+                mc.fontRendererObj.drawString(
+                    "Loading...",
+                    width / 2f - mc.fontRendererObj.getStringWidth("Loading...") / 2f,
+                    height / 2f - mc.fontRendererObj.FONT_HEIGHT / 2f,
+                    Color(223, 223, 233, 255).rgb,
+                    false
                 )
             }
-            GlStateManager.resetColor()
-            onHover(mouseX, mouseY)
             GlStateManager.disableBlend()
             GlStateManager.enableTexture2D()
             GlStateManager.popMatrix()
