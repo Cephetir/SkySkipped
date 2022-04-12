@@ -25,10 +25,22 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class AutoStopFlying : Feature() {
 
-    // Hardest feature ever
     @SubscribeEvent
     fun onWorld(event: WorldEvent.Load) {
         if(!Config.stopFly || !Cache.inSkyblock) return
-        mc.thePlayer.capabilities.isFlying = false
+        Thread {
+            try {
+                val last = System.currentTimeMillis()
+                var velo = false
+                while(!velo) {
+                    if(System.currentTimeMillis() - last >= 2000) return@Thread
+                    velo = mc.thePlayer.capabilities.isFlying
+                    Thread.sleep(10)
+                }
+                mc.thePlayer.capabilities.isFlying = false
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+        }.start()
     }
 }
