@@ -39,6 +39,7 @@ class Listener {
                 var foundDungeon = false
                 var foundSkyblock = false
                 var foundWorkshop = false
+                var foundIsland = false
                 var percentage = 0
                 var dungeonName = ""
                 var itemheld = "Nothing"
@@ -54,18 +55,22 @@ class Listener {
                         if (strippedLine.contains("Cleared: ")) {
                             foundDungeon = true
                             percentage = Integer.parseInt(strippedLine.substring(9).split(" ")[0])
-                        } else if (text.startsWith(" §7⏣") && foundDungeon) dungeonName = strippedLine.trim()
-                        else if(strippedLine.contains("Jerry's Workshop")) foundWorkshop = true
+                        } else if (text.startsWith(" §7⏣")) {
+                            if (foundDungeon) dungeonName = strippedLine.trim()
+                            else if (strippedLine.contains("Jerry's Workshop")) foundWorkshop = true
+                            else if (strippedLine.contains("Your Island")) foundIsland = true
+                        }
                     }
 
                     if (Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null) itemheld =
-                        Minecraft.getMinecraft().thePlayer.heldItem.displayName.stripColor().keepScoreboardCharacters()
-                            .trim()
+                        Minecraft.getMinecraft().thePlayer.heldItem.displayName
+                            .stripColor().keepScoreboardCharacters().trim()
                 }
 
                 Cache.inSkyblock = foundSkyblock
                 Cache.isInDungeon = foundDungeon
                 Cache.inWorkshop = foundWorkshop
+                Cache.onIsland = foundIsland
                 Cache.dungeonPercentage = percentage
                 Cache.dungeonName = dungeonName
                 Cache.itemheld = itemheld

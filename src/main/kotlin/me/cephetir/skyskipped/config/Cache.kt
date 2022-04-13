@@ -32,6 +32,9 @@ object Cache {
     @JvmField
     var inWorkshop = false
     @JvmField
+    var onIsland = false
+
+    @JvmField
     var itemheld = ""
 
     @JvmField
