@@ -44,6 +44,7 @@ class FailSafe : Feature() {
         var desynced = false
 
         var timer = System.currentTimeMillis()
+        var timer2 = System.currentTimeMillis()
     }
 
     private var ticks = 0
@@ -60,6 +61,7 @@ class FailSafe : Feature() {
     fun unstuck(event: ClientTickEvent) {
         if (!Config.failSafe) ticks = 0
         if (!Config.failSafe || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
+        if (System.currentTimeMillis() - timer2 < 3000 || called2) return
 
         if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
             if (lastPos != null) {
@@ -127,6 +129,7 @@ class FailSafe : Feature() {
                         MacroBuilder.onKey()
                         called = false
                         ticks = 0
+                        timer2 = System.currentTimeMillis()
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
@@ -194,6 +197,7 @@ class FailSafe : Feature() {
                         CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
                         called = false
                         ticks = 0
+                        timer2 = System.currentTimeMillis()
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
@@ -337,6 +341,60 @@ class FailSafe : Feature() {
                 UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
                 mc.thePlayer.sendChatMessage("/sethome")
                 timer = System.currentTimeMillis()
+            }
+        }
+    }
+
+    @SubscribeEvent
+    fun autoWarpBack(event: ClientTickEvent) {
+        if (called2) return
+        if (!Config.failSafeIsland || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
+        if (Cache.onIsland) return
+        val pizza = Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled
+        val cheeto = Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")
+        if (pizza || cheeto) {
+            Thread {
+                try {
+                    Thread.sleep(Config.failSafeIslandDelay.toLong())
+                    if (Cache.onIsland) return@Thread
+                    if (Cache.inSkyblock) {
+                        if (pizza) {
+                            MacroBuilder.onKey()
+                            UChat.chat("§cSkySkipped §f:: §eDetected hub! Warping back...")
+                            mc.thePlayer.sendChatMessage("/is")
+                            Thread.sleep(Config.failSafeIslandDelay.toLong())
+                            MacroBuilder.onKey()
+                        } else {
+                            CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                            UChat.chat("§cSkySkipped §f:: §eDetected hub! Warping back...")
+                            mc.thePlayer.sendChatMessage("/is")
+                            Thread.sleep(Config.failSafeIslandDelay.toLong())
+                            CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                        }
+                    } else {
+                        if (pizza) {
+                            MacroBuilder.onKey()
+                            UChat.chat("§cSkySkipped §f:: §eDetected other lobby! Warping back...")
+                            mc.thePlayer.sendChatMessage("/l")
+                            Thread.sleep(Config.failSafeIslandDelay.toLong())
+                            mc.thePlayer.sendChatMessage("/play sb")
+                            Thread.sleep(Config.failSafeIslandDelay.toLong())
+                            mc.thePlayer.sendChatMessage("/is")
+                            MacroBuilder.onKey()
+                        } else {
+                            CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                            UChat.chat("§cSkySkipped §f:: §eDetected other lobby! Warping back...")
+                            mc.thePlayer.sendChatMessage("/l")
+                            Thread.sleep(Config.failSafeIslandDelay.toLong())
+                            mc.thePlayer.sendChatMessage("/play sb")
+                            Thread.sleep(Config.failSafeIslandDelay.toLong())
+                            mc.thePlayer.sendChatMessage("/is")
+                            CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                        }
+                    }
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                }
             }
         }
     }

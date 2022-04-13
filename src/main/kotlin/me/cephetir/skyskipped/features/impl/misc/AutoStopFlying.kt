@@ -33,7 +33,7 @@ class AutoStopFlying : Feature() {
                 val last = System.currentTimeMillis()
                 var velo = false
                 while(!velo) {
-                    if(System.currentTimeMillis() - last >= 2000) return@Thread
+                    if(System.currentTimeMillis() - last >= 3000) return@Thread
                     velo = mc.thePlayer.capabilities.isFlying
                     Thread.sleep(10)
                 }

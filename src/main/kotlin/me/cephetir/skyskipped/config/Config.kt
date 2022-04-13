@@ -69,6 +69,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         addDependency("failsafeJump", "failSafe")
         addDependency("fastBreakNumber", "fastBreak")
         addDependency("failSafeDesyncTime", "failSafeDesync")
+        addDependency("failSafeIslandDelay", "failSafeIsland")
         addDependency("blockList", "block")
 
         addDependency("petsBgBlur", "petsOverlay")
@@ -289,8 +290,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             category = "Hacks",
             subcategory = "Failsafes",
             description = "Seconds to wait for failsafe to trigger.",
-            min = 5,
-            max = 120,
+            min = 30,
+            max = 240,
             increment = 1
         )
         var failSafeDesyncTime = 40
@@ -303,6 +304,27 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             description = "Automatically sets home on layer switch when Pizza's or Cheeto Client's macro enabled."
         )
         var failSafeSpawn = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Warp Back To Island Failsafe",
+            category = "Hacks",
+            subcategory = "Failsafes",
+            description = "Automatically warps you to island."
+        )
+        var failSafeIsland = false
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Auto Warp Back Failsafe Delay",
+            category = "Hacks",
+            subcategory = "Failsafes",
+            description = "Delay in seconds between warps. Set more if you have bad ping (1s ~ 100 ping, 5s ~ 300ping)",
+            minF = 0.5f,
+            maxF = 10f,
+            decimalPlaces = 1
+        )
+        var failSafeIslandDelay = 2.5f
 
         @Property(
             type = PropertyType.SWITCH,
