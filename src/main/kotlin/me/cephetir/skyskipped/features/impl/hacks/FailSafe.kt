@@ -47,6 +47,13 @@ class FailSafe : Feature() {
         var timer2 = System.currentTimeMillis()
     }
 
+    private var pizza = Loader.isModLoaded("pizzaclient") &&
+            MacroBuilder.toggled &&
+            MacroBuilder.currentMacro is FarmingMacro
+
+    private var cheeto = Loader.isModLoaded("ChromaHUD") &&
+            CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")
+
     private var ticks = 0
     private var lastPos: BlockPos? = null
     private var called = false
@@ -57,13 +64,16 @@ class FailSafe : Feature() {
 
     private var lastState = false
 
+    private var called3 = false
+
     @SubscribeEvent
     fun unstuck(event: ClientTickEvent) {
         if (!Config.failSafe) ticks = 0
         if (!Config.failSafe || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
         if (System.currentTimeMillis() - timer2 < 3000 || called2) return
 
-        if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
+        update()
+        if (pizza || cheeto) {
             if (lastPos != null) {
                 if (checkPos(mc.thePlayer.position)) {
                     ticks++
@@ -80,7 +90,9 @@ class FailSafe : Feature() {
                 Thread {
                     try {
                         UChat.chat("§cSkySkipped §f:: §eYou got stuck! Trying to prevent that...")
-                        MacroBuilder.onKey()
+                        if (pizza) MacroBuilder.onKey()
+                        else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+
                         if (Config.failsafeJump) KeyBinding.setKeyBindState(
                             mc.gameSettings.keyBindJump.keyCode,
                             true
@@ -126,75 +138,10 @@ class FailSafe : Feature() {
                             mc.gameSettings.keyBindJump.keyCode,
                             false
                         )
-                        MacroBuilder.onKey()
-                        called = false
-                        ticks = 0
-                        timer2 = System.currentTimeMillis()
-                    } catch (e: InterruptedException) {
-                        e.printStackTrace()
-                    }
-                }.start()
-            }
-        } else if (Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")) {
-            if (lastPos != null) {
-                if (checkPos(mc.thePlayer.position)) ticks++ else {
-                    lastPos = mc.thePlayer.position
-                    ticks = 0
-                }
-            } else lastPos = mc.thePlayer.position
 
-            if (ticks >= 60 && !called) {
-                called = true
-                Thread {
-                    try {
-                        UChat.chat("§cSkySkipped §f:: §eYou got stuck! Trying to prevent that...")
-                        CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                        if (Config.failsafeJump) KeyBinding.setKeyBindState(
-                            mc.gameSettings.keyBindJump.keyCode,
-                            true
-                        )
-                        Thread.sleep(100)
+                        if (pizza) MacroBuilder.onKey()
+                        else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
-                        // back
-                        KeyBinding.setKeyBindState(
-                            mc.gameSettings.keyBindBack.keyCode,
-                            true
-                        )
-                        Thread.sleep(300)
-                        KeyBinding.setKeyBindState(
-                            mc.gameSettings.keyBindBack.keyCode,
-                            false
-                        )
-                        Thread.sleep(100)
-
-                        // left
-                        KeyBinding.setKeyBindState(
-                            mc.gameSettings.keyBindLeft.keyCode,
-                            true
-                        )
-                        Thread.sleep(300)
-                        KeyBinding.setKeyBindState(
-                            mc.gameSettings.keyBindLeft.keyCode,
-                            false
-                        )
-                        Thread.sleep(100)
-
-                        // right
-                        KeyBinding.setKeyBindState(
-                            mc.gameSettings.keyBindRight.keyCode,
-                            true
-                        )
-                        Thread.sleep(300)
-                        KeyBinding.setKeyBindState(
-                            mc.gameSettings.keyBindRight.keyCode,
-                            false
-                        )
-                        Thread.sleep(100)
-                        if (Config.failsafeJump) KeyBinding.setKeyBindState(
-                            mc.gameSettings.keyBindJump.keyCode,
-                            false
-                        )
-                        CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
                         called = false
                         ticks = 0
                         timer2 = System.currentTimeMillis()
@@ -221,10 +168,11 @@ class FailSafe : Feature() {
         ).stripColor().trim()
 
         if (line.startsWith("Jacob's Contest")) {
-            if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
+            update()
+            if (pizza) {
                 UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
                 MacroBuilder.onKey()
-            } else if (Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")) {
+            } else if (cheeto) {
                 UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
                 CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
             }
@@ -240,7 +188,8 @@ class FailSafe : Feature() {
         val stack = Minecraft.getMinecraft().thePlayer.heldItem
         if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey("ExtraAttributes", 10)) return
         val ticksTimeout = Config.failSafeDesyncTime * 20
-        if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro) {
+        update()
+        if (pizza || cheeto) {
             var newCount = -1
             val tag = stack.tagCompound
             if (tag.hasKey("ExtraAttributes", 10)) {
@@ -263,7 +212,9 @@ class FailSafe : Feature() {
                 Thread {
                     try {
                         UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
-                        MacroBuilder.onKey()
+                        if (pizza) MacroBuilder.onKey()
+                        else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+
                         val yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
                         val pitch = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationPitch)
 
@@ -275,46 +226,9 @@ class FailSafe : Feature() {
                         mc.thePlayer.rotationPitch = pitch
 
                         Thread.sleep(100L)
-                        MacroBuilder.onKey()
-                        called2 = false
-                        ticks2 = 0
-                    } catch (e: InterruptedException) {
-                        e.printStackTrace()
-                    }
-                }.start()
-            }
-        } else if (Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")) {
-            var newCount = -1
-            val tag = stack.tagCompound
-            if (tag.hasKey("ExtraAttributes", 10)) {
-                val ea = tag.getCompoundTag("ExtraAttributes")
-                if (ea.hasKey("mined_crops", 99))
-                    newCount = ea.getInteger("mined_crops")
-                else if (ea.hasKey("farmed_cultivating", 99))
-                    newCount = ea.getInteger("farmed_cultivating")
-            }
-            if (newCount != -1 && newCount > lastCount) {
-                lastCount = newCount
-                desynced = false
-            } else {
-                ticks2++
-                if (ticks2 >= ticksTimeout / 3) desynced = true
-            }
+                        if (pizza) MacroBuilder.onKey()
+                        else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
-            if (ticks2 >= ticksTimeout && !called2) {
-                called2 = true
-                Thread {
-                    try {
-                        UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
-                        CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-
-                        Thread.sleep(100L)
-                        mc.thePlayer.sendChatMessage("/hub")
-                        Thread.sleep(5000L)
-                        mc.thePlayer.sendChatMessage("/is")
-                        Thread.sleep(1000L)
-
-                        CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
                         called2 = false
                         ticks2 = 0
                     } catch (e: InterruptedException) {
@@ -330,7 +244,8 @@ class FailSafe : Feature() {
         if (stuck || desynced) return
         if (!Config.failSafeSpawn || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
-        if (Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is SugarCaneMacro) {
+        update()
+        if (pizza && MacroBuilder.currentMacro is SugarCaneMacro) {
             var switch = false
             if (lastState != (MacroBuilder.currentMacro as IMixinSugarCaneMacro).state) {
                 lastState = (MacroBuilder.currentMacro as IMixinSugarCaneMacro).state
@@ -347,56 +262,54 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun autoWarpBack(event: ClientTickEvent) {
-        if (called2) return
+        if (called2 || called3) return
         if (!Config.failSafeIsland || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
         if (Cache.onIsland) return
-        val pizza = Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled
-        val cheeto = Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")
+
+        update()
         if (pizza || cheeto) {
+            called3 = true
             Thread {
                 try {
-                    Thread.sleep(Config.failSafeIslandDelay.toLong())
-                    if (Cache.onIsland) return@Thread
-                    if (Cache.inSkyblock) {
-                        if (pizza) {
-                            MacroBuilder.onKey()
-                            UChat.chat("§cSkySkipped §f:: §eDetected hub! Warping back...")
-                            mc.thePlayer.sendChatMessage("/is")
-                            Thread.sleep(Config.failSafeIslandDelay.toLong())
-                            MacroBuilder.onKey()
-                        } else {
-                            CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                            UChat.chat("§cSkySkipped §f:: §eDetected hub! Warping back...")
-                            mc.thePlayer.sendChatMessage("/is")
-                            Thread.sleep(Config.failSafeIslandDelay.toLong())
-                            CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                        }
-                    } else {
-                        if (pizza) {
-                            MacroBuilder.onKey()
-                            UChat.chat("§cSkySkipped §f:: §eDetected other lobby! Warping back...")
-                            mc.thePlayer.sendChatMessage("/l")
-                            Thread.sleep(Config.failSafeIslandDelay.toLong())
-                            mc.thePlayer.sendChatMessage("/play sb")
-                            Thread.sleep(Config.failSafeIslandDelay.toLong())
-                            mc.thePlayer.sendChatMessage("/is")
-                            MacroBuilder.onKey()
-                        } else {
-                            CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                            UChat.chat("§cSkySkipped §f:: §eDetected other lobby! Warping back...")
-                            mc.thePlayer.sendChatMessage("/l")
-                            Thread.sleep(Config.failSafeIslandDelay.toLong())
-                            mc.thePlayer.sendChatMessage("/play sb")
-                            Thread.sleep(Config.failSafeIslandDelay.toLong())
-                            mc.thePlayer.sendChatMessage("/is")
-                            CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                        }
+                    if (pizza) MacroBuilder.onKey()
+                    else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+
+                    val delay = Config.failSafeIslandDelay.toLong() * 1000L
+                    println("DELAY: $delay")
+                    Thread.sleep(delay)
+
+                    if (Cache.onIsland) {
+                        called3 = false
+                        return@Thread
                     }
+
+                    if (Cache.inSkyblock) {
+                        UChat.chat("§cSkySkipped §f:: §eDetected hub! Warping back...")
+                        mc.thePlayer.sendChatMessage("/is")
+                        Thread.sleep(delay)
+                    } else {
+                        UChat.chat("§cSkySkipped §f:: §eDetected other lobby! Warping back...")
+                        mc.thePlayer.sendChatMessage("/l")
+                        Thread.sleep(delay)
+                        mc.thePlayer.sendChatMessage("/play sb")
+                        Thread.sleep(delay)
+                        mc.thePlayer.sendChatMessage("/is")
+                    }
+
+                    if (pizza) MacroBuilder.onKey()
+                    else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+
+                    called3 = false
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
-            }
+            }.start()
         }
+    }
+
+    private fun update() {
+        pizza = Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro
+        cheeto = Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")
     }
 
     private fun checkPos(player: BlockPos): Boolean =
