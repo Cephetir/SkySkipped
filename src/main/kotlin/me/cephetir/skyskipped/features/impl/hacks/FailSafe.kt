@@ -24,11 +24,14 @@ import me.cephetir.skyskipped.event.events.PacketReceive
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinSugarCaneMacro
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import net.minecraft.block.BlockStem
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
+import net.minecraft.init.Blocks
 import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraft.util.BlockPos
 import net.minecraft.util.MathHelper
+import net.minecraft.util.MovingObjectPosition
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -61,6 +64,7 @@ class FailSafe : Feature() {
     private var ticks2 = 0
     private var lastCount = 0
     private var called2 = false
+    private var lastBlock: LastBlock? = null
 
     private var lastState = false
 
@@ -181,33 +185,67 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun desync(event: ClientTickEvent) {
-        if (stuck) return
+        if (stuck || called2) return
         if (!Config.failSafeDesync) ticks2 = 0
         if (!Config.failSafeDesync || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
-        val stack = Minecraft.getMinecraft().thePlayer.heldItem
-        if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey("ExtraAttributes", 10)) return
-        val ticksTimeout = Config.failSafeDesyncTime * 20
         update()
         if (pizza || cheeto) {
-            var newCount = -1
-            val tag = stack.tagCompound
-            if (tag.hasKey("ExtraAttributes", 10)) {
-                val ea = tag.getCompoundTag("ExtraAttributes")
-                if (ea.hasKey("mined_crops", 99))
-                    newCount = ea.getInteger("mined_crops")
-                else if (ea.hasKey("farmed_cultivating", 99))
-                    newCount = ea.getInteger("farmed_cultivating")
-            }
-            if (newCount != -1 && newCount > lastCount) {
-                lastCount = newCount
-                desynced = false
-            } else {
-                ticks2++
-                if (ticks2 >= ticksTimeout / 3) desynced = true
+            var trigger = false
+            when (Config.failSafeDesyncMode) {
+                0 -> {
+                    val ticksTimeout = Config.failSafeDesyncTime * 20
+                    val stack = Minecraft.getMinecraft().thePlayer.heldItem
+                    if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey(
+                            "ExtraAttributes",
+                            10
+                        )
+                    ) return
+                    var newCount = -1
+                    val tag = stack.tagCompound
+                    if (tag.hasKey("ExtraAttributes", 10)) {
+                        val ea = tag.getCompoundTag("ExtraAttributes")
+                        if (ea.hasKey("mined_crops", 99))
+                            newCount = ea.getInteger("mined_crops")
+                        else if (ea.hasKey("farmed_cultivating", 99))
+                            newCount = ea.getInteger("farmed_cultivating")
+                    }
+                    if (newCount != -1 && newCount > lastCount) {
+                        lastCount = newCount
+                        desynced = false
+                    } else {
+                        ticks2++
+                        if (ticks2 >= ticksTimeout / 3) desynced = true
+                        if (ticks2 >= ticksTimeout) trigger = true
+                    }
+                }
+                1 -> {
+                    if (lastBlock == null) {
+                        val obj = mc.objectMouseOver
+                        if (obj == null ||
+                            obj.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK ||
+                            mc.theWorld.getBlockState(obj.blockPos).block !is BlockStem
+                        ) return
+                        lastBlock = LastBlock(obj.blockPos, Config.failSafeDesyncTime * 20)
+                    } else {
+                        lastBlock!!.ticks--
+                        val blockState = mc.theWorld.getBlockState(lastBlock!!.blockPos)
+                        if (lastBlock!!.ticks <= 0) {
+                            if (blockState.block != Blocks.air &&
+                                blockState.block is BlockStem &&
+                                blockState.properties[BlockStem.AGE]!! != 0
+                            ) trigger = true
+                            else ticks2++
+                            if (ticks2 >= 20) {
+                                lastBlock = null
+                                ticks2 = 0
+                            }
+                        }
+                    }
+                }
             }
 
-            if (ticks2 >= ticksTimeout && !called2) {
+            if (trigger && !called2) {
                 called2 = true
                 Thread {
                     try {
@@ -230,6 +268,7 @@ class FailSafe : Feature() {
                         else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
                         called2 = false
+                        lastBlock = null
                         ticks2 = 0
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
@@ -314,4 +353,6 @@ class FailSafe : Feature() {
 
     private fun checkPos(player: BlockPos): Boolean =
         lastPos!!.x - player.x <= 1 && lastPos!!.x - player.x >= -1 && lastPos!!.y - player.y <= 1 && lastPos!!.y - player.y >= -1 && lastPos!!.z - player.z <= 1 && lastPos!!.z - player.z >= -1
+
+    data class LastBlock(val blockPos: BlockPos, var ticks: Int)
 }
