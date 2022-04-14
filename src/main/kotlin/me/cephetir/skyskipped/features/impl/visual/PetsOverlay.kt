@@ -120,6 +120,7 @@ class PetsOverlay : Feature() {
         private var nextPage: Slot? = null
         private var previousPage: Slot? = null
         private val PET_PATTERN = Pattern.compile("§7\\[Lvl \\d+] (?<color>§[0-9a-fk-or]).+")
+        private var converting = false
 
         init {
             width = chest.width
@@ -191,7 +192,15 @@ class PetsOverlay : Feature() {
             val d = height - height / 4
             val n = (rectHeight1 + 5 + (j + 1) * 24) * 1.5 + 20
             bottom = d.coerceAtLeast(n.roundToInt())
-            BlurUtils.renderBlurredBackground(Config.petsBgBlur, width.toFloat(), height.toFloat(), rectWidth.toFloat() - 20, rectHeight.toFloat(), width.toFloat() - rectWidth.toFloat() + 40 - rectWidth.toFloat(), bottom.toFloat() - rectHeight.toFloat())
+            BlurUtils.renderBlurredBackground(
+                Config.petsBgBlur,
+                width.toFloat(),
+                height.toFloat(),
+                rectWidth.toFloat() - 20,
+                rectHeight.toFloat(),
+                width.toFloat() - rectWidth.toFloat() + 40 - rectWidth.toFloat(),
+                bottom.toFloat() - rectHeight.toFloat()
+            )
             Gui.drawRect(0, 0, width, height, Color(0, 0, 0, 150).rgb)
             drawRoundedOutline(
                 rectWidth - 20f,
@@ -210,11 +219,19 @@ class PetsOverlay : Feature() {
                 Color(223, 223, 233, 255).rgb,
                 false
             )
-            if(close != null) {
+            if (close != null) {
                 if (pets.isNotEmpty()) for (pet in pets) {
                     renderItem(pet.itemStack, pet.x, pet.y)
+
                     if (pet.last) {
-                        drawRoundedRect(pet.x - 0.3f, pet.y - 0.3f, pet.x + 16.3f, pet.y + 16.3f, 6f, pet.rarity)
+                        drawRoundedRect(
+                            pet.x - 0.3f,
+                            pet.y - 0.3f,
+                            pet.x + 16.3f,
+                            pet.y + 16.3f,
+                            6f,
+                            pet.rarity
+                        )
                         drawRoundedOutline(
                             pet.x - 1f,
                             pet.y - 1f,
@@ -225,7 +242,15 @@ class PetsOverlay : Feature() {
                             Color(23, 217, 7, 255).rgb
                         )
                     }
-                    drawRoundedOutline(pet.x - 0.5f, pet.y - 0.5f, pet.x + 16.5f, pet.y + 16.5f, 6f, 2.5f, pet.rarity)
+                    drawRoundedOutline(
+                        pet.x - 0.5f,
+                        pet.y - 0.5f,
+                        pet.x + 16.5f,
+                        pet.y + 16.5f,
+                        6f,
+                        2.5f,
+                        pet.rarity
+                    )
                     GlStateManager.scale(0.5f / 1.5f, 0.5f / 1.5f, 0.5f / 1.5f)
                     GlStateManager.scale(3f, 3f, 3f)
                 }
@@ -331,15 +356,13 @@ class PetsOverlay : Feature() {
                 }
                 GlStateManager.resetColor()
                 onHover(mouseX, mouseY)
-            } else {
-                mc.fontRendererObj.drawString(
-                    "Loading...",
-                    width / 2f - mc.fontRendererObj.getStringWidth("Loading...") / 2f,
-                    height / 2f - mc.fontRendererObj.FONT_HEIGHT / 2f,
-                    Color(223, 223, 233, 255).rgb,
-                    false
-                )
-            }
+            } else mc.fontRendererObj.drawString(
+                "Loading...",
+                (width / 2f - mc.fontRendererObj.getStringWidth("Loading...") / 2f) / 1.5f,
+                (height / 2f - mc.fontRendererObj.FONT_HEIGHT / 2f) / 1.5f,
+                Color(223, 223, 233, 255).rgb,
+                false
+            )
             GlStateManager.disableBlend()
             GlStateManager.enableTexture2D()
             GlStateManager.popMatrix()
@@ -354,7 +377,7 @@ class PetsOverlay : Feature() {
             val container = chest as IMixinGuiContainer
             for (pet in pets) if (mouseX > pet.x && mouseY > pet.y && mouseX < pet.x + 16 && mouseY < pet.y + 16) {
                 container.handleMouseClick(pet.slot, pet.slot.slotNumber, button, 0)
-                mc.thePlayer.closeScreen()
+                if (!converting) mc.thePlayer.closeScreen()
                 return
             }
             mouseX *= 1.5
@@ -370,12 +393,15 @@ class PetsOverlay : Feature() {
                 close!!.slotNumber,
                 button,
                 0
-            ) else if (mouseX > width / 2f + 20 + 12 && mouseY > h - 25 && mouseX < width / 2f + 20 + 12 + 40 && mouseY < h - 25 + 20) container.handleMouseClick(
-                convert,
-                convert!!.slotNumber,
-                button,
-                0
-            ) else if (mouseX > width / 2f + 20 + 12 + 40 + 12 && mouseY > h - 25 && mouseX < width / 2f + 20 + 12 + 40 + 12 + 40 && mouseY < h - 25 + 20) container.handleMouseClick(
+            ) else if (mouseX > width / 2f + 20 + 12 && mouseY > h - 25 && mouseX < width / 2f + 20 + 12 + 40 && mouseY < h - 25 + 20) {
+                container.handleMouseClick(
+                    convert,
+                    convert!!.slotNumber,
+                    button,
+                    0
+                )
+                converting = !converting
+            } else if (mouseX > width / 2f + 20 + 12 + 40 + 12 && mouseY > h - 25 && mouseX < width / 2f + 20 + 12 + 40 + 12 + 40 && mouseY < h - 25 + 20) container.handleMouseClick(
                 hide,
                 hide!!.slotNumber,
                 button,
