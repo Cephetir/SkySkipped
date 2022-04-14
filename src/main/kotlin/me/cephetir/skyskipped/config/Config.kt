@@ -69,6 +69,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         addDependency("failsafeJump", "failSafe")
         addDependency("fastBreakNumber", "fastBreak")
         addDependency("failSafeDesyncTime", "failSafeDesync")
+        addDependency("failSafeDesyncMode", "failSafeDesync")
         addDependency("failSafeIslandDelay", "failSafeIsland")
         addDependency("blockList", "block")
 
@@ -290,11 +291,21 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             category = "Hacks",
             subcategory = "Failsafes",
             description = "Seconds to wait for failsafe to trigger.",
-            min = 30,
+            min = 5,
             max = 240,
             increment = 1
         )
         var failSafeDesyncTime = 40
+
+        @Property(
+            type = PropertyType.SELECTOR,
+            name = "Desync Failsafe Mode",
+            category = "Hacks",
+            subcategory = "Failsafes",
+            description = "Mode for desync failsafe.",
+            options = ["Hoe counter (old)", "Block (new)"]
+        )
+        var failSafeDesyncMode = 0
 
         @Property(
             type = PropertyType.SWITCH,
