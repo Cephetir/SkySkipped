@@ -68,7 +68,7 @@ class CustomScoreboard : Feature() {
                 val s = a(ScorePlayerTeam.formatPlayerName(
                     scoreplayerteam as Team,
                     score.playerName
-                ) + ": " + EnumChatFormatting.RED + score.scorePoints)
+                ) + (if(!customSbNumbers) ": " + EnumChatFormatting.RED + score.scorePoints else ""))
                 width = width.coerceAtLeast(mc.fontRendererObj.getStringWidth(s))
             }
             val i1 = (collection.size * fontHeight).toFloat()
