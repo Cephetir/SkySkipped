@@ -50,12 +50,8 @@ class FailSafe : Feature() {
         var timer2 = System.currentTimeMillis()
     }
 
-    private var pizza = Loader.isModLoaded("pizzaclient") &&
-            MacroBuilder.toggled &&
-            MacroBuilder.currentMacro is FarmingMacro
-
-    private var cheeto = Loader.isModLoaded("ChromaHUD") &&
-            CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")
+    private var pizza = false
+    private var cheeto = false
 
     private var ticks = 0
     private var lastPos: BlockPos? = null
