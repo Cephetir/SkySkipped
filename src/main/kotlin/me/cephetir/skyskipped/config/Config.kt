@@ -324,7 +324,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             maxF = 10f,
             decimalPlaces = 1
         )
-        var failSafeIslandDelay = 2.5f
+        var failSafeIslandDelay = 4f
 
         @Property(
             type = PropertyType.SWITCH,
