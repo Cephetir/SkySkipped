@@ -89,6 +89,8 @@ class FailSafe : Feature() {
                 called = true
                 Thread {
                     try {
+                        val pizza = pizza
+                        val cheeto = cheeto
                         UChat.chat("§cSkySkipped §f:: §eYou got stuck! Trying to prevent that...")
                         if (pizza) MacroBuilder.onKey()
                         else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
@@ -181,7 +183,7 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun desync(event: ClientTickEvent) {
-        if (stuck || called2) return
+        if (called || called2) return
         if (!Config.failSafeDesync) ticks2 = 0
         if (!Config.failSafeDesync || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
@@ -245,6 +247,8 @@ class FailSafe : Feature() {
                 called2 = true
                 Thread {
                     try {
+                        val pizza = pizza
+                        val cheeto = cheeto
                         UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
                         if (pizza) MacroBuilder.onKey()
                         else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
@@ -306,11 +310,12 @@ class FailSafe : Feature() {
             called3 = true
             Thread {
                 try {
+                    val pizza = pizza
+                    val cheeto = cheeto
                     if (pizza) MacroBuilder.onKey()
                     else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
                     val delay = Config.failSafeIslandDelay.toLong() * 1000L
-                    println("DELAY: $delay")
                     Thread.sleep(delay)
 
                     if (Cache.onIsland) {
@@ -321,7 +326,6 @@ class FailSafe : Feature() {
                     if (Cache.inSkyblock) {
                         UChat.chat("§cSkySkipped §f:: §eDetected hub! Warping back...")
                         mc.thePlayer.sendChatMessage("/is")
-                        Thread.sleep(delay)
                     } else {
                         UChat.chat("§cSkySkipped §f:: §eDetected other lobby! Warping back...")
                         mc.thePlayer.sendChatMessage("/l")
@@ -331,6 +335,7 @@ class FailSafe : Feature() {
                         mc.thePlayer.sendChatMessage("/is")
                     }
 
+                    Thread.sleep(delay)
                     if (pizza) MacroBuilder.onKey()
                     else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 

@@ -20,6 +20,7 @@ package me.cephetir.skyskipped.features.impl.misc
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import net.minecraft.client.settings.KeyBinding
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -31,13 +32,15 @@ class AutoStopFlying : Feature() {
         Thread {
             try {
                 val last = System.currentTimeMillis()
-                var velo = false
-                while(!velo) {
+                var state = false
+                while(!state) {
                     if(System.currentTimeMillis() - last >= 3000) return@Thread
-                    velo = mc.thePlayer.capabilities.isFlying
+                    state = mc.thePlayer.capabilities.isFlying
                     Thread.sleep(10)
                 }
-                mc.thePlayer.capabilities.isFlying = false
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, true)
+                Thread.sleep(100)
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, false)
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }

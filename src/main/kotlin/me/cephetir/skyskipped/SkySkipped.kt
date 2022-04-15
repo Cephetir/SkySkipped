@@ -73,7 +73,7 @@ class SkySkipped {
 
         @JvmStatic
         fun getCosmetics(message: String): String {
-            if(Minecraft.getMinecraft().thePlayer == null) return message
+            if (Minecraft.getMinecraft().thePlayer == null) return message
             var text = message
             val result = regex.findAll(text)
             for (matcher in result) {
@@ -86,7 +86,8 @@ class SkySkipped {
             }
             if (text.contains(Minecraft.getMinecraft().thePlayer.displayNameString)) text = text.replace(
                 Minecraft.getMinecraft().thePlayer.displayNameString,
-                cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§") ?: return text
+                cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§")
+                    ?: return text
             )
             return text
         }
@@ -96,7 +97,8 @@ class SkySkipped {
             if (Minecraft.getMinecraft().thePlayer != null && message.contains(Minecraft.getMinecraft().thePlayer.displayName.formattedText))
                 return message.replace(
                     Minecraft.getMinecraft().thePlayer.displayNameString,
-                    cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§") ?: return message
+                    cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§")
+                        ?: return message
                 )
             else return message
         }

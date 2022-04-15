@@ -26,6 +26,7 @@ import me.cephetir.skyskipped.config.Config.Companion.customSbNumbers
 import me.cephetir.skyskipped.event.events.ScoreboardRenderEvent
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.BlurUtils
+import me.cephetir.skyskipped.utils.RenderUtils
 import me.cephetir.skyskipped.utils.RoundUtils
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
@@ -40,6 +41,10 @@ import java.text.DecimalFormat
 import java.util.regex.Pattern
 
 class CustomScoreboard : Feature() {
+    private var lastX = 0f
+    private var lastY = 0f
+    private var lastWidth = 0f
+    private var lastHeight = 0f
 
     @SubscribeEvent
     fun onDraw(event: ScoreboardRenderEvent) {
@@ -65,10 +70,12 @@ class CustomScoreboard : Feature() {
             val fontHeight = mc.fontRendererObj.FONT_HEIGHT
             for (score in collection) {
                 val scoreplayerteam = scoreboard.getPlayersTeam(score.playerName) ?: continue
-                val s = a(ScorePlayerTeam.formatPlayerName(
-                    scoreplayerteam as Team,
-                    score.playerName
-                ) + (if(!customSbNumbers) ": " + EnumChatFormatting.RED + score.scorePoints else ""))
+                val s = a(
+                    ScorePlayerTeam.formatPlayerName(
+                        scoreplayerteam as Team,
+                        score.playerName
+                    ) + (if (!customSbNumbers) ": " + EnumChatFormatting.RED + score.scorePoints else "")
+                )
                 width = width.coerceAtLeast(mc.fontRendererObj.getStringWidth(s))
             }
             val i1 = (collection.size * fontHeight).toFloat()
@@ -77,20 +84,23 @@ class CustomScoreboard : Feature() {
             val l1: Float = resolution.scaledWidth - width - k1
             val m: Float = resolution.scaledWidth - k1 + 2.0f
             val blur = Config.customSbBlur
+
+            val x = RenderUtils.animate(l1 - 2.0f, lastX, 0.2f)
+            lastX = x
+            val y = RenderUtils.animate(j1 - collection.size * fontHeight - fontHeight - 3.0f, lastY, 0.2f)
+            lastY = y
+            val w = RenderUtils.animate(m - (l1 - 2.0f), lastWidth, 0.2f)
+            lastWidth = w
+            val h = RenderUtils.animate((fontHeight * (collection.size + 1) + 4).toFloat(), lastHeight, 0.2f)
+            lastHeight = h
             if (Config.customSbBlurT) BlurUtils.renderBlurredBackground(
                 blur,
                 resolution.scaledWidth.toFloat(),
                 resolution.scaledHeight.toFloat(),
-                l1 - 2.0f,
-                j1 - collection.size * fontHeight - fontHeight - 3.0f,
-                m - (l1 - 2.0f),
-                (fontHeight * (collection.size + 1) + 4).toFloat()
+                x, y, w, h
             )
             if (Config.customSbOutline) RoundUtils.drawRoundedOutline(
-                l1 - 2.0f,
-                j1 - collection.size * fontHeight - fontHeight - 3.0f,
-                (l1 - 2.0f) + (m - (l1 - 2.0f)),
-                (j1 - collection.size * fontHeight - fontHeight - 3.0f) + (fontHeight * (collection.size + 1) + 4).toFloat(),
+                x, y, x + w, y + h,
                 5.0f,
                 2.5f,
                 Config.customSbOutlineColor.rgb,

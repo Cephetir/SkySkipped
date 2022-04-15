@@ -246,4 +246,13 @@ object RenderUtils {
             0.88f
         )
     }
+
+    // Tenacity momento ez
+    fun animate(endPoint: Float, current: Float, speed: Float): Float {
+        val sped = speed.coerceIn(0f, 1f)
+        val shouldContinueAnimation = endPoint > current
+        val dif = endPoint.coerceAtLeast(current) - endPoint.coerceAtMost(current)
+        val factor = dif * sped
+        return current + if (shouldContinueAnimation) factor else -factor
+    }
 }
