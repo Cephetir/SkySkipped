@@ -60,6 +60,9 @@ public class MixinMinecraft {
     @Shadow
     public EntityPlayerSP thePlayer;
 
+    /*
+     *  @Author Apfelsaft
+     */
     @Inject(method = "sendClickBlockToController", at = @At("RETURN"))
     private void sendClickBlockToController(CallbackInfo ci) {
         if(!Config.Companion.getFastBreak()) return;
