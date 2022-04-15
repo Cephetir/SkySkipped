@@ -40,6 +40,9 @@ import qolskyblockmod.pizzaclient.features.macros.builder.MacroBuilder
 import qolskyblockmod.pizzaclient.features.macros.builder.macros.FarmingMacro
 import qolskyblockmod.pizzaclient.features.macros.farming.SugarCaneMacro
 import xyz.apfelmus.cf4m.CF4M
+import xyz.apfelmus.cheeto.client.modules.world.AutoFarm
+import java.lang.reflect.Field
+
 
 class FailSafe : Feature() {
     companion object {
@@ -63,6 +66,7 @@ class FailSafe : Feature() {
     private var lastBlock: LastBlock? = null
 
     private var lastState = false
+    private var lastDirection: Any? = null
 
     private var called3 = false
 
@@ -284,6 +288,22 @@ class FailSafe : Feature() {
             var switch = false
             if (lastState != (MacroBuilder.currentMacro as IMixinSugarCaneMacro).state) {
                 lastState = (MacroBuilder.currentMacro as IMixinSugarCaneMacro).state
+                switch = true
+            }
+
+            if (switch && System.currentTimeMillis() - timer > 500) {
+                UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
+                mc.thePlayer.sendChatMessage("/sethome")
+                timer = System.currentTimeMillis()
+            }
+        } else if (cheeto) {
+            var switch = false
+            val f: Field = AutoFarm::class.java.getDeclaredField("farmingDirection")
+            f.isAccessible = true
+            val value = f.get(CF4M.INSTANCE.moduleManager.getModule("AutoFarm"))
+            if (lastDirection == null) lastDirection = value
+            else if (lastDirection != value) {
+                lastDirection = value
                 switch = true
             }
 
