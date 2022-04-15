@@ -85,14 +85,29 @@ class CustomScoreboard : Feature() {
             val m: Float = resolution.scaledWidth - k1 + 2.0f
             val blur = Config.customSbBlur
 
-            val x = RenderUtils.animate(l1 - 2.0f, lastX, 0.2f)
-            lastX = x
-            val y = RenderUtils.animate(j1 - collection.size * fontHeight - fontHeight - 3.0f, lastY, 0.2f)
-            lastY = y
-            val w = RenderUtils.animate(m - (l1 - 2.0f), lastWidth, 0.2f)
-            lastWidth = w
-            val h = RenderUtils.animate((fontHeight * (collection.size + 1) + 4).toFloat(), lastHeight, 0.2f)
-            lastHeight = h
+            val x: Float
+            val y: Float
+            val w: Float
+            val h: Float
+            if (lastX == 0f && lastY == 0f) {
+                x = l1 - 2.0f
+                lastX = x
+                y = j1 - collection.size * fontHeight - fontHeight - 3.0f
+                lastY = y
+                w = m - (l1 - 2.0f)
+                lastWidth = w
+                h = (fontHeight * (collection.size + 1) + 4).toFloat()
+                lastHeight = h
+            } else {
+                x = RenderUtils.animate(l1 - 2.0f, lastX, 0.2f)
+                lastX = x
+                y = RenderUtils.animate(j1 - collection.size * fontHeight - fontHeight - 3.0f, lastY, 0.2f)
+                lastY = y
+                w = RenderUtils.animate(m - (l1 - 2.0f), lastWidth, 0.2f)
+                lastWidth = w
+                h = RenderUtils.animate((fontHeight * (collection.size + 1) + 4).toFloat(), lastHeight, 0.2f)
+                lastHeight = h
+            }
             if (Config.customSbBlurT) BlurUtils.renderBlurredBackground(
                 blur,
                 resolution.scaledWidth.toFloat(),
