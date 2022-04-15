@@ -28,8 +28,6 @@ Cephetir's cool mod for Hypixel and Skyblock
     - Ping on Watcher cleared
 - ESPs
     - Shows esp for players, starred mobs and bats
-- Terminals Display
-    - Display called terminals in player's nametag
 </details>
 
 <details>
@@ -43,6 +41,8 @@ Cephetir's cool mod for Hypixel and Skyblock
       - Stops macros on jacob event start
     - Desync Falisafe
       - Stops macros when hypixel decides to stop breaking crops
+    - Auto set spawn every row
+      - Auto set spawn every row
 - Block Ability
     - Blocks any item's ability
 - Item Swapper With Custom Keybinds
@@ -66,7 +66,7 @@ Cephetir's cool mod for Hypixel and Skyblock
 - Delight Locked Gemstone Slots in AH
   - Make items with locked gemstone slots darker in ah
 - Custom Scoreboard
-    - Draw custom scoreboard instead vanilla
+    - Draw custom cool scoreboard instead of vanilla
 - Remove Red Numbers In Scoreboard
 </details>
 
@@ -82,8 +82,10 @@ Cephetir's cool mod for Hypixel and Skyblock
     <summary>Misc</summary>
 
 ### Misc
-- Stop fly
-  - Stop flying on private island
+- Auto Stop Fly
+  - Stop flying on private island when spawned with soup
+- Cookie Clicker
+  - Obviously auto cookie clicker
 </details>
 
 ## Commands
@@ -91,7 +93,8 @@ Cephetir's cool mod for Hypixel and Skyblock
     <summary>Commands</summary>
 
 - /sm or /sm gui - opens config gui
+- /sm keybind or /sm kb - epic item swapper
+- /sm pet [pet index] - auto select pet very fast
 - /sm github - opens official github page
-- /sm pet [pet index] - Auto select pet very fast
 - /sm help - shows all commands list
 </details>

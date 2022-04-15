@@ -9,7 +9,6 @@
     "IMixinGuiScreen",
     "IMixinRenderManager",
     "IMixinSugarCaneMacro",
-    "MixinAutoFarm",
     "MixinGuiContainer",
     "MixinGuiDisconnected",
     "MixinGuiIngame",
