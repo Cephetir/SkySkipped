@@ -24,7 +24,7 @@ import me.cephetir.skyskipped.event.events.PacketReceive
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinSugarCaneMacro
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import net.minecraft.block.BlockStem
+import net.minecraft.block.BlockNetherWart
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.init.Blocks
@@ -222,22 +222,18 @@ class FailSafe : Feature() {
                         val obj = mc.objectMouseOver
                         if (obj == null ||
                             obj.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK ||
-                            mc.theWorld.getBlockState(obj.blockPos).block !is BlockStem
+                            mc.theWorld.getBlockState(obj.blockPos).block !is BlockNetherWart
                         ) return
                         lastBlock = LastBlock(obj.blockPos, Config.failSafeDesyncTime * 20)
                     } else {
                         lastBlock!!.ticks--
-                        val blockState = mc.theWorld.getBlockState(lastBlock!!.blockPos)
                         if (lastBlock!!.ticks <= 0) {
+                            val blockState = mc.theWorld.getBlockState(lastBlock!!.blockPos)
                             if (blockState.block != Blocks.air &&
-                                blockState.block is BlockStem &&
-                                blockState.properties[BlockStem.AGE]!! != 0
+                                blockState.block is BlockNetherWart &&
+                                blockState.properties[BlockNetherWart.AGE]!! == 3
                             ) trigger = true
-                            else ticks2++
-                            if (ticks2 >= 20) {
-                                lastBlock = null
-                                ticks2 = 0
-                            }
+                            else lastBlock = null
                         }
                     }
                 }
