@@ -24,10 +24,9 @@ import me.cephetir.skyskipped.event.events.PacketReceive
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinSugarCaneMacro
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import net.minecraft.block.BlockNetherWart
+import net.minecraft.block.*
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
-import net.minecraft.init.Blocks
 import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraft.util.BlockPos
 import net.minecraft.util.MathHelper
@@ -226,18 +225,23 @@ class FailSafe : Feature() {
                         val obj = mc.objectMouseOver
                         if (obj == null ||
                             obj.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK ||
-                            mc.theWorld.getBlockState(obj.blockPos).block !is BlockNetherWart
+                            mc.theWorld.getBlockState(obj.blockPos).block !is BlockBush
                         ) return
                         lastBlock = LastBlock(obj.blockPos, Config.failSafeDesyncTime * 20)
                     } else {
                         lastBlock!!.ticks--
                         if (lastBlock!!.ticks <= 0) {
                             val blockState = mc.theWorld.getBlockState(lastBlock!!.blockPos)
-                            if (blockState.block != Blocks.air &&
-                                blockState.block is BlockNetherWart &&
-                                blockState.properties[BlockNetherWart.AGE]!! == 3
-                            ) trigger = true
-                            else lastBlock = null
+                            when (blockState.block) {
+                                is BlockNetherWart -> if (blockState.properties[BlockNetherWart.AGE]!! == 3) trigger = true
+                                is BlockReed -> trigger = true
+                                is BlockPotato -> if (blockState.properties[BlockPotato.AGE]!! == 7) trigger = true
+                                is BlockCarrot -> if (blockState.properties[BlockCarrot.AGE]!! == 7) trigger = true
+                                else -> {
+                                    if (blockState.block.unlocalizedName == "crops") trigger = true
+                                    else lastBlock = null
+                                }
+                            }
                         }
                     }
                 }
