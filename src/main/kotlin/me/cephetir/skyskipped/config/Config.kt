@@ -65,6 +65,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         addDependency("customSbBlur", "customSbBlurT")
         addDependency("customSbOutline", "customSb")
         addDependency("customSbOutlineColor", "customSbOutline")
+        addDependency("customSbOutlineColorRainbow", "customSbOutline")
 
         addDependency("failsafeJump", "failSafe")
         addDependency("fastBreakNumber", "fastBreak")
@@ -616,6 +617,15 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             description = "Color for scoreboard outline."
         )
         var customSbOutlineColor: Color = Color(87, 0, 247, 255)
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Scoreboard Outline Rainbow Color",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Rainbow color for scoreboard outline."
+        )
+        var customSbOutlineColorRainbow = false
 
         @Property(
             type = PropertyType.TEXT,
