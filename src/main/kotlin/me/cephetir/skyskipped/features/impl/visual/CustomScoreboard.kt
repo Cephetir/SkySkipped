@@ -115,7 +115,7 @@ class CustomScoreboard : Feature() {
                 x, y, w, h
             )
             if (Config.customSbOutline) RoundUtils.drawRoundedOutline(
-                x, y, x + w, y + h,
+                x - 1, y - 1, x + w + 1, y + h + 1,
                 5.0f,
                 2.5f,
                 if (!Config.customSbOutlineColorRainbow) Config.customSbOutlineColor.rgb
