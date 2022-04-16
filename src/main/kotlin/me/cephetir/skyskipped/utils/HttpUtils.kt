@@ -58,9 +58,9 @@ object HttpUtils {
 
     init {
         reqConf = RequestConfig.custom()
-            .setSocketTimeout(5000)
-            .setConnectTimeout(5000)
-            .setConnectionRequestTimeout(2000)
+            .setSocketTimeout(10000)
+            .setConnectTimeout(10000)
+            .setConnectionRequestTimeout(5000)
             .setRedirectsEnabled(false)
             .setMaxRedirects(0)
             .build()
@@ -69,9 +69,9 @@ object HttpUtils {
 
     fun requestConfig() {
         reqConf = RequestConfig.custom()
-            .setSocketTimeout(5000)
-            .setConnectTimeout(5000)
-            .setConnectionRequestTimeout(2000)
+            .setSocketTimeout(10000)
+            .setConnectTimeout(10000)
+            .setConnectionRequestTimeout(5000)
             .setRedirectsEnabled(false)
             .setMaxRedirects(0)
             .build()
