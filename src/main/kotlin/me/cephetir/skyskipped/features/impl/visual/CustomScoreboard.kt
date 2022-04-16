@@ -118,7 +118,8 @@ class CustomScoreboard : Feature() {
                 x, y, x + w, y + h,
                 5.0f,
                 2.5f,
-                Config.customSbOutlineColor.rgb,
+                if (!Config.customSbOutlineColorRainbow) Config.customSbOutlineColor.rgb
+                else RenderUtils.getChroma(3000F, 0),
             )
 
             var i2 = 0
