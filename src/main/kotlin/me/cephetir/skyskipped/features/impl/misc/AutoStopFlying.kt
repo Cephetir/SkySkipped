@@ -26,18 +26,14 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class AutoStopFlying : Feature() {
 
+    // #HypixelBestDevs
     @SubscribeEvent
     fun onWorld(event: WorldEvent.Load) {
-        if(!Config.stopFly || !Cache.inSkyblock) return
+        if (!Config.stopFly || !Cache.inSkyblock) return
         Thread {
             try {
-                val last = System.currentTimeMillis()
-                var state = false
-                while(!state) {
-                    if(System.currentTimeMillis() - last >= 3000) return@Thread
-                    state = mc.thePlayer.capabilities.isFlying
-                    Thread.sleep(10)
-                }
+                Thread.sleep(3000)
+                if (!Cache.onIsland) return@Thread
                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, true)
                 Thread.sleep(100)
                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, false)
