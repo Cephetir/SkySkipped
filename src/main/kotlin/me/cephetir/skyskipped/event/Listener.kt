@@ -47,7 +47,7 @@ class Listener {
             var dungeonName = ""
             var itemheld = "Nothing"
 
-            val scoreObjective = Minecraft.getMinecraft().thePlayer.worldScoreboard.getObjectiveInDisplaySlot(1)
+            val scoreObjective = Minecraft.getMinecraft().thePlayer.worldScoreboard.getObjectiveInDisplaySlot(1) ?: return
             val scores = ScoreboardUtils.fetchScoreboardLines()
 
             if (scoreObjective.displayName.stripColor().startsWith("SKYBLOCK")) foundSkyblock = true
