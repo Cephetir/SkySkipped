@@ -20,7 +20,6 @@ package me.cephetir.skyskipped.features.impl.misc
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import net.minecraft.client.settings.KeyBinding
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -29,14 +28,17 @@ class AutoStopFlying : Feature() {
     // #HypixelBestDevs
     @SubscribeEvent
     fun onWorld(event: WorldEvent.Load) {
-        if (!Config.stopFly || !Cache.inSkyblock) return
+        if (!Config.stopFly) return
         Thread {
             try {
-                Thread.sleep(3000)
-                if (!Cache.onIsland) return@Thread
-                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, true)
-                Thread.sleep(100)
-                KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, false)
+                val last = System.currentTimeMillis()
+                var state = false
+                while(!state) {
+                    if(System.currentTimeMillis() - last >= 3000) return@Thread
+                    state = mc.thePlayer.capabilities.isFlying && Cache.onIsland
+                    Thread.sleep(10)
+                }
+                mc.thePlayer.capabilities.isFlying = false
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
