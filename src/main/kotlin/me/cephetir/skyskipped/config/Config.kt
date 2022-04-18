@@ -72,6 +72,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         addDependency("failSafeDesyncTime", "failSafeDesync")
         addDependency("failSafeDesyncMode", "failSafeDesync")
         addDependency("failSafeIslandDelay", "failSafeIsland")
+        addDependency("failSafeJacobNumber", "failSafeJacob")
         addDependency("blockList", "block")
 
         addDependency("petsBgBlur", "petsOverlay")
@@ -278,6 +279,18 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         var failSafeJacob = false
 
         @Property(
+            type = PropertyType.SLIDER,
+            name = "Jacob Failsafe Stop At",
+            category = "Hacks",
+            subcategory = "Failsafes",
+            description = "Amount of crops mined for Jacob failsafe to stop.",
+            min = 100000,
+            max = 1000000,
+            increment = 1
+        )
+        var failSafeJacobNumber = 400000
+
+        @Property(
             type = PropertyType.SWITCH,
             name = "Desync Failsafe",
             category = "Hacks",
@@ -292,11 +305,11 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             category = "Hacks",
             subcategory = "Failsafes",
             description = "Seconds to wait for failsafe to trigger.",
-            min = 5,
-            max = 240,
+            min = 1,
+            max = 120,
             increment = 1
         )
-        var failSafeDesyncTime = 40
+        var failSafeDesyncTime = 5
 
         @Property(
             type = PropertyType.SELECTOR,
@@ -306,7 +319,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             description = "Mode for desync failsafe.",
             options = ["Hoe counter (old)", "Block (new)"]
         )
-        var failSafeDesyncMode = 0
+        var failSafeDesyncMode = 1
 
         @Property(
             type = PropertyType.SWITCH,

@@ -43,6 +43,7 @@ class Listener {
             var foundSkyblock = false
             var foundWorkshop = false
             var foundIsland = false
+            var foundJacob = false
             var percentage = 0
             var dungeonName = ""
             var itemheld = "Nothing"
@@ -62,7 +63,7 @@ class Listener {
                         if (foundDungeon) dungeonName = strippedLine.trim()
                         else if (strippedLine.contains("Jerry's Workshop")) foundWorkshop = true
                         else if (strippedLine.contains("Your Island")) foundIsland = true
-                    }
+                    } else if (strippedLine.contains("Jacob's Contest")) foundJacob = true
                 }
 
                 if (Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null)
@@ -74,6 +75,7 @@ class Listener {
             Cache.isInDungeon = foundDungeon
             Cache.inWorkshop = foundWorkshop
             Cache.onIsland = foundIsland
+            Cache.isJacob = foundJacob
             Cache.dungeonPercentage = percentage
             Cache.dungeonName = dungeonName
             Cache.itemheld = itemheld
