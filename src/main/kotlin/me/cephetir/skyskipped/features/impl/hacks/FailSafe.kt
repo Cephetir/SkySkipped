@@ -172,14 +172,18 @@ class FailSafe : Feature() {
             postfix = event.packet.suffix
         ).stripColor().trim()
 
-        if (line.startsWith("Jacob's Contest")) {
-            update()
-            if (pizza) {
-                UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
-                MacroBuilder.onKey()
-            } else if (cheeto) {
-                UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
-                CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+        update()
+        if (Cache.isJacob && (pizza || cheeto)) {
+            if (line.contains("with")) {
+                val split = line.split(" ")
+                if (split.size == 3) {
+                    val number = split[2].replace(",", "").toInt()
+                    if (number >= Config.failSafeJacobNumber) {
+                        UChat.chat("§cSkySkipped §f:: §eJacob event failsafe triggered! Stopping macro...")
+                        if (pizza) MacroBuilder.onKey()
+                        else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                    }
+                }
             }
         }
     }
