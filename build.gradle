@@ -67,7 +67,7 @@ dependencies {
         exclude module: 'log4j'
     }
 
-    implementation('org.projectlombok:lombok:1.18.22')
+    implementation('org.projectlombok:lombok:1.18.24')
     annotationProcessor('org.projectlombok:lombok:1.18.22')
 
     implementation('org.spongepowered:mixin:0.8.5-SNAPSHOT')
