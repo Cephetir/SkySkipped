@@ -24,13 +24,17 @@ import me.cephetir.skyskipped.event.events.PacketReceive
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinSugarCaneMacro
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import net.minecraft.block.*
+import net.minecraft.block.BlockCarrot
+import net.minecraft.block.BlockNetherWart
+import net.minecraft.block.BlockPotato
+import net.minecraft.block.BlockReed
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraft.util.BlockPos
 import net.minecraft.util.MathHelper
 import net.minecraft.util.MovingObjectPosition
+import net.minecraftforge.common.IPlantable
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -173,18 +177,15 @@ class FailSafe : Feature() {
         ).stripColor().trim()
 
         update()
-        if (Cache.isJacob && (pizza || cheeto)) {
-            if (line.contains("with")) {
-                val split = line.split(" ")
-                if (split.size == 3) {
-                    val number = split[2].replace(",", "").toInt()
-                    if (number >= Config.failSafeJacobNumber) {
-                        UChat.chat("§cSkySkipped §f:: §eJacob event failsafe triggered! Stopping macro...")
-                        if (pizza) MacroBuilder.onKey()
-                        else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                    }
-                }
-            }
+        if (!Cache.isJacob || !(pizza || cheeto)) return
+        if (!line.contains("with")) return
+        val split = line.split(" ")
+        if (split.size != 3) return
+        val number = split[2].replace(",", "").toInt()
+        if (number >= Config.failSafeJacobNumber) {
+            UChat.chat("§cSkySkipped §f:: §eJacob event failsafe triggered! Stopping macro...")
+            if (pizza) MacroBuilder.onKey()
+            else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
         }
     }
 
@@ -229,7 +230,7 @@ class FailSafe : Feature() {
                         val obj = mc.objectMouseOver
                         if (obj == null ||
                             obj.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK ||
-                            mc.theWorld.getBlockState(obj.blockPos).block !is BlockBush
+                            mc.theWorld.getBlockState(obj.blockPos).block !is IPlantable
                         ) return
                         lastBlock = LastBlock(obj.blockPos, Config.failSafeDesyncTime * 20)
                     } else {
@@ -241,10 +242,8 @@ class FailSafe : Feature() {
                                 is BlockReed -> trigger = true
                                 is BlockPotato -> if (blockState.properties[BlockPotato.AGE]!! == 7) trigger = true
                                 is BlockCarrot -> if (blockState.properties[BlockCarrot.AGE]!! == 7) trigger = true
-                                else -> {
-                                    if (blockState.block.unlocalizedName == "crops") trigger = true
-                                    else lastBlock = null
-                                }
+                                else -> if (blockState.block.unlocalizedName == "crops") trigger = true
+                                else lastBlock = null
                             }
                         }
                     }
