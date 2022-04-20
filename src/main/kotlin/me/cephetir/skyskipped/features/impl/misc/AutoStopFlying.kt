@@ -34,9 +34,9 @@ class AutoStopFlying : Feature() {
                 val last = System.currentTimeMillis()
                 var state = false
                 while(!state) {
-                    if(System.currentTimeMillis() - last >= 3000) return@Thread
+                    if(System.currentTimeMillis() - last >= 6000) return@Thread
                     state = mc.thePlayer.capabilities.isFlying && Cache.onIsland
-                    Thread.sleep(10)
+                    Thread.sleep(100)
                 }
                 mc.thePlayer.capabilities.isFlying = false
             } catch (e: InterruptedException) {
