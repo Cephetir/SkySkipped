@@ -26,16 +26,10 @@ object ScoreboardUtils {
     fun fetchScoreboardLines(): List<String> {
         val scoreboard = Minecraft.getMinecraft().theWorld?.scoreboard ?: return emptyList()
         val objective = scoreboard.getObjectiveInDisplaySlot(1) ?: return emptyList()
-        var scores = scoreboard.getSortedScores(objective)
-        val list = scores.filter { input: Score? ->
+        val scores = scoreboard.getSortedScores(objective).filter { input: Score? ->
             input != null && input.playerName != null && !input.playerName
                 .startsWith("#")
-        }
-        scores = if (list.size > 15) {
-            list.drop(15)
-        } else {
-            list
-        }
+        }.take(15)
         return scores.map {
             ScorePlayerTeam.formatPlayerName(scoreboard.getPlayersTeam(it.playerName), it.playerName)
         }
