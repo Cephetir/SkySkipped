@@ -200,14 +200,14 @@ class FailSafe : Feature() {
             when (Config.failSafeDesyncMode) {
                 0 -> {
                     val ticksTimeout = Config.failSafeDesyncTime * 20
-                    val stack = Minecraft.getMinecraft().thePlayer.heldItem
-                    if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey(
+                    val stack = Minecraft.getMinecraft().thePlayer.getHeldItem
+                    if (stack == null || !stack.hasTagCompound() || !stack.getTagCompound.hasKey(
                             "ExtraAttributes",
                             10
                         )
                     ) return
                     var newCount = -1
-                    val tag = stack.tagCompound
+                    val tag = stack.getTagCompound
                     if (tag.hasKey("ExtraAttributes", 10)) {
                         val ea = tag.getCompoundTag("ExtraAttributes")
                         if (ea.hasKey("mined_crops", 99))
