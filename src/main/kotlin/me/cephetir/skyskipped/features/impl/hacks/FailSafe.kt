@@ -219,30 +219,47 @@ class FailSafe : Feature() {
 
         update()
         if (pizza || cheeto) {
-            if (Config.failSafeDesyncMode == 0) {
-                val ticksTimeout = Config.failSafeDesyncTime * 20
-                val stack = Minecraft.getMinecraft().thePlayer.heldItem
-                if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey(
-                        "ExtraAttributes",
-                        10
-                    )
-                ) return
-                var newCount = -1
-                val tag = stack.tagCompound
-                if (tag.hasKey("ExtraAttributes", 10)) {
-                    val ea = tag.getCompoundTag("ExtraAttributes")
-                    if (ea.hasKey("mined_crops", 99))
-                        newCount = ea.getInteger("mined_crops")
-                    else if (ea.hasKey("farmed_cultivating", 99))
-                        newCount = ea.getInteger("farmed_cultivating")
+            when (Config.failSafeDesyncMode) {
+                0 -> {
+                    val ticksTimeout = Config.failSafeDesyncTime * 20
+                    val stack = Minecraft.getMinecraft().thePlayer.heldItem
+                    if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey(
+                            "ExtraAttributes",
+                            10
+                        )
+                    ) return
+                    var newCount = -1
+                    val tag = stack.tagCompound
+                    if (tag.hasKey("ExtraAttributes", 10)) {
+                        val ea = tag.getCompoundTag("ExtraAttributes")
+                        if (ea.hasKey("mined_crops", 99))
+                            newCount = ea.getInteger("mined_crops")
+                        else if (ea.hasKey("farmed_cultivating", 99))
+                            newCount = ea.getInteger("farmed_cultivating")
+                    }
+                    if (newCount != -1 && newCount > lastCount) {
+                        lastCount = newCount
+                        desynced = false
+                    } else {
+                        ticks2++
+                        if (ticks2 >= ticksTimeout / 3) desynced = true
+                        if (ticks2 >= ticksTimeout) trigger = true
+                    }
                 }
-                if (newCount != -1 && newCount > lastCount) {
-                    lastCount = newCount
-                    desynced = false
-                } else {
-                    ticks2++
-                    if (ticks2 >= ticksTimeout / 3) desynced = true
-                    if (ticks2 >= ticksTimeout) trigger = true
+                1 -> {
+                    if (lastBlock == null) return
+                    lastBlock!!.ticks--
+                    if (lastBlock!!.ticks <= 0) {
+                        val blockState = mc.theWorld.getBlockState(lastBlock!!.blockPos)
+                        when (blockState.block) {
+                            is BlockNetherWart -> if (blockState.properties[BlockNetherWart.AGE]!! == 3) trigger = true
+                            is BlockReed -> trigger = true
+                            is BlockPotato -> if (blockState.properties[BlockPotato.AGE]!! == 7) trigger = true
+                            is BlockCarrot -> if (blockState.properties[BlockCarrot.AGE]!! == 7) trigger = true
+                            else -> if (blockState.block.unlocalizedName == "crops") trigger = true
+                            else lastBlock = null
+                        }
+                    }
                 }
             }
 
@@ -289,23 +306,9 @@ class FailSafe : Feature() {
         if (!pizza && !cheeto) return
         if (Config.failSafeDesyncMode != 1) return
 
-        if (lastBlock == null) {
-            if (mc.theWorld.getBlockState(event.pos).block is IPlantable)
-                lastBlock = LastBlock(event.pos, Config.failSafeDesyncTime * 20)
-        } else {
-            lastBlock!!.ticks--
-            if (lastBlock!!.ticks <= 0) {
-                val blockState = mc.theWorld.getBlockState(lastBlock!!.blockPos)
-                when (blockState.block) {
-                    is BlockNetherWart -> if (blockState.properties[BlockNetherWart.AGE]!! == 3) trigger = true
-                    is BlockReed -> trigger = true
-                    is BlockPotato -> if (blockState.properties[BlockPotato.AGE]!! == 7) trigger = true
-                    is BlockCarrot -> if (blockState.properties[BlockCarrot.AGE]!! == 7) trigger = true
-                    else -> if (blockState.block.unlocalizedName == "crops") trigger = true
-                    else lastBlock = null
-                }
-            }
-        }
+        if (lastBlock != null) return
+        if (mc.theWorld.getBlockState(event.pos).block is IPlantable)
+            lastBlock = LastBlock(event.pos, Config.failSafeDesyncTime * 20)
     }
 
     @SubscribeEvent
