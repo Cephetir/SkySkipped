@@ -23,6 +23,7 @@ import gg.essential.universal.wrappers.message.UTextComponent
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
+import me.cephetir.skyskipped.features.impl.hacks.FailSafe
 import me.cephetir.skyskipped.features.impl.hacks.PetMacro
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import me.cephetir.skyskipped.utils.TextUtils.isNumeric
@@ -57,27 +58,33 @@ class SkySkippedCommand : CommandBase() {
     }
 
     override fun processCommand(sender: ICommandSender, args: Array<String>) {
-        if (args.isEmpty())
-            EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
-        else if (args[0] == "gui")
-            EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
-        else if(args[0] == "keybinds" || args[0] == "kb")
-            EssentialAPI.getGuiUtil().openScreen(GuiItemSwap())
-        else if (args[0] == "github") {
-            val text = UTextComponent("§cSkySkipped §f:: §eGithub: §fhttps://github.com/Cephetir/SkySkipped")
-            text.setHover(HoverEvent.Action.SHOW_TEXT, "§9Open URL in browser.")
-            text.setClick(ClickEvent.Action.OPEN_URL, "https://github.com/Cephetir/SkySkipped")
-            sender.addChatMessage(text)
-        } else if (args[0] == "pet") {
-            if ((args.size >= 2) && args[1].isNumeric() && args[1].toInt() > 0) {
-                val player = Minecraft.getMinecraft().thePlayer
-                if (Config.petsOverlay) Features.petsOverlay.auto = args[1].toInt()
-                else MinecraftForge.EVENT_BUS.register(PetMacro(args[1].toInt()))
-                player.sendChatMessage("/pets")
-            } else
-                chat("§cSkySkipped §f:: §4Specify pet index! Usage: /sm pet [pet index (start counting from 1)]")
-        } else if (args[0] == "help") {
-            chat(
+        if (args.isEmpty()) return EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
+
+        when (args[0]) {
+            "gui" -> EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
+            "keybinds" -> EssentialAPI.getGuiUtil().openScreen(GuiItemSwap())
+            "kb" -> EssentialAPI.getGuiUtil().openScreen(GuiItemSwap())
+            "github" -> {
+                val text = UTextComponent("§cSkySkipped §f:: §eGithub: §fhttps://github.com/Cephetir/SkySkipped")
+                text.setHover(HoverEvent.Action.SHOW_TEXT, "§9Open URL in browser.")
+                text.setClick(ClickEvent.Action.OPEN_URL, "https://github.com/Cephetir/SkySkipped")
+                sender.addChatMessage(text)
+            }
+            "pet" -> {
+                if ((args.size >= 2) && args[1].isNumeric() && args[1].toInt() > 0) {
+                    val player = Minecraft.getMinecraft().thePlayer
+                    if (Config.petsOverlay) Features.petsOverlay.auto = args[1].toInt()
+                    else MinecraftForge.EVENT_BUS.register(PetMacro(args[1].toInt()))
+                    player.sendChatMessage("/pets")
+                } else chat("§cSkySkipped §f:: §4Specify pet index! Usage: /sm pet [pet index (start counting from 1)]")
+            }
+            "stop" -> {
+                if (FailSafe.called4) {
+                    FailSafe.called4 = false
+                    chat("§cSkySkipped §f:: §eJacob failsafe stopped and won't reenable macro!")
+                } else chat("§cSkySkipped §f:: §4Jacob failsafe wasn't triggered!")
+            }
+            "help" -> chat(
                 """
                     §cSkySkipped §f:: §eUsage:
                     §cSkySkipped §f:: §e/sm §for§e /sm gui §f- §eOpens GUI
@@ -87,8 +94,7 @@ class SkySkippedCommand : CommandBase() {
                     §cSkySkipped §f:: §e/sm help §f- §eShow this message
                     """.trimIndent()
             )
-        } else {
-            chat(
+            else -> chat(
                 """
                     §cSkySkipped §f:: §eUsage:
                     §cSkySkipped §f:: §e/sm §for§e /sm gui §f- §eOpens GUI

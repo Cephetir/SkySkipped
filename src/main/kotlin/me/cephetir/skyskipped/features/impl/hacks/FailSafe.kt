@@ -34,6 +34,7 @@ import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraft.util.BlockPos
 import net.minecraft.util.MathHelper
 import net.minecraft.util.MovingObjectPosition
+import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.common.IPlantable
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -54,6 +55,8 @@ class FailSafe : Feature() {
 
         var timer = System.currentTimeMillis()
         var timer2 = System.currentTimeMillis()
+
+        var called4 = false
     }
 
     private var pizza = false
@@ -72,6 +75,8 @@ class FailSafe : Feature() {
     private var lastDirection: Any? = null
 
     private var called3 = false
+
+    private var lastMacro = true
 
     @SubscribeEvent
     fun unstuck(event: ClientTickEvent) {
@@ -184,9 +189,25 @@ class FailSafe : Feature() {
         val number = split[2].replace(",", "").toInt()
         if (number >= Config.failSafeJacobNumber) {
             UChat.chat("§cSkySkipped §f:: §eJacob event failsafe triggered! Stopping macro...")
-            if (pizza) MacroBuilder.onKey()
-            else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+            if (pizza) {
+                MacroBuilder.onKey()
+                lastMacro = true
+            } else if (cheeto) {
+                CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                lastMacro = false
+            }
+            called4 = true
         }
+    }
+
+    @SubscribeEvent
+    fun onChat(event: ClientChatReceivedEvent) {
+        if (!called4) return
+        if (!event.message.unformattedText.stripColor().contains("The Farming Contest is over!")) return
+        UChat.chat("§cSkySkipped §f:: §eJacob event ended! Starting macro again...")
+        if (lastMacro) MacroBuilder.onKey()
+        else CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+        called4 = false
     }
 
     @SubscribeEvent
