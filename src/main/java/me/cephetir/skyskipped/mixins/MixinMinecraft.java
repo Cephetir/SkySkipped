@@ -18,6 +18,7 @@
 package me.cephetir.skyskipped.mixins;
 
 import me.cephetir.skyskipped.config.Config;
+import me.cephetir.skyskipped.event.events.BlockClickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
@@ -28,6 +29,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -71,6 +73,7 @@ public class MixinMinecraft {
         if (this.objectMouseOver != null && extraClicks > 0 && shouldClick)
             for (int i = 0; i < extraClicks; i++) {
                 BlockPos clickedBlock = this.objectMouseOver.getBlockPos();
+                MinecraftForge.EVENT_BUS.post(new BlockClickEvent(clickedBlock));
                 this.objectMouseOver = this.renderViewEntity.rayTrace(this.playerController.getBlockReachDistance(), 1.0F);
                 if (this.objectMouseOver == null || this.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK)
                     break;
