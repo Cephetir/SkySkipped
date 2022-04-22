@@ -23,7 +23,7 @@ plugins {
     id "java"
 }
 
-version = "2.9"
+version = "2.9.1"
 group = "me.cephetir.skyskipped"
 archivesBaseName = "SkySkipped"
 

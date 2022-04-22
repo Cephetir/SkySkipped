@@ -204,7 +204,7 @@ class FailSafe : Feature() {
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
         if (!called4) return
-        if (!event.message.unformattedText.stripColor().contains("The Farming Contest is over!")) return
+        if (!event.message.unformattedText.stripColor().startsWith("[NPC] Jacob: Come see me in Hub to claim your reward!")) return
         UChat.chat("§cSkySkipped §f:: §eJacob event ended! Starting macro again...")
         if (lastMacro) MacroBuilder.onKey()
         else CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
@@ -306,7 +306,7 @@ class FailSafe : Feature() {
         if (!pizza && !cheeto) return
         if (Config.failSafeDesyncMode != 1) return
 
-        if (lastBlock != null) return
+        if (lastBlock != null || event.pos == null) return
         if (mc.theWorld.getBlockState(event.pos).block is IPlantable)
             lastBlock = LastBlock(event.pos, Config.failSafeDesyncTime * 20)
     }
