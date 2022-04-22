@@ -20,4 +20,4 @@ package me.cephetir.skyskipped.event.events
 import net.minecraft.util.BlockPos
 import net.minecraftforge.fml.common.eventhandler.Event
 
-class BlockClickEvent(val pos: BlockPos) : Event()
+class BlockClickEvent(val pos: BlockPos?) : Event()
