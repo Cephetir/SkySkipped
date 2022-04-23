@@ -94,6 +94,10 @@ class SkySkippedCommand : CommandBase() {
                     §cSkySkipped §f:: §e/sm help §f- §eShow this message
                     """.trimIndent()
             )
+            "dev" -> {
+                SkySkipped.devMode = !SkySkipped.devMode
+                chat("§cSkySkipped §f:: §eDev mode ${SkySkipped.devMode}")
+            }
             else -> chat(
                 """
                     §cSkySkipped §f:: §eUsage:

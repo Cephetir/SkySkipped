@@ -353,6 +353,15 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
+            name = "Inventory Failsafe",
+            category = "Hacks",
+            subcategory = "Failsafes",
+            description = "Inventory clearing when full."
+        )
+        var failSafeInv = false
+
+        @Property(
+            type = PropertyType.SWITCH,
             name = "Block ability",
             category = "Hacks",
             description = "Blocks item ability."
