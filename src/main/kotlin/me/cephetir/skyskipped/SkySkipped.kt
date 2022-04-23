@@ -60,6 +60,7 @@ class SkySkipped {
         val config = Config()
         val features = Features()
         val logger: Logger = LogManager.getLogger("SkySkipped")
+        var devMode = false
 
         val autoGhostBlockKey = KeyBinding("Auto Ghost Block", Keyboard.KEY_NONE, "SkySkipped")
         val perspectiveToggle = KeyBinding("Better Perspective", Keyboard.KEY_NONE, "SkySkipped")

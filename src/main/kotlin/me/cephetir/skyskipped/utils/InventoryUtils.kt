@@ -15,19 +15,22 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.features
+package me.cephetir.skyskipped.utils
 
-import gg.essential.universal.UChat
-import me.cephetir.skyskipped.SkySkipped
 import net.minecraft.client.Minecraft
+import net.minecraft.inventory.Slot
 
-abstract class Feature {
-    val mc: Minecraft = Minecraft.getMinecraft()
+object InventoryUtils {
+    @JvmStatic
+    fun getInventory(): List<Slot> {
+        return Minecraft.getMinecraft().thePlayer.inventoryContainer.inventorySlots.subList(9, 44)
+    }
 
-    protected fun printdev(text: String) {
-        if (SkySkipped.devMode) {
-            println("[SkySkipped DEV] $text")
-            UChat.chat("[SkySkipped DEV] $text")
-        }
+    @JvmStatic
+    fun isFull(): Boolean {
+        val inv = getInventory()
+        val newInv = mutableListOf<Slot>()
+        for (slot in inv) if (slot.hasStack) newInv.add(slot)
+        return inv.size == newInv.size
     }
 }

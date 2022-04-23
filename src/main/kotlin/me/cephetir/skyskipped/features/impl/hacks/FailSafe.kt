@@ -24,6 +24,7 @@ import me.cephetir.skyskipped.event.events.BlockClickEvent
 import me.cephetir.skyskipped.event.events.PacketReceive
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinSugarCaneMacro
+import me.cephetir.skyskipped.utils.InventoryUtils
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraft.block.BlockCarrot
 import net.minecraft.block.BlockNetherWart
@@ -79,11 +80,14 @@ class FailSafe : Feature() {
 
     private var lastMacro = true
 
+    private var ticks5 = 0
+    private var called5 = false
+
     @SubscribeEvent
     fun unstuck(event: ClientTickEvent) {
         if (!Config.failSafe) ticks = 0
         if (!Config.failSafe || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
-        if (System.currentTimeMillis() - timer2 < 3000 || called2) return
+        if (System.currentTimeMillis() - timer2 < 3000 || called2 || called3 || called5) return
 
         update()
         if (pizza || cheeto) {
@@ -188,7 +192,9 @@ class FailSafe : Feature() {
         val split = line.split(" ")
         if (split.size != 3) return
         val number = split[2].replace(",", "").toInt()
+        printdev("Jacob crop amount $number")
         if (number >= Config.failSafeJacobNumber) {
+            printdev("Jacob detected!")
             UChat.chat("§cSkySkipped §f:: §eJacob event failsafe triggered! Stopping macro...")
             if (pizza) {
                 MacroBuilder.onKey()
@@ -205,6 +211,7 @@ class FailSafe : Feature() {
     fun onChat(event: ClientChatReceivedEvent) {
         if (!called4) return
         if (!event.message.unformattedText.stripColor().startsWith("[NPC] Jacob: Come see me in Hub to claim your reward!")) return
+        printdev("Detected jacob msg in chat")
         UChat.chat("§cSkySkipped §f:: §eJacob event ended! Starting macro again...")
         if (lastMacro) MacroBuilder.onKey()
         else CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
@@ -213,7 +220,7 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun desync(event: ClientTickEvent) {
-        if (called || called2) return
+        if (called || called2 || called3 || called5) return
         if (!Config.failSafeDesync) ticks2 = 0
         if (!Config.failSafeDesync || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
@@ -237,6 +244,7 @@ class FailSafe : Feature() {
                         else if (ea.hasKey("farmed_cultivating", 99))
                             newCount = ea.getInteger("farmed_cultivating")
                     }
+                    printdev("Current counter: $newCount")
                     if (newCount != -1 && newCount > lastCount) {
                         lastCount = newCount
                         desynced = false
@@ -251,19 +259,31 @@ class FailSafe : Feature() {
                     lastBlock!!.ticks--
                     if (lastBlock!!.ticks <= 0) {
                         val blockState = mc.theWorld.getBlockState(lastBlock!!.blockPos)
+                        printdev(
+                            "Time is up! Checking block... " +
+                                    "Name: ${blockState.block.javaClass.simpleName}, " +
+                                    "Age: ${blockState.properties[BlockNetherWart.AGE]}, " +
+                                    "Coords: ${lastBlock!!.blockPos.x} ${lastBlock!!.blockPos.y} ${lastBlock!!.blockPos.z}"
+                        )
                         when (blockState.block) {
                             is BlockNetherWart -> if (blockState.properties[BlockNetherWart.AGE]!! == 3) trigger = true
                             is BlockReed -> trigger = true
                             is BlockPotato -> if (blockState.properties[BlockPotato.AGE]!! == 7) trigger = true
                             is BlockCarrot -> if (blockState.properties[BlockCarrot.AGE]!! == 7) trigger = true
-                            else -> if (blockState.block.unlocalizedName == "crops") trigger = true
-                            else lastBlock = null
+                            else -> {
+                                if (blockState.block.unlocalizedName == "crops") trigger = true
+                                else {
+                                    lastBlock = null
+                                    printdev("Last block didnt trigger macro")
+                                }
+                            }
                         }
                     }
                 }
             }
 
             if (trigger && !called2) {
+                printdev("Triggered desync failsafe!")
                 called2 = true
                 Thread {
                     try {
@@ -291,6 +311,7 @@ class FailSafe : Feature() {
                         lastBlock = null
                         ticks2 = 0
                         trigger = false
+                        printdev("Ended resync process!")
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
@@ -301,14 +322,18 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun onBlockBreak(event: BlockClickEvent) {
+        printdev("Block mined! (event fired)")
         if (called || called2) return
         if (!Config.failSafeDesync || mc.thePlayer == null || mc.theWorld == null) return
         if (!pizza && !cheeto) return
         if (Config.failSafeDesyncMode != 1) return
 
-        if (lastBlock != null || event.pos == null) return
-        if (mc.theWorld.getBlockState(event.pos).block is IPlantable)
-            lastBlock = LastBlock(event.pos, Config.failSafeDesyncTime * 20)
+        if (lastBlock != null || event.blockState == null) return
+        val block = event.blockState.block
+        if (block is IPlantable) {
+            lastBlock = LastBlock(event.pos!!, Config.failSafeDesyncTime * 20)
+            printdev("Added new desync block ${block.javaClass.simpleName}")
+        }
     }
 
     @SubscribeEvent
@@ -350,7 +375,7 @@ class FailSafe : Feature() {
 
     @SubscribeEvent
     fun autoWarpBack(event: ClientTickEvent) {
-        if (called2 || called3) return
+        if (called2 || called3 || called5) return
         if (!Config.failSafeIsland || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
         if (Cache.onIsland) return
 
@@ -389,6 +414,41 @@ class FailSafe : Feature() {
                     else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
                     called3 = false
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                }
+            }.start()
+        }
+    }
+
+    @SubscribeEvent
+    fun fullInv(event: ClientTickEvent) {
+        if (called || called2 || called3 || called5 || desynced) return
+        if (!Config.failSafeInv) ticks2 = 0
+        if (!Config.failSafeInv || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
+        update()
+        if (!pizza && !cheeto) return
+
+        if (InventoryUtils.isFull()) {
+            printdev("Inventory is full!")
+            ticks5++
+        } else ticks5 = 0
+
+        if (!called5 && ticks5 >= 100) {
+            printdev("Triggering full invenory failsafe!")
+            called5 = true
+            Thread {
+                try {
+                    val pizza = pizza
+                    val cheeto = cheeto
+                    UChat.chat("§cSkySkipped §f:: §eInventory is full! Cleanning...")
+                    if (pizza) MacroBuilder.onKey()
+                    else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+
+                    UChat.chat("Doing stuff...")
+
+                    called5 = false
+                    ticks5 = 0
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
