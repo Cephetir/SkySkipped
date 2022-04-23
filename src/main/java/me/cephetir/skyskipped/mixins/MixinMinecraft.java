@@ -73,7 +73,6 @@ public class MixinMinecraft {
         if (this.objectMouseOver != null && extraClicks > 0 && shouldClick)
             for (int i = 0; i < extraClicks; i++) {
                 BlockPos clickedBlock = this.objectMouseOver.getBlockPos();
-                MinecraftForge.EVENT_BUS.post(new BlockClickEvent(clickedBlock));
                 this.objectMouseOver = this.renderViewEntity.rayTrace(this.playerController.getBlockReachDistance(), 1.0F);
                 if (this.objectMouseOver == null || this.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK)
                     break;
@@ -84,5 +83,11 @@ public class MixinMinecraft {
                     this.playerController.clickBlock(newBlock, this.objectMouseOver.sideHit);
                 }
             }
+    }
+
+    @Inject(method = "clickMouse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;clickBlock(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"))
+    private void clickMouse(CallbackInfo ci) {
+        BlockPos clickedBlock = this.objectMouseOver.getBlockPos();
+        MinecraftForge.EVENT_BUS.post(new BlockClickEvent(clickedBlock, this.theWorld.getBlockState(clickedBlock)));
     }
 }
