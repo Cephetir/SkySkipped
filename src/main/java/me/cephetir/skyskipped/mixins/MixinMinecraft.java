@@ -18,7 +18,6 @@
 package me.cephetir.skyskipped.mixins;
 
 import me.cephetir.skyskipped.config.Config;
-import me.cephetir.skyskipped.event.events.BlockClickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
@@ -29,7 +28,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -83,11 +81,5 @@ public class MixinMinecraft {
                     this.playerController.clickBlock(newBlock, this.objectMouseOver.sideHit);
                 }
             }
-    }
-
-    @Inject(method = "clickMouse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;clickBlock(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"))
-    private void clickMouse(CallbackInfo ci) {
-        BlockPos clickedBlock = this.objectMouseOver.getBlockPos();
-        MinecraftForge.EVENT_BUS.post(new BlockClickEvent(clickedBlock, this.theWorld.getBlockState(clickedBlock)));
     }
 }
