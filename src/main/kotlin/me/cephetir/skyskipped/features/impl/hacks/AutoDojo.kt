@@ -34,32 +34,20 @@ import net.minecraft.init.Items
 import net.minecraft.network.Packet
 import net.minecraft.network.play.client.C09PacketHeldItemChange
 import net.minecraft.util.MathHelper
+import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import org.lwjgl.input.Keyboard
 import kotlin.math.abs
 
-class AutoDojo : Feature() {
+open class AutoDojo : Feature() {
     private var enabled = false
     private var mode = DojoMode.NONE
 
     private var target: Entity? = null
     private val ignore = mutableListOf<Entity>()
 
-    @SubscribeEvent
-    fun onKey(event: InputEvent.KeyInputEvent) {
-        if (mc.thePlayer == null || mc.theWorld == null || !Cache.inSkyblock) return
-        if (!Keyboard.getEventKeyState()) return
-        if (Keyboard.getEventKey() != SkySkipped.autoDojo.keyCode) return
-
-        if (enabled) {
-            enabled = false
-            mode = DojoMode.NONE
-            target = null
-            ignore.clear()
-            return UChat.chat("§cSkySkipped §f:: §eAuto dojo §cdisabled§e!")
-        }
-
+    fun onEnable() {
         for (score in ScoreboardUtils.sidebarLines) {
             val text = score.stripColor().keepScoreboardCharacters()
             if (text.stripColor().contains("Challenge: ")) {
@@ -73,15 +61,38 @@ class AutoDojo : Feature() {
                 break
             }
         }
+        return if (!enabled) UChat.chat("§cSkySkipped §f:: §4Enter dojo area first!")
+        else UChat.chat("§cSkySkipped §f:: §eAuto dojo §aenabled§e! Mode ${mode.name}.")
+    }
 
-        if (!enabled) return UChat.chat("§cSkySkipped §f:: §4Enter dojo area first!")
+    fun onDisable() {
+        enabled = false
+        mode = DojoMode.NONE
+        target = null
+        ignore.clear()
+        return UChat.chat("§cSkySkipped §f:: §eAuto dojo §cdisabled§e!")
+    }
 
-        UChat.chat("§cSkySkipped §f:: §eAuto dojo §aenabled§e! Mode ${mode.name}.")
+    @SubscribeEvent
+    protected fun onKey(event: InputEvent.KeyInputEvent) {
+        if (mc.thePlayer == null || mc.theWorld == null || !Cache.inSkyblock) return
+        if (!Keyboard.getEventKeyState()) return
+        if (Keyboard.getEventKey() != SkySkipped.autoDojo.keyCode) return
+
+        if (enabled) onDisable()
+        else onEnable()
+    }
+
+    @SubscribeEvent
+    protected fun onChat(event: ClientChatReceivedEvent) {
+        if (!enabled || mode == DojoMode.NONE) return
+        val text = event.message.unformattedText.stripColor().keepScoreboardCharacters().trim()
+        if(text.contains("CHALLENGE COMPLETED")) onDisable()
     }
 
     // Discipline Mode
     @SubscribeEvent
-    fun onMovePre(event: UpdateWalkingPlayerEvent.Pre) {
+    protected fun onMovePre(event: UpdateWalkingPlayerEvent.Pre) {
         if (!enabled || mode != DojoMode.Discipline) return
         target = getTarget()
         if (target != null) {
@@ -96,8 +107,9 @@ class AutoDojo : Feature() {
         }
     }
 
+    // Discipline Mode
     @SubscribeEvent
-    fun onMovePost(event: UpdateWalkingPlayerEvent.Post) {
+    protected fun onMovePost(event: UpdateWalkingPlayerEvent.Post) {
         if (!enabled || mode != DojoMode.Discipline) return
         if (target != null && mc.thePlayer.ticksExisted % 2 == 0) {
             updateItemNoEvent()
@@ -118,8 +130,9 @@ class AutoDojo : Feature() {
         }
     }
 
+    // Discipline and Force Mode
     @SubscribeEvent
-    fun onAttack(event: PlayerAttackEvent) {
+    protected fun onAttack(event: PlayerAttackEvent) {
         if (!enabled || mode == DojoMode.NONE) return
         when (mode) {
             DojoMode.Discipline -> {
@@ -154,6 +167,7 @@ class AutoDojo : Feature() {
                 val helmet = event.target.getEquipmentInSlot(4) ?: return printdev("helmet is null")
                 if (helmet.item == Items.leather_helmet) event.isCanceled = true
             }
+            DojoMode.NONE -> return
         }
     }
 
