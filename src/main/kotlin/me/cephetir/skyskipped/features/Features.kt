@@ -27,6 +27,7 @@ import me.cephetir.skyskipped.features.impl.dugeons.AutoGhostBlock
 import me.cephetir.skyskipped.features.impl.dugeons.ChestCloser
 import me.cephetir.skyskipped.features.impl.dugeons.ESP
 import me.cephetir.skyskipped.features.impl.dugeons.Pings
+import me.cephetir.skyskipped.features.impl.hacks.AutoDojo
 import me.cephetir.skyskipped.features.impl.hacks.Blocker
 import me.cephetir.skyskipped.features.impl.hacks.FailSafe
 import me.cephetir.skyskipped.features.impl.hacks.ItemSwap
@@ -65,6 +66,7 @@ class Features {
         AutoStopFlying(),
         Metrics(),
         AutoCookieClicker(),
+        AutoDojo(),
     )
 
     fun register() = features.forEach { MinecraftForge.EVENT_BUS.register(it) }

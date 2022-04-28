@@ -5,10 +5,12 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [],
   "client": [
+    "IMixinEntityPlayerSP",
     "IMixinGuiContainer",
     "IMixinGuiScreen",
     "IMixinRenderManager",
     "IMixinSugarCaneMacro",
+    "MixinEntityPlayerSP",
     "MixinGuiContainer",
     "MixinGuiDisconnected",
     "MixinGuiIngame",
@@ -17,6 +19,7 @@
     "MixinGuiPlayerTabOverlay",
     "MixinMinecraft",
     "MixinNetworkManager",
+    "MixinPlayerControllerMP",
     "MixinRender",
     "MixinRendererLivingEntity",
     "MixinSShapedMacro"

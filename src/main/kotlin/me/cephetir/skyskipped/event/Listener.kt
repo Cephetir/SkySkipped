@@ -49,7 +49,7 @@ class Listener {
             var itemheld = "Nothing"
 
             val scoreObjective = Minecraft.getMinecraft().thePlayer.worldScoreboard.getObjectiveInDisplaySlot(1) ?: return
-            val scores = ScoreboardUtils.fetchScoreboardLines()
+            val scores = ScoreboardUtils.sidebarLines
 
             if (scoreObjective.displayName.stripColor().startsWith("SKYBLOCK")) foundSkyblock = true
 
