@@ -64,6 +64,7 @@ class SkySkipped {
 
         val autoGhostBlockKey = KeyBinding("Auto Ghost Block", Keyboard.KEY_NONE, "SkySkipped")
         val perspectiveToggle = KeyBinding("Better Perspective", Keyboard.KEY_NONE, "SkySkipped")
+        val autoDojo = KeyBinding("Auto Dojo", Keyboard.KEY_NONE, "SkySkipped")
 
         val keybinds = HashSet<GuiItemSwap.Keybind>()
 
@@ -79,11 +80,13 @@ class SkySkipped {
             val result = regex.findAll(text)
             for (matcher in result) {
                 val name = matcher.groups["username"]?.value?.trim() ?: continue
+                val nameRange = matcher.groups["username"]?.range ?: continue
                 val prefix = matcher.groups["prefix"]?.value?.trim()
+                val prefixRange = matcher.groups["prefix"]?.range ?: continue
                 val newName = cosmetics[name]?.component1()?.replace("&", "§") ?: continue
                 val newPrefix = cosmetics[name]?.component2()?.replace("&", "§") ?: continue
-                text = text.replace(name, newName)
-                if (prefix != null) text = text.replace(prefix, newPrefix)
+                text = text.replaceRange(nameRange, newName)
+                if (prefix != null) text = text.replaceRange(prefixRange, newPrefix)
             }
             if (text.contains(Minecraft.getMinecraft().thePlayer.displayNameString)) text = text.replace(
                 Minecraft.getMinecraft().thePlayer.displayNameString,
@@ -128,6 +131,7 @@ class SkySkipped {
 
         ClientRegistry.registerKeyBinding(autoGhostBlockKey)
         ClientRegistry.registerKeyBinding(perspectiveToggle)
+        ClientRegistry.registerKeyBinding(autoDojo)
 
         EssentialAPI.getShutdownHookUtil().register {
             RPC.shutdown()

@@ -26,10 +26,6 @@ import me.cephetir.skyskipped.mixins.IMixinSugarCaneMacro
 import me.cephetir.skyskipped.utils.InventoryUtils
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import net.minecraft.block.BlockCarrot
-import net.minecraft.block.BlockNetherWart
-import net.minecraft.block.BlockPotato
-import net.minecraft.block.BlockReed
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.gui.inventory.GuiInventory
@@ -42,8 +38,6 @@ import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraft.util.BlockPos
 import net.minecraft.util.MathHelper
 import net.minecraftforge.client.event.ClientChatReceivedEvent
-import net.minecraftforge.common.IPlantable
-import net.minecraftforge.event.world.BlockEvent
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -78,7 +72,6 @@ class FailSafe : Feature() {
     private var ticks2 = 0
     private var lastCount = 0
     private var called2 = false
-    private var lastBlock: LastBlock? = null
     private var trigger = false
 
     private var lastState = false
@@ -221,7 +214,7 @@ class FailSafe : Feature() {
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
         if (!called4) return
-        if (!event.message.unformattedText.stripColor().startsWith("[NPC] Jacob: Come see me in Hub to claim your reward!")) return
+        if (!event.message.unformattedText.stripColor().keepScoreboardCharacters().contains("Come see me in the Hub", true)) return
         printdev("Detected jacob msg in chat")
         UChat.chat("§cSkySkipped §f:: §eJacob event ended! Starting macro again...")
         if (lastMacro) MacroBuilder.onKey()
@@ -236,60 +229,31 @@ class FailSafe : Feature() {
         if (!Config.failSafeDesync || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
         if (pizza || cheeto) {
-            when (Config.failSafeDesyncMode) {
-                0 -> {
-                    val ticksTimeout = Config.failSafeDesyncTime * 20
-                    val stack = Minecraft.getMinecraft().thePlayer.heldItem
-                    if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey(
-                            "ExtraAttributes",
-                            10
-                        )
-                    ) return
-                    var newCount = -1
-                    val tag = stack.tagCompound
-                    if (tag.hasKey("ExtraAttributes", 10)) {
-                        val ea = tag.getCompoundTag("ExtraAttributes")
-                        if (ea.hasKey("mined_crops", 99))
-                            newCount = ea.getInteger("mined_crops")
-                        else if (ea.hasKey("farmed_cultivating", 99))
-                            newCount = ea.getInteger("farmed_cultivating")
-                    }
-                    printdev("Current counter: $newCount")
-                    if (newCount != -1 && newCount > lastCount) {
-                        lastCount = newCount
-                        desynced = false
-                    } else {
-                        ticks2++
-                        if (ticks2 >= ticksTimeout / 3) desynced = true
-                        if (ticks2 >= ticksTimeout) trigger = true
-                    }
-                }
-                1 -> {
-                    if (lastBlock == null) return
-                    lastBlock!!.ticks--
-                    if (lastBlock!!.ticks <= 0) {
-                        val blockState = mc.theWorld.getBlockState(lastBlock!!.blockPos)
-                        printdev(
-                            "Time is up! Checking block... " +
-                                    "Name: ${blockState.block.javaClass.simpleName}, " +
-                                    "Age: ${blockState.properties[BlockNetherWart.AGE]}, " +
-                                    "Coords: ${lastBlock!!.blockPos.x} ${lastBlock!!.blockPos.y} ${lastBlock!!.blockPos.z}"
-                        )
-                        when (blockState.block) {
-                            is BlockNetherWart -> if (blockState.properties[BlockNetherWart.AGE]!! == 3) trigger = true
-                            is BlockReed -> trigger = true
-                            is BlockPotato -> if (blockState.properties[BlockPotato.AGE]!! == 7) trigger = true
-                            is BlockCarrot -> if (blockState.properties[BlockCarrot.AGE]!! == 7) trigger = true
-                            else -> {
-                                if (blockState.block.unlocalizedName == "crops") trigger = true
-                                else {
-                                    lastBlock = null
-                                    printdev("Last block didnt trigger macro")
-                                }
-                            }
-                        }
-                    }
-                }
+            val ticksTimeout = Config.failSafeDesyncTime * 20
+            val stack = Minecraft.getMinecraft().thePlayer.heldItem
+            if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey(
+                    "ExtraAttributes",
+                    10
+                )
+            ) return
+            var newCount = -1
+            val tag = stack.tagCompound
+            if (tag.hasKey("ExtraAttributes", 10)) {
+                val ea = tag.getCompoundTag("ExtraAttributes")
+                if (ea.hasKey("mined_crops", 99))
+                    newCount = ea.getInteger("mined_crops")
+                else if (ea.hasKey("farmed_cultivating", 99))
+                    newCount = ea.getInteger("farmed_cultivating")
+            }
+            printdev("Current counter: $newCount")
+            if (newCount != -1 && newCount > lastCount) {
+                lastCount = newCount
+                ticks2 = 0
+                desynced = false
+            } else {
+                ticks2++
+                if (ticks2 >= ticksTimeout / 3) desynced = true
+                if (ticks2 >= ticksTimeout) trigger = true
             }
 
             if (trigger && !called2) {
@@ -318,7 +282,6 @@ class FailSafe : Feature() {
                         else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
                         called2 = false
-                        lastBlock = null
                         ticks2 = 0
                         trigger = false
                         printdev("Ended resync process!")
@@ -327,23 +290,6 @@ class FailSafe : Feature() {
                     }
                 }.start()
             }
-        }
-    }
-
-    @SubscribeEvent
-    fun onBlockBreak(event: BlockEvent.BreakEvent) {
-        if (called || called2) return
-        if (!Config.failSafeDesync || mc.thePlayer == null || mc.theWorld == null) return
-        if (event.player != mc.thePlayer) return
-        if (!pizza && !cheeto) return
-        if (Config.failSafeDesyncMode != 1) return
-
-        if (lastBlock != null || event.state == null) return
-        printdev("Block mined")
-        val block = event.state.block
-        if (block is IPlantable) {
-            lastBlock = LastBlock(event.pos!!, Config.failSafeDesyncTime * 20)
-            printdev("Added new desync block ${block.javaClass.simpleName}")
         }
     }
 
@@ -503,7 +449,7 @@ class FailSafe : Feature() {
                         }
                     }
                     mc.thePlayer.closeScreen()
-                    if(crops.isEmpty()) {
+                    if (crops.isEmpty()) {
                         printdev("no crops")
                         called5 = false
                         ticks5 = 0
@@ -614,6 +560,4 @@ class FailSafe : Feature() {
 
     private fun checkPos(player: BlockPos): Boolean =
         lastPos!!.x - player.x <= 1 && lastPos!!.x - player.x >= -1 && lastPos!!.y - player.y <= 1 && lastPos!!.y - player.y >= -1 && lastPos!!.z - player.z <= 1 && lastPos!!.z - player.z >= -1
-
-    data class LastBlock(val blockPos: BlockPos, var ticks: Int)
 }

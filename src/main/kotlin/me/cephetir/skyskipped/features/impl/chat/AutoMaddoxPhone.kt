@@ -32,7 +32,7 @@ class AutoMaddoxPhone : Feature() {
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (!Config.autoMaddox || !Cache.inSkyblock || event.phase != TickEvent.Phase.START) return
-        val scoreboard: List<String> = ScoreboardUtils.fetchScoreboardLines()
+        val scoreboard: List<String> = ScoreboardUtils.sidebarLines
 
         for (line in scoreboard) {
             val strippedLine = line.stripColor().keepScoreboardCharacters().trim()
