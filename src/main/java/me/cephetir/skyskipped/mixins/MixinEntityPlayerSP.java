@@ -23,8 +23,10 @@ import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C0BPacketEntityAction;
 import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = EntityPlayerSP.class, priority = Integer.MAX_VALUE)
 public abstract class MixinEntityPlayerSP {
@@ -59,12 +61,13 @@ public abstract class MixinEntityPlayerSP {
     /**
      * @author Oringo
      */
-    @Overwrite
-    public void onUpdateWalkingPlayer() {
+    @Inject(method = "onUpdateWalkingPlayer", at = @At("HEAD"), cancellable = true)
+    public void onUpdateWalkingPlayer(CallbackInfo ci) {
         EntityPlayerSP it = (EntityPlayerSP) (Object) this;
         UpdateWalkingPlayerEvent.Pre event = new UpdateWalkingPlayerEvent.Pre(it.posX, it.getEntityBoundingBox().minY, it.posZ, it.rotationYaw, it.rotationPitch, it.onGround, it.isSprinting(), it.isSneaking());
 
         if (!MinecraftForge.EVENT_BUS.post(event)) {
+            ci.cancel();
             boolean flag = event.getSprinting();
             if (flag != this.serverSprintState) {
                 if (flag)
