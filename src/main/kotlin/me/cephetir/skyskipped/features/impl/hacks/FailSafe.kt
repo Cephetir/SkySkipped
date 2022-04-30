@@ -56,7 +56,6 @@ class FailSafe : Feature() {
         var desynced = false
 
         var timer = System.currentTimeMillis()
-        var timer2 = System.currentTimeMillis()
 
         var called4 = false
     }
@@ -65,10 +64,12 @@ class FailSafe : Feature() {
     private var cheeto = false
     private var updateTicks = 0
 
+    private var ticksWarpStuck = 0
     private var ticks = 0
     private var lastPos: BlockPos? = null
     private var called = false
 
+    private var ticksWarpDesync = 0
     private var ticks2 = 0
     private var lastCount = 0
     private var called2 = false
@@ -93,9 +94,14 @@ class FailSafe : Feature() {
     fun unstuck(event: ClientTickEvent) {
         if (!Config.failSafe) ticks = 0
         if (!Config.failSafe || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
-        if (System.currentTimeMillis() - timer2 < 3000 || called2 || called3 || called5) return
+        if (called2 || called3 || called5) return
 
         if (pizza || cheeto) {
+            if(ticksWarpStuck >= 0) {
+                ticksWarpStuck--
+                return
+            }
+
             if (lastPos != null) {
                 if (checkPos(mc.thePlayer.position)) {
                     ticks++
@@ -168,7 +174,7 @@ class FailSafe : Feature() {
 
                         called = false
                         ticks = 0
-                        timer2 = System.currentTimeMillis()
+                        ticksWarpStuck = 60
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
@@ -229,6 +235,11 @@ class FailSafe : Feature() {
         if (!Config.failSafeDesync || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
         if (pizza || cheeto) {
+            if(ticksWarpDesync >= 0) {
+                ticksWarpDesync--
+                return
+            }
+
             val ticksTimeout = Config.failSafeDesyncTime * 20
             val stack = Minecraft.getMinecraft().thePlayer.heldItem
             if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey(
@@ -261,6 +272,7 @@ class FailSafe : Feature() {
                 called2 = true
                 Thread {
                     try {
+                        val extraDelay = Config.failSafeGlobalTime.toLong()
                         val pizza = pizza
                         val cheeto = cheeto
                         UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
@@ -270,20 +282,22 @@ class FailSafe : Feature() {
                         val yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
                         val pitch = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationPitch)
 
+                        Thread.sleep(extraDelay)
                         mc.thePlayer.sendChatMessage("/hub")
-                        Thread.sleep(5000L)
+                        Thread.sleep(5000L + extraDelay)
                         mc.thePlayer.sendChatMessage("/is")
-                        Thread.sleep(2500L)
+                        Thread.sleep(2500L + extraDelay)
                         mc.thePlayer.rotationYaw += yaw - MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
                         mc.thePlayer.rotationPitch = pitch
 
-                        Thread.sleep(100L)
+                        Thread.sleep(100L + extraDelay)
                         if (pizza) MacroBuilder.onKey()
                         else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
                         called2 = false
                         ticks2 = 0
                         trigger = false
+                        ticksWarpDesync = 100
                         printdev("Ended resync process!")
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
@@ -345,7 +359,8 @@ class FailSafe : Feature() {
                     else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
                     val delay = Config.failSafeIslandDelay.toLong() * 1000L
-                    Thread.sleep(delay)
+                    val extraDelay = Config.failSafeGlobalTime.toLong()
+                    Thread.sleep(delay + extraDelay)
 
                     if (Cache.onIsland) {
                         called3 = false
@@ -358,13 +373,13 @@ class FailSafe : Feature() {
                     } else {
                         UChat.chat("§cSkySkipped §f:: §eDetected other lobby! Warping back...")
                         mc.thePlayer.sendChatMessage("/l")
-                        Thread.sleep(delay)
+                        Thread.sleep(delay + extraDelay)
                         mc.thePlayer.sendChatMessage("/play sb")
-                        Thread.sleep(delay)
+                        Thread.sleep(delay + extraDelay)
                         mc.thePlayer.sendChatMessage("/is")
                     }
 
-                    Thread.sleep(delay)
+                    Thread.sleep(delay + extraDelay)
                     if (pizza) MacroBuilder.onKey()
                     else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
@@ -395,12 +410,14 @@ class FailSafe : Feature() {
                 try {
                     val pizza = pizza
                     val cheeto = cheeto
+                    val extraDelay = Config.failSafeGlobalTime.toLong() / 2
                     UChat.chat("§cSkySkipped §f:: §eInventory is full! Cleanning...")
                     if (pizza) MacroBuilder.onKey()
                     else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                    Thread.sleep(1000L)
 
                     mc.displayGuiScreen(GuiInventory(mc.thePlayer))
-                    Thread.sleep(1000L)
+                    Thread.sleep(1000L + extraDelay)
 
                     if (mc.currentScreen !is GuiInventory) {
                         printdev("Invenory closed")
@@ -435,7 +452,7 @@ class FailSafe : Feature() {
                                 (mc.currentScreen as GuiInventory).inventorySlots.windowId,
                                 -999, 0, 0, mc.thePlayer
                             )
-                            Thread.sleep(500L)
+                            Thread.sleep(500L + extraDelay)
                         }
                     } else printdev("no stone")
                     val crops = inv.filter {
@@ -459,15 +476,15 @@ class FailSafe : Feature() {
                         return@Thread
                     }
 
-                    Thread.sleep(1000L)
+                    Thread.sleep(1000L + extraDelay)
                     mc.thePlayer.sendChatMessage("/sbmenu")
-                    Thread.sleep(1000L)
+                    Thread.sleep(1000L + extraDelay)
 
                     val startTime = System.currentTimeMillis()
                     var exit = false
                     var trades: Slot? = null
                     while (!exit) {
-                        if (System.currentTimeMillis() - startTime >= 3000L) {
+                        if (System.currentTimeMillis() - startTime >= 5000L) {
                             printdev("Cant find trades button")
                             called5 = false
                             ticks5 = 0
@@ -489,13 +506,13 @@ class FailSafe : Feature() {
                         (mc.currentScreen as GuiChest).inventorySlots.windowId,
                         trades!!.slotIndex, 0, 0, mc.thePlayer
                     )
-                    Thread.sleep(500L)
+                    Thread.sleep(500L + extraDelay)
                     printdev("clicked trades")
 
                     val startTime2 = System.currentTimeMillis()
                     var sell: Slot? = null
                     while (sell == null) {
-                        if (System.currentTimeMillis() - startTime2 >= 3000L || mc.currentScreen !is GuiChest) {
+                        if (System.currentTimeMillis() - startTime2 >= 5000L || mc.currentScreen !is GuiChest) {
                             printdev("Cant find sell button")
                             called5 = false
                             ticks5 = 0
@@ -538,7 +555,7 @@ class FailSafe : Feature() {
                                 (mc.currentScreen as GuiChest).inventorySlots.windowId,
                                 slot.slotNumber, 0, 0, mc.thePlayer
                             )
-                            Thread.sleep(500L)
+                            Thread.sleep(500L + extraDelay)
                         }
                     } else printdev("no crops")
 

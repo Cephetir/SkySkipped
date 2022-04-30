@@ -350,6 +350,18 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         var failSafeInv = false
 
         @Property(
+            type = PropertyType.SLIDER,
+            name = "Global Extra Delay for Failsafes",
+            category = "Hacks",
+            subcategory = "Failsafes",
+            description = "Time in ms between actions (Use only if high ping!).",
+            min = 0,
+            max = 10000,
+            increment = 10
+        )
+        var failSafeGlobalTime = 0
+
+        @Property(
             type = PropertyType.SWITCH,
             name = "Block ability",
             category = "Hacks",
