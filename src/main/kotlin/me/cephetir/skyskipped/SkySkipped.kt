@@ -17,6 +17,8 @@
 
 package me.cephetir.skyskipped
 
+import com.google.gson.Gson
+import com.google.gson.JsonArray
 import gg.essential.api.EssentialAPI
 import gg.essential.api.utils.Multithreading
 import gg.essential.api.utils.WebUtil
@@ -28,6 +30,7 @@ import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.features.impl.misc.Metrics
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import me.cephetir.skyskipped.utils.BlurUtils
+import me.cephetir.skyskipped.utils.HttpUtils
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
 import net.minecraftforge.client.ClientCommandHandler
@@ -82,11 +85,11 @@ class SkySkipped {
                 val name = matcher.groups["username"]?.value?.trim() ?: continue
                 val nameRange = matcher.groups["username"]?.range ?: continue
                 val prefix = matcher.groups["prefix"]?.value?.trim()
-                val prefixRange = matcher.groups["prefix"]?.range ?: continue
+                val prefixRange = matcher.groups["prefix"]?.range
                 val newName = cosmetics[name]?.component1()?.replace("&", "§") ?: continue
                 val newPrefix = cosmetics[name]?.component2()?.replace("&", "§") ?: continue
                 text = text.replaceRange(nameRange, newName)
-                if (prefix != null) text = text.replaceRange(prefixRange, newPrefix)
+                if (prefix != null && prefixRange != null) text = text.replaceRange(prefixRange, newPrefix)
             }
             if (text.contains(Minecraft.getMinecraft().thePlayer.displayNameString)) text = text.replace(
                 Minecraft.getMinecraft().thePlayer.displayNameString,
@@ -156,18 +159,18 @@ class SkySkipped {
                 )
             } else logger.info("Latest version!")
 
-            val json = WebUtil.fetchJSON("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/n.json")
-            if (json.size == 0) logger.info("Failed to download cosmetics!")
-            else {
-                json.optJSONArray("list").toList().forEach {
-                    cosmetics[it.asJsonObject.getAsJsonPrimitive("name").asString] =
-                        Pair(
-                            it.asJsonObject.getAsJsonPrimitive("nick").asString,
-                            it.asJsonObject.getAsJsonPrimitive("prefix").asString
-                        )
-                }
-                logger.info("Successfully downloaded cosmetics!")
+            val body = HttpUtils.sendPatch("https://skyskipped-website.vercel.app/api/nicks", null, null)
+                ?: return@runAsync logger.info("Failed to download cosmetics!")
+            val json = Gson().fromJson(body, JsonArray::class.java)
+                ?: return@runAsync logger.info("Failed to download cosmetics!")
+            json.forEach {
+                cosmetics[it.asJsonObject.getAsJsonPrimitive("name").asString] =
+                    Pair(
+                        it.asJsonObject.getAsJsonPrimitive("nick").asString,
+                        it.asJsonObject.getAsJsonPrimitive("prefix").asString
+                    )
             }
+            logger.info("Successfully downloaded cosmetics!")
         }
     }
 }
