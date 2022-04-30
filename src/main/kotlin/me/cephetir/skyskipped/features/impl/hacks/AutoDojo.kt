@@ -93,7 +93,11 @@ open class AutoDojo : Feature() {
     // Discipline Mode
     @SubscribeEvent
     protected fun onMovePre(event: UpdateWalkingPlayerEvent.Pre) {
-        if (!enabled || mode != DojoMode.Discipline) return
+        if (!enabled || mode != DojoMode.Discipline) {
+            event.isCanceled = true
+            return
+        }
+
         target = getTarget()
         if (target != null) {
             val angles = RotationUtils.getServerAngles(target!!)
@@ -110,7 +114,11 @@ open class AutoDojo : Feature() {
     // Discipline Mode
     @SubscribeEvent
     protected fun onMovePost(event: UpdateWalkingPlayerEvent.Post) {
-        if (!enabled || mode != DojoMode.Discipline) return
+        if (!enabled || mode != DojoMode.Discipline) {
+            event.isCanceled = true
+            return
+        }
+
         if (target != null && mc.thePlayer.ticksExisted % 2 == 0) {
             updateItemNoEvent()
             if (mc.thePlayer.getDistanceToEntity(target) < 3.8) {
