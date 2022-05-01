@@ -73,7 +73,6 @@ class FailSafe : Feature() {
     private var ticks2 = 0
     private var lastCount = 0L
     private var called2 = false
-    private var trigger = false
 
     private var lastState = false
     private var lastDirection: Any? = null
@@ -263,10 +262,9 @@ class FailSafe : Feature() {
             } else {
                 ticks2++
                 if (ticks2 >= ticksTimeout / 3) desynced = true
-                if (ticks2 >= ticksTimeout) trigger = true
             }
 
-            if (trigger && !called2) {
+            if (ticks2 >= ticksTimeout && !called2) {
                 printdev("Triggered desync failsafe!")
                 called2 = true
                 Thread {
@@ -295,7 +293,6 @@ class FailSafe : Feature() {
 
                         called2 = false
                         ticks2 = 0
-                        trigger = false
                         ticksWarpDesync = 100
                         printdev("Ended resync process!")
                     } catch (e: InterruptedException) {
@@ -393,7 +390,7 @@ class FailSafe : Feature() {
     @SubscribeEvent
     fun fullInv(event: ClientTickEvent) {
         if (called || called2 || called3 || called5 || desynced) return
-        if (!Config.failSafeInv) ticks2 = 0
+        if (!Config.failSafeInv) ticks5 = 0
         if (!Config.failSafeInv || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
         if (!pizza && !cheeto) return
 
