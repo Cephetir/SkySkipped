@@ -71,7 +71,7 @@ class FailSafe : Feature() {
 
     private var ticksWarpDesync = 0
     private var ticks2 = 0
-    private var lastCount = 0
+    private var lastCount = 0L
     private var called2 = false
     private var trigger = false
 
@@ -242,22 +242,21 @@ class FailSafe : Feature() {
 
             val ticksTimeout = Config.failSafeDesyncTime * 20
             val stack = Minecraft.getMinecraft().thePlayer.heldItem
-            if (stack == null || !stack.hasTagCompound() || !stack.tagCompound.hasKey(
-                    "ExtraAttributes",
-                    10
-                )
+            if (stack == null ||
+                !stack.hasTagCompound() ||
+                !stack.tagCompound.hasKey("ExtraAttributes", 10)
             ) return
-            var newCount = -1
+            var newCount = -1L
             val tag = stack.tagCompound
             if (tag.hasKey("ExtraAttributes", 10)) {
                 val ea = tag.getCompoundTag("ExtraAttributes")
                 if (ea.hasKey("mined_crops", 99))
-                    newCount = ea.getInteger("mined_crops")
+                    newCount = ea.getLong("mined_crops")
                 else if (ea.hasKey("farmed_cultivating", 99))
-                    newCount = ea.getInteger("farmed_cultivating")
+                    newCount = ea.getLong("farmed_cultivating")
             }
             printdev("Current counter: $newCount")
-            if (newCount != -1 && newCount > lastCount) {
+            if (newCount != -1L && newCount > lastCount) {
                 lastCount = newCount
                 ticks2 = 0
                 desynced = false
