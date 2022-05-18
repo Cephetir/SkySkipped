@@ -97,7 +97,7 @@ open class AutoDojo : Feature() {
     // Discipline Mode
     @SubscribeEvent
     protected fun onMovePre(event: UpdateWalkingPlayerEvent.Pre) {
-        if (!enabled || mode != DojoMode.Discipline) {
+        if (!enabled || mode != DojoMode.Discipline || true) {
             event.isCanceled = true
             return
         }
@@ -119,7 +119,7 @@ open class AutoDojo : Feature() {
     // Discipline Mode
     @SubscribeEvent
     protected fun onMovePost(event: UpdateWalkingPlayerEvent.Post) {
-        if (!enabled || mode != DojoMode.Discipline) {
+        if (!enabled || mode != DojoMode.Discipline || true) {
             event.isCanceled = true
             return
         }
