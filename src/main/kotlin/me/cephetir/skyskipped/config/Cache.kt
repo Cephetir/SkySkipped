@@ -18,6 +18,7 @@
 package me.cephetir.skyskipped.config
 
 object Cache {
+    @Volatile
     @JvmField
     var isInDungeon = false
     @JvmField
@@ -27,12 +28,16 @@ object Cache {
 
     @JvmField
     var inParty = false
+    @Volatile
     @JvmField
     var inSkyblock = false
+    @Volatile
     @JvmField
     var inWorkshop = false
+    @Volatile
     @JvmField
     var onIsland = false
+    @Volatile
     @JvmField
     var isJacob = false
 

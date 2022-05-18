@@ -49,9 +49,7 @@ class BlurUtils {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onScreenRender(event: RenderGameOverlayEvent.Pre) {
-        if (event.type == RenderGameOverlayEvent.ElementType.ALL) {
-            processBlurs()
-        }
+        if (event.type == RenderGameOverlayEvent.ElementType.ALL) processBlurs()
         Minecraft.getMinecraft().framebuffer.bindFramebuffer(false)
     }
 
@@ -79,9 +77,8 @@ class BlurUtils {
 
         private var shouldBlur = true
         fun markDirty() {
-            if (Minecraft.getMinecraft().theWorld != null) {
+            if (Minecraft.getMinecraft().theWorld != null)
                 shouldBlur = true
-            }
         }
 
         fun processBlurs() {
@@ -93,31 +90,22 @@ class BlurUtils {
                     lastBlurUse[blur] = currentTime
                     val width = Minecraft.getMinecraft().displayWidth
                     val height = Minecraft.getMinecraft().displayHeight
-                    val output = blurOutput.computeIfAbsent(
-                        blur
-                    ) {
-                        val fb =
-                            Framebuffer(width, height, false)
+                    val output = blurOutput.computeIfAbsent(blur) {
+                        val fb = Framebuffer(width, height, false)
                         fb.setFramebufferFilter(GL11.GL_NEAREST)
                         OutputStuff(fb, null, null)
                     }
                     if (output.framebuffer.framebufferWidth != width || output.framebuffer.framebufferHeight != height) {
                         output.framebuffer.createBindFramebuffer(width, height)
-                        if (output.blurShaderHorz != null) {
+                        if (output.blurShaderHorz != null)
                             output.blurShaderHorz!!.setProjectionMatrix(createProjectionMatrix(width, height))
-                        }
-                        if (output.blurShaderVert != null) {
+                        if (output.blurShaderVert != null)
                             output.blurShaderVert!!.setProjectionMatrix(createProjectionMatrix(width, height))
-                        }
                     }
                     blurBackground(output, blur)
                 }
                 val remove: MutableSet<Float> = HashSet()
-                for ((key, value) in lastBlurUse) {
-                    if (currentTime - value > 30 * 1000) {
-                        remove.add(key)
-                    }
-                }
+                for ((key, value) in lastBlurUse) if (currentTime - value > 30 * 1000) remove.add(key)
 
                 for ((key, value) in blurOutput) {
                     if (remove.contains(key)) {
@@ -169,14 +157,12 @@ class BlurUtils {
                 blurOutputHorz = Framebuffer(width, height, false)
                 blurOutputHorz!!.setFramebufferFilter(GL11.GL_NEAREST)
             }
-            if (blurOutputHorz == null || output == null) {
-                return
-            }
+            if (blurOutputHorz == null || output == null) return
             if (blurOutputHorz!!.framebufferWidth != width || blurOutputHorz!!.framebufferHeight != height) {
                 blurOutputHorz!!.createBindFramebuffer(width, height)
                 Minecraft.getMinecraft().framebuffer.bindFramebuffer(false)
             }
-            if (output.blurShaderHorz == null) {
+            if (output.blurShaderHorz == null)
                 try {
                     output.blurShaderHorz = Shader(
                         Minecraft.getMinecraft().resourceManager, "blur",
@@ -184,10 +170,9 @@ class BlurUtils {
                     )
                     output.blurShaderHorz!!.shaderManager.getShaderUniform("BlurDir")[1f] = 0f
                     output.blurShaderHorz!!.setProjectionMatrix(createProjectionMatrix(width, height))
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                 }
-            }
-            if (output.blurShaderVert == null) {
+            if (output.blurShaderVert == null)
                 try {
                     output.blurShaderVert = Shader(
                         Minecraft.getMinecraft().resourceManager, "blur",
@@ -195,14 +180,12 @@ class BlurUtils {
                     )
                     output.blurShaderVert!!.shaderManager.getShaderUniform("BlurDir")[0f] = 1f
                     output.blurShaderVert!!.setProjectionMatrix(createProjectionMatrix(width, height))
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                 }
-            }
             if (output.blurShaderHorz != null && output.blurShaderVert != null) {
-                if (output.blurShaderHorz!!.shaderManager.getShaderUniform("Radius") == null) {
+                if (output.blurShaderHorz!!.shaderManager.getShaderUniform("Radius") == null)
                     //Corrupted shader?
                     return
-                }
                 output.blurShaderHorz!!.shaderManager.getShaderUniform("Radius").set(blurFactor)
                 output.blurShaderVert!!.shaderManager.getShaderUniform("Radius").set(blurFactor)
                 GL11.glPushMatrix()
@@ -232,9 +215,7 @@ class BlurUtils {
             shouldBlur = true
             if (blurOutput.isEmpty()) return
             var out = blurOutput[blurStrength]
-            if (out == null) {
-                out = blurOutput.values.iterator().next()
-            }
+            if (out == null) out = blurOutput.values.iterator().next()
             val uMin = x / screenWidth
             val uMax = (x + blurWidth) / screenWidth
             val vMin = (screenHeight - y) / screenHeight

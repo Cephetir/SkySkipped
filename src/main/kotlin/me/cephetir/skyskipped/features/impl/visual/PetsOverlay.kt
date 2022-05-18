@@ -20,6 +20,7 @@ package me.cephetir.skyskipped.features.impl.visual
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinGuiContainer
+import me.cephetir.skyskipped.mixins.IMixinGuiScreen
 import me.cephetir.skyskipped.utils.BlurUtils
 import me.cephetir.skyskipped.utils.ItemRarity.Companion.byBaseColor
 import me.cephetir.skyskipped.utils.RoundUtils.drawRoundedOutline
@@ -91,6 +92,7 @@ class PetsOverlay : Feature() {
     }
 
     private var ticks = 0
+
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
@@ -432,27 +434,9 @@ class PetsOverlay : Feature() {
         }
 
         private fun onHover(mouseX: Int, mouseY: Int) {
-            if (pets.isNotEmpty()) for (pet in pets) if (mouseX / 1.5f > pet.x && mouseY / 1.5f > pet.y && mouseX / 1.5f < pet.x + 16 && mouseY / 1.5f < pet.y + 16) {
-                var max = 0
-                val tooltip = pet.itemStack.getTooltip(mc.thePlayer, false)
-                GlStateManager.translate(0f, 0f, 150f)
-                for ((i, text) in tooltip.withIndex()) {
-                    if (mc.fontRendererObj.getStringWidth(text) > max) max = mc.fontRendererObj.getStringWidth(text)
-                    mc.fontRendererObj.drawStringWithShadow(
-                        text, (mouseX + 5 + 5).toFloat(),
-                        (mouseY + 5 + i * 10 - 8).toFloat(), -1
-                    )
-                }
-                GlStateManager.translate(0f, 0f, -5f)
-                Gui.drawRect(
-                    mouseX + 5,
-                    mouseY - 8,
-                    mouseX + 5 + max + 10,
-                    mouseY + tooltip.size * 10 + 10 - 8,
-                    Color(0, 0, 0, 200).rgb
-                )
-                GlStateManager.translate(0f, 0f, -145f)
-            }
+            if (pets.isNotEmpty()) for (pet in pets)
+                if (mouseX / 1.5f > pet.x && mouseY / 1.5f > pet.y && mouseX / 1.5f < pet.x + 16 && mouseY / 1.5f < pet.y + 16)
+                    (chest as IMixinGuiScreen).renderToolTip(pet.itemStack, mouseX, mouseY)
         }
 
         private fun renderItem(itemStack: ItemStack?, x: Int, y: Int) {

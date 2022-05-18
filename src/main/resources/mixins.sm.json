@@ -11,6 +11,7 @@
     "IMixinRenderManager",
     "IMixinSugarCaneMacro",
     "MixinEntityPlayerSP",
+    "MixinFontRenderer",
     "MixinGuiContainer",
     "MixinGuiDisconnected",
     "MixinGuiIngame",

@@ -34,11 +34,9 @@ enum class ItemRarity(val rarityName: String = "COMMON", val baseColor: EnumChat
 
     companion object {
         private val VALUES = values().sortedBy { it.ordinal }.toMutableList()
-        val RARITY_PATTERN: Regex = Regex("(?:§[\\da-f]§l§ka§r )?(?<rarity>${VALUES.joinToString("|") { "(?:${it.baseColor}§l)+${it.rarityName}" }})")
+        val RARITY_PATTERN = Regex("(?:§[\\da-f]§l§ka§r )?(?<rarity>${VALUES.joinToString("|") { "(?:${it.baseColor}§l)+${it.rarityName}" }})")
 
-        fun byBaseColor(color: String): ItemRarity {
-            return VALUES.find { it.baseColor.toString() == color } ?: COMMON
-        }
+        fun byBaseColor(color: String): ItemRarity = VALUES.find { it.baseColor.toString() == color } ?: COMMON
     }
 
     val nextRarity: ItemRarity

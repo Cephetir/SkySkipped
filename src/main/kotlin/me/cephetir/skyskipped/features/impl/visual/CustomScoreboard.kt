@@ -19,10 +19,8 @@ package me.cephetir.skyskipped.features.impl.visual
 
 import com.mojang.realmsclient.gui.ChatFormatting
 import gg.essential.universal.ChatColor
-import me.cephetir.skyskipped.SkySkipped.Companion.cosmetics
+import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.config.Config.Companion.coinsToggle
-import me.cephetir.skyskipped.config.Config.Companion.customSbNumbers
 import me.cephetir.skyskipped.event.events.ScoreboardRenderEvent
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.BlurUtils
@@ -74,7 +72,7 @@ class CustomScoreboard : Feature() {
                     ScorePlayerTeam.formatPlayerName(
                         scoreplayerteam as Team,
                         score.playerName
-                    ) + (if (!customSbNumbers) ": " + EnumChatFormatting.RED + score.scorePoints else "")
+                    ) + (if (!Config.customSbNumbers) ": " + EnumChatFormatting.RED + score.scorePoints else "")
                 )
                 width = width.coerceAtLeast(mc.fontRendererObj.getStringWidth(s))
             }
@@ -158,18 +156,17 @@ class CustomScoreboard : Feature() {
 
     private fun a(text: String): String {
         val txt = text.stripColor().keepScoreboardCharacters().trim()
-        return if (coinsToggle && txt.startsWith("Purse: ")) {
+        return if (Config.coinsToggle && txt.startsWith("Purse: ")) {
             val coins = txt.substring(7).split(" ").toTypedArray()[0].replace(",", "").toDouble()
             val needed = coins + Config.coins
             val format = DecimalFormat("###,###.##")
             val s = format.format(needed).replace(" ", ",")
             "Purse: " + ChatColor.GOLD + s
-        } else if (customSbNumbers && text.startsWith(EnumChatFormatting.RED.toString() + "") &&
+        } else if (Config.customSbNumbers && text.startsWith(EnumChatFormatting.RED.toString() + "") &&
             Pattern.compile("\\d+").matcher(txt).matches()
         ) ""
-        else if (Minecraft.getMinecraft().thePlayer != null && text.contains(Minecraft.getMinecraft().thePlayer.name)) text.replace(
-            Minecraft.getMinecraft().thePlayer.name, cosmetics[Minecraft.getMinecraft().thePlayer.name]!!
-                .component1().replace("&", "§")
-        ) else text
+        else if (Minecraft.getMinecraft().thePlayer != null && text.contains(Minecraft.getMinecraft().thePlayer.displayNameString) && !Config.advancedCustomNames)
+            SkySkipped.getCosmetics(text)
+        else text
     }
 }

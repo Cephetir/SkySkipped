@@ -23,7 +23,9 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.events.PacketReceive
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinSugarCaneMacro
+import me.cephetir.skyskipped.utils.HttpUtils
 import me.cephetir.skyskipped.utils.InventoryUtils
+import me.cephetir.skyskipped.utils.RotationClass
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraft.client.Minecraft
@@ -48,9 +50,11 @@ import qolskyblockmod.pizzaclient.features.macros.farming.SugarCaneMacro
 import xyz.apfelmus.cf4m.CF4M
 import xyz.apfelmus.cheeto.client.modules.world.AutoFarm
 import java.lang.reflect.Field
+import java.util.*
+import kotlin.math.abs
 
 
-class FailSafe : Feature() {
+open class FailSafe : Feature() {
     companion object {
         var stuck = false
         var desynced = false
@@ -63,6 +67,7 @@ class FailSafe : Feature() {
     private var pizza = false
     private var cheeto = false
     private var updateTicks = 0
+    private val random = Random()
 
     private var ticksWarpStuck = 0
     private var ticks = 0
@@ -84,19 +89,29 @@ class FailSafe : Feature() {
     private var ticks5 = 0
     private var called5 = false
 
+    private var lastY = -1f
+    private var called6 = false
+
+    private var ticks7 = 0
+    private var called7 = false
+    private var lastMacro2 = true
+
+    private var ticks8 = 0
+    private var called8 = false
+
     @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
+    protected fun onTick(event: ClientTickEvent) {
         if (updateTicks++ >= 20) update()
     }
 
     @SubscribeEvent
-    fun unstuck(event: ClientTickEvent) {
+    protected fun unstuck(event: ClientTickEvent) {
         if (!Config.failSafe) ticks = 0
         if (!Config.failSafe || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
-        if (called2 || called3 || called5) return
+        if (called2 || called3 || called5 || called6 || called8) return
 
         if (pizza || cheeto) {
-            if(ticksWarpStuck >= 0) {
+            if (ticksWarpStuck >= 0) {
                 ticksWarpStuck--
                 return
             }
@@ -183,7 +198,7 @@ class FailSafe : Feature() {
     }
 
     @SubscribeEvent
-    fun jacob(event: PacketReceive) {
+    protected fun jacob(event: PacketReceive) {
         if (
             !Cache.inSkyblock ||
             event.packet !is S3EPacketTeams ||
@@ -217,9 +232,11 @@ class FailSafe : Feature() {
     }
 
     @SubscribeEvent
-    fun onChat(event: ClientChatReceivedEvent) {
+    protected fun onChat(event: ClientChatReceivedEvent) {
         if (!called4) return
-        if (!event.message.unformattedText.stripColor().keepScoreboardCharacters().contains("Come see me in the Hub", true)) return
+        if (!event.message.unformattedText.stripColor().keepScoreboardCharacters()
+                .contains("Come see me in the Hub", true)
+        ) return
         printdev("Detected jacob msg in chat")
         UChat.chat("§cSkySkipped §f:: §eJacob event ended! Starting macro again...")
         if (lastMacro) MacroBuilder.onKey()
@@ -228,13 +245,13 @@ class FailSafe : Feature() {
     }
 
     @SubscribeEvent
-    fun desync(event: ClientTickEvent) {
-        if (called || called2 || called3 || called5) return
+    protected fun desync(event: ClientTickEvent) {
+        if (called || called2 || called3 || called5 || called6 || called8) return
         if (!Config.failSafeDesync) ticks2 = 0
         if (!Config.failSafeDesync || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
         if (pizza || cheeto) {
-            if(ticksWarpDesync >= 0) {
+            if (ticksWarpDesync >= 0) {
                 ticksWarpDesync--
                 return
             }
@@ -291,6 +308,7 @@ class FailSafe : Feature() {
                         if (pizza) MacroBuilder.onKey()
                         else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
+                        lastY = mc.thePlayer.posY.toFloat()
                         called2 = false
                         ticks2 = 0
                         ticksWarpDesync = 100
@@ -304,7 +322,7 @@ class FailSafe : Feature() {
     }
 
     @SubscribeEvent
-    fun autoSetSpawn(event: ClientTickEvent) {
+    protected fun autoSetSpawn(event: ClientTickEvent) {
         if (stuck || desynced) return
         if (!Config.failSafeSpawn || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
 
@@ -340,8 +358,8 @@ class FailSafe : Feature() {
     }
 
     @SubscribeEvent
-    fun autoWarpBack(event: ClientTickEvent) {
-        if (called2 || called3 || called5) return
+    protected fun autoWarpBack(event: ClientTickEvent) {
+        if (called2 || called3 || called5 || called8) return
         if (!Config.failSafeIsland || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
         if (Cache.onIsland) return
 
@@ -353,32 +371,28 @@ class FailSafe : Feature() {
                     val cheeto = cheeto
                     if (pizza) MacroBuilder.onKey()
                     else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                    UChat.chat("§cSkySkipped §f:: §eDetected not on island! Warping back...")
 
                     val delay = Config.failSafeIslandDelay.toLong() * 1000L
                     val extraDelay = Config.failSafeGlobalTime.toLong()
                     Thread.sleep(delay + extraDelay)
 
                     if (Cache.onIsland) {
+                        if (pizza) MacroBuilder.onKey()
+                        else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
                         called3 = false
                         return@Thread
                     }
 
-                    if (Cache.inSkyblock) {
-                        UChat.chat("§cSkySkipped §f:: §eDetected hub! Warping back...")
-                        mc.thePlayer.sendChatMessage("/is")
-                    } else {
-                        UChat.chat("§cSkySkipped §f:: §eDetected other lobby! Warping back...")
-                        mc.thePlayer.sendChatMessage("/l")
-                        Thread.sleep(delay + extraDelay)
-                        mc.thePlayer.sendChatMessage("/play sb")
-                        Thread.sleep(delay + extraDelay)
-                        mc.thePlayer.sendChatMessage("/is")
-                    }
+                    goBack(delay, extraDelay)
+                    Thread.sleep(delay + extraDelay)
+                    if (!Cache.onIsland) goBack(delay, extraDelay)
 
                     Thread.sleep(delay + extraDelay)
                     if (pizza) MacroBuilder.onKey()
                     else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
+                    lastY = mc.thePlayer.posY.toFloat()
                     called3 = false
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
@@ -387,9 +401,20 @@ class FailSafe : Feature() {
         }
     }
 
+    private fun goBack(delay: Long, extraDelay: Long) {
+        if (Cache.inSkyblock) mc.thePlayer.sendChatMessage("/is")
+        else {
+            mc.thePlayer.sendChatMessage("/l")
+            Thread.sleep(delay + extraDelay)
+            mc.thePlayer.sendChatMessage("/play sb")
+            Thread.sleep(delay + extraDelay)
+            mc.thePlayer.sendChatMessage("/is")
+        }
+    }
+
     @SubscribeEvent
-    fun fullInv(event: ClientTickEvent) {
-        if (called || called2 || called3 || called5 || desynced) return
+    protected fun fullInv(event: ClientTickEvent) {
+        if (called || called2 || called3 || called5 || called6 || called8 || desynced) return
         if (!Config.failSafeInv) ticks5 = 0
         if (!Config.failSafeInv || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
         if (!pizza && !cheeto) return
@@ -402,171 +427,280 @@ class FailSafe : Feature() {
         if (!called5 && ticks5 >= 50) {
             printdev("Triggering full invenory failsafe!")
             called5 = true
-            Thread {
-                try {
+            clearInventory({
+                UChat.chat("§cSkySkipped §f:: §eInventory is full! Cleanning...")
+                val pizza = pizza
+                val cheeto = cheeto
+                if (pizza) MacroBuilder.onKey()
+                else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+            },
+                {
                     val pizza = pizza
                     val cheeto = cheeto
-                    val extraDelay = Config.failSafeGlobalTime.toLong() / 2
-                    UChat.chat("§cSkySkipped §f:: §eInventory is full! Cleanning...")
-                    if (pizza) MacroBuilder.onKey()
-                    else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                    Thread.sleep(1000L)
-
-                    mc.displayGuiScreen(GuiInventory(mc.thePlayer))
-                    Thread.sleep(1000L + extraDelay)
-
-                    if (mc.currentScreen !is GuiInventory) {
-                        printdev("Invenory closed")
-                        called5 = false
-                        ticks5 = 0
-                        mc.thePlayer.closeScreen()
-                        if (pizza) MacroBuilder.onKey()
-                        else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                        return@Thread
-                    }
-                    val inv = ((mc.currentScreen as GuiInventory).inventorySlots as ContainerPlayer).inventorySlots
-                    val stoneSlots = inv.filter {
-                        it.hasStack && it.stack.displayName.stripColor().keepScoreboardCharacters().contains("Stone", true)
-                    }
-                    if (stoneSlots.isNotEmpty()) {
-                        printdev("Stone detected!")
-                        for (slot in stoneSlots) {
-                            if (mc.currentScreen !is GuiInventory) {
-                                printdev("Invenory closed")
-                                called5 = false
-                                ticks5 = 0
-                                mc.thePlayer.closeScreen()
-                                if (pizza) MacroBuilder.onKey()
-                                else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                                return@Thread
-                            }
-                            mc.playerController.windowClick(
-                                (mc.currentScreen as GuiInventory).inventorySlots.windowId,
-                                slot.slotNumber, 0, 0, mc.thePlayer
-                            )
-                            mc.playerController.windowClick(
-                                (mc.currentScreen as GuiInventory).inventorySlots.windowId,
-                                -999, 0, 0, mc.thePlayer
-                            )
-                            Thread.sleep(500L + extraDelay)
-                        }
-                    } else printdev("no stone")
-                    val crops = inv.filter {
-                        it.hasStack && when (it.stack.item) {
-                            Items.nether_wart -> true
-                            Items.reeds -> true
-                            Items.potato -> true
-                            Items.carrot -> true
-                            Items.melon -> true
-                            else -> it.stack.displayName.contains("mushroom")
-                        }
-                    }
-                    mc.thePlayer.closeScreen()
-                    if (crops.isEmpty()) {
-                        printdev("no crops")
-                        called5 = false
-                        ticks5 = 0
-                        mc.thePlayer.closeScreen()
-                        if (pizza) MacroBuilder.onKey()
-                        else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                        return@Thread
-                    }
-
-                    Thread.sleep(1000L + extraDelay)
-                    mc.thePlayer.sendChatMessage("/sbmenu")
-                    Thread.sleep(1000L + extraDelay)
-
-                    val startTime = System.currentTimeMillis()
-                    var exit = false
-                    var trades: Slot? = null
-                    while (!exit) {
-                        if (System.currentTimeMillis() - startTime >= 5000L) {
-                            printdev("Cant find trades button")
-                            called5 = false
-                            ticks5 = 0
-                            mc.thePlayer.closeScreen()
-                            if (pizza) MacroBuilder.onKey()
-                            else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                            return@Thread
-                        }
-                        Thread.sleep(100L)
-                        exit = mc.currentScreen != null && mc.currentScreen is GuiChest
-                        if (exit) {
-                            trades = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
-                                it.hasStack && it.stack.displayName.stripColor() == "Trades"
-                            }
-                            exit = trades != null
-                        }
-                    }
-                    mc.playerController.windowClick(
-                        (mc.currentScreen as GuiChest).inventorySlots.windowId,
-                        trades!!.slotIndex, 0, 0, mc.thePlayer
-                    )
-                    Thread.sleep(500L + extraDelay)
-                    printdev("clicked trades")
-
-                    val startTime2 = System.currentTimeMillis()
-                    var sell: Slot? = null
-                    while (sell == null) {
-                        if (System.currentTimeMillis() - startTime2 >= 5000L || mc.currentScreen !is GuiChest) {
-                            printdev("Cant find sell button")
-                            called5 = false
-                            ticks5 = 0
-                            mc.thePlayer.closeScreen()
-                            if (pizza) MacroBuilder.onKey()
-                            else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                            return@Thread
-                        }
-                        Thread.sleep(100L)
-                        sell = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
-                            it.hasStack && it.stack.item.unlocalizedName.contains("hopper")
-                        }
-                    }
-                    printdev("found sell")
-
-                    val inventory = ((mc.currentScreen as GuiChest).inventorySlots as ContainerChest).inventorySlots
-                    val cropss = inventory.filter {
-                        it.hasStack && when (it.stack.item) {
-                            Items.nether_wart -> true
-                            Items.reeds -> true
-                            Items.potato -> true
-                            Items.carrot -> true
-                            Items.melon -> true
-                            else -> it.stack.displayName.contains("mushroom")
-                        }
-                    }
-                    if (cropss.isNotEmpty()) {
-                        printdev("Crops found!")
-                        for (slot in cropss) {
-                            if (mc.currentScreen !is GuiChest) {
-                                printdev("Invenory closed")
-                                called5 = false
-                                ticks5 = 0
-                                mc.thePlayer.closeScreen()
-                                if (pizza) MacroBuilder.onKey()
-                                else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                                return@Thread
-                            }
-                            mc.playerController.windowClick(
-                                (mc.currentScreen as GuiChest).inventorySlots.windowId,
-                                slot.slotNumber, 0, 0, mc.thePlayer
-                            )
-                            Thread.sleep(500L + extraDelay)
-                        }
-                    } else printdev("no crops")
-
                     if (pizza) MacroBuilder.onKey()
                     else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
                     called5 = false
                     ticks5 = 0
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
-            }.start()
+                })
         }
     }
 
+    @SubscribeEvent
+    protected fun changeYaw(event: ClientTickEvent) {
+        if (called6 || called3 || called2) return
+        if (!Config.failSafeChangeYaw || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
+
+        if (!pizza && !cheeto) return
+        val y = mc.thePlayer.posY.toFloat()
+        if (lastY == -1f) {
+            lastY = y
+            return
+        }
+
+        if (abs(lastY - y) < 1.5f || called6) return
+        called6 = true
+        printdev("Detected Y change: old Y $lastY new Y $y")
+        val p = pizza
+        val c = cheeto
+        UChat.chat("§cSkySkipped §f:: §eChanging yaw...")
+        if (pizza) MacroBuilder.onKey()
+        else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+        Thread.sleep(500L + Config.failSafeGlobalTime)
+
+        var yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
+        printdev("Last yaw: $yaw")
+        yaw -= yaw % 10
+        printdev("Round yaw: $yaw")
+        val yaww = MathHelper.wrapAngleTo180_float(yaw + 180)
+        printdev("New yaw: $yaww")
+
+        val newYaw = if (Config.failSafeChangeYawRandom) getRandom(yaww - 2.5f, yaww + 2.5f) else yaww
+        val newPitch = if (Config.failSafeChangeYawRandom) getRandom(-2.5f, 2.5f) else 0f
+        printdev("Apply random on yaw and pitch: $newYaw $newPitch")
+        val time = getRandom(Config.failSafeChangeYawSpeed + 250f, Config.failSafeChangeYawSpeed - 250f).toLong()
+        RotationClass(RotationClass.Rotation(newYaw, newPitch), time)
+
+        Thread {
+            try {
+                Thread.sleep(time + 500L + Config.failSafeGlobalTime)
+                if (p) MacroBuilder.onKey()
+                else if (c) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                lastY = mc.thePlayer.posY.toFloat()
+                called6 = false
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }.start()
+    }
+
+    @SubscribeEvent
+    protected fun checkBanWave(event: ClientTickEvent) {
+        if (!Config.failSafeBanWave || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
+        if (!pizza && !cheeto && !called7) return
+        if (ticks7++ < Config.failSafeBanWaveTimer * 60 * 20) return
+        ticks7 = 0
+
+        Thread {
+            val status = HttpUtils.sendGet(
+                "https://api.snipes.wtf/bancheck",
+                mapOf("User-Agent" to "MACRO-MODreal", "Content-Type" to "application/json")
+            )
+            if (status == "Nah") {
+                UChat.chat("§cSkySkipped §f:: §eBanwave: §cFalse")
+                if (Config.failSafeBanWaveDisable && called7) {
+                    UChat.chat("§cSkySkipped §f:: §eReenbabling macro...")
+                    if (lastMacro2) MacroBuilder.onKey()
+                    else CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                    called7 = false
+                }
+            } else if (status == "disconnect:all") {
+                UChat.chat("§cSkySkipped §f:: §eBanwave: §aTrue")
+                if (Config.failSafeBanWaveDisable && !called7) {
+                    UChat.chat("§cSkySkipped §f:: §eDisabling macro...")
+                    lastMacro2 = pizza
+                    if (pizza) MacroBuilder.onKey()
+                    else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                    called7 = true
+                }
+            } else UChat.chat("§cSkySkipped §f:: §cCoudn't check current banwave status!")
+        }.start()
+    }
+
+    @SubscribeEvent
+    protected fun invCleaner(event: ClientTickEvent) {
+        if (called || called2 || called3 || called5 || called6 || called8 || desynced) return
+        if (!Config.failSafeInvConfig || event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
+        if (!pizza && !cheeto) return
+
+        if (ticks8++ >= Config.failSafeInvConfigTime * 60 * 20 && !called8) {
+            called8 = true
+            printdev("Clearing inv...")
+            clearInventory({
+                UChat.chat("§cSkySkipped §f:: §eCleanning inventory...")
+                val pizza = pizza
+                val cheeto = cheeto
+                if (pizza) MacroBuilder.onKey()
+                else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+            },
+                {
+                    val pizza = pizza
+                    val cheeto = cheeto
+                    if (pizza) MacroBuilder.onKey()
+                    else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+                    called8 = false
+                    ticks8 = 0
+                })
+        }
+    }
+
+    private fun clearInventory(onStart: Runnable, onEnd: Runnable) {
+        Thread {
+            try {
+                onStart.run()
+                val extraDelay = Config.failSafeGlobalTime.toLong() / 2
+                Thread.sleep(1000L)
+
+                mc.displayGuiScreen(GuiInventory(mc.thePlayer))
+                Thread.sleep(1000L + extraDelay)
+
+                if (mc.currentScreen !is GuiInventory) {
+                    printdev("Invenory closed")
+                    mc.thePlayer.closeScreen()
+                    onEnd.run()
+                    return@Thread
+                }
+                val inv = ((mc.currentScreen as GuiInventory).inventorySlots as ContainerPlayer).inventorySlots
+                val stoneSlots = inv.filter {
+                    it.hasStack && it.stack.displayName.stripColor().keepScoreboardCharacters()
+                        .contains("Stone", true)
+                }
+                if (stoneSlots.isNotEmpty()) {
+                    printdev("Stone detected!")
+                    for (slot in stoneSlots) {
+                        if (mc.currentScreen !is GuiInventory) {
+                            printdev("Invenory closed")
+                            mc.thePlayer.closeScreen()
+                            onEnd.run()
+                            return@Thread
+                        }
+                        mc.playerController.windowClick(
+                            (mc.currentScreen as GuiInventory).inventorySlots.windowId,
+                            slot.slotNumber, 0, 0, mc.thePlayer
+                        )
+                        mc.playerController.windowClick(
+                            (mc.currentScreen as GuiInventory).inventorySlots.windowId,
+                            -999, 0, 0, mc.thePlayer
+                        )
+                        Thread.sleep(500L + extraDelay)
+                    }
+                } else printdev("no stone")
+                val crops = inv.filter {
+                    it.hasStack && when (it.stack.item) {
+                        Items.nether_wart -> true
+                        Items.reeds -> true
+                        Items.potato -> true
+                        Items.carrot -> true
+                        Items.melon -> true
+                        else -> it.stack.displayName.contains("mushroom") || it.stack.displayName.contains("wart")
+                    }
+                }
+                mc.thePlayer.closeScreen()
+                if (crops.isEmpty()) {
+                    printdev("no crops")
+                    mc.thePlayer.closeScreen()
+                    onEnd.run()
+                    return@Thread
+                }
+
+                Thread.sleep(1000L + extraDelay)
+                mc.thePlayer.sendChatMessage("/sbmenu")
+                Thread.sleep(1000L + extraDelay)
+
+                val startTime = System.currentTimeMillis()
+                var exit = false
+                var trades: Slot? = null
+                while (!exit) {
+                    if (System.currentTimeMillis() - startTime >= 5000L) {
+                        printdev("Cant find trades button")
+                        mc.thePlayer.closeScreen()
+                        onEnd.run()
+                        return@Thread
+                    }
+                    Thread.sleep(100L)
+                    exit = mc.currentScreen != null && mc.currentScreen is GuiChest
+                    if (exit) {
+                        trades = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
+                            it.hasStack && it.stack.displayName.stripColor() == "Trades"
+                        }
+                        exit = trades != null
+                    }
+                }
+                mc.playerController.windowClick(
+                    (mc.currentScreen as GuiChest).inventorySlots.windowId,
+                    trades!!.slotIndex, 0, 0, mc.thePlayer
+                )
+                Thread.sleep(500L + extraDelay)
+                printdev("clicked trades")
+
+                val startTime2 = System.currentTimeMillis()
+                var sell: Slot? = null
+                while (sell == null) {
+                    if (System.currentTimeMillis() - startTime2 >= 5000L || mc.currentScreen !is GuiChest) {
+                        printdev("Cant find sell button")
+                        mc.thePlayer.closeScreen()
+                        onEnd.run()
+                        return@Thread
+                    }
+                    Thread.sleep(100L)
+                    sell = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
+                        it.hasStack && it.stack.item.unlocalizedName.contains("hopper")
+                    }
+                }
+                printdev("found sell")
+
+                val inventory = ((mc.currentScreen as GuiChest).inventorySlots as ContainerChest).inventorySlots
+                val cropss = inventory.filter {
+                    it.hasStack && when (it.stack.item) {
+                        Items.nether_wart -> true
+                        Items.reeds -> true
+                        Items.potato -> true
+                        Items.carrot -> true
+                        Items.melon -> true
+                        else -> it.stack.displayName.contains("mushroom")
+                    }
+                }
+                if (cropss.isNotEmpty()) {
+                    printdev("Crops found!")
+                    for (slot in cropss) {
+                        if (mc.currentScreen !is GuiChest) {
+                            printdev("Invenory closed")
+                            mc.thePlayer.closeScreen()
+                            onEnd.run()
+                            return@Thread
+                        }
+                        mc.playerController.windowClick(
+                            (mc.currentScreen as GuiChest).inventorySlots.windowId,
+                            slot.slotNumber, 0, 0, mc.thePlayer
+                        )
+                        Thread.sleep(500L + extraDelay)
+                    }
+                } else printdev("no crops")
+
+                onEnd.run()
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+        }.start()
+    }
+
+    private fun getRandom(a: Float, b: Float): Float = a + (b - a) * random.nextFloat()
+
     private fun update() {
+        if(Config.failSafeForce) {
+            pizza = true
+            cheeto = true
+            return
+        }
         pizza = Loader.isModLoaded("pizzaclient") && MacroBuilder.toggled && MacroBuilder.currentMacro is FarmingMacro
         cheeto = Loader.isModLoaded("ChromaHUD") && CF4M.INSTANCE.moduleManager.isEnabled("AutoFarm")
     }

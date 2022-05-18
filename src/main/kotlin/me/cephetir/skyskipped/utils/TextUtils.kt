@@ -17,44 +17,30 @@
 
 package me.cephetir.skyskipped.utils
 
-import java.util.*
-import java.util.regex.Pattern
 import kotlin.math.ceil
 
 object TextUtils {
-    private val STRIP_COLOR_PATTERN = Pattern.compile("(?i)§[0-9A-FK-OR]")
-    private val SCOREBOARD_CHARACTERS = Pattern.compile("[^a-z A-Z:0-9/'.]")
-    private val INTEGER_CHARACTERS = Pattern.compile("[^0-9]")
+    private val STRIP_COLOR_PATTERN = Regex("(?i)§[\\dA-FK-OR]")
+    private val SCOREBOARD_CHARACTERS = Regex("[^a-z A-Z:\\d/'.]")
+    private val INTEGER_CHARACTERS = Regex("\\D")
+    private val NUMERIC = Regex("-?\\d+(\\.\\d+)?")
 
     @JvmStatic
-    fun String.stripColor(): String {
-        return STRIP_COLOR_PATTERN.matcher(this).replaceAll("")
-    }
+    fun String.stripColor(): String = STRIP_COLOR_PATTERN.replace(this, "")
 
     @JvmStatic
-    fun String.keepScoreboardCharacters(): String {
-        return SCOREBOARD_CHARACTERS.matcher(this).replaceAll("")
-    }
+    fun String.keepScoreboardCharacters(): String = SCOREBOARD_CHARACTERS.replace(this, "")
 
     @JvmStatic
-    fun String.isNumeric(): Boolean {
-        return this.matches(Regex("-?\\d+(\\.\\d+)?")) // ty stackoverflow
-    }
+    fun String.isNumeric(): Boolean = this.matches(NUMERIC) // ty stackoverflow
 
-    fun CharSequence?.containsAny(vararg sequences: CharSequence?): Boolean {
-        return if (this == null) false
-        else sequences.any { it != null && this.contains(it, true) }
-    }
+    fun CharSequence?.containsAny(vararg sequences: CharSequence): Boolean = this.containsAny(sequences.toList())
 
-    fun CharSequence?.containsAny(sequences: List<CharSequence>): Boolean {
-        return if (this == null) false
+    fun CharSequence?.containsAny(sequences: List<CharSequence>): Boolean =
+        if (this == null) false
         else sequences.any { it != "" && this.contains(it, true) }
-    }
 
-    private val suffixes = TreeMap<Long, String>()
-    fun String.keepIntegerCharactersOnly(): String {
-        return INTEGER_CHARACTERS.matcher(this).replaceAll("")
-    }
+    fun String.keepIntegerCharactersOnly(): String = INTEGER_CHARACTERS.replace(this, "")
 
     fun join(list: List<*>, delimeter: String?): String {
         if (list.isEmpty()) return ""
@@ -66,12 +52,6 @@ object TextUtils {
         return stringBuilder.toString()
     }
 
-    init {
-        suffixes[1000L] = "k"
-        suffixes[1000000L] = "m"
-        suffixes[1000000000L] = "b"
-    }
-
     fun Long.formatTime(): String {
         var seconds = ceil(this / 1000.0).toLong()
         val hr = seconds / (60 * 60)
@@ -79,27 +59,9 @@ object TextUtils {
         val min = seconds / 60
         seconds -= min * 60
         val stringBuilder = StringBuilder()
-        if (hr > 0) {
-            stringBuilder.append(hr).append("h ")
-        }
-        if (hr > 0 || min > 0) {
-            stringBuilder.append(min).append("m ")
-        }
-        if (hr > 0 || min > 0 || seconds > 0) {
-            stringBuilder.append(seconds).append("s ")
-        }
+        if (hr > 0) stringBuilder.append(hr).append("h ")
+        if (hr > 0 || min > 0) stringBuilder.append(min).append("m ")
+        if (hr > 0 || min > 0 || seconds > 0) stringBuilder.append(seconds).append("s ")
         return stringBuilder.toString()
-    }
-
-    fun insertDashUUID(uuid: String?): String {
-        var sb = StringBuilder(uuid)
-        sb.insert(8, "-")
-        sb = StringBuilder(sb.toString())
-        sb.insert(13, "-")
-        sb = StringBuilder(sb.toString())
-        sb.insert(18, "-")
-        sb = StringBuilder(sb.toString())
-        sb.insert(23, "-")
-        return sb.toString()
     }
 }

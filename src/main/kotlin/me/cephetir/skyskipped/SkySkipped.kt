@@ -19,6 +19,7 @@ package me.cephetir.skyskipped
 
 import com.google.gson.Gson
 import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import gg.essential.api.EssentialAPI
 import gg.essential.api.utils.Multithreading
 import gg.essential.api.utils.WebUtil
@@ -58,7 +59,7 @@ class SkySkipped {
     companion object {
         const val MODID = "skyskipped"
         const val MOD_NAME = "SkySkipped"
-        const val VERSION = "2.9"
+        const val VERSION = "3.0"
 
         val config = Config()
         val features = Features()
@@ -68,11 +69,9 @@ class SkySkipped {
         val autoGhostBlockKey = KeyBinding("Auto Ghost Block", Keyboard.KEY_NONE, "SkySkipped")
         val perspectiveToggle = KeyBinding("Better Perspective", Keyboard.KEY_NONE, "SkySkipped")
         val autoDojo = KeyBinding("Auto Dojo", Keyboard.KEY_NONE, "SkySkipped")
-
         val keybinds = HashSet<GuiItemSwap.Keybind>()
 
-        @JvmField
-        val cosmetics = hashMapOf<String, Pair<String, String>>()
+        private val cosmetics = hashMapOf<String, Pair<String, String>>()
 
         val regex = Regex("(?:§.)*(?<prefix>\\[\\w\\w\\w(?:(?:§.)*\\+)*(?:§.)*])? *(?<username>\\w{3,16})(?:§.)* *:*")
 
@@ -109,7 +108,6 @@ class SkySkipped {
                 )
             else return message
         }
-
     }
 
     @Mod.EventHandler
@@ -159,18 +157,23 @@ class SkySkipped {
                 )
             } else logger.info("Latest version!")
 
-            val body = HttpUtils.sendPatch("https://skyskipped-website.vercel.app/api/nicks", null, null)
-                ?: return@runAsync logger.info("Failed to download cosmetics!")
-            val json = Gson().fromJson(body, JsonArray::class.java)
-                ?: return@runAsync logger.info("Failed to download cosmetics!")
-            json.forEach {
-                cosmetics[it.asJsonObject.getAsJsonPrimitive("name").asString] =
-                    Pair(
-                        it.asJsonObject.getAsJsonPrimitive("nick").asString,
-                        it.asJsonObject.getAsJsonPrimitive("prefix").asString
-                    )
+            val gson = Gson()
+            val body = HttpUtils.sendGet("https://api.github.com/gists/7af203131b17bd470e5453785916ef69", mapOf("Content-Type" to "application/json"))
+            val json = gson.fromJson(body, JsonObject::class.java)
+            if (json.isJsonNull) logger.info("Failed to download cosmetics!")
+            else {
+                val content = json.getAsJsonObject("files")
+                    .getAsJsonObject("cosmetics.json")
+                    .getAsJsonPrimitive("content").asString
+                gson.fromJson(content, JsonArray::class.java).toList().forEach {
+                    cosmetics[it.asJsonObject.getAsJsonPrimitive("name").asString] =
+                        Pair(
+                            it.asJsonObject.getAsJsonPrimitive("nick").asString,
+                            it.asJsonObject.getAsJsonPrimitive("prefix").asString
+                        )
+                }
+                logger.info("Successfully downloaded cosmetics!")
             }
-            logger.info("Successfully downloaded cosmetics!")
         }
     }
 }

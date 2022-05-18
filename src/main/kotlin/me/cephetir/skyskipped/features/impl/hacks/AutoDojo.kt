@@ -28,6 +28,7 @@ import me.cephetir.skyskipped.utils.RotationUtils
 import me.cephetir.skyskipped.utils.ScoreboardUtils
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import net.minecraft.client.settings.KeyBinding
 import net.minecraft.entity.Entity
 import net.minecraft.entity.monster.EntityZombie
 import net.minecraft.init.Items
@@ -39,6 +40,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import org.lwjgl.input.Keyboard
 import kotlin.math.abs
+
 
 open class AutoDojo : Feature() {
     private var enabled = false
@@ -53,10 +55,11 @@ open class AutoDojo : Feature() {
             if (text.stripColor().contains("Challenge: ")) {
                 printdev(text)
                 enabled = true
-                when (text.split("Challenge: ")[1]) {
-                    "Discipline" -> mode = DojoMode.Discipline
-                    "Force" -> mode = DojoMode.Force
-                    else -> enabled = false
+                try {
+                    mode = DojoMode.valueOf(text.split("Challenge: ")[1])
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
+                    onDisable()
                 }
                 break
             }
@@ -66,6 +69,7 @@ open class AutoDojo : Feature() {
     }
 
     fun onDisable() {
+        if (mode == DojoMode.Swiftness) KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, false)
         enabled = false
         mode = DojoMode.NONE
         target = null
@@ -87,7 +91,7 @@ open class AutoDojo : Feature() {
     protected fun onChat(event: ClientChatReceivedEvent) {
         if (!enabled || mode == DojoMode.NONE) return
         val text = event.message.unformattedText.stripColor().keepScoreboardCharacters().trim()
-        if(text.contains("CHALLENGE COMPLETED")) onDisable()
+        if (text.contains("CHALLENGE COMPLETED")) onDisable()
     }
 
     // Discipline Mode
@@ -97,6 +101,7 @@ open class AutoDojo : Feature() {
             event.isCanceled = true
             return
         }
+        event.isCanceled = false
 
         target = getTarget()
         if (target != null) {
@@ -118,6 +123,7 @@ open class AutoDojo : Feature() {
             event.isCanceled = true
             return
         }
+        event.isCanceled = false
 
         if (target != null && mc.thePlayer.ticksExisted % 2 == 0) {
             updateItemNoEvent()
@@ -175,8 +181,39 @@ open class AutoDojo : Feature() {
                 val helmet = event.target.getEquipmentInSlot(4) ?: return printdev("helmet is null")
                 if (helmet.item == Items.leather_helmet) event.isCanceled = true
             }
-            DojoMode.NONE -> return
+            else -> return
         }
+    }
+
+    // Swiftness mode
+    @SubscribeEvent
+    protected fun onMoveP(event: UpdateWalkingPlayerEvent.Pre) {
+        if (!enabled || mode != DojoMode.Swiftness) {
+            event.isCanceled = true
+            return
+        }
+        event.isCanceled = false
+
+        val player = mc.thePlayer
+        val bb = player.entityBoundingBox
+        val stepHeight: Float = player.stepHeight
+
+
+        var clipping = false
+        var x = -0.05
+        while (x <= 0.05) {
+            var z = -0.05
+            while (z <= 0.05) {
+                if (mc.theWorld.checkBlockCollision(bb.offset(x, -stepHeight.toDouble(), z))) {
+                    clipping = true
+                    break
+                }
+                z += 0.05
+            }
+            x += 0.05
+        }
+
+        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, clipping)
     }
 
     private fun findItemInHotbar(name: String): Int {
@@ -202,6 +239,7 @@ open class AutoDojo : Feature() {
     enum class DojoMode {
         NONE,
         Discipline,
-        Force
+        Force,
+        Swiftness
     }
 }

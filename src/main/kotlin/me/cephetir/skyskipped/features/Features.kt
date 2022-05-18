@@ -45,7 +45,7 @@ class Features {
         val petsOverlay = PetsOverlay()
     }
 
-    var features: MutableList<Feature> = mutableListOf(
+    var features = listOf(
         ChestCloser(),
         ChatSwapper(),
         ESP(),
