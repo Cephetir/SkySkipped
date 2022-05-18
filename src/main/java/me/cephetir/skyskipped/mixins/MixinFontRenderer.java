@@ -19,16 +19,15 @@ package me.cephetir.skyskipped.mixins;
 
 import me.cephetir.skyskipped.SkySkipped;
 import me.cephetir.skyskipped.config.Config;
-import net.minecraft.client.gui.GuiNewChat;
+import net.minecraft.client.gui.FontRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-@Mixin(GuiNewChat.class)
-public class MixinGuiNewChat {
-
-    @ModifyArg(method = "drawChat", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawStringWithShadow(Ljava/lang/String;FFI)I"), index = 0)
-    private String onDrawString(String text) {
-        return !Config.Companion.getAdvancedCustomNames() ? SkySkipped.getCosmetics(text) : text;
+@Mixin(FontRenderer.class)
+public class MixinFontRenderer {
+    @ModifyVariable(method = "drawString(Ljava/lang/String;FFIZ)I", at = @At(value = "HEAD"), argsOnly = true)
+    public String drawString(String text) {
+        return Config.Companion.getAdvancedCustomNames() ? SkySkipped.getCosmetics(text) : text;
     }
 }

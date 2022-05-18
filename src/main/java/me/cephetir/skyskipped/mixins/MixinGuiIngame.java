@@ -42,6 +42,7 @@ public class MixinGuiIngame {
 
     @ModifyArg(method = "renderScoreboard", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I"))
     public String a(String text) {
+        if (Config.Companion.getCustomSb()) return text;
         String txt = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(text)).trim();
         if (Config.Companion.getCoinsToggle() && txt.startsWith("Purse: ")) {
             double coins = Double.parseDouble(txt.substring(7).split(" ")[0].replace(",", ""));
@@ -51,7 +52,7 @@ public class MixinGuiIngame {
             return "Purse: " + ChatColor.GOLD + s;
         } else if (Config.Companion.getCustomSbNumbers() && text.startsWith(EnumChatFormatting.RED + "") && Pattern.compile("\\d+").matcher(txt).matches())
             return "";
-        else if(Minecraft.getMinecraft().thePlayer != null && text.contains(Minecraft.getMinecraft().thePlayer.getDisplayNameString()))
+        else if(Minecraft.getMinecraft().thePlayer != null && text.contains(Minecraft.getMinecraft().thePlayer.getDisplayNameString()) && !Config.Companion.getAdvancedCustomNames())
             return SkySkipped.getCosmetics(text);
         else return text;
     }

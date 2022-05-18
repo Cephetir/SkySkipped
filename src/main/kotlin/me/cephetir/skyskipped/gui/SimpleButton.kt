@@ -25,7 +25,7 @@ import gg.essential.elementa.constraints.animation.Animations
 import gg.essential.elementa.dsl.*
 import java.awt.Color
 
-class SimpleButton @JvmOverloads constructor(val t: String, val h: Boolean = false, val w: Boolean = false) :
+class SimpleButton @JvmOverloads constructor(t: String, private val h: Boolean = false, private val w: Boolean = false) :
     UIBlock(Color(0, 0, 0, 80)) {
 
     val text = UIText(t).constrain {
@@ -37,16 +37,10 @@ class SimpleButton @JvmOverloads constructor(val t: String, val h: Boolean = fal
     init {
         this
             .constrain {
-                width = if (w) {
-                    RelativeConstraint()
-                } else {
-                    (text.getWidth() + 40).pixels()
-                }
-                height = if (h) {
-                    RelativeConstraint()
-                } else {
-                    (text.getHeight() + 10).pixels()
-                }
+                width = if (w) RelativeConstraint()
+                else (text.getWidth() + 40).pixels()
+                height = if (h) RelativeConstraint()
+                else (text.getHeight() + 10).pixels()
             }
             .onMouseEnter {
                 animate {

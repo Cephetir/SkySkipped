@@ -36,8 +36,7 @@ class Listener {
             !Minecraft.getMinecraft().isSingleplayer &&
             Minecraft.getMinecraft().theWorld != null &&
             Minecraft.getMinecraft().netHandler != null &&
-            EssentialAPI.getMinecraftUtil().isHypixel() &&
-            Minecraft.getMinecraft().thePlayer.worldScoreboard != null
+            EssentialAPI.getMinecraftUtil().isHypixel()
         ) {
             var foundDungeon = false
             var foundSkyblock = false
@@ -48,7 +47,18 @@ class Listener {
             var dungeonName = ""
             var itemheld = "Nothing"
 
-            val scoreObjective = Minecraft.getMinecraft().thePlayer.worldScoreboard.getObjectiveInDisplaySlot(1) ?: return
+            val scoreObjective = Minecraft.getMinecraft().thePlayer.worldScoreboard.getObjectiveInDisplaySlot(1)
+            if(scoreObjective == null) {
+                Cache.inSkyblock = false
+                Cache.isInDungeon = false
+                Cache.inWorkshop = false
+                Cache.onIsland = false
+                Cache.isJacob = false
+                Cache.dungeonPercentage = 0
+                Cache.dungeonName = ""
+                Cache.itemheld = "Nothing"
+                return
+            }
             val scores = ScoreboardUtils.sidebarLines
 
             if (scoreObjective.displayName.stripColor().startsWith("SKYBLOCK")) foundSkyblock = true
@@ -86,5 +96,11 @@ class Listener {
     fun onWorldLoad(event: WorldEvent.Load) {
         Cache.inSkyblock = false
         Cache.isInDungeon = false
+        Cache.inWorkshop = false
+        Cache.onIsland = false
+        Cache.isJacob = false
+        Cache.dungeonPercentage = 0
+        Cache.dungeonName = ""
+        Cache.itemheld = "Nothing"
     }
 }

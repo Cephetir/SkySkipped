@@ -50,9 +50,7 @@ class GuiItemSwap : WindowScreen(newGuiScale = 2) {
             height = 14.pixels()
         }
 
-        scrollComponent = ScrollComponent(
-            innerPadding = 4f,
-        ).childOf(window).constrain {
+        scrollComponent = ScrollComponent(innerPadding = 4f).childOf(window).constrain {
             x = CenterConstraint()
             y = 15.percent()
             width = 90.percent()
@@ -183,11 +181,8 @@ class GuiItemSwap : WindowScreen(newGuiScale = 2) {
             val pressed = clickedButton === entry
             val reused =
                 keyCode != 0 && (mc.gameSettings.keyBindings.any { it.keyCode == keyCode } || components.any { it.value.keyCode != 0 && it.value !== entry && it.value.keyCode == keyCode })
-            if (pressed) {
-                button.text.setText("§f> §e${button.text.getText()}§f <")
-            } else if (reused) {
-                button.text.setText("§c${button.text.getText()}")
-            }
+            if (pressed) button.text.setText("§f> §e${button.text.getText()}§f <")
+            else if (reused) button.text.setText("§c${button.text.getText()}")
         }
     }
 

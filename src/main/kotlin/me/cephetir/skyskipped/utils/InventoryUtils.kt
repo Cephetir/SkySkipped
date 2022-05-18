@@ -22,9 +22,7 @@ import net.minecraft.inventory.Slot
 
 object InventoryUtils {
     @JvmStatic
-    fun getInventory(): List<Slot> {
-        return Minecraft.getMinecraft().thePlayer.inventoryContainer.inventorySlots.subList(9, 44)
-    }
+    fun getInventory(): List<Slot> = Minecraft.getMinecraft().thePlayer.inventoryContainer.inventorySlots.subList(9, 44)
 
     @JvmStatic
     fun isFull(): Boolean {

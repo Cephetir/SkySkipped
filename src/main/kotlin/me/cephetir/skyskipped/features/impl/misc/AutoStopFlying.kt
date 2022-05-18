@@ -35,7 +35,7 @@ class AutoStopFlying : Feature() {
                 var state = false
                 while(!state) {
                     if(System.currentTimeMillis() - last >= 6000) return@Thread
-                    state = mc.thePlayer.capabilities.isFlying && Cache.onIsland
+                    state = mc.thePlayer?.capabilities?.isFlying ?: continue && Cache.onIsland
                     Thread.sleep(100)
                 }
                 mc.thePlayer.capabilities.isFlying = false

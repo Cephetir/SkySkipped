@@ -18,6 +18,7 @@
 package me.cephetir.skyskipped.mixins;
 
 import me.cephetir.skyskipped.SkySkipped;
+import me.cephetir.skyskipped.config.Config;
 import net.minecraft.client.gui.GuiPlayerTabOverlay;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,6 +28,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 public class MixinGuiPlayerTabOverlay {
     @ModifyArg(method = "renderPlayerlist", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawStringWithShadow(Ljava/lang/String;FFI)I"), index = 0)
     private String onDrawString(String text) {
-        return SkySkipped.getCosmetics(text);
+        return !Config.Companion.getAdvancedCustomNames() ? SkySkipped.getCosmetics(text) : text;
     }
 }

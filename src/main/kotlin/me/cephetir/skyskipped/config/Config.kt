@@ -22,8 +22,10 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import gg.essential.vigilance.Vigilant
+import gg.essential.vigilance.data.Category
 import gg.essential.vigilance.data.Property
 import gg.essential.vigilance.data.PropertyType
+import gg.essential.vigilance.data.SortingBehavior
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
@@ -31,7 +33,7 @@ import net.minecraft.client.Minecraft
 import java.awt.Color
 import java.io.File
 
-class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
+class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingBehavior = ConfigSorting()) {
     init {
         registerListener<Any>(
             "DRPC"
@@ -72,6 +74,11 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         addDependency("failSafeDesyncTime", "failSafeDesync")
         addDependency("failSafeIslandDelay", "failSafeIsland")
         addDependency("failSafeJacobNumber", "failSafeJacob")
+        addDependency("failSafeChangeYawRandom", "failSafeChangeYaw")
+        addDependency("failSafeChangeYawSpeed", "failSafeChangeYaw")
+        addDependency("failSafeBanWaveTimer", "failSafeBanWave")
+        addDependency("failSafeBanWaveDisable", "failSafeBanWave")
+        addDependency("failSafeInvConfigTime", "failSafeInvConfig")
         addDependency("blockList", "block")
 
         addDependency("petsBgBlur", "petsOverlay")
@@ -80,6 +87,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
 
         addDependency("coins", "coinsToggle")
         addDependency("mimicText", "mimic")
+
+        setSubcategoryDescription("Hacks", "Item Swapper", "Set keybinds for Item Swapper in special gui \"/sm kb\"")
 
         initialize()
     }
@@ -138,6 +147,23 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             ex.printStackTrace()
         }
         SkySkipped.logger.info("Saved keybinds!")
+    }
+
+    private class ConfigSorting : SortingBehavior() {
+        private val categories = listOf(
+            "Dungeons",
+            "Failsafes",
+            "Hacks",
+            "Visual",
+            "Chat",
+            "Slayers",
+            "Discord",
+            "Super Secret Settings",
+            "Misc",
+        )
+
+        override fun getCategoryComparator(): Comparator<in Category> =
+            Comparator.comparingInt { category: Category -> categories.indexOf(category.name) }
     }
 
     companion object {
@@ -253,8 +279,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.SWITCH,
             name = "Unstuck Failsafe",
-            category = "Hacks",
-            subcategory = "Failsafes",
+            category = "Failsafes",
+            subcategory = "Unstuck",
             description = "Prevent stucking in blocks for Pizza and Cheeto Client."
         )
         var failSafe = false
@@ -262,8 +288,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.SWITCH,
             name = "Jump When Stuck",
-            category = "Hacks",
-            subcategory = "Failsafes",
+            category = "Failsafes",
+            subcategory = "Unstuck",
             description = "Jump when stuck."
         )
         var failsafeJump = false
@@ -271,8 +297,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.SWITCH,
             name = "Jacob Failsafe",
-            category = "Hacks",
-            subcategory = "Failsafes",
+            category = "Failsafes",
+            subcategory = "Jacob",
             description = "Stops Pizza and Cheeto Client's macros on jacob event start."
         )
         var failSafeJacob = false
@@ -280,8 +306,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.SLIDER,
             name = "Jacob Failsafe Stop At",
-            category = "Hacks",
-            subcategory = "Failsafes",
+            category = "Failsafes",
+            subcategory = "Jacob",
             description = "Amount of crops mined for Jacob failsafe to stop.",
             min = 100000,
             max = 1000000,
@@ -292,8 +318,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.SWITCH,
             name = "Desync Failsafe",
-            category = "Hacks",
-            subcategory = "Failsafes",
+            category = "Failsafes",
+            subcategory = "Desync",
             description = "Stops Pizza and Cheeto Client's macros when hypixel decides to stop breaking crops."
         )
         var failSafeDesync = false
@@ -301,8 +327,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.SLIDER,
             name = "Desync Failsafe Timeout",
-            category = "Hacks",
-            subcategory = "Failsafes",
+            category = "Failsafes",
+            subcategory = "Desync",
             description = "Seconds to wait for failsafe to trigger.",
             min = 1,
             max = 20,
@@ -313,8 +339,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.SWITCH,
             name = "Auto Set Spawn",
-            category = "Hacks",
-            subcategory = "Failsafes",
+            category = "Failsafes",
+            subcategory = "Auto Set Spawn",
             description = "Automatically sets home on layer switch when Pizza's or Cheeto Client's macro enabled."
         )
         var failSafeSpawn = false
@@ -322,8 +348,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.SWITCH,
             name = "Auto Warp Back To Island Failsafe",
-            category = "Hacks",
-            subcategory = "Failsafes",
+            category = "Failsafes",
+            subcategory = "Auto Warp Back",
             description = "Automatically warps you to island."
         )
         var failSafeIsland = false
@@ -331,8 +357,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
         @Property(
             type = PropertyType.DECIMAL_SLIDER,
             name = "Auto Warp Back Failsafe Delay",
-            category = "Hacks",
-            subcategory = "Failsafes",
+            category = "Failsafes",
+            subcategory = "Auto Warp Back",
             description = "Delay in seconds between warps. Set more if you have bad ping (1s ~ 100 ping, 5s ~ 300ping)",
             minF = 0.5f,
             maxF = 10f,
@@ -342,18 +368,98 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Inventory Failsafe",
-            category = "Hacks",
-            subcategory = "Failsafes",
-            description = "Inventory clearing when full."
+            name = "Full Inventory Failsafe",
+            category = "Failsafes",
+            subcategory = "Inventory",
+            description = "Inventory cleaning when full."
         )
         var failSafeInv = false
 
         @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Rotation",
+            category = "Failsafes",
+            subcategory = "Auto Rotation",
+            description = "Rotates you 180 deg on Y change for vertical farms."
+        )
+        var failSafeChangeYaw = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Rotation Randomness",
+            category = "Failsafes",
+            subcategory = "Auto Rotation",
+            description = "Will make ratoation yaw random from -2.5 to 2.5."
+        )
+        var failSafeChangeYawRandom = true
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Auto Rotation Speed",
+            category = "Failsafes",
+            subcategory = "Auto Rotation",
+            description = "Speed in seconds rotation takes.",
+            minF = 0.3f,
+            maxF = 3f,
+            decimalPlaces = 1
+        )
+        var failSafeChangeYawSpeed = 1.5f
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Ban Wave Checker",
+            category = "Failsafes",
+            subcategory = "Ban Wave",
+            description = "Checks if there's a ban wave happens right now."
+        )
+        var failSafeBanWave = false
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Ban Wave Checker Timer",
+            category = "Failsafes",
+            subcategory = "Ban Wave",
+            description = "Delay in minutes between banwave checks.",
+            minF = 0.1f,
+            maxF = 30f,
+            decimalPlaces = 1
+        )
+        var failSafeBanWaveTimer = 5f
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Ban Wave Auto Macro Disable",
+            category = "Failsafes",
+            subcategory = "Ban Wave",
+            description = "Disable macro when ban wave happens."
+        )
+        var failSafeBanWaveDisable = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Configurable Inventory Failsafe",
+            category = "Failsafes",
+            subcategory = "Inventory",
+            description = "Inventory cleaning on specific crops amount."
+        )
+        var failSafeInvConfig = false
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Inventory Failsafe Timer",
+            category = "Failsafes",
+            subcategory = "Ban Wave",
+            description = "Time in minutes between inventory cleaning.",
+            minF = 30f,
+            maxF = 360f,
+            decimalPlaces = 1
+        )
+        var failSafeInvConfigTime = 120f
+
+        @Property(
             type = PropertyType.SLIDER,
             name = "Global Extra Delay for Failsafes",
-            category = "Hacks",
-            subcategory = "Failsafes",
+            category = "Failsafes",
             description = "Time in ms between actions (Use only if high ping!).",
             min = 0,
             max = 10000,
@@ -363,8 +469,17 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
 
         @Property(
             type = PropertyType.SWITCH,
+            name = "Force Macro Mode",
+            category = "Failsafes",
+            description = "Forcely enable all failsafes.\n! WARNING: It will brake most failsafes!"
+        )
+        var failSafeForce = false
+
+        @Property(
+            type = PropertyType.SWITCH,
             name = "Block ability",
             category = "Hacks",
+            subcategory = "Block ability",
             description = "Blocks item ability."
         )
         var block = false
@@ -373,6 +488,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             type = PropertyType.TEXT,
             name = "Ability list",
             category = "Hacks",
+            subcategory = "Block ability",
             description = "List of items to block ability. Split with \", \"."
         )
         var blockList = ""
@@ -381,6 +497,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             type = PropertyType.SLIDER,
             name = "Item Swap Delay",
             category = "Hacks",
+            subcategory = "Item Swapper",
             description = "Delay between items swapping.",
             increment = 10,
             max = 1000,
@@ -720,5 +837,13 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped") {
             description = "Auto clicks in cookie clicker."
         )
         var cookieClicker = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Advenced Custom Names",
+            category = "Misc",
+            description = "Redraws text in all menus and guis.\nCan make performance issues!"
+        )
+        var advancedCustomNames = false
     }
 }
