@@ -28,6 +28,7 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
+import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.features.impl.misc.Metrics
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import me.cephetir.skyskipped.utils.BlurUtils
@@ -69,7 +70,9 @@ class SkySkipped {
         val autoGhostBlockKey = KeyBinding("Auto Ghost Block", Keyboard.KEY_NONE, "SkySkipped")
         val perspectiveToggle = KeyBinding("Better Perspective", Keyboard.KEY_NONE, "SkySkipped")
         val autoDojo = KeyBinding("Auto Dojo", Keyboard.KEY_NONE, "SkySkipped")
+        val giftAura = KeyBinding("Gift Aura", Keyboard.KEY_NONE, "SkySkipped")
         val keybinds = HashSet<GuiItemSwap.Keybind>()
+        val macroKey = KeyBinding("Toggle Macro", Keyboard.KEY_NONE, "SkySkipped")
 
         private val cosmetics = hashMapOf<String, Pair<String, String>>()
 
@@ -123,6 +126,7 @@ class SkySkipped {
         MinecraftForge.EVENT_BUS.register(RPC())
         MinecraftForge.EVENT_BUS.register(Listener())
         features.register()
+        MinecraftForge.EVENT_BUS.register(MacroManager)
         RPC.reset()
         BlurUtils.registerListener()
 
@@ -133,6 +137,8 @@ class SkySkipped {
         ClientRegistry.registerKeyBinding(autoGhostBlockKey)
         ClientRegistry.registerKeyBinding(perspectiveToggle)
         ClientRegistry.registerKeyBinding(autoDojo)
+        ClientRegistry.registerKeyBinding(giftAura)
+        ClientRegistry.registerKeyBinding(macroKey)
 
         EssentialAPI.getShutdownHookUtil().register {
             RPC.shutdown()

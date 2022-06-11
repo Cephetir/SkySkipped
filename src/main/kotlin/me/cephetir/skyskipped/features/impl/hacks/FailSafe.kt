@@ -217,7 +217,7 @@ open class FailSafe : Feature() {
         if (split.size != 3) return
         val number = split[2].replace(",", "").toInt()
         printdev("Jacob crop amount $number")
-        if (number >= Config.failSafeJacobNumber) {
+        if (number >= Config.netherWartJacobNumber) {
             printdev("Jacob detected!")
             UChat.chat("§cSkySkipped §f:: §eJacob event failsafe triggered! Stopping macro...")
             if (pizza) {
@@ -465,7 +465,6 @@ open class FailSafe : Feature() {
         UChat.chat("§cSkySkipped §f:: §eChanging yaw...")
         if (pizza) MacroBuilder.onKey()
         else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-        Thread.sleep(500L + Config.failSafeGlobalTime)
 
         var yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
         printdev("Last yaw: $yaw")
@@ -477,7 +476,7 @@ open class FailSafe : Feature() {
         val newYaw = if (Config.failSafeChangeYawRandom) getRandom(yaww - 2.5f, yaww + 2.5f) else yaww
         val newPitch = if (Config.failSafeChangeYawRandom) getRandom(-2.5f, 2.5f) else 0f
         printdev("Apply random on yaw and pitch: $newYaw $newPitch")
-        val time = getRandom(Config.failSafeChangeYawSpeed + 250f, Config.failSafeChangeYawSpeed - 250f).toLong()
+        val time = getRandom(Config.failSafeChangeYawSpeed * 60 + 250f, Config.failSafeChangeYawSpeed * 60 - 250f).toLong()
         RotationClass(RotationClass.Rotation(newYaw, newPitch), time)
 
         Thread {
@@ -503,7 +502,7 @@ open class FailSafe : Feature() {
         Thread {
             val status = HttpUtils.sendGet(
                 "https://api.snipes.wtf/bancheck",
-                mapOf("User-Agent" to "MACRO-MODreal", "Content-Type" to "application/json")
+                mapOf("Content-Type" to "application/json")
             )
             if (status == "Nah") {
                 UChat.chat("§cSkySkipped §f:: §eBanwave: §cFalse")

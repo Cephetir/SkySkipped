@@ -28,6 +28,7 @@ import gg.essential.vigilance.data.PropertyType
 import gg.essential.vigilance.data.SortingBehavior
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
+import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import net.minecraft.client.Minecraft
 import java.awt.Color
@@ -47,6 +48,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
                 }
             }.start()
         }
+
+        registerListener<Int>("macroType") { MacroManager.current = MacroManager.macros[it] }
 
         addDependency("playeresp", "esp")
         addDependency("starredmobsesp", "esp")
@@ -87,6 +90,12 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
         addDependency("coins", "coinsToggle")
         addDependency("mimicText", "mimic")
+
+        addDependency("netherWartDesyncTime", "netherWartDesync")
+        addDependency("netherWartJacobNumber", "netherWartJacob")
+        addDependency("netherWartBanWaveCheckerDisable", "netherWartBanWaveChecker")
+        addDependency("netherWartBanWaveCheckerTimer", "netherWartBanWaveChecker")
+        addDependency("webhookUrl", "webhook")
 
         setSubcategoryDescription("Hacks", "Item Swapper", "Set keybinds for Item Swapper in special gui \"/sm kb\"")
 
@@ -152,9 +161,10 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
     private class ConfigSorting : SortingBehavior() {
         private val categories = listOf(
             "Dungeons",
-            "Failsafes",
-            "Hacks",
+            "Macro",
+            "Failsafes (Legacy)",
             "Visual",
+            "Hacks",
             "Chat",
             "Slayers",
             "Discord",
@@ -279,7 +289,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Unstuck Failsafe",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Unstuck",
             description = "Prevent stucking in blocks for Pizza and Cheeto Client."
         )
@@ -288,7 +298,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Jump When Stuck",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Unstuck",
             description = "Jump when stuck."
         )
@@ -297,7 +307,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Jacob Failsafe",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Jacob",
             description = "Stops Pizza and Cheeto Client's macros on jacob event start."
         )
@@ -306,7 +316,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SLIDER,
             name = "Jacob Failsafe Stop At",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Jacob",
             description = "Amount of crops mined for Jacob failsafe to stop.",
             min = 100000,
@@ -318,7 +328,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Desync Failsafe",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Desync",
             description = "Stops Pizza and Cheeto Client's macros when hypixel decides to stop breaking crops."
         )
@@ -327,7 +337,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SLIDER,
             name = "Desync Failsafe Timeout",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Desync",
             description = "Seconds to wait for failsafe to trigger.",
             min = 1,
@@ -339,7 +349,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Auto Set Spawn",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Auto Set Spawn",
             description = "Automatically sets home on layer switch when Pizza's or Cheeto Client's macro enabled."
         )
@@ -348,7 +358,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Auto Warp Back To Island Failsafe",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Auto Warp Back",
             description = "Automatically warps you to island."
         )
@@ -357,7 +367,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.DECIMAL_SLIDER,
             name = "Auto Warp Back Failsafe Delay",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Auto Warp Back",
             description = "Delay in seconds between warps. Set more if you have bad ping (1s ~ 100 ping, 5s ~ 300ping)",
             minF = 0.5f,
@@ -369,7 +379,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Full Inventory Failsafe",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Inventory",
             description = "Inventory cleaning when full."
         )
@@ -378,7 +388,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Auto Rotation",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Auto Rotation",
             description = "Rotates you 180 deg on Y change for vertical farms."
         )
@@ -387,7 +397,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Auto Rotation Randomness",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Auto Rotation",
             description = "Will make ratoation yaw random from -2.5 to 2.5."
         )
@@ -396,7 +406,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.DECIMAL_SLIDER,
             name = "Auto Rotation Speed",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Auto Rotation",
             description = "Speed in seconds rotation takes.",
             minF = 0.3f,
@@ -408,7 +418,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Ban Wave Checker",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Ban Wave",
             description = "Checks if there's a ban wave happens right now."
         )
@@ -417,7 +427,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.DECIMAL_SLIDER,
             name = "Ban Wave Checker Timer",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Ban Wave",
             description = "Delay in minutes between banwave checks.",
             minF = 0.1f,
@@ -429,7 +439,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Ban Wave Auto Macro Disable",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Ban Wave",
             description = "Disable macro when ban wave happens."
         )
@@ -438,7 +448,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Configurable Inventory Failsafe",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             subcategory = "Inventory",
             description = "Inventory cleaning on specific crops amount."
         )
@@ -447,8 +457,8 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.DECIMAL_SLIDER,
             name = "Inventory Failsafe Timer",
-            category = "Failsafes",
-            subcategory = "Ban Wave",
+            category = "Failsafes (Legacy)",
+            subcategory = "Inventory",
             description = "Time in minutes between inventory cleaning.",
             minF = 30f,
             maxF = 360f,
@@ -459,7 +469,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SLIDER,
             name = "Global Extra Delay for Failsafes",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             description = "Time in ms between actions (Use only if high ping!).",
             min = 0,
             max = 10000,
@@ -470,7 +480,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         @Property(
             type = PropertyType.SWITCH,
             name = "Force Macro Mode",
-            category = "Failsafes",
+            category = "Failsafes (Legacy)",
             description = "Forcely enable all failsafes.\n! WARNING: It will brake most failsafes!"
         )
         var failSafeForce = false
@@ -741,6 +751,15 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         var customSbBlur = 20f
 
         @Property(
+            type = PropertyType.COLOR,
+            name = "Scoreboard Background Color",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Color for scoreboard background."
+        )
+        var customSbBgColor: Color = Color(0, 0, 0, 110)
+
+        @Property(
             type = PropertyType.SWITCH,
             name = "Draw Scoreboard Outline",
             category = "Visual",
@@ -845,5 +864,168 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
             description = "Redraws text in all menus and guis.\nCan make performance issues!"
         )
         var advancedCustomNames = false
+
+        @Property(
+            type = PropertyType.SELECTOR,
+            name = "Macro Type",
+            category = "Macro",
+            description = "Choose macro for keybind.",
+            options = ["Nether Wart (SShaped)"]
+        )
+        var macroType = 0
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Desktop Notifications",
+            category = "Macro",
+            description = "Sends notifications just like webhook."
+        )
+        var desktopNotifications = true
+
+        @Property(
+            type = PropertyType.SELECTOR,
+            name = "Farm Direction",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Set direction of your eyes (check it with f3).",
+            options = ["North", "East", "West", "South"]
+        )
+        var netherWartDirection = 0
+
+        @Property(
+            type = PropertyType.SELECTOR,
+            name = "Farm Type",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Type of your farm.",
+            options = ["Horizontal", "Vertical", "Ladders", "Dropdown"]
+        )
+        var netherWartType = 0
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Set Spawn",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Set spawn on row switch."
+        )
+        var netherWartSetSpawn = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Unstuck Failsafe",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Prevent stucking in blocks."
+        )
+        var netherWartStuck = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Desync Failsafe",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Stops macro when hypixel decides to stop breaking crops."
+        )
+        var netherWartDesync = true
+
+        @Property(
+            type = PropertyType.SLIDER,
+            name = "Desync Failsafe Timeout",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Seconds to wait for failsafe to trigger.",
+            min = 1,
+            max = 20,
+            increment = 1
+        )
+        var netherWartDesyncTime = 5
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Jacob Failsafe",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Stops macro on Jacob Event start."
+        )
+        var netherWartJacob = true
+
+        @Property(
+            type = PropertyType.SLIDER,
+            name = "Jacob Failsafe Stop At",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Amount of crops mined during Jacob after which macro will stop.",
+            min = 0,
+            max = 1000000,
+            increment = 1000
+        )
+        var netherWartJacobNumber = 400000
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Full Inventory Failsafe",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Clears inventory if it fills up."
+        )
+        var netherWartFullInv = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Ban Wave Checker",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Checks if there's a ban wave happens right now."
+        )
+        var netherWartBanWaveChecker = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Ban Wave Auto Macro Disable",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Disable macro when ban wave happens."
+        )
+        var netherWartBanWaveCheckerDisable = true
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Ban Wave Checker Timer",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Delay in minutes between ban wave checks.",
+            minF = 0.1f,
+            maxF = 30f,
+            decimalPlaces = 1
+        )
+        var netherWartBanWaveCheckerTimer = 5f
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "CPU Saver",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Limits cpu usage while macroing."
+        )
+        var netherWartCpuSaver = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Webhook Notifications",
+            category = "Macro",
+            subcategory = "Webhook",
+            description = "Send different notifications to webhook about somthing happening."
+        )
+        var webhook = false
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Webhook URL",
+            category = "Macro",
+            subcategory = "Webhook",
+            description = "Webhook URL for notifications."
+        )
+        var webhookUrl = ""
     }
 }

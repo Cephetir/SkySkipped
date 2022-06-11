@@ -78,9 +78,8 @@ class CustomScoreboard : Feature() {
             }
             val i1 = (collection.size * fontHeight).toFloat()
             val j1: Float = resolution.scaledHeight / 2.0f + i1 / 3.0f
-            val k1 = 3.0f
-            val l1: Float = resolution.scaledWidth - width - k1
-            val m: Float = resolution.scaledWidth - k1 + 2.0f
+            val l1: Float = resolution.scaledWidth - width - 5.0f
+            val m: Float = resolution.scaledWidth - 5.0f + 2.0f
             val blur = Config.customSbBlur
 
             val x: Float
@@ -111,6 +110,12 @@ class CustomScoreboard : Feature() {
                 resolution.scaledWidth.toFloat(),
                 resolution.scaledHeight.toFloat(),
                 x, y, w, h
+            ) else RenderUtils.drawRect(
+                x - 1,
+                y - 1,
+                x + w + 1,
+                y + h + 1,
+                Config.customSbBgColor.rgb
             )
             if (Config.customSbOutline) RoundUtils.drawRoundedOutline(
                 x - 1, y - 1, x + w + 1, y + h + 1,
@@ -127,7 +132,7 @@ class CustomScoreboard : Feature() {
                 var s2: String = ScorePlayerTeam.formatPlayerName(scoreplayerteam2 as Team, score2.playerName)
                     .replace("§ewww.hypixel.ne\ud83c\udf82§et", Config.customSbText.replace("&", "§"))
                 val k2 = j1 - i2 * fontHeight
-                val matcher = Pattern.compile("[0-9][0-9]/[0-9][0-9]/[0-9][0-9]").matcher(s2)
+                val matcher = Pattern.compile("\\d\\d/\\d\\d/\\d\\d").matcher(s2)
                 if (Config.customSbLobby && matcher.find()) s2 = ChatFormatting.GRAY.toString() + matcher.group()
                 val flag = s2 == Config.customSbText.replace("&", "§")
                 if (flag) mc.fontRendererObj.drawStringWithShadow(
