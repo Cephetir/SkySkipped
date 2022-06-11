@@ -31,18 +31,19 @@ Cephetir's cool mod for Hypixel and Skyblock
 </details>
 
 <details>
+    <summary>Macro</summary>
+
+### Macro
+- Nether Wart Macro
+  - Advanced netherwart macro with many failsafes, webhook and notifications support, ban wave checker, different farm types and more!
+</details>
+
+<details>
     <summary>Hacks (real) (100%) (trust me best hacks)</summary>
 
 ### Hacks (real) (100%) (trust me best hacks)
-- Failsafes for Pizza and Cheeto Clients
-    - Unstuck Falisafe
-      - Prevent stucking in blocks
-    - Jacob Falisafe
-      - Stops macros on jacob event start
-    - Desync Falisafe
-      - Stops macros when hypixel decides to stop breaking crops
-    - Auto set spawn every row
-      - Auto set spawn every row
+- Auto Dojo
+  - Modes: Discipline, Force
 - Block Ability
     - Blocks any item's ability
 - Item Swapper With Custom Keybinds
