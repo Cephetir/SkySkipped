@@ -74,5 +74,5 @@ class RotationClass(rotation: Rotation, time: Long) {
         return Rotation(yawChng, endRot.pitch - startRot.pitch)
     }
 
-    data class Rotation(val yaw: Float, val pitch: Float)
+    data class Rotation(var yaw: Float, var pitch: Float)
 }
