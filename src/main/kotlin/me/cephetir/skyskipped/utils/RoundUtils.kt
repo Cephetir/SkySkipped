@@ -1,14 +1,14 @@
 /*
- *   
+ *
  * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
  * Version 2, December 2004
- *  
+ *
  * Copyright (C) 2022 Cephetir
  *
  * Everyone is permitted to copy and distribute verbatim or modified
  * copies of this license document, and changing it is allowed as long
  * as the name is changed.
- *  
+ *
  * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
  * TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
  *
@@ -26,7 +26,7 @@ import kotlin.math.sin
 object RoundUtils {
     val mc = Minecraft.getMinecraft()!!
     val fr = mc.fontRendererObj
-    
+
     fun enableGL2D() {
         GL11.glDisable(2929)
         GL11.glEnable(3042)
