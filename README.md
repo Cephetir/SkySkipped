@@ -1,4 +1,5 @@
 # SkySkipped
+[![CodeFactor](https://www.codefactor.io/repository/github/cephetir/skyskipped/badge)](https://www.codefactor.io/repository/github/cephetir/skyskipped)\
 Cephetir's cool mod for Hypixel and Skyblock
 
 ## Features
@@ -28,6 +29,9 @@ Cephetir's cool mod for Hypixel and Skyblock
     - Ping on Watcher cleared
 - ESPs
     - Shows esp for players, starred mobs and bats
+    - Tracers option
+- Admin Room Detection
+  - Scans dungeon for admin room
 </details>
 
 <details>
@@ -36,6 +40,12 @@ Cephetir's cool mod for Hypixel and Skyblock
 ### Macro
 - Nether Wart Macro
   - Advanced netherwart macro with many failsafes, webhook and notifications support, ban wave checker, different farm types and more!
+- Sugar Cane Macro
+  - Advanced sugar cane macro with many failsafes, webhook and notifications support, ban wave checker, different farm types and more!
+- Remote Macro Controlling
+  - Control macro from anywhere with discord bot
+- Farming HUD
+  - Render hud with some useful information
 </details>
 
 <details>
@@ -69,6 +79,8 @@ Cephetir's cool mod for Hypixel and Skyblock
 - Custom Scoreboard
     - Draw custom cool scoreboard instead of vanilla
 - Remove Red Numbers In Scoreboard
+- Trail
+  - Render trail behind player when moving
 </details>
 
 <details>
