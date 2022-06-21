@@ -38,6 +38,7 @@ import net.minecraft.util.MathHelper
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.input.Keyboard
 import kotlin.math.abs
 
@@ -187,33 +188,14 @@ open class AutoDojo : Feature() {
 
     // Swiftness mode
     @SubscribeEvent
-    protected fun onMoveP(event: UpdateWalkingPlayerEvent.Pre) {
-        if (!enabled || mode != DojoMode.Swiftness) {
-            event.isCanceled = true
-            return
-        }
-        event.isCanceled = false
+    protected fun onTick(event: ClientTickEvent) {
+        if (!enabled || mode != DojoMode.Swiftness) return
 
-        val player = mc.thePlayer
-        val bb = player.entityBoundingBox
-        val stepHeight: Float = player.stepHeight
+        val box = mc.thePlayer.collisionBoundingBox
+        val adjustedBox = box.offset(0.0, -0.5, 0.0).expand(-0.001, 0.0, -0.001)
+        val sneak = mc.theWorld.checkBlockCollision(adjustedBox)
 
-
-        var clipping = false
-        var x = -0.05
-        while (x <= 0.05) {
-            var z = -0.05
-            while (z <= 0.05) {
-                if (mc.theWorld.checkBlockCollision(bb.offset(x, -stepHeight.toDouble(), z))) {
-                    clipping = true
-                    break
-                }
-                z += 0.05
-            }
-            x += 0.05
-        }
-
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, clipping)
+        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, sneak)
     }
 
     private fun findItemInHotbar(name: String): Int {

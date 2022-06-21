@@ -17,25 +17,41 @@
 
 package me.cephetir.skyskipped.features.impl.macro
 
-import ds.desktop.notify.DesktopNotify
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.HttpUtils
+import java.awt.SystemTray
+import java.awt.TrayIcon
 import java.net.URL
 import javax.swing.ImageIcon
 
+
 abstract class Macro(val name: String) : Feature() {
+    private lateinit var trayIcon: TrayIcon
+
     var enabled = false
     abstract fun toggle()
+    abstract fun info(): String
+
+    abstract fun isBanwave(): String
+    abstract fun banwaveCheckIn(): Long
+
+    abstract fun cropsMined(): Long
+
+    abstract fun stopAndOpenInv()
+    abstract fun closeInvAndReturn()
 
     protected fun sendWebhook(title: String, message: String, ping: Boolean) {
-        if (Config.desktopNotifications)
-            DesktopNotify.showDesktopMessage(
-                "SkySkipped Macro: $title",
-                message,
-                DesktopNotify.SUCCESS,
-                ImageIcon(URL("https://cdn.discordapp.com/app-assets/867366183057752094/925346125291061308.png")).image
-            )
+        if (Config.desktopNotifications) {
+            if (!this::trayIcon.isInitialized) {
+                val tray = SystemTray.getSystemTray()
+                val image = ImageIcon(URL("https://cdn.discordapp.com/app-assets/867366183057752094/925346125291061308.png")).image
+                trayIcon = TrayIcon(image, "SkySkipped")
+                trayIcon.isImageAutoSize = true
+                tray.add(trayIcon)
+            }
+            trayIcon.displayMessage(title, message, TrayIcon.MessageType.INFO)
+        }
 
         if (!Config.webhook || Config.webhookUrl.isEmpty()) return
         val headers = mapOf(

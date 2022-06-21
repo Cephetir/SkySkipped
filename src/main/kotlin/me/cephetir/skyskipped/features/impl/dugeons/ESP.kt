@@ -20,8 +20,10 @@ package me.cephetir.skyskipped.features.impl.dugeons
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.RenderUtils
-import me.cephetir.skyskipped.utils.RenderUtils.getChroma
+import me.cephetir.skyskipped.mixins.IMixinMinecraft
+import me.cephetir.skyskipped.mixins.IMixinRenderManager
+import me.cephetir.skyskipped.utils.render.RenderUtils
+import me.cephetir.skyskipped.utils.render.RenderUtils.getChroma
 import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.passive.EntityBat
@@ -41,19 +43,23 @@ class ESP : Feature() {
     fun onRender(event: RenderWorldLastEvent) {
         if (!Config.esp || !Cache.isInDungeon) return
 
-        for (e in starredmobs) RenderUtils.renderStarredMobBoundingBox(e, event.partialTicks)
+        for (e in starredmobs) {
+            val color = if (Config.chromaMode) getChroma(3000.0F, 0) else Config.mobsespColor.rgb
+            RenderUtils.renderStarredMobBoundingBox(e, event.partialTicks, color)
+            drawTracer(e, color)
+        }
 
-        for (e in players) RenderUtils.renderMiniBoundingBox(
-            e,
-            event.partialTicks,
-            if (Config.chromaMode) getChroma(3000.0F, 0) else Config.playersespColor.rgb
-        )
+        for (e in players) {
+            val color = if (Config.chromaMode) getChroma(3000.0F, 0) else Config.playersespColor.rgb
+            RenderUtils.renderMiniBoundingBox(e, event.partialTicks, color)
+            drawTracer(e, color)
+        }
 
-        for (e in bats) RenderUtils.renderBoundingBox(
-            e,
-            event.partialTicks,
-            if (Config.chromaMode) getChroma(3000.0F, 0) else Config.batsespColor.rgb
-        )
+        for (e in bats) {
+            val color = if (Config.chromaMode) getChroma(3000.0F, 0) else Config.batsespColor.rgb
+            RenderUtils.renderBoundingBox(e, event.partialTicks, color)
+            drawTracer(e, color)
+        }
     }
 
     @SubscribeEvent
@@ -62,9 +68,7 @@ class ESP : Feature() {
         starredmobs.clear()
         players.clear()
         bats.clear()
-        val iterator = mc.theWorld.loadedEntityList.iterator()
-        while (iterator.hasNext()) {
-            val e = iterator.next() as Entity
+        for (e in mc.theWorld.loadedEntityList) {
             if (Config.starredmobsesp && e is EntityArmorStand && !e.isDead && e.getCustomNameTag().contains("✯"))
                 starredmobs.add(e)
             else if (Config.playeresp && e is EntityPlayer && !e.isDead && e != mc.thePlayer && e.team != null && (e.team as ScorePlayerTeam).nameTagVisibility != Team.EnumVisible.NEVER)
@@ -72,5 +76,17 @@ class ESP : Feature() {
             else if (Config.batsesp && e is EntityBat && !e.isDead)
                 bats.add(e)
         }
+    }
+
+    private fun drawTracer(entity: Entity, color: Int) {
+        if (!Config.espTracers) return
+        val xPos = (entity.lastTickPosX + (entity.posX - entity.lastTickPosX)
+                * (mc as IMixinMinecraft).timer.renderPartialTicks - (mc.renderManager as IMixinRenderManager).renderPosX)
+        val yPos = (entity.lastTickPosY + (entity.posY - entity.lastTickPosY)
+                * (mc as IMixinMinecraft).timer.renderPartialTicks - (mc.renderManager as IMixinRenderManager).renderPosY)
+        val zPos = (entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ)
+                * (mc as IMixinMinecraft).timer.renderPartialTicks - (mc.renderManager as IMixinRenderManager).renderPosZ)
+
+        RenderUtils.drawTracerLine(xPos, yPos, zPos, color, 1.2f)
     }
 }

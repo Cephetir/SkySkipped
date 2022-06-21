@@ -22,7 +22,7 @@ import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.RenderUtils
+import me.cephetir.skyskipped.utils.render.RenderUtils
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityArmorStand

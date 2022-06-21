@@ -15,7 +15,7 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.utils
+package me.cephetir.skyskipped.utils.render
 
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
@@ -26,7 +26,7 @@ import kotlin.math.sin
 object RoundUtils {
     val mc = Minecraft.getMinecraft()!!
     val fr = mc.fontRendererObj
-    
+
     fun enableGL2D() {
         GL11.glDisable(2929)
         GL11.glEnable(3042)
@@ -155,7 +155,7 @@ object RoundUtils {
     }
 
     @JvmStatic
-    fun drawRoundedRect(x: Float, y: Float, x1: Float, y1: Float, radius: Float, color: Int) {
+    fun drawRoundedRect(x: Float, y: Float, x1: Float, y1: Float, radius: Float, color: Int = -1) {
         var x = x
         var y = y
         var x1 = x1
@@ -169,7 +169,7 @@ object RoundUtils {
         GlStateManager.enableBlend()
         GlStateManager.disableTexture2D()
         GL11.glEnable(GL11.GL_LINE_SMOOTH)
-        setColor(color)
+        if (color != -1) setColor(color)
         GL11.glEnable(2848)
         GL11.glBegin(GL11.GL_POLYGON)
         var i: Int = 0

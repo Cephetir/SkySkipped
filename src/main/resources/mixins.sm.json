@@ -6,9 +6,12 @@
   "mixins": [],
   "client": [
     "IMixinEntityPlayerSP",
+    "IMixinEntityRenderer",
     "IMixinGuiContainer",
     "IMixinGuiScreen",
+    "IMixinMinecraft",
     "IMixinRenderManager",
+    "IMixinShaderGroup",
     "IMixinSugarCaneMacro",
     "MixinEntityPlayerSP",
     "MixinFontRenderer",

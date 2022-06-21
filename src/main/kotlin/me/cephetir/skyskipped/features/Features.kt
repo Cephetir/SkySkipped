@@ -23,14 +23,12 @@ import me.cephetir.skyskipped.commands.dungeonCommands.PartyCommand
 import me.cephetir.skyskipped.features.impl.chat.AutoMaddoxPhone
 import me.cephetir.skyskipped.features.impl.chat.ChatSwapper
 import me.cephetir.skyskipped.features.impl.chat.Ping
-import me.cephetir.skyskipped.features.impl.dugeons.AutoGhostBlock
-import me.cephetir.skyskipped.features.impl.dugeons.ChestCloser
-import me.cephetir.skyskipped.features.impl.dugeons.ESP
-import me.cephetir.skyskipped.features.impl.dugeons.Pings
+import me.cephetir.skyskipped.features.impl.dugeons.*
 import me.cephetir.skyskipped.features.impl.hacks.AutoDojo
 import me.cephetir.skyskipped.features.impl.hacks.Blocker
 import me.cephetir.skyskipped.features.impl.hacks.FailSafe
 import me.cephetir.skyskipped.features.impl.hacks.ItemSwap
+import me.cephetir.skyskipped.features.impl.macro.FarmingHUD
 import me.cephetir.skyskipped.features.impl.misc.AutoCookieClicker
 import me.cephetir.skyskipped.features.impl.misc.AutoStopFlying
 import me.cephetir.skyskipped.features.impl.misc.Metrics
@@ -67,6 +65,9 @@ class Features {
         Metrics(),
         AutoCookieClicker(),
         AutoDojo(),
+        Trail(),
+        AdminRoomDetection(),
+        FarmingHUD(),
     )
 
     fun register() = features.forEach { MinecraftForge.EVENT_BUS.register(it) }

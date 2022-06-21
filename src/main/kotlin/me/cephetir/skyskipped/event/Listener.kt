@@ -19,6 +19,7 @@ package me.cephetir.skyskipped.event
 
 import gg.essential.api.EssentialAPI
 import me.cephetir.skyskipped.config.Cache
+import me.cephetir.skyskipped.features.impl.dugeons.AdminRoomDetection
 import me.cephetir.skyskipped.utils.ScoreboardUtils
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
@@ -48,7 +49,7 @@ class Listener {
             var itemheld = "Nothing"
 
             val scoreObjective = Minecraft.getMinecraft().thePlayer.worldScoreboard.getObjectiveInDisplaySlot(1)
-            if(scoreObjective == null) {
+            if (scoreObjective == null) {
                 Cache.inSkyblock = false
                 Cache.isInDungeon = false
                 Cache.inWorkshop = false
@@ -102,5 +103,6 @@ class Listener {
         Cache.dungeonPercentage = 0
         Cache.dungeonName = ""
         Cache.itemheld = "Nothing"
+        AdminRoomDetection.scanned = false
     }
 }

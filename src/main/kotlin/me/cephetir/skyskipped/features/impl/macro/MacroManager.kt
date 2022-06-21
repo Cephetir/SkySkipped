@@ -17,23 +17,25 @@
 
 package me.cephetir.skyskipped.features.impl.macro
 
-import gg.essential.universal.UChat
 import me.cephetir.skyskipped.SkySkipped
-import me.cephetir.skyskipped.config.Cache
+import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.impl.macro.macros.NetherwartMacro
+import me.cephetir.skyskipped.features.impl.macro.macros.SugarCaneMacro
 import net.minecraft.client.Minecraft
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import org.lwjgl.input.Keyboard
 
 object MacroManager {
-    var current: Macro? = null
-    val macros = listOf<Macro>(
-        NetherwartMacro()
+    val current: Macro
+        get() = macros[Config.macroType]
+
+    val macros = listOf(
+        NetherwartMacro(),
+        SugarCaneMacro()
     )
 
-    fun <T : Macro> getMacro(macro: T): T? = macros.find { it.javaClass == macro } as T?
-    fun getMacro(macro: String): Macro? = macros.find { it.name.equals(macro, true) }
+    var startTime = 0L
 
     @SubscribeEvent
     fun onInput(event: InputEvent.KeyInputEvent) {
@@ -42,9 +44,9 @@ object MacroManager {
             !Keyboard.getEventKeyState() ||
             Keyboard.getEventKey() != SkySkipped.macroKey.keyCode
         ) return
-        if (current == null) return UChat.chat("§cSkySkipped §f:: §4Select macro in config!")
-        if (current!!.enabled) return current!!.toggle()
-        if (!Cache.onIsland) return UChat.chat("§cSkySkipped §f:: §4You're not on private island!")
-        current!!.toggle()
+        startTime = System.currentTimeMillis()
+        if (current.enabled) return current.toggle()
+        //if (!Cache.onIsland) return UChat.chat("§cSkySkipped §f:: §4You're not on private island!")
+        current.toggle()
     }
 }
