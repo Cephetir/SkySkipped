@@ -21,6 +21,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import gg.essential.elementa.utils.withAlpha
 import gg.essential.vigilance.Vigilant
 import gg.essential.vigilance.data.Category
 import gg.essential.vigilance.data.Property
@@ -28,7 +29,7 @@ import gg.essential.vigilance.data.PropertyType
 import gg.essential.vigilance.data.SortingBehavior
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
-import me.cephetir.skyskipped.features.impl.macro.MacroManager
+import me.cephetir.skyskipped.features.impl.macro.RemoteControlling
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import net.minecraft.client.Minecraft
 import java.awt.Color
@@ -36,9 +37,7 @@ import java.io.File
 
 class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingBehavior = ConfigSorting()) {
     init {
-        registerListener<Any>(
-            "DRPC"
-        ) {
+        registerListener<Boolean>("DRPC") {
             Thread {
                 try {
                     Thread.sleep(100L)
@@ -49,12 +48,23 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
             }.start()
         }
 
-        registerListener<Int>("macroType") { MacroManager.current = MacroManager.macros[it] }
+        registerListener<Boolean>("remoteControl") {
+            Thread {
+                try {
+                    Thread.sleep(100L)
+                    if (it) RemoteControlling.setup()
+                    else RemoteControlling.stop()
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                }
+            }.start()
+        }
 
         addDependency("playeresp", "esp")
         addDependency("starredmobsesp", "esp")
         addDependency("batsesp", "esp")
         addDependency("chromaMode", "esp")
+        addDependency("espTracers", "esp")
         addDependency("playersespColor", "playeresp")
         addDependency("mobsespColor", "starredmobsesp")
         addDependency("batsespColor", "batsesp")
@@ -88,6 +98,9 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         addDependency("petsBorderColor", "petsOverlay")
         addDependency("petsBorderWidth", "petsOverlay")
 
+        addDependency("trailParticle", "trail")
+        addDependency("trailInterval", "trail")
+
         addDependency("coins", "coinsToggle")
         addDependency("mimicText", "mimic")
 
@@ -96,6 +109,11 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         addDependency("netherWartBanWaveCheckerDisable", "netherWartBanWaveChecker")
         addDependency("netherWartBanWaveCheckerTimer", "netherWartBanWaveChecker")
         addDependency("webhookUrl", "webhook")
+
+        addDependency("farmingHudX", "farmingHud")
+        addDependency("farmingHudY", "farmingHud")
+        addDependency("farmingHudColor", "farmingHud")
+        addDependency("farmingHudColorText", "farmingHud")
 
         setSubcategoryDescription("Hacks", "Item Swapper", "Set keybinds for Item Swapper in special gui \"/sm kb\"")
 
@@ -288,10 +306,19 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
         @Property(
             type = PropertyType.SWITCH,
+            name = "Tracers",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Draw tracers on esp mobs."
+        )
+        var espTracers = false
+
+        @Property(
+            type = PropertyType.SWITCH,
             name = "Unstuck Failsafe",
             category = "Failsafes (Legacy)",
             subcategory = "Unstuck",
-            description = "Prevent stucking in blocks for Pizza and Cheeto Client."
+            description = "Prevent stacking in blocks for Pizza and Cheeto Client."
         )
         var failSafe = false
 
@@ -399,7 +426,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
             name = "Auto Rotation Randomness",
             category = "Failsafes (Legacy)",
             subcategory = "Auto Rotation",
-            description = "Will make ratoation yaw random from -2.5 to 2.5."
+            description = "Will make rotation yaw random from -2.5 to 2.5."
         )
         var failSafeChangeYawRandom = true
 
@@ -695,6 +722,14 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
         @Property(
             type = PropertyType.SWITCH,
+            name = "Admin Room Detection",
+            category = "Dungeons",
+            description = "Scans dungeon for admin room."
+        )
+        var adminRoom = false
+
+        @Property(
+            type = PropertyType.SWITCH,
             name = "Perspective Toggle",
             category = "Visual",
             subcategory = "Perspective Toggle",
@@ -822,6 +857,36 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
         @Property(
             type = PropertyType.SWITCH,
+            name = "Trail",
+            category = "Visual",
+            subcategory = "Trail",
+            description = "Render trail behind player when moving."
+        )
+        var trail = false
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Trail Particles",
+            category = "Visual",
+            subcategory = "Trail",
+            description = "What particles will be rendered\nGet names from https://www.spigotmc.org/wiki/particle-list-1-8-8/"
+        )
+        var trailParticle = "DRIP_LAVA"
+
+        @Property(
+            type = PropertyType.SLIDER,
+            name = "Trail Interval",
+            category = "Visual",
+            subcategory = "Trail",
+            description = "Interval between particles in ms.",
+            min = 0,
+            max = 5000,
+            increment = 10
+        )
+        var trailInterval = 100
+
+        @Property(
+            type = PropertyType.SWITCH,
             name = "Fast Break",
             category = "Hacks",
             subcategory = "Fast Break",
@@ -859,7 +924,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Advenced Custom Names",
+            name = "Advanced Custom Names",
             category = "Misc",
             description = "Redraws text in all menus and guis.\nCan make performance issues!"
         )
@@ -870,17 +935,9 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
             name = "Macro Type",
             category = "Macro",
             description = "Choose macro for keybind.",
-            options = ["Nether Wart (SShaped)"]
+            options = ["Nether Wart (SShaped)", "Sugar Cane (Normal and SShaped)"]
         )
         var macroType = 0
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Desktop Notifications",
-            category = "Macro",
-            description = "Sends notifications just like webhook."
-        )
-        var desktopNotifications = true
 
         @Property(
             type = PropertyType.SELECTOR,
@@ -916,7 +973,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
             name = "Unstuck Failsafe",
             category = "Macro",
             subcategory = "Nether Wart Macro",
-            description = "Prevent stucking in blocks."
+            description = "Prevent stacking in blocks."
         )
         var netherWartStuck = true
 
@@ -1012,10 +1069,166 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
         @Property(
             type = PropertyType.SWITCH,
+            name = "Auto Reconnect",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Auto reconnects to server after getting disconnected."
+        )
+        var netherWartReconnect = false
+
+        @Property(
+            type = PropertyType.SELECTOR,
+            name = "Farm Direction (Only SShaped Type)",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Set direction of your eyes (check it with f3).",
+            options = ["North", "East", "West", "South"]
+        )
+        var sugarCaneDirection = 0
+
+        @Property(
+            type = PropertyType.SELECTOR,
+            name = "Farm Direction (Only Normal Type)",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Set yaw direction (check it with f3).",
+            options = ["45", "-45"]
+        )
+        var sugarCaneDirectionNormal = 0
+
+        @Property(
+            type = PropertyType.SELECTOR,
+            name = "Farm Type",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Type of your farm.",
+            options = ["Normal", "SShaped", "SShaped Dropdown", "SShaped Ladders"]
+        )
+        var sugarCaneType = 0
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Set Spawn",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Set spawn on row switch."
+        )
+        var sugarCaneSetSpawn = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Unstuck Failsafe",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Prevent stacking in blocks."
+        )
+        var sugarCaneStuck = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Desync Failsafe",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Stops macro when hypixel decides to stop breaking crops."
+        )
+        var sugarCaneDesync = true
+
+        @Property(
+            type = PropertyType.SLIDER,
+            name = "Desync Failsafe Timeout",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Seconds to wait for failsafe to trigger.",
+            min = 1,
+            max = 20,
+            increment = 1
+        )
+        var sugarCaneDesyncTime = 5
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Jacob Failsafe",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Stops macro on Jacob Event start."
+        )
+        var sugarCaneJacob = true
+
+        @Property(
+            type = PropertyType.SLIDER,
+            name = "Jacob Failsafe Stop At",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Amount of crops mined during Jacob after which macro will stop.",
+            min = 0,
+            max = 1000000,
+            increment = 1000
+        )
+        var sugarCaneJacobNumber = 400000
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Full Inventory Failsafe",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Clears inventory if it fills up."
+        )
+        var sugarCaneFullInv = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Ban Wave Checker",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Checks if there's a ban wave happens right now."
+        )
+        var sugarCaneBanWaveChecker = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Ban Wave Auto Macro Disable",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Disable macro when ban wave happens."
+        )
+        var sugarCaneBanWaveCheckerDisable = true
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Ban Wave Checker Timer",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Delay in minutes between ban wave checks.",
+            minF = 0.1f,
+            maxF = 30f,
+            decimalPlaces = 1
+        )
+        var sugarCaneBanWaveCheckerTimer = 5f
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "CPU Saver",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Limits cpu usage while macroing."
+        )
+        var sugarCaneCpuSaver = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Reconnect",
+            category = "Macro",
+            subcategory = "Sugar Cane Macro",
+            description = "Auto reconnects to server after getting disconnected."
+        )
+        var sugarCaneReconnect = false
+
+        @Property(
+            type = PropertyType.SWITCH,
             name = "Webhook Notifications",
             category = "Macro",
-            subcategory = "Webhook",
-            description = "Send different notifications to webhook about somthing happening."
+            subcategory = "Notifications",
+            description = "Send different notifications to webhook about something happening."
         )
         var webhook = false
 
@@ -1023,9 +1236,87 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
             type = PropertyType.TEXT,
             name = "Webhook URL",
             category = "Macro",
-            subcategory = "Webhook",
+            subcategory = "Notifications",
             description = "Webhook URL for notifications."
         )
         var webhookUrl = ""
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Desktop Notifications",
+            category = "Macro",
+            subcategory = "Notifications",
+            description = "Sends notifications just like webhook."
+        )
+        var desktopNotifications = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Remote Macro Controlling",
+            category = "Macro",
+            subcategory = "Remote Controlling",
+            description = "Control macro from anywhere with discord bot."
+        )
+        var remoteControl = false
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Bot's Token",
+            category = "Macro",
+            subcategory = "Remote Controlling",
+            description = "Bot's token.\nRead tutorial on discord server."
+        )
+        var remoteControlUrl = ""
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Farming HUD",
+            category = "Macro",
+            subcategory = "Farming HUD",
+            description = "Render huds with some useful information."
+        )
+        var farmingHud = false
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Farming HUD Position X",
+            category = "Macro",
+            subcategory = "Farming HUD",
+            description = "Edit position with \"/sm hud\".",
+            minF = 0f,
+            maxF = 10000f,
+            decimalPlaces = 1
+        )
+        var farmingHudX = 0f
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Farming HUD Position Y",
+            category = "Macro",
+            subcategory = "Farming HUD",
+            description = "Edit position with \"/sm hud\".",
+            minF = 0f,
+            maxF = 10000f,
+            decimalPlaces = 1
+        )
+        var farmingHudY = 0f
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "Farming HUD Background Color",
+            category = "Macro",
+            subcategory = "Farming HUD",
+            description = "Background color of Farming HUD."
+        )
+        var farmingHudColor = Color.BLACK.withAlpha(110)
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "Farming HUD Text Color",
+            category = "Macro",
+            subcategory = "Farming HUD",
+            description = "Text color of Farming HUD."
+        )
+        var farmingHudColorText = Color.RED.darker()
     }
 }

@@ -25,6 +25,7 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.hacks.FailSafe
 import me.cephetir.skyskipped.features.impl.hacks.PetMacro
+import me.cephetir.skyskipped.gui.impl.GuiHudEditor
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import me.cephetir.skyskipped.utils.TextUtils.isNumeric
 import net.minecraft.client.Minecraft
@@ -91,6 +92,8 @@ class SkySkippedCommand : CommandBase() {
                     §cSkySkipped §f:: §e/sm keybinds §for§e /sm kb §f- §eOpens item swap keybinds GUI
                     §cSkySkipped §f:: §e/sm github §f- §eOpens official github page
                     §cSkySkipped §f:: §e/sm pet [pet index (start counting from 1)] §f- §eAuto select pet quickly
+                    §cSkySkipped §f:: §e/sm trail [particle name] §f- §eSet trail particle
+                    §cSkySkipped §f:: §e/sm hud §f- §eOpens hud editor GUI
                     §cSkySkipped §f:: §e/sm help §f- §eShow this message
                     """.trimIndent()
             )
@@ -98,6 +101,11 @@ class SkySkippedCommand : CommandBase() {
                 SkySkipped.devMode = !SkySkipped.devMode
                 chat("§cSkySkipped §f:: §eDev mode ${SkySkipped.devMode}")
             }
+            "trail" -> {
+                if (args.size >= 2) Config.trailParticle = args[1]
+                else chat("§cSkySkipped §f:: §4Specify particle name!")
+            }
+            "hud" -> EssentialAPI.getGuiUtil().openScreen(GuiHudEditor())
             else -> chat(
                 """
                     §cSkySkipped §f:: §eUsage:
@@ -105,6 +113,8 @@ class SkySkippedCommand : CommandBase() {
                     §cSkySkipped §f:: §e/sm keybinds §for§e /sm kb §f- §eOpens item swap keybinds GUI
                     §cSkySkipped §f:: §e/sm github §f- §eOpens official github page
                     §cSkySkipped §f:: §e/sm pet [pet index (start counting from 1)] §f- §eAuto select pet very fast
+                    §cSkySkipped §f:: §e/sm trail [particle name] §f- §eSet trail particle
+                    §cSkySkipped §f:: §e/sm hud §f- §eOpens hud editor GUI
                     §cSkySkipped §f:: §e/sm help §f- §eShows this message
                     """.trimIndent()
             )

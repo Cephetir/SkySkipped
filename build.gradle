@@ -23,7 +23,7 @@ plugins {
     id "java"
 }
 
-version = "3.0"
+version = "3.1"
 group = "me.cephetir.skyskipped"
 archivesBaseName = "SkySkipped"
 
@@ -67,16 +67,17 @@ dependencies {
         exclude module: 'log4j'
     }
 
+    implementation("com.github.DV8FromTheWorld:JDA:v5.0.0-alpha.12") {
+        exclude module: 'opus-java'
+    }
+
     implementation('org.projectlombok:lombok:1.18.24')
-    annotationProcessor('org.projectlombok:lombok:1.18.22')
+    annotationProcessor('org.projectlombok:lombok:1.18.24')
 
     implementation('org.spongepowered:mixin:0.8.5-SNAPSHOT')
     annotationProcessor('org.spongepowered:mixin:0.7.11-SNAPSHOT')
 
-    implementation(files("libs/Pizza_Client-1.1.3-pre1.jar"))
-    implementation(files("libs/ChromaHUD-3.0.jar"))
-
-    include(files("libs/DS-Desktop-Notify.jar"))
+    implementation(files("libs/Pizza_Client-1.1.3-pre1.jar", "libs/ChromaHUD-3.0.jar"))
 }
 
 mixin {
@@ -103,6 +104,8 @@ shadowJar {
     archiveClassifier.set("")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     configurations = [project.configurations.include]
+
+    relocate 'org.apache.commons.collections4', 'me.cephetir.apache.commons.collections4'
 
     exclude "LICENSE.md"
     exclude "pack.mcmeta"

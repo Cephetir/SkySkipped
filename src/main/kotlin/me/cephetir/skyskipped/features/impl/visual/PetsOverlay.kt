@@ -21,10 +21,10 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinGuiContainer
 import me.cephetir.skyskipped.mixins.IMixinGuiScreen
-import me.cephetir.skyskipped.utils.BlurUtils
 import me.cephetir.skyskipped.utils.ItemRarity.Companion.byBaseColor
-import me.cephetir.skyskipped.utils.RoundUtils.drawRoundedOutline
-import me.cephetir.skyskipped.utils.RoundUtils.drawRoundedRect
+import me.cephetir.skyskipped.utils.render.RoundUtils.drawRoundedOutline
+import me.cephetir.skyskipped.utils.render.RoundUtils.drawRoundedRect
+import me.cephetir.skyskipped.utils.render.shaders.BlurUtils
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.inventory.GuiChest
@@ -194,14 +194,12 @@ class PetsOverlay : Feature() {
             val d = height - height / 4
             val n = (rectHeight1 + 5 + (j + 1) * 24) * 1.5 + 20
             bottom = d.coerceAtLeast(n.roundToInt())
-            BlurUtils.renderBlurredBackground(
-                Config.petsBgBlur,
-                width.toFloat(),
-                height.toFloat(),
+            BlurUtils.blurArea(
                 rectWidth.toFloat() - 20,
                 rectHeight.toFloat(),
-                width.toFloat() - rectWidth.toFloat() + 40 - rectWidth.toFloat(),
-                bottom.toFloat() - rectHeight.toFloat()
+                width - rectWidth + 20f,
+                bottom.toFloat(),
+                Config.petsBgBlur
             )
             Gui.drawRect(0, 0, width, height, Color(0, 0, 0, 150).rgb)
             drawRoundedOutline(

@@ -23,11 +23,11 @@ import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.events.ScoreboardRenderEvent
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.BlurUtils
-import me.cephetir.skyskipped.utils.RenderUtils
-import me.cephetir.skyskipped.utils.RoundUtils
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import me.cephetir.skyskipped.utils.render.RenderUtils
+import me.cephetir.skyskipped.utils.render.RoundUtils
+import me.cephetir.skyskipped.utils.render.shaders.BlurUtils
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
@@ -80,7 +80,6 @@ class CustomScoreboard : Feature() {
             val j1: Float = resolution.scaledHeight / 2.0f + i1 / 3.0f
             val l1: Float = resolution.scaledWidth - width - 5.0f
             val m: Float = resolution.scaledWidth - 5.0f + 2.0f
-            val blur = Config.customSbBlur
 
             val x: Float
             val y: Float
@@ -105,11 +104,11 @@ class CustomScoreboard : Feature() {
                 h = RenderUtils.animate((fontHeight * (collection.size + 1) + 4).toFloat(), lastHeight, 0.2f)
                 lastHeight = h
             }
-            if (Config.customSbBlurT) BlurUtils.renderBlurredBackground(
-                blur,
-                resolution.scaledWidth.toFloat(),
-                resolution.scaledHeight.toFloat(),
-                x, y, w, h
+
+            if (Config.customSbBlurT) BlurUtils.blurArea(
+                x, y,
+                x + w, y + h,
+                Config.customSbBlur
             ) else RenderUtils.drawRect(
                 x - 1,
                 y - 1,

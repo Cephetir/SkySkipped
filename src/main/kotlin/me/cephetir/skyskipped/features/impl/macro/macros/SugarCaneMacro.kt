@@ -58,7 +58,7 @@ import kotlin.math.ceil
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-class NetherwartMacro : Macro("NetherWart") {
+class SugarCaneMacro : Macro("SugarCane") {
     private val events = Events(this)
     private val random = Random()
     private val messages =
@@ -66,7 +66,8 @@ class NetherwartMacro : Macro("NetherWart") {
 
     // States
     private var farmDirection = FarmDirection.NORTH
-    private var farmType = FarmType.HORIZONTAL
+    private var farmDirectionNormal = FarmDirectionNormal.POSITIVE
+    private var farmType = FarmType.NORMAL
 
     private var movementDirection = MovementDirection.LEFT
     private var farmingState = FarmingState.SETUP
@@ -81,6 +82,7 @@ class NetherwartMacro : Macro("NetherWart") {
     private var lastyaw = -1f
     private var lastpitch = -1f
     private var spawnTimer = 0L
+    private var switchTimer = 0L
     private var lastY = -1
     private var dced = false
     private var banwave = false
@@ -129,7 +131,7 @@ class NetherwartMacro : Macro("NetherWart") {
     // Bedrock cage
     private var bedrockTimer = 0L
 
-    open class Events(private val macro: NetherwartMacro) {
+    open class Events(private val macro: SugarCaneMacro) {
         @SubscribeEvent
         protected fun onTick(event: ClientTickEvent) = macro.onTick(event)
 
@@ -140,7 +142,7 @@ class NetherwartMacro : Macro("NetherWart") {
         protected fun onChat(event: ClientChatReceivedEvent) = macro.onChat(event.message.unformattedText.stripColor().keepScoreboardCharacters())
     }
 
-    override fun info() = "Macro: Nether Wart Macro, Settings: ${farmDirection.name}, ${farmType.name}, State: ${farmingState.name}"
+    override fun info() = "Macro: Sugar Cane Macro, Settings: ${farmDirection.name}, ${farmType.name}, State: ${farmingState.name}"
 
     override fun isBanwave(): String = if (banwave) "§aFalse" else "§4True"
     override fun banwaveCheckIn(): Long = checkerTicks / 20 * 1000L
@@ -157,11 +159,11 @@ class NetherwartMacro : Macro("NetherWart") {
         reset()
         unpressKeys()
         MinecraftForge.EVENT_BUS.register(events)
-        UChat.chat("§cSkySkipped §f:: §eNether Wart Macro §aEnabled§e! Settings: ${farmDirection.name}, ${farmType.name}")
+        UChat.chat("§cSkySkipped §f:: §eSugar Cane Macro §aEnabled§e! Settings: ${farmDirection.name}, ${farmType.name}")
     }
 
     private fun onDisable() {
-        if (Config.netherWartCpuSaver) {
+        if (Config.sugarCaneCpuSaver) {
             mc.gameSettings.limitFramerate = lastFps
             mc.gameSettings.renderDistanceChunks = lastDist
         }
@@ -169,12 +171,13 @@ class NetherwartMacro : Macro("NetherWart") {
         MinecraftForge.EVENT_BUS.unregister(events)
         unpressKeys()
         reset()
-        UChat.chat("§cSkySkipped §f:: §eNether Wart Macro §cDisabled§e!")
+        UChat.chat("§cSkySkipped §f:: §eSugar Cane Macro §cDisabled§e!")
     }
 
     private fun reset() {
-        farmDirection = FarmDirection.values()[Config.netherWartDirection]
-        farmType = FarmType.values()[Config.netherWartType]
+        farmDirection = FarmDirection.values()[Config.sugarCaneDirection]
+        farmDirectionNormal = FarmDirectionNormal.values()[Config.sugarCaneDirectionNormal]
+        farmType = FarmType.values()[Config.sugarCaneType]
         movementDirection = MovementDirection.LEFT
         farmingState = FarmingState.SETUP
 
@@ -184,6 +187,7 @@ class NetherwartMacro : Macro("NetherWart") {
         lastyaw = -1f
         lastpitch = -1f
         spawnTimer = 0L
+        switchTimer = 0L
         lastY = -1
         dced = false
         banwave = false
@@ -219,14 +223,13 @@ class NetherwartMacro : Macro("NetherWart") {
         checkerStopped = false
 
         bedrockTimer = 0L
-        banwave = false
     }
 
     fun onRender() {
     }
 
     fun onTick(event: ClientTickEvent) {
-        if ((mc.thePlayer == null || mc.theWorld == null) && !dced) return checkBan()
+        if (mc.thePlayer == null || mc.theWorld == null) return checkBan()
         when (event.phase) {
             Phase.START -> onTickPre()
             Phase.END -> onTickPost()
@@ -269,25 +272,24 @@ class NetherwartMacro : Macro("NetherWart") {
             FarmingState.SETUP -> {
                 unpressKeys()
                 mc.displayGuiScreen(null)
-                if (!Cache.onIsland) {
-                    farmingState = FarmingState.WARPED
-                    return
-                }
                 if (rotating == null) {
-                    val yaw = when (farmDirection) {
+                    val yaw = if (farmType == FarmType.NORMAL) when (farmDirectionNormal) {
+                        FarmDirectionNormal.POSITIVE -> 45f
+                        FarmDirectionNormal.NEGATIVE -> -45f
+                    }
+                    else when (farmDirection) {
                         FarmDirection.NORTH -> 180f
                         FarmDirection.SOUTH -> 0f
                         FarmDirection.WEST -> 90f
                         FarmDirection.EAST -> -90f
                     }
-                    val pitch = 0f
-                    printdev("Rotate yaw and pitch: $yaw $pitch")
+                    printdev("Rotate yaw and pitch: $yaw 0")
                     rotating = RotationClass(RotationClass.Rotation(yaw, 0f), 1500L)
                 }
                 if (rotating!!.done) {
                     printdev("Finished rotating")
 
-                    if (Config.netherWartCpuSaver) {
+                    if (Config.sugarCaneCpuSaver) {
                         lastFps = mc.gameSettings.limitFramerate
                         mc.gameSettings.limitFramerate = 30
                         lastDist = mc.gameSettings.renderDistanceChunks
@@ -301,7 +303,7 @@ class NetherwartMacro : Macro("NetherWart") {
                 }
             }
             FarmingState.FARM -> {
-                if (applyFailsafes()) return
+                applyFailsafes()
                 checkRotation()
                 checkDirection()
             }
@@ -390,7 +392,7 @@ class NetherwartMacro : Macro("NetherWart") {
                             UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
                             sendWebhook("Desync failsafe", "Desync detected! Swapping lobbies...", false)
                             unpressKeys()
-                            if (!Config.netherWartSetSpawn) mc.thePlayer.sendChatMessage("/sethome")
+                            if (!Config.sugarCaneSetSpawn) mc.thePlayer.sendChatMessage("/sethome")
                             desyncF = false
                         }
                         if (System.currentTimeMillis() - desyncWaitTimer >= 2000L) {
@@ -649,11 +651,16 @@ class NetherwartMacro : Macro("NetherWart") {
         if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return
 
         KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.keyCode, true)
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.keyCode, forward)
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.keyCode, false)
         val flag = movementDirection == MovementDirection.LEFT
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.keyCode, flag && !forward)
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindRight.keyCode, !flag && !forward)
+        if (farmType == FarmType.NORMAL) {
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindRight.keyCode, !flag)
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.keyCode, flag)
+        } else {
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.keyCode, forward)
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.keyCode, false)
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.keyCode, flag && !forward)
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindRight.keyCode, !flag && !forward)
+        }
     }
 
     override fun stopAndOpenInv() {
@@ -680,96 +687,113 @@ class NetherwartMacro : Macro("NetherWart") {
         Blocks.air,
         Blocks.water,
         Blocks.wall_sign,
-        Blocks.ladder
+        Blocks.ladder,
+        Blocks.reeds
     )
 
     private fun checkDirection() {
-        var x = 0
-        var x2 = 0
-        var z = 0
-        var z2 = 0
-        when (farmDirection) {
-            FarmDirection.SOUTH -> {
-                x = 1
-                z2 = 1
-            }
-            FarmDirection.WEST -> {
-                z = 1
-                x2 = -1
-            }
-            FarmDirection.NORTH -> {
-                x = -1
-                z2 = -1
-            }
-            FarmDirection.EAST -> {
-                z = -1
-                x2 = 1
-            }
-        }
-        val y = ceil(mc.thePlayer.posY)
+        if (farmType == FarmType.NORMAL) {
+            if (mc.thePlayer.motionX == 0.0 && mc.thePlayer.motionZ == 0.0 && System.currentTimeMillis() - switchTimer >= 500) {
+                movementDirection =
+                    if (movementDirection == MovementDirection.LEFT) MovementDirection.RIGHT
+                    else MovementDirection.LEFT
+                printdev("Changing direction to ${movementDirection.name}")
+                switchTimer = System.currentTimeMillis()
 
-        val side =
-            if (movementDirection == MovementDirection.LEFT) BlockPos(
-                mc.thePlayer.posX + x,
-                y,
-                mc.thePlayer.posZ + z
-            )
-            else BlockPos(
-                mc.thePlayer.posX + x * -1,
-                y,
-                mc.thePlayer.posZ + z * -1
-            )
-
-        val frwrd = BlockPos(
-            mc.thePlayer.posX + x2,
-            y,
-            mc.thePlayer.posZ + z2
-        )
-
-        val sideBlock = mc.theWorld.getBlockState(side)
-        val frwrdBlock = mc.theWorld.getBlockState(frwrd)
-
-        if (farmType == FarmType.LADDERS) {
-            val ladderBlock = mc.theWorld.getBlockState(BlockPos(mc.thePlayer.posX, y, mc.thePlayer.posZ))
-            if (ladderBlock.block == Blocks.ladder) {
-                printdev("Detected ladder")
-                farmingState = FarmingState.CLIMB
-                return
-            }
-        }
-
-        forward = false
-        if (frwrdBlock.block == Blocks.air) {
-            forward = true
-            printdev("Going forward")
-        }
-
-        if (farmType == FarmType.DROPDOWN) {
-            if (lastY == -1) lastY = y.roundToInt()
-            else if (abs(y - lastY) >= 2) {
-                printdev("Detected Y change!")
-                farmDirection = when (farmDirection) {
-                    FarmDirection.SOUTH -> FarmDirection.NORTH
-                    FarmDirection.WEST -> FarmDirection.EAST
-                    FarmDirection.NORTH -> FarmDirection.SOUTH
-                    FarmDirection.EAST -> FarmDirection.WEST
+                if (Config.sugarCaneSetSpawn && System.currentTimeMillis() - spawnTimer >= 1000) {
+                    UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
+                    mc.thePlayer.sendChatMessage("/sethome")
+                    spawnTimer = System.currentTimeMillis()
                 }
-                farmingState = FarmingState.SETUP
-                rotating = null
-                return
             }
-        }
+        } else {
+            var x = 0
+            var x2 = 0
+            var z = 0
+            var z2 = 0
+            when (farmDirection) {
+                FarmDirection.SOUTH -> {
+                    x = 1
+                    z2 = 1
+                }
+                FarmDirection.WEST -> {
+                    z = 1
+                    x2 = -1
+                }
+                FarmDirection.NORTH -> {
+                    x = -1
+                    z2 = -1
+                }
+                FarmDirection.EAST -> {
+                    z = -1
+                    x2 = 1
+                }
+            }
+            val y = ceil(mc.thePlayer.posY)
 
-        if (!ignoreBlocks.contains(sideBlock.block)) {
-            movementDirection =
-                if (movementDirection == MovementDirection.LEFT) MovementDirection.RIGHT
-                else MovementDirection.LEFT
-            printdev("Changing direction to ${movementDirection.name}")
+            val side =
+                if (movementDirection == MovementDirection.LEFT) BlockPos(
+                    mc.thePlayer.posX + x,
+                    y,
+                    mc.thePlayer.posZ + z
+                )
+                else BlockPos(
+                    mc.thePlayer.posX + x * -1,
+                    y,
+                    mc.thePlayer.posZ + z * -1
+                )
 
-            if (Config.netherWartSetSpawn && System.currentTimeMillis() - spawnTimer >= 1000) {
-                UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
-                mc.thePlayer.sendChatMessage("/sethome")
-                spawnTimer = System.currentTimeMillis()
+            val frwrd = BlockPos(
+                mc.thePlayer.posX + x2,
+                y,
+                mc.thePlayer.posZ + z2
+            )
+
+            val sideBlock = mc.theWorld.getBlockState(side)
+            val frwrdBlock = mc.theWorld.getBlockState(frwrd)
+
+            if (farmType == FarmType.LADDERS) {
+                val ladderBlock = mc.theWorld.getBlockState(BlockPos(mc.thePlayer.posX, y, mc.thePlayer.posZ))
+                if (ladderBlock.block == Blocks.ladder) {
+                    printdev("Detected ladder")
+                    farmingState = FarmingState.CLIMB
+                    return
+                }
+            }
+
+            forward = false
+            if (frwrdBlock.block == Blocks.air) {
+                forward = true
+                printdev("Going forward")
+            }
+
+            if (farmType == FarmType.DROPDOWN) {
+                if (lastY == -1) lastY = y.roundToInt()
+                else if (abs(y - lastY) >= 2) {
+                    printdev("Detected Y change!")
+                    farmDirection = when (farmDirection) {
+                        FarmDirection.SOUTH -> FarmDirection.NORTH
+                        FarmDirection.WEST -> FarmDirection.EAST
+                        FarmDirection.NORTH -> FarmDirection.SOUTH
+                        FarmDirection.EAST -> FarmDirection.WEST
+                    }
+                    farmingState = FarmingState.SETUP
+                    rotating = null
+                    return
+                }
+            }
+
+            if (!ignoreBlocks.contains(sideBlock.block)) {
+                movementDirection =
+                    if (movementDirection == MovementDirection.LEFT) MovementDirection.RIGHT
+                    else MovementDirection.LEFT
+                printdev("Changing direction to ${movementDirection.name}")
+
+                if (Config.sugarCaneSetSpawn && System.currentTimeMillis() - spawnTimer >= 1000) {
+                    UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
+                    mc.thePlayer.sendChatMessage("/sethome")
+                    spawnTimer = System.currentTimeMillis()
+                }
             }
         }
     }
@@ -791,22 +815,21 @@ class NetherwartMacro : Macro("NetherWart") {
         }
     }
 
-    private fun applyFailsafes(): Boolean {
+    private fun applyFailsafes() {
         if (bedrockFailsafe()) {
             UChat.chat("§cSkySkipped §f:: §eBedrock detected! Applying cage failsafe...")
             sendWebhook("Bedrock Cage", "Found bedrock around player! Applying failsafe...", true)
             farmingState = FarmingState.BEDROCK_CAGE
             bedrockTimer = System.currentTimeMillis() + 3500L
-            return true
+            return
         }
-        if (warpBackFailsafe()) return true
-        if (captchaFailsafe()) return true
-        if (fullInvFailsafe()) return true
-        if (unstuckFailsafe()) return true
-        if (desyncFailsafe()) return true
-        if (jacobFailsafe()) return true
+        if (warpBackFailsafe()) return
+        if (captchaFailsafe()) return
+        if (fullInvFailsafe()) return
+        if (unstuckFailsafe()) return
+        if (desyncFailsafe()) return
+        if (jacobFailsafe()) return
         banwaveChecker()
-        return false
     }
 
     private fun bedrockFailsafe(): Boolean {
@@ -822,7 +845,7 @@ class NetherwartMacro : Macro("NetherWart") {
 
     private fun unstuckFailsafe(): Boolean {
         var stuck = false
-        if (!Config.netherWartStuck) return false
+        if (!Config.sugarCaneStuck) return false
         if (lastPos == null) lastPos = mc.thePlayer.position
         else {
             if (checkPos(mc.thePlayer.position)) {
@@ -844,13 +867,13 @@ class NetherwartMacro : Macro("NetherWart") {
 
     private fun desyncFailsafe(): Boolean {
         var desynced = false
-        if (!Config.netherWartDesync) return false
+        if (!Config.sugarCaneDesync) return false
         if (ticksWarpDesync >= 0) {
             ticksWarpDesync--
             return false
         }
 
-        val ticksTimeout = Config.netherWartDesyncTime * 20
+        val ticksTimeout = Config.sugarCaneDesyncTime * 20
         val stack = Minecraft.getMinecraft().thePlayer.heldItem
         if (stack == null ||
             !stack.hasTagCompound() ||
@@ -896,7 +919,7 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private fun jacobFailsafe(): Boolean {
-        if (!Config.netherWartJacob) return false
+        if (!Config.sugarCaneJacob) return false
         if (!Cache.isJacob) return false
         printdev("Jacob event is on!")
 
@@ -907,7 +930,7 @@ class NetherwartMacro : Macro("NetherWart") {
             if (split.size != 3) return false
             val number = split[2].replace(",", "").toInt()
             printdev("Jacob crop amount $number")
-            if (number >= Config.netherWartJacobNumber) {
+            if (number >= Config.sugarCaneJacobNumber) {
                 printdev("Jacob detected!")
                 UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
                 sendWebhook("Jacob event", "Jacob event started! Stopping macro...", false)
@@ -921,7 +944,7 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private fun fullInvFailsafe(): Boolean {
-        if (!Config.netherWartFullInv) return false
+        if (!Config.sugarCaneFullInv) return false
 
         if (InventoryUtils.isFull()) {
             printdev("Inventory is full!")
@@ -939,8 +962,8 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private fun banwaveChecker() {
-        if (!Config.netherWartBanWaveChecker) return
-        if (checkerTicks++ < Config.netherWartBanWaveCheckerTimer * 60 * 20) return
+        if (!Config.sugarCaneBanWaveChecker) return
+        if (checkerTicks++ < Config.sugarCaneBanWaveCheckerTimer * 60 * 20) return
 
         Multithreading.runAsync {
             val status = HttpUtils.sendGet(
@@ -950,7 +973,7 @@ class NetherwartMacro : Macro("NetherWart") {
             if (status == "Nah") {
                 banwave = false
                 UChat.chat("§cSkySkipped §f:: §eBanwave: §aFalse")
-                if (Config.netherWartBanWaveCheckerDisable && checkerStopped) {
+                if (Config.sugarCaneBanWaveCheckerDisable && checkerStopped) {
                     UChat.chat("§cSkySkipped §f:: §eReenbabling macro...")
                     sendWebhook("Ban Wave Checker", "Ban Wave ended, reenabling macro...", false)
                     farmingState = FarmingState.IDLE
@@ -959,7 +982,7 @@ class NetherwartMacro : Macro("NetherWart") {
             } else if (status == "disconnect:all") {
                 banwave = true
                 UChat.chat("§cSkySkipped §f:: §eBanwave: §cTrue")
-                if (Config.netherWartBanWaveCheckerDisable && !checkerStopped) {
+                if (Config.sugarCaneBanWaveCheckerDisable && !checkerStopped) {
                     UChat.chat("§cSkySkipped §f:: §eDisabling macro...")
                     sendWebhook("Ban Wave Checker", "Ban Wave started, disabling macro...", false)
                     farmingState = FarmingState.IDLE
@@ -993,7 +1016,7 @@ class NetherwartMacro : Macro("NetherWart") {
                 sendWebhook("Disconnected", "You got disconnected with reason:\\n$rsn", true)
             }
 
-            if (Config.netherWartReconnect) {
+            if (Config.sugarCaneReconnect) {
                 farmingState = FarmingState.IDLE
                 dced = true
                 mc.displayGuiScreen(
@@ -1068,6 +1091,11 @@ class NetherwartMacro : Macro("NetherWart") {
         END
     }
 
+    private enum class FarmDirectionNormal {
+        POSITIVE,
+        NEGATIVE
+    }
+
     private enum class FarmDirection {
         NORTH,
         EAST,
@@ -1076,9 +1104,9 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private enum class FarmType {
-        HORIZONTAL,
-        VERTICAL,
-        LADDERS,
-        DROPDOWN
+        NORMAL,
+        SSHAPED,
+        DROPDOWN,
+        LADDERS
     }
 }

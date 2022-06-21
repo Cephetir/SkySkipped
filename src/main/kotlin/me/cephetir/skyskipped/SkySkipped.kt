@@ -29,9 +29,9 @@ import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.features.impl.macro.MacroManager
+import me.cephetir.skyskipped.features.impl.macro.RemoteControlling
 import me.cephetir.skyskipped.features.impl.misc.Metrics
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
-import me.cephetir.skyskipped.utils.BlurUtils
 import me.cephetir.skyskipped.utils.HttpUtils
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
@@ -48,6 +48,7 @@ import org.lwjgl.input.Keyboard
 import java.awt.Desktop
 import java.net.URI
 
+
 @Mod(
     modid = SkySkipped.MODID,
     name = SkySkipped.MOD_NAME,
@@ -60,7 +61,7 @@ class SkySkipped {
     companion object {
         const val MODID = "skyskipped"
         const val MOD_NAME = "SkySkipped"
-        const val VERSION = "3.0"
+        const val VERSION = "3.1"
 
         val config = Config()
         val features = Features()
@@ -75,8 +76,7 @@ class SkySkipped {
         val macroKey = KeyBinding("Toggle Macro", Keyboard.KEY_NONE, "SkySkipped")
 
         private val cosmetics = hashMapOf<String, Pair<String, String>>()
-
-        val regex = Regex("(?:§.)*(?<prefix>\\[\\w\\w\\w(?:(?:§.)*\\+)*(?:§.)*])? *(?<username>\\w{3,16})(?:§.)* *:*")
+        private val regex = Regex("(?:§.)*(?<prefix>\\[\\w\\w\\w(?:(?:§.)*\\+)*(?:§.)*])? *(?<username>\\w{3,16})(?:§.)* *:*")
 
         @JvmStatic
         fun getCosmetics(message: String): String {
@@ -123,12 +123,12 @@ class SkySkipped {
 
     @Mod.EventHandler
     fun onInit(event: FMLInitializationEvent) {
+        logger.info("Initializing SkySkipped...")
         MinecraftForge.EVENT_BUS.register(RPC())
         MinecraftForge.EVENT_BUS.register(Listener())
         features.register()
         MinecraftForge.EVENT_BUS.register(MacroManager)
         RPC.reset()
-        BlurUtils.registerListener()
 
         ClientCommandHandler.instance.registerCommand(SkySkippedCommand())
         ClientCommandHandler.instance.registerCommand(Features.leaveCommand)
@@ -144,6 +144,7 @@ class SkySkipped {
             RPC.shutdown()
             config.saveKeybinds()
             Metrics.update(false)
+            RemoteControlling.stop()
         }
     }
 

@@ -15,9 +15,10 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.utils
+package me.cephetir.skyskipped.utils.render
 
-import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.mixins.IMixinEntityRenderer
+import me.cephetir.skyskipped.mixins.IMixinMinecraft
 import me.cephetir.skyskipped.mixins.IMixinRenderManager
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
@@ -28,8 +29,10 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.Vec3
-import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL11.*
 import java.awt.Color
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 object RenderUtils {
@@ -62,37 +65,37 @@ object RenderUtils {
             c.red / 255f, c.green / 255f, c.blue / 255f,
             c.alpha / 255f * alphaMultiplier
         )
-        worldrenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION)
+        worldrenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
         worldrenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
         worldrenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
         tessellator.draw()
-        worldrenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION)
+        worldrenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
         worldrenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
         worldrenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
         tessellator.draw()
-        worldrenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION)
+        worldrenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
         worldrenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
         worldrenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
         worldrenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
         worldrenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
         tessellator.draw()
-        worldrenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION)
+        worldrenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
         worldrenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
         tessellator.draw()
-        worldrenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION)
+        worldrenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
         worldrenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
         worldrenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
         tessellator.draw()
-        worldrenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION)
+        worldrenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
         worldrenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
         worldrenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
@@ -105,7 +108,7 @@ object RenderUtils {
         GlStateManager.enableCull()
     }
 
-    fun renderStarredMobBoundingBox(entity: Entity, partialTicks: Float) {
+    fun renderStarredMobBoundingBox(entity: Entity, partialTicks: Float, color: Int) {
         val rm = mc.renderManager as IMixinRenderManager
         val renderPosX = rm.renderPosX
         val renderPosY = rm.renderPosY
@@ -113,7 +116,6 @@ object RenderUtils {
         val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks.toDouble() - renderPosX
         val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks.toDouble() - renderPosY
         val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks.toDouble() - renderPosZ
-        val color = if (Config.chromaMode) getChroma(3000.0F, 0) else Config.mobsespColor.rgb
         val entityBox = entity.entityBoundingBox
         val aabb = AxisAlignedBB.fromBounds(
             entityBox.minX - entity.posX + x - 0.4,
@@ -289,5 +291,94 @@ object RenderUtils {
         tessellator.draw()
         GlStateManager.enableTexture2D()
         GlStateManager.disableBlend()
+    }
+
+    fun drawTracerLine(x: Double, y: Double, z: Double, color: Int, lineWdith: Float) {
+        val f3 = (color shr 24 and 255).toFloat() / 255.0f
+        val f = (color shr 16 and 255).toFloat() / 255.0f
+        val f1 = (color shr 8 and 255).toFloat() / 255.0f
+        val f2 = (color and 255).toFloat() / 255.0f
+        GlStateManager.pushMatrix()
+        GlStateManager.loadIdentity()
+        (mc.entityRenderer as IMixinEntityRenderer).orientCamera((mc as IMixinMinecraft).timer.renderPartialTicks)
+        GlStateManager.enableBlend()
+        glEnable(GL_LINE_SMOOTH)
+        glDisable(GL_DEPTH_TEST)
+        GlStateManager.disableTexture2D()
+        GlStateManager.blendFunc(770, 771)
+        glLineWidth(lineWdith)
+        GlStateManager.color(f, f1, f2, f3)
+        glBegin(2)
+        glVertex3d(0.0, 0.0 + Minecraft.getMinecraft().thePlayer.getEyeHeight(), 0.0)
+        glVertex3d(x, y, z)
+        glEnd()
+        GlStateManager.disableBlend()
+        GlStateManager.enableTexture2D()
+        glEnable(GL_DEPTH_TEST)
+        glDisable(GL_LINE_SMOOTH)
+        glPopMatrix()
+    }
+
+    fun quickDrawRect(x: Float, y: Float, x2: Float, y2: Float) {
+        glBegin(GL_QUADS)
+        glVertex2d(x2.toDouble(), y.toDouble())
+        glVertex2d(x.toDouble(), y.toDouble())
+        glVertex2d(x.toDouble(), y2.toDouble())
+        glVertex2d(x2.toDouble(), y2.toDouble())
+        glEnd()
+    }
+
+    fun fastRoundedRect(paramXStart: Float, paramYStart: Float, paramXEnd: Float, paramYEnd: Float, radius: Float) {
+        var paramXStart = paramXStart
+        var paramYStart = paramYStart
+        var paramXEnd = paramXEnd
+        var paramYEnd = paramYEnd
+        var z = 0f
+        if (paramXStart > paramXEnd) {
+            z = paramXStart
+            paramXStart = paramXEnd
+            paramXEnd = z
+        }
+        if (paramYStart > paramYEnd) {
+            z = paramYStart
+            paramYStart = paramYEnd
+            paramYEnd = z
+        }
+        val x1 = (paramXStart + radius).toDouble()
+        val y1 = (paramYStart + radius).toDouble()
+        val x2 = (paramXEnd - radius).toDouble()
+        val y2 = (paramYEnd - radius).toDouble()
+        glEnable(GL_LINE_SMOOTH)
+        glLineWidth(1f)
+        glBegin(GL_POLYGON)
+        val degree = Math.PI / 180
+        run {
+            var i = 0.0
+            while (i <= 90) {
+                glVertex2d(x2 + sin(i * degree) * radius, y2 + cos(i * degree) * radius)
+                i += 1.0
+            }
+        }
+        run {
+            var i = 90.0
+            while (i <= 180) {
+                glVertex2d(x2 + sin(i * degree) * radius, y1 + cos(i * degree) * radius)
+                i += 1.0
+            }
+        }
+        run {
+            var i = 180.0
+            while (i <= 270) {
+                glVertex2d(x1 + sin(i * degree) * radius, y1 + cos(i * degree) * radius)
+                i += 1.0
+            }
+        }
+        var i = 270.0
+        while (i <= 360) {
+            glVertex2d(x1 + sin(i * degree) * radius, y2 + cos(i * degree) * radius)
+            i += 1.0
+        }
+        glEnd()
+        glDisable(GL_LINE_SMOOTH)
     }
 }
