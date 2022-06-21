@@ -271,7 +271,7 @@ class PetsOverlay : Feature() {
                         (h - 25 - 3).toFloat(),
                         -1
                     )
-                    renderItem(nextPage!!.stack, (width / 2 - 20 - 12 - 40 - 12 - 28), (h - 25 + 10 - 8))
+                    renderItem(nextPage!!.stack, width / 2 - 20 - 12 - 40 - 12 - 28, h - 25 + 10 - 8)
                     if (previousPage != null) {
                         Gui.drawRect(
                             width / 2 - 20 - 12 - 40 - 12 - 40,
@@ -288,8 +288,8 @@ class PetsOverlay : Feature() {
                         )
                         renderItem(
                             previousPage!!.stack,
-                            (width / 2 - 20 - 12 - 40 - 12 - 28),
-                            (h - 25 - 30 + 10 - 8)
+                            width / 2 - 20 - 12 - 40 - 12 - 28,
+                            h - 25 - 30 + 10 - 8
                         )
                     }
                 } else if (previousPage != null) {
@@ -308,8 +308,8 @@ class PetsOverlay : Feature() {
                     )
                     renderItem(
                         previousPage!!.stack,
-                        (width / 2 - 20 - 12 - 40 - 12 - 28),
-                        (h - 25 + 10 - 8)
+                        width / 2 - 20 - 12 - 40 - 12 - 28,
+                        h - 25 + 10 - 8
                     )
                 }
                 if (autopet != null) {
@@ -320,11 +320,11 @@ class PetsOverlay : Feature() {
                         h - 25 + 20,
                         Color(255, 255, 255, 150).rgb
                     )
-                    renderItem(autopet!!.stack, (width / 2 - 20 - 12 - 28), (h - 25 + 10 - 8))
+                    renderItem(autopet!!.stack, width / 2 - 20 - 12 - 28, h - 25 + 10 - 8)
                 }
                 if (close != null) {
                     Gui.drawRect(width / 2 - 20, h - 25, width / 2 + 20, h - 25 + 20, Color(255, 255, 255, 150).rgb)
-                    renderItem(close!!.stack, (width / 2 - 20 + 20 - 8), (h - 25 + 10 - 8))
+                    renderItem(close!!.stack, width / 2 - 20 + 20 - 8, h - 25 + 10 - 8)
                 }
                 if (convert != null) {
                     Gui.drawRect(
@@ -336,8 +336,8 @@ class PetsOverlay : Feature() {
                     )
                     renderItem(
                         convert!!.stack,
-                        (width / 2 + 20 + 12 + 20 - 8),
-                        (h - 25 + 10 - 8)
+                        width / 2 + 20 + 12 + 20 - 8,
+                        h - 25 + 10 - 8
                     )
                 }
                 if (hide != null) {
@@ -350,8 +350,8 @@ class PetsOverlay : Feature() {
                     )
                     renderItem(
                         hide!!.stack,
-                        (width / 2 + 20 + 12 + 40 + 12 + 20 - 8),
-                        (h - 25 + 10 - 8)
+                        width / 2 + 20 + 12 + 40 + 12 + 20 - 8,
+                        h - 25 + 10 - 8
                     )
                 }
                 GlStateManager.resetColor()

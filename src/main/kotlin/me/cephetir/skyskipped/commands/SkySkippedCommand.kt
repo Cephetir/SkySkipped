@@ -72,7 +72,7 @@ class SkySkippedCommand : CommandBase() {
                 sender.addChatMessage(text)
             }
             "pet" -> {
-                if ((args.size >= 2) && args[1].isNumeric() && args[1].toInt() > 0) {
+                if (args.size >= 2 && args[1].isNumeric() && args[1].toInt() > 0) {
                     val player = Minecraft.getMinecraft().thePlayer
                     if (Config.petsOverlay) Features.petsOverlay.auto = args[1].toInt()
                     else MinecraftForge.EVENT_BUS.register(PetMacro(args[1].toInt()))

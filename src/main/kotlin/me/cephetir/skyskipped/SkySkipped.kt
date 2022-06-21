@@ -154,7 +154,7 @@ class SkySkipped {
         Multithreading.runAsync {
             val version = WebUtil.fetchString("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt")
                 ?: return@runAsync
-            if ((version != "Failed to fetch") && (VERSION.toDouble() < version.toDouble())) {
+            if (version != "Failed to fetch" && VERSION.toDouble() < version.toDouble()) {
                 logger.info("New version detected!")
                 EssentialAPI.getNotifications().push(
                     "SkySkipped",

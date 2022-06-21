@@ -220,7 +220,7 @@ class GuiItemSwap : WindowScreen(newGuiScale = 2) {
             1 shl ordinal
         }
 
-        fun inBitfield(field: Int) = (field and bitValue) == bitValue
+        fun inBitfield(field: Int) = field and bitValue == bitValue
 
         companion object {
             fun getPressed() = values().filter { it.pressed() }

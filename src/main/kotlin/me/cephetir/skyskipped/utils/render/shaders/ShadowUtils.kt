@@ -47,7 +47,7 @@ object ShadowUtils {
         val w = sc.scaledWidth
         val h = sc.scaledHeight
         val f = sc.scaleFactor
-        if ((lastWidth != w.toFloat()) || lastHeight != h.toFloat() || initialFB == null || frameBuffer == null || mainShader == null) {
+        if (lastWidth != w.toFloat() || lastHeight != h.toFloat() || initialFB == null || frameBuffer == null || mainShader == null) {
             initialFB = Framebuffer(w * f, h * f, true)
             initialFB!!.setFramebufferColor(0f, 0f, 0f, 0f)
             initialFB!!.setFramebufferFilter(GL11.GL_LINEAR)
