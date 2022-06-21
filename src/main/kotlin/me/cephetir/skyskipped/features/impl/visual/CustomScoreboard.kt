@@ -72,7 +72,7 @@ class CustomScoreboard : Feature() {
                     ScorePlayerTeam.formatPlayerName(
                         scoreplayerteam as Team,
                         score.playerName
-                    ) + (if (!Config.customSbNumbers) ": " + EnumChatFormatting.RED + score.scorePoints else "")
+                    ) + if (!Config.customSbNumbers) ": " + EnumChatFormatting.RED + score.scorePoints else ""
                 )
                 width = width.coerceAtLeast(mc.fontRendererObj.getStringWidth(s))
             }

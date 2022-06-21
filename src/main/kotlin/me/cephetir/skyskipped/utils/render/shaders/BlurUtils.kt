@@ -167,5 +167,5 @@ object BlurUtils {
         GlStateManager.disableBlend()
     }
 
-    private fun sizeHasChanged(scaleFactor: Int, width: Int, height: Int): Boolean = (lastFactor != scaleFactor || lastWidth != width || lastHeight != height)
+    private fun sizeHasChanged(scaleFactor: Int, width: Int, height: Int): Boolean = lastFactor != scaleFactor || lastWidth != width || lastHeight != height
 }

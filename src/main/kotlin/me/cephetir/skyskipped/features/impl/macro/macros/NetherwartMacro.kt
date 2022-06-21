@@ -46,7 +46,6 @@ import net.minecraft.inventory.Slot
 import net.minecraft.util.BlockPos
 import net.minecraft.util.IChatComponent
 import net.minecraftforge.client.event.ClientChatReceivedEvent
-import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -134,9 +133,6 @@ class NetherwartMacro : Macro("NetherWart") {
         protected fun onTick(event: ClientTickEvent) = macro.onTick(event)
 
         @SubscribeEvent
-        protected fun onRender(event: RenderWorldLastEvent) = macro.onRender()
-
-        @SubscribeEvent
         protected fun onChat(event: ClientChatReceivedEvent) = macro.onChat(event.message.unformattedText.stripColor().keepScoreboardCharacters())
     }
 
@@ -222,9 +218,6 @@ class NetherwartMacro : Macro("NetherWart") {
         banwave = false
     }
 
-    fun onRender() {
-    }
-
     fun onTick(event: ClientTickEvent) {
         if ((mc.thePlayer == null || mc.theWorld == null) && !dced) return checkBan()
         when (event.phase) {
@@ -266,380 +259,393 @@ class NetherwartMacro : Macro("NetherWart") {
 
     private fun onTickPre() {
         when (farmingState) {
-            FarmingState.SETUP -> {
-                unpressKeys()
-                mc.displayGuiScreen(null)
-                if (!Cache.onIsland) {
-                    farmingState = FarmingState.WARPED
-                    return
-                }
-                if (rotating == null) {
-                    val yaw = when (farmDirection) {
-                        FarmDirection.NORTH -> 180f
-                        FarmDirection.SOUTH -> 0f
-                        FarmDirection.WEST -> 90f
-                        FarmDirection.EAST -> -90f
-                    }
-                    val pitch = 0f
-                    printdev("Rotate yaw and pitch: $yaw $pitch")
-                    rotating = RotationClass(RotationClass.Rotation(yaw, 0f), 1500L)
-                }
-                if (rotating!!.done) {
-                    printdev("Finished rotating")
-
-                    if (Config.netherWartCpuSaver) {
-                        lastFps = mc.gameSettings.limitFramerate
-                        mc.gameSettings.limitFramerate = 30
-                        lastDist = mc.gameSettings.renderDistanceChunks
-                        mc.gameSettings.renderDistanceChunks = 2
-                    }
-
-                    farmingState = FarmingState.FARM
-                    rotating = null
-                    rotated = true
-                    lastY = ceil(mc.thePlayer.posY).roundToInt()
-                }
-            }
+            FarmingState.SETUP -> setup()
             FarmingState.FARM -> {
                 if (applyFailsafes()) return
                 checkRotation()
                 checkDirection()
             }
-            FarmingState.CLIMB -> {
-                unpressKeys()
-                KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.keyCode, true)
-
-                val ladderBlock = mc.theWorld.getBlockState(BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ))
-                if (ladderBlock.block != Blocks.ladder) {
-                    printdev("Finished climbing")
-                    farmDirection = when (farmDirection) {
-                        FarmDirection.SOUTH -> FarmDirection.NORTH
-                        FarmDirection.WEST -> FarmDirection.EAST
-                        FarmDirection.NORTH -> FarmDirection.SOUTH
-                        FarmDirection.EAST -> FarmDirection.WEST
-                    }
-                    farmingState = FarmingState.SETUP
-                    rotating = null
-                }
-            }
-            FarmingState.STUCK -> {
-                when (stuckSteps) {
-                    StuckSteps.SETUP -> {
-                        UChat.chat("§cSkySkipped §f:: §eYou got stuck! Trying to prevent that...")
-                        sendWebhook("Unstuck failsafe", "You got stuck! Trying to prevent that...", false)
-                        unpressKeys()
-                        stuckSteps = StuckSteps.BACK
-                        keyTimer = System.currentTimeMillis()
-                        keyState = true
-                    }
-                    StuckSteps.BACK -> {
-                        KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.keyCode, keyState)
-                        if (System.currentTimeMillis() - keyTimer >= 300) {
-                            if (keyState) keyState = false
-                            else {
-                                keyState = true
-                                stuckSteps = StuckSteps.FORWARD
-                            }
-                            keyTimer = System.currentTimeMillis()
-                        }
-                    }
-                    StuckSteps.FORWARD -> {
-                        KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.keyCode, keyState)
-                        if (System.currentTimeMillis() - keyTimer >= 300) {
-                            if (keyState) keyState = false
-                            else {
-                                keyState = true
-                                stuckSteps = StuckSteps.LEFT
-                            }
-                            keyTimer = System.currentTimeMillis()
-                        }
-                    }
-                    StuckSteps.LEFT -> {
-                        KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.keyCode, keyState)
-                        if (System.currentTimeMillis() - keyTimer >= 300) {
-                            if (keyState) keyState = false
-                            else {
-                                keyState = true
-                                stuckSteps = StuckSteps.RIGHT
-                            }
-                            keyTimer = System.currentTimeMillis()
-                        }
-                    }
-                    StuckSteps.RIGHT -> {
-                        KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.keyCode, keyState)
-                        if (System.currentTimeMillis() - keyTimer >= 300) {
-                            if (keyState) keyState = false
-                            else {
-                                keyState = true
-                                stuckSteps = StuckSteps.END
-                            }
-                            keyTimer = System.currentTimeMillis()
-                        }
-                    }
-                    StuckSteps.END -> {
-                        unpressKeys()
-                        farmingState = FarmingState.SETUP
-                        ticksStuck = 0
-                    }
-                }
-            }
-            FarmingState.DESYNED -> {
-                when (desyncedSteps) {
-                    DesyncedSteps.SETUP -> {
-                        if (desyncF) {
-                            UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
-                            sendWebhook("Desync failsafe", "Desync detected! Swapping lobbies...", false)
-                            unpressKeys()
-                            if (!Config.netherWartSetSpawn) mc.thePlayer.sendChatMessage("/sethome")
-                            desyncF = false
-                        }
-                        if (System.currentTimeMillis() - desyncWaitTimer >= 2000L) {
-                            printdev("next stage warp to hub")
-                            desyncedSteps = DesyncedSteps.WARP_TO_LOBBY
-                            desyncWaitTimer = System.currentTimeMillis()
-                            desyncF = true
-                        }
-                    }
-                    DesyncedSteps.WARP_TO_LOBBY -> {
-                        if (desyncF) {
-                            printdev("Warp to hub")
-                            unpressKeys()
-                            mc.thePlayer.sendChatMessage("/hub")
-                            desyncF = false
-                        }
-                        if (System.currentTimeMillis() - desyncWaitTimer >= 10000L) {
-                            printdev("next stage warp back")
-                            desyncedSteps = DesyncedSteps.WARP_BACK
-                            desyncWaitTimer = System.currentTimeMillis()
-                            desyncF = true
-                        }
-                    }
-                    DesyncedSteps.WARP_BACK -> {
-                        if (desyncF) {
-                            printdev("Warp to is")
-                            unpressKeys()
-                            mc.thePlayer.sendChatMessage("/is")
-                            desyncF = false
-                        }
-                        if (System.currentTimeMillis() - desyncWaitTimer >= 5000L) {
-                            printdev("next stage end")
-                            desyncedSteps = DesyncedSteps.END
-                            desyncWaitTimer = System.currentTimeMillis()
-                            desyncF = true
-                        }
-                    }
-                    DesyncedSteps.END -> {
-                        farmingState = FarmingState.SETUP
-                        ticksDesync = 0
-                        ticksWarpDesync = 100
-                        printdev("Ended resync process!")
-                    }
-                }
-            }
-            FarmingState.WARPED -> {
-                unpressKeys()
-                when (warpedSteps) {
-                    WarpBackSteps.SETUP -> {
-                        warpTimer = System.currentTimeMillis()
-                        if (Cache.onIsland) {
-                            farmingState = FarmingState.SETUP
-                            warpLobbySteps = 0
-                        } else if (Cache.inSkyblock) warpedSteps = WarpBackSteps.WARP_BACK
-                        else if (!Cache.inSkyblock) warpedSteps = WarpBackSteps.WARP_TO_LOBBY
-                    }
-                    WarpBackSteps.WARP_TO_LOBBY -> {
-                        if (Cache.onIsland) warpedSteps = WarpBackSteps.SETUP
-                        if (System.currentTimeMillis() - warpTimer < 3000L) return
-                        warpTimer = System.currentTimeMillis()
-                        when (warpLobbySteps) {
-                            0 -> mc.thePlayer.sendChatMessage("/l")
-                            1 -> mc.thePlayer.sendChatMessage("/play sb")
-                            2 -> mc.thePlayer.sendChatMessage("/is")
-                        }
-                        warpLobbySteps++
-                    }
-                    WarpBackSteps.WARP_BACK -> {
-                        if (System.currentTimeMillis() - warpTimer < 1500L) return
-                        warpTimer = System.currentTimeMillis()
-                        mc.thePlayer.sendChatMessage("/is")
-                        warpedSteps = WarpBackSteps.SETUP
-                    }
-                }
-            }
-            FarmingState.CLEAR_INV -> {
-                unpressKeys()
-                when (clearInvSteps) {
-                    ClearInvSteps.SETUP -> {
-                        UChat.chat("§cSkySkipped §f:: §eInventory is full! Cleaning...")
-                        sendWebhook("Full Inventory failsafe", "Inventory is full! Cleaning...", false)
-                        clearInvSteps = ClearInvSteps.OPEN_INV
-                    }
-                    ClearInvSteps.OPEN_INV -> {
-                        if (openedInv == 0) {
-                            mc.displayGuiScreen(GuiInventory(mc.thePlayer))
-                            clearInvTimer = System.currentTimeMillis()
-                            openedInv = 1
-                        }
-
-                        if (System.currentTimeMillis() - clearInvTimer >= 1000L) {
-                            if (checkInv()) {
-                                clearInvSteps = ClearInvSteps.END
-                                return
-                            }
-                            clearInvSteps = ClearInvSteps.CLEAR_STONE
-                            clearInvTimer = System.currentTimeMillis()
-                        }
-                    }
-                    ClearInvSteps.CLEAR_STONE -> {
-                        if (toClearInv == null) {
-                            val inv = ((mc.currentScreen as GuiInventory).inventorySlots as ContainerPlayer).inventorySlots
-                            val stoneSlots = inv.filter {
-                                it.hasStack && it.stack.displayName.stripColor().keepScoreboardCharacters().contains("Stone", true)
-                            }
-                            toClearInv = stoneSlots.toMutableList()
-                            return
-                        } else {
-                            if (toClearInv!!.isEmpty()) {
-                                toClearInv = null
-                                clearInvSteps = ClearInvSteps.CLEAR_RES
-                                return
-                            }
-                            if (checkInv()) {
-                                clearInvSteps = ClearInvSteps.END
-                                return
-                            }
-                            if (System.currentTimeMillis() - clearInvTimer < 500L) return
-                            clearInvTimer = System.currentTimeMillis()
-                            val slot = toClearInv!![0]
-                            toClearInv!!.removeAt(0)
-
-                            mc.playerController.windowClick(
-                                (mc.currentScreen as GuiInventory).inventorySlots.windowId,
-                                slot.slotNumber, 0, 0, mc.thePlayer
-                            )
-                            mc.playerController.windowClick(
-                                (mc.currentScreen as GuiInventory).inventorySlots.windowId,
-                                -999, 0, 0, mc.thePlayer
-                            )
-                        }
-                    }
-                    ClearInvSteps.CLEAR_RES -> {
-                        if (toClearInv == null) {
-                            val inv = ((mc.currentScreen as GuiInventory).inventorySlots as ContainerPlayer).inventorySlots
-                            val crops = inv.filter {
-                                it.hasStack && when (it.stack.item) {
-                                    Items.nether_wart -> true
-                                    Items.reeds -> true
-                                    Items.potato -> true
-                                    Items.carrot -> true
-                                    Items.melon -> true
-                                    else -> it.stack.displayName.contains("mushroom", true) ||
-                                            it.stack.displayName.contains("wart", true) ||
-                                            it.stack.displayName.contains("enchanted", true)
-                                }
-                            }
-                            toClearInv = crops.toMutableList()
-                            openedInv = 0
-                            return
-                        } else {
-                            if (toClearInv!!.isEmpty()) {
-                                clearInvSteps = ClearInvSteps.END
-                                return
-                            }
-
-                            when (openedInv) {
-                                0 -> {
-                                    mc.thePlayer.closeScreen()
-                                    mc.thePlayer.sendChatMessage("/sbmenu")
-                                    openedInv = 1
-                                    clearInvTimer = System.currentTimeMillis()
-                                    return
-                                }
-                                1 -> {
-                                    if (System.currentTimeMillis() - clearInvTimer >= 2000L) {
-                                        clearInvSteps = ClearInvSteps.END
-                                        return
-                                    }
-
-                                    if (mc.currentScreen !is GuiChest) return
-                                    val trades = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
-                                        it.hasStack && it.stack.displayName.stripColor() == "Trades"
-                                    } ?: return
-
-                                    mc.playerController.windowClick(
-                                        (mc.currentScreen as GuiChest).inventorySlots.windowId,
-                                        trades.slotIndex, 0, 0, mc.thePlayer
-                                    )
-                                    openedInv = 2
-                                    clearInvTimer = System.currentTimeMillis()
-                                    return
-                                }
-                                2 -> {
-                                    if (System.currentTimeMillis() - clearInvTimer >= 2000L) {
-                                        clearInvSteps = ClearInvSteps.END
-                                        return
-                                    }
-
-                                    if (mc.currentScreen !is GuiChest) return
-                                    (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
-                                        it.hasStack && it.stack.item.unlocalizedName.contains("hopper")
-                                    } ?: return
-                                    clearInvTimer = System.currentTimeMillis()
-                                }
-                            }
-
-                            if (mc.currentScreen !is GuiChest) {
-                                clearInvSteps = ClearInvSteps.END
-                                return
-                            }
-                            if (System.currentTimeMillis() - clearInvTimer < 500L) return
-                            clearInvTimer = System.currentTimeMillis()
-                            val slot = toClearInv!![0]
-                            toClearInv!!.removeAt(0)
-
-                            mc.playerController.windowClick(
-                                (mc.currentScreen as GuiChest).inventorySlots.windowId,
-                                slot.slotNumber, 0, 0, mc.thePlayer
-                            )
-                        }
-                    }
-                    ClearInvSteps.END -> {
-                        printdev("Finished clearing")
-                        farmingState = FarmingState.SETUP
-                        clearInvSteps = ClearInvSteps.SETUP
-                        fullInvTicks = 0
-                        toClearInv = null
-                        openedInv = 0
-                    }
-                }
-            }
-            FarmingState.BEDROCK_CAGE -> {
-                if (System.currentTimeMillis() - bedrockTimer < 5000L) return
-                unpressKeys()
-
-                if (rotating == null) {
-                    val yaw = getRandom(-180f, 180f)
-                    val pitch = getRandom(-45f, 75f)
-                    rotating = RotationClass(RotationClass.Rotation(yaw, pitch), 1000L + getRandom(500f, 1000f).roundToLong())
-                } else if (rotating!!.done) {
-                    bedrockTimer = System.currentTimeMillis() + getRandom(1000f, 3000f).roundToLong()
-                    rotating = null
-                }
-
-                if (getRandom(1f, 50f) == 25f) mc.thePlayer.sendChatMessage(messages[getRandom(0f, messages.size - 1f).roundToInt()])
-                if (!bedrockFailsafe()) {
-                    sendWebhook("Lucky Escape!", "You successfully left bedrock cage!", true)
-                    farmingState = FarmingState.IDLE
-                }
-            }
+            FarmingState.CLIMB -> climb()
+            FarmingState.STUCK -> stuck()
+            FarmingState.DESYNED -> desynced()
+            FarmingState.WARPED -> warped()
+            FarmingState.CLEAR_INV -> clearInv()
+            FarmingState.BEDROCK_CAGE -> bedrockCage()
             FarmingState.IDLE -> {
                 unpressKeys()
                 if (dced) {
                     if (mc.thePlayer == null || mc.theWorld == null) return
-
                     farmingState = FarmingState.SETUP
                 }
             }
+        }
+    }
+
+    private fun setup() {
+        unpressKeys()
+        mc.displayGuiScreen(null)
+        if (!Cache.onIsland) {
+            farmingState = FarmingState.WARPED
+            return
+        }
+        if (rotating == null) {
+            val yaw = when (farmDirection) {
+                FarmDirection.NORTH -> 180f
+                FarmDirection.SOUTH -> 0f
+                FarmDirection.WEST -> 90f
+                FarmDirection.EAST -> -90f
+            }
+            val pitch = 0f
+            printdev("Rotate yaw and pitch: $yaw $pitch")
+            rotating = RotationClass(RotationClass.Rotation(yaw, 0f), 1500L)
+        }
+        if (rotating!!.done) {
+            printdev("Finished rotating")
+
+            if (Config.netherWartCpuSaver) {
+                lastFps = mc.gameSettings.limitFramerate
+                mc.gameSettings.limitFramerate = 30
+                lastDist = mc.gameSettings.renderDistanceChunks
+                mc.gameSettings.renderDistanceChunks = 2
+            }
+
+            farmingState = FarmingState.FARM
+            rotating = null
+            rotated = true
+            lastY = ceil(mc.thePlayer.posY).roundToInt()
+        }
+    }
+
+    private fun climb() {
+        unpressKeys()
+        KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.keyCode, true)
+
+        val ladderBlock = mc.theWorld.getBlockState(BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ))
+        if (ladderBlock.block != Blocks.ladder) {
+            printdev("Finished climbing")
+            farmDirection = when (farmDirection) {
+                FarmDirection.SOUTH -> FarmDirection.NORTH
+                FarmDirection.WEST -> FarmDirection.EAST
+                FarmDirection.NORTH -> FarmDirection.SOUTH
+                FarmDirection.EAST -> FarmDirection.WEST
+            }
+            farmingState = FarmingState.SETUP
+            rotating = null
+        }
+    }
+
+    private fun stuck() {
+        when (stuckSteps) {
+            StuckSteps.SETUP -> {
+                UChat.chat("§cSkySkipped §f:: §eYou got stuck! Trying to prevent that...")
+                sendWebhook("Unstuck failsafe", "You got stuck! Trying to prevent that...", false)
+                unpressKeys()
+                stuckSteps = StuckSteps.BACK
+                keyTimer = System.currentTimeMillis()
+                keyState = true
+            }
+            StuckSteps.BACK -> {
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.keyCode, keyState)
+                if (System.currentTimeMillis() - keyTimer >= 300) {
+                    if (keyState) keyState = false
+                    else {
+                        keyState = true
+                        stuckSteps = StuckSteps.FORWARD
+                    }
+                    keyTimer = System.currentTimeMillis()
+                }
+            }
+            StuckSteps.FORWARD -> {
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.keyCode, keyState)
+                if (System.currentTimeMillis() - keyTimer >= 300) {
+                    if (keyState) keyState = false
+                    else {
+                        keyState = true
+                        stuckSteps = StuckSteps.LEFT
+                    }
+                    keyTimer = System.currentTimeMillis()
+                }
+            }
+            StuckSteps.LEFT -> {
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.keyCode, keyState)
+                if (System.currentTimeMillis() - keyTimer >= 300) {
+                    if (keyState) keyState = false
+                    else {
+                        keyState = true
+                        stuckSteps = StuckSteps.RIGHT
+                    }
+                    keyTimer = System.currentTimeMillis()
+                }
+            }
+            StuckSteps.RIGHT -> {
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.keyCode, keyState)
+                if (System.currentTimeMillis() - keyTimer >= 300) {
+                    if (keyState) keyState = false
+                    else {
+                        keyState = true
+                        stuckSteps = StuckSteps.END
+                    }
+                    keyTimer = System.currentTimeMillis()
+                }
+            }
+            StuckSteps.END -> {
+                unpressKeys()
+                farmingState = FarmingState.SETUP
+                ticksStuck = 0
+            }
+        }
+    }
+
+    private fun desynced() {
+        when (desyncedSteps) {
+            DesyncedSteps.SETUP -> {
+                if (desyncF) {
+                    UChat.chat("§cSkySkipped §f:: §eDesync detected! Swapping lobbies...")
+                    sendWebhook("Desync failsafe", "Desync detected! Swapping lobbies...", false)
+                    unpressKeys()
+                    if (!Config.netherWartSetSpawn) mc.thePlayer.sendChatMessage("/sethome")
+                    desyncF = false
+                }
+                if (System.currentTimeMillis() - desyncWaitTimer >= 2000L) {
+                    printdev("next stage warp to hub")
+                    desyncedSteps = DesyncedSteps.WARP_TO_LOBBY
+                    desyncWaitTimer = System.currentTimeMillis()
+                    desyncF = true
+                }
+            }
+            DesyncedSteps.WARP_TO_LOBBY -> {
+                if (desyncF) {
+                    printdev("Warp to hub")
+                    unpressKeys()
+                    mc.thePlayer.sendChatMessage("/hub")
+                    desyncF = false
+                }
+                if (System.currentTimeMillis() - desyncWaitTimer >= 10000L) {
+                    printdev("next stage warp back")
+                    desyncedSteps = DesyncedSteps.WARP_BACK
+                    desyncWaitTimer = System.currentTimeMillis()
+                    desyncF = true
+                }
+            }
+            DesyncedSteps.WARP_BACK -> {
+                if (desyncF) {
+                    printdev("Warp to is")
+                    unpressKeys()
+                    mc.thePlayer.sendChatMessage("/is")
+                    desyncF = false
+                }
+                if (System.currentTimeMillis() - desyncWaitTimer >= 5000L) {
+                    printdev("next stage end")
+                    desyncedSteps = DesyncedSteps.END
+                    desyncWaitTimer = System.currentTimeMillis()
+                    desyncF = true
+                }
+            }
+            DesyncedSteps.END -> {
+                farmingState = FarmingState.SETUP
+                ticksDesync = 0
+                ticksWarpDesync = 100
+                printdev("Ended resync process!")
+            }
+        }
+    }
+
+    private fun warped() {
+        unpressKeys()
+        when (warpedSteps) {
+            WarpBackSteps.SETUP -> {
+                warpTimer = System.currentTimeMillis()
+                if (Cache.onIsland) {
+                    farmingState = FarmingState.SETUP
+                    warpLobbySteps = 0
+                } else if (Cache.inSkyblock) warpedSteps = WarpBackSteps.WARP_BACK
+                else if (!Cache.inSkyblock) warpedSteps = WarpBackSteps.WARP_TO_LOBBY
+            }
+            WarpBackSteps.WARP_TO_LOBBY -> {
+                if (Cache.onIsland) warpedSteps = WarpBackSteps.SETUP
+                if (System.currentTimeMillis() - warpTimer < 3000L) return
+                warpTimer = System.currentTimeMillis()
+                when (warpLobbySteps) {
+                    0 -> mc.thePlayer.sendChatMessage("/l")
+                    1 -> mc.thePlayer.sendChatMessage("/play sb")
+                    2 -> mc.thePlayer.sendChatMessage("/is")
+                }
+                warpLobbySteps++
+            }
+            WarpBackSteps.WARP_BACK -> {
+                if (System.currentTimeMillis() - warpTimer < 1500L) return
+                warpTimer = System.currentTimeMillis()
+                mc.thePlayer.sendChatMessage("/is")
+                warpedSteps = WarpBackSteps.SETUP
+            }
+        }
+    }
+
+    private fun clearInv() {
+        unpressKeys()
+        when (clearInvSteps) {
+            ClearInvSteps.SETUP -> {
+                UChat.chat("§cSkySkipped §f:: §eInventory is full! Cleaning...")
+                sendWebhook("Full Inventory failsafe", "Inventory is full! Cleaning...", false)
+                clearInvSteps = ClearInvSteps.OPEN_INV
+            }
+            ClearInvSteps.OPEN_INV -> {
+                if (openedInv == 0) {
+                    mc.displayGuiScreen(GuiInventory(mc.thePlayer))
+                    clearInvTimer = System.currentTimeMillis()
+                    openedInv = 1
+                }
+
+                if (System.currentTimeMillis() - clearInvTimer >= 1000L) {
+                    if (checkInv()) {
+                        clearInvSteps = ClearInvSteps.END
+                        return
+                    }
+                    clearInvSteps = ClearInvSteps.CLEAR_STONE
+                    clearInvTimer = System.currentTimeMillis()
+                }
+            }
+            ClearInvSteps.CLEAR_STONE -> {
+                if (toClearInv == null) {
+                    val inv = ((mc.currentScreen as GuiInventory).inventorySlots as ContainerPlayer).inventorySlots
+                    val stoneSlots = inv.filter {
+                        it.hasStack && it.stack.displayName.stripColor().keepScoreboardCharacters().contains("Stone", true)
+                    }
+                    toClearInv = stoneSlots.toMutableList()
+                    return
+                } else {
+                    if (toClearInv!!.isEmpty()) {
+                        toClearInv = null
+                        clearInvSteps = ClearInvSteps.CLEAR_RES
+                        return
+                    }
+                    if (checkInv()) {
+                        clearInvSteps = ClearInvSteps.END
+                        return
+                    }
+                    if (System.currentTimeMillis() - clearInvTimer < 500L) return
+                    clearInvTimer = System.currentTimeMillis()
+                    val slot = toClearInv!![0]
+                    toClearInv!!.removeAt(0)
+
+                    mc.playerController.windowClick(
+                        (mc.currentScreen as GuiInventory).inventorySlots.windowId,
+                        slot.slotNumber, 0, 0, mc.thePlayer
+                    )
+                    mc.playerController.windowClick(
+                        (mc.currentScreen as GuiInventory).inventorySlots.windowId,
+                        -999, 0, 0, mc.thePlayer
+                    )
+                }
+            }
+            ClearInvSteps.CLEAR_RES -> {
+                if (toClearInv == null) {
+                    val inv = ((mc.currentScreen as GuiInventory).inventorySlots as ContainerPlayer).inventorySlots
+                    val crops = inv.filter {
+                        it.hasStack && when (it.stack.item) {
+                            Items.nether_wart -> true
+                            Items.reeds -> true
+                            Items.potato -> true
+                            Items.carrot -> true
+                            Items.melon -> true
+                            else -> it.stack.displayName.contains("mushroom", true) ||
+                                    it.stack.displayName.contains("wart", true) ||
+                                    it.stack.displayName.contains("enchanted", true)
+                        }
+                    }
+                    toClearInv = crops.toMutableList()
+                    openedInv = 0
+                    return
+                } else {
+                    if (toClearInv!!.isEmpty()) {
+                        clearInvSteps = ClearInvSteps.END
+                        return
+                    }
+
+                    when (openedInv) {
+                        0 -> {
+                            mc.thePlayer.closeScreen()
+                            mc.thePlayer.sendChatMessage("/sbmenu")
+                            openedInv = 1
+                            clearInvTimer = System.currentTimeMillis()
+                            return
+                        }
+                        1 -> {
+                            if (System.currentTimeMillis() - clearInvTimer >= 2000L) {
+                                clearInvSteps = ClearInvSteps.END
+                                return
+                            }
+
+                            if (mc.currentScreen !is GuiChest) return
+                            val trades = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
+                                it.hasStack && it.stack.displayName.stripColor() == "Trades"
+                            } ?: return
+
+                            mc.playerController.windowClick(
+                                (mc.currentScreen as GuiChest).inventorySlots.windowId,
+                                trades.slotIndex, 0, 0, mc.thePlayer
+                            )
+                            openedInv = 2
+                            clearInvTimer = System.currentTimeMillis()
+                            return
+                        }
+                        2 -> {
+                            if (System.currentTimeMillis() - clearInvTimer >= 2000L) {
+                                clearInvSteps = ClearInvSteps.END
+                                return
+                            }
+
+                            if (mc.currentScreen !is GuiChest) return
+                            (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
+                                it.hasStack && it.stack.item.unlocalizedName.contains("hopper")
+                            } ?: return
+                            clearInvTimer = System.currentTimeMillis()
+                        }
+                    }
+
+                    if (mc.currentScreen !is GuiChest) {
+                        clearInvSteps = ClearInvSteps.END
+                        return
+                    }
+                    if (System.currentTimeMillis() - clearInvTimer < 500L) return
+                    clearInvTimer = System.currentTimeMillis()
+                    val slot = toClearInv!![0]
+                    toClearInv!!.removeAt(0)
+
+                    mc.playerController.windowClick(
+                        (mc.currentScreen as GuiChest).inventorySlots.windowId,
+                        slot.slotNumber, 0, 0, mc.thePlayer
+                    )
+                }
+            }
+            ClearInvSteps.END -> {
+                printdev("Finished clearing")
+                farmingState = FarmingState.SETUP
+                clearInvSteps = ClearInvSteps.SETUP
+                fullInvTicks = 0
+                toClearInv = null
+                openedInv = 0
+            }
+        }
+    }
+
+    private fun bedrockCage() {
+        if (System.currentTimeMillis() - bedrockTimer < 5000L) return
+        unpressKeys()
+
+        if (rotating == null) {
+            val yaw = getRandom(-180f, 180f)
+            val pitch = getRandom(-45f, 75f)
+            rotating = RotationClass(RotationClass.Rotation(yaw, pitch), 1000L + getRandom(500f, 1000f).roundToLong())
+        } else if (rotating!!.done) {
+            bedrockTimer = System.currentTimeMillis() + getRandom(1000f, 3000f).roundToLong()
+            rotating = null
+        }
+
+        if (getRandom(1f, 50f) == 25f) mc.thePlayer.sendChatMessage(messages[getRandom(0f, messages.size - 1f).roundToInt()])
+        if (!bedrockFailsafe()) {
+            sendWebhook("Lucky Escape!", "You successfully left bedrock cage!", true)
+            farmingState = FarmingState.IDLE
         }
     }
 

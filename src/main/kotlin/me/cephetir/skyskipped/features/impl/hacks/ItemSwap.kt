@@ -34,37 +34,38 @@ class ItemSwap : Feature() {
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if(event.phase != TickEvent.Phase.START || !Cache.inSkyblock) return
-        if(mc.currentScreen !is GuiInventory) return
+        if (event.phase != TickEvent.Phase.START || !Cache.inSkyblock) return
+        if (mc.currentScreen !is GuiInventory) return
 
-        for(keybind in SkySkipped.keybinds) {
+        for (keybind in SkySkipped.keybinds) {
             val down = Keyboard.isKeyDown(keybind.keyCode)
-            if(down == keybind.lastState) continue
+            if (down == keybind.lastState) continue
             keybind.lastState = down
-            if(!down) continue
+            if (!down) continue
 
             val screen = (mc.currentScreen as GuiInventory).inventorySlots
 
             val names = keybind.message.split(":")
-            if(names.size < 2) {
+            if (names.size < 2) {
                 UChat.chat("§cSkySkipped §f:: §4Invalid item name format!")
                 continue
             }
             var first: Slot? = null
             var second: Slot? = null
 
-            for(slot in screen.inventorySlots) {
+            for (slot in screen.inventorySlots) {
                 val item = slot.stack ?: continue
-                if(item.displayName.contains(names[0], true)) first = slot
-                else if(item.displayName.contains(names[1], true)) second = slot
+                if (item.displayName.contains(names[0], true)) first = slot
+                else if (item.displayName.contains(names[1], true)) second = slot
             }
 
-            if(first != null && second != null) called[Pair(first, second)] = 0
+            if (first != null && second != null) called[Pair(first, second)] = 0
             else UChat.chat("§cSkySkipped §f:: §4Can't find first or second item to swap!")
         }
     }
 
     private var timer = System.currentTimeMillis()
+
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
         for ((slots, step) in called) {
@@ -72,14 +73,14 @@ class ItemSwap : Feature() {
                 called.clear()
                 return
             }
-            if(System.currentTimeMillis() - timer < Config.swapDelay) return
+            if (System.currentTimeMillis() - timer < Config.swapDelay) return
             timer = System.currentTimeMillis()
 
             val first = slots.first
             val second = slots.second
             val screen = (mc.currentScreen as GuiInventory).inventorySlots
 
-            when(step) {
+            when (step) {
                 0 -> {
                     mc.playerController.windowClick(screen.windowId, first.slotNumber, 0, 0, mc.thePlayer)
                     called[slots] = 1
