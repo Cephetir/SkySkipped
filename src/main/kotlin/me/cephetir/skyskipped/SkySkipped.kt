@@ -55,7 +55,8 @@ import java.net.URI
     version = SkySkipped.VERSION,
     acceptedMinecraftVersions = "[1.8.9]",
     modLanguageAdapter = "gg.essential.api.utils.KotlinAdapter",
-    clientSideOnly = true
+    clientSideOnly = true,
+    dependencies = "after:skyskippedjdaaddon"
 )
 class SkySkipped {
     companion object {
