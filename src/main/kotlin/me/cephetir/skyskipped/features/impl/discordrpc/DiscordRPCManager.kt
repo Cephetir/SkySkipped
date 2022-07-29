@@ -17,15 +17,19 @@
 
 package me.cephetir.skyskipped.features.impl.discordrpc
 
+import com.google.gson.JsonObject
 import com.jagrosh.discordipc.IPCClient
 import com.jagrosh.discordipc.IPCListener
 import com.jagrosh.discordipc.entities.RichPresence
 import me.cephetir.skyskipped.SkySkipped
+import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.event.SBInfo
+import me.cephetir.skyskipped.event.SkyblockIsland
+import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
-import org.json.JSONObject
 import java.time.OffsetDateTime
 
 class DiscordRPCManager : IPCListener {
@@ -66,9 +70,35 @@ class DiscordRPCManager : IPCListener {
         get() = client != null && connected
 
     private fun updatePresence() {
+        detailsLine = when (Config.drpcDetail) {
+            0 ->
+                if (SBInfo.island == SkyblockIsland.Unknown)
+                    if (RPC.mc.isIntegratedServerRunning) "Singleplayer" else RPC.mc.currentServerData?.serverIP ?: "Main Menu"
+                else SBInfo.island.formattedName
+
+            1 -> RPC.mc.session.username
+            2 -> if (RPC.mc.isIntegratedServerRunning) "Singleplayer" else RPC.mc.currentServerData?.serverIP ?: "Main Menu"
+            3 -> RPC.mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
+            4 -> Config.drpcText
+            else -> ""
+        }
+
+        stateLine = when (Config.drpcState) {
+            0 ->
+                if (SBInfo.island == SkyblockIsland.Unknown)
+                    if (RPC.mc.isIntegratedServerRunning) "Singleplayer" else RPC.mc.currentServerData?.serverIP ?: "Main Menu"
+                else SBInfo.island.formattedName
+
+            1 -> RPC.mc.session.username
+            2 -> if (RPC.mc.isIntegratedServerRunning) "Singleplayer" else RPC.mc.currentServerData?.serverIP ?: "Main Menu"
+            3 -> RPC.mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
+            4 -> Config.drpcText2
+            else -> ""
+        }
+
         val presence = RichPresence.Builder()
-            .setState(stateLine)
             .setDetails(detailsLine)
+            .setState(stateLine)
             .setStartTimestamp(startTimestamp)
             .setLargeImage("large", "SkySkipped v" + SkySkipped.VERSION)
             .build()
@@ -92,7 +122,7 @@ class DiscordRPCManager : IPCListener {
     private var tickCounter = 0
     @SubscribeEvent
     fun onClientTick(event: ClientTickEvent) {
-        if(event.phase != TickEvent.Phase.START || !isActive) return
+        if (event.phase != TickEvent.Phase.START || !isActive) return
         tickCounter++
         if (tickCounter % 200 == 0) {
             updatePresence()
@@ -100,7 +130,7 @@ class DiscordRPCManager : IPCListener {
         }
     }
 
-    override fun onClose(client: IPCClient, json: JSONObject?) {
+    override fun onClose(client: IPCClient, json: JsonObject?) {
         SkySkipped.logger.info("Discord RPC closed")
         this.client = null
         connected = false

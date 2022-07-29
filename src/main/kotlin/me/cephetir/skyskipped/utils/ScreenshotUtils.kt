@@ -26,6 +26,7 @@ import javax.imageio.ImageIO
 
 
 object ScreenshotUtils {
+    @JvmStatic
     fun takeScreenshot(): File {
         Minecraft.getSystemTime()
         val screenRect = Rectangle(Toolkit.getDefaultToolkit().screenSize)

@@ -18,10 +18,12 @@
 package me.cephetir.skyskipped.features.impl.dugeons
 
 import gg.essential.universal.UChat
+import kotlinx.coroutines.launch
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.PingUtils
+import me.cephetir.skyskipped.utils.skyblock.PingUtils
+import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockPos
@@ -40,11 +42,9 @@ class AdminRoomDetection : Feature() {
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (!scanned && Config.adminRoom && Cache.isInDungeon) {
+        if (!scanned && Config.adminRoom && Cache.softInDungeon) {
             scanned = true
-            Thread {
-                scan()
-            }.start()
+            BackgroundScope.launch { scan() }
         }
     }
 
@@ -56,15 +56,12 @@ class AdminRoomDetection : Feature() {
                 val zPos = startZ + z * (roomSize shr 1)
 
                 if (!mc.theWorld.getChunkFromChunkCoords(xPos shr 4, zPos shr 4).isLoaded) {
-                    printdev("CHUNK NOT LOADED")
                     UChat.chat("§cSkySkipped §f:: §4Can't find any admin room!")
                     return
                 }
                 if (isColumnAir(xPos, zPos)) continue
 
-                printdev("Checking $xPos $zPos")
                 if (getRoom(xPos, zPos, z, x)) {
-                    printdev("Found Admin Room!")
                     UChat.chat("§cSkySkipped §f:: §aFound admin room at X: $x, Z: $z!")
                     PingUtils(100, "Admin Room!")
                     return

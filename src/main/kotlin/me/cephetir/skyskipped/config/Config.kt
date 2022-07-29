@@ -17,10 +17,7 @@
 
 package me.cephetir.skyskipped.config
 
-import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
+import com.google.gson.*
 import gg.essential.elementa.utils.withAlpha
 import gg.essential.vigilance.Vigilant
 import gg.essential.vigilance.data.Category
@@ -29,45 +26,47 @@ import gg.essential.vigilance.data.PropertyType
 import gg.essential.vigilance.data.SortingBehavior
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
+import me.cephetir.skyskipped.features.impl.hacks.HotbarSaver
 import me.cephetir.skyskipped.features.impl.macro.RemoteControlling
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import net.minecraft.client.Minecraft
 import java.awt.Color
 import java.io.File
 
-class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingBehavior = ConfigSorting()) {
+class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFile, "SkySkipped", sortingBehavior = ConfigSorting()) {
     init {
+        if (!configFile.exists()) {
+            configFile.parentFile.mkdirs()
+            configFile.createNewFile()
+        }
+
         registerListener<Boolean>("DRPC") {
-            Thread {
-                try {
-                    Thread.sleep(100L)
-                    RPC.reset()
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
-            }.start()
+            RPC.reset(it)
         }
 
         registerListener<Boolean>("remoteControl") {
-            Thread {
-                try {
-                    Thread.sleep(100L)
-                    if (it) RemoteControlling.setup()
-                    else RemoteControlling.stop()
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
-            }.start()
+            if (it) RemoteControlling.setup()
+            else RemoteControlling.stop()
         }
 
+        addDependency("espMode", "esp")
         addDependency("playeresp", "esp")
         addDependency("starredmobsesp", "esp")
         addDependency("batsesp", "esp")
-        addDependency("chromaMode", "esp")
-        addDependency("espTracers", "esp")
+        addDependency("keyesp", "esp")
         addDependency("playersespColor", "playeresp")
+        addDependency("playerespChroma", "playeresp")
         addDependency("mobsespColor", "starredmobsesp")
+        addDependency("starredmobsespChroma", "starredmobsesp")
         addDependency("batsespColor", "batsesp")
+        addDependency("batsespChroma", "batsesp")
+        addDependency("keyespColor", "keyesp")
+        addDependency("keyespChroma", "keyesp")
+
+        addDependency("drpcDetail", "DRPC")
+        addDependency("drpcState", "DRPC")
+        addDependency("drpcText", "DRPC")
+        addDependency("drpcText2", "DRPC")
 
         addDependency("presentsColor", "presents")
 
@@ -104,6 +103,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         addDependency("coins", "coinsToggle")
         addDependency("mimicText", "mimic")
 
+        addDependency("customPitch", "customAngles")
         addDependency("netherWartDesyncTime", "netherWartDesync")
         addDependency("netherWartJacobNumber", "netherWartJacob")
         addDependency("netherWartBanWaveCheckerDisable", "netherWartBanWaveChecker")
@@ -121,18 +121,20 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
     }
 
     private val gson = Gson()
-    private val file = File(modDir, "keybinds.json")
+    private val keybindsFile = File(modDir, "keybinds.json")
+    private val hotbarFile = File(modDir, "hotbars.json")
+
     fun loadKeybinds() {
         try {
-            if (!file.exists()) {
-                file.parentFile.mkdirs()
-                file.createNewFile()
+            if (!keybindsFile.exists()) {
+                keybindsFile.parentFile.mkdirs()
+                keybindsFile.createNewFile()
             }
 
-            file.reader().use { reader ->
+            keybindsFile.reader().use { reader ->
                 SkySkipped.keybinds.clear()
-                val data = gson.fromJson(reader, JsonElement::class.java) as JsonArray
-                data.mapTo(SkySkipped.keybinds) {
+                val `data` = (gson.fromJson(reader, JsonElement::class.java) ?: return@use) as JsonArray
+                `data`.mapTo(SkySkipped.keybinds) {
                     it as JsonObject
                     GuiItemSwap.Keybind(
                         it["message"].asString,
@@ -144,7 +146,7 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         } catch (e: Exception) {
             e.printStackTrace()
             try {
-                this.file.writer().use { gson.toJson(JsonArray(), it) }
+                this.keybindsFile.writer().use { gson.toJson(JsonArray(), it) }
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
@@ -154,18 +156,72 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
     fun saveKeybinds() {
         try {
-            if (!file.exists()) {
-                file.parentFile.mkdirs()
-                file.createNewFile()
+            if (!keybindsFile.exists()) {
+                keybindsFile.parentFile.mkdirs()
+                keybindsFile.createNewFile()
             }
 
-            file.writer().use { writer ->
+            keybindsFile.writer().use { writer ->
                 val arr = JsonArray()
                 for (s in SkySkipped.keybinds) {
                     val obj = JsonObject()
                     obj.addProperty("message", s.message)
                     obj.addProperty("keyCode", s.keyCode)
                     obj.addProperty("modifiers", s.modifiers)
+                    arr.add(obj)
+                }
+                gson.toJson(arr, writer)
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+        SkySkipped.logger.info("Saved keybinds!")
+    }
+
+    fun loadHotbars() {
+        try {
+            if (!hotbarFile.exists()) {
+                hotbarFile.parentFile.mkdirs()
+                hotbarFile.createNewFile()
+            }
+
+            hotbarFile.reader().use { reader ->
+                HotbarSaver.presets.clear()
+                val `data` = (gson.fromJson(reader, JsonElement::class.java) ?: return@use) as JsonArray
+                `data`.mapTo(HotbarSaver.presets) {
+                    it as JsonObject
+                    HotbarSaver.HotbarPreset(
+                        it["name"].asString,
+                        it["items"].asJsonArray.map { element -> element.asString },
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            try {
+                this.hotbarFile.writer().use { gson.toJson(JsonArray(), it) }
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        }
+        SkySkipped.logger.info("Loaded hotbars!")
+    }
+
+    fun saveHotbars() {
+        try {
+            if (!hotbarFile.exists()) {
+                hotbarFile.parentFile.mkdirs()
+                hotbarFile.createNewFile()
+            }
+
+            hotbarFile.writer().use { writer ->
+                val arr = JsonArray()
+                for (s in HotbarSaver.presets) {
+                    val obj = JsonObject()
+                    obj.addProperty("name", s.name)
+                    val array = JsonArray()
+                    s.items.forEach { array.add(JsonPrimitive(it)) }
+                    obj.add("items", array)
                     arr.add(obj)
                 }
                 gson.toJson(arr, writer)
@@ -209,15 +265,6 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Chest Closer in Crystal Hollows",
-            category = "Dungeons",
-            subcategory = "Chest Closer",
-            description = "Auto close chests in Crystal Hollows."
-        )
-        var chestCloserCH = false
-
-        @Property(
-            type = PropertyType.SWITCH,
             name = "Party chat swapper",
             category = "Chat",
             description = "Automatically swaps between party chat and global chat."
@@ -233,6 +280,40 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         var DRPC = true
 
         @Property(
+            type = PropertyType.SELECTOR,
+            name = "RPC First Line",
+            category = "Discord",
+            description = "Shows status in discord.",
+            options = ["Location", "Username", "Server", "Item in hand", "Custom Text"]
+        )
+        var drpcDetail = 2
+
+        @Property(
+            type = PropertyType.SELECTOR,
+            name = "RPC Second Line",
+            category = "Discord",
+            description = "Shows status in discord.",
+            options = ["Location", "Username", "Server", "Item in hand", "Custom Text"]
+        )
+        var drpcState = 3
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "RPC Custom Text First Line",
+            category = "Discord",
+            description = "Shows status in discord."
+        )
+        var drpcText = ""
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "RPC Custom Text Second Line",
+            category = "Discord",
+            description = "Shows status in discord."
+        )
+        var drpcText2 = ""
+
+        @Property(
             type = PropertyType.SWITCH,
             name = "ESP",
             category = "Dungeons",
@@ -240,6 +321,16 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
             description = "Shows mobs through walls."
         )
         var esp = false
+
+        @Property(
+            type = PropertyType.SELECTOR,
+            name = "ESP Mode",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Type of esp.",
+            options = ["Outline", "Box", "Chams"]
+        )
+        var espMode = 0
 
         @Property(
             type = PropertyType.SWITCH,
@@ -252,12 +343,21 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
         @Property(
             type = PropertyType.COLOR,
-            name = "ESP Players Color",
+            name = "Player ESP Color",
             category = "Dungeons",
             subcategory = "ESP",
-            description = "Box color for ESP."
+            description = "Color for ESP."
         )
         var playersespColor: Color = Color.PINK
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Player ESP Chroma Color",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Chroma color for ESP."
+        )
+        var playerespChroma = false
 
         @Property(
             type = PropertyType.SWITCH,
@@ -270,12 +370,21 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
         @Property(
             type = PropertyType.COLOR,
-            name = "ESP Starred mobs Color",
+            name = "Starred mobs ESP Color",
             category = "Dungeons",
             subcategory = "ESP",
-            description = "Box color for ESP."
+            description = "Color for ESP."
         )
         var mobsespColor: Color = Color.ORANGE
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Starred mobs ESP Chroma Color",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Chroma color for ESP."
+        )
+        var starredmobsespChroma = false
 
         @Property(
             type = PropertyType.SWITCH,
@@ -288,30 +397,48 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
 
         @Property(
             type = PropertyType.COLOR,
-            name = "ESP Bats Color",
+            name = "Bats ESP Color",
             category = "Dungeons",
             subcategory = "ESP",
-            description = "Box color for ESP."
+            description = "Color for ESP."
         )
         var batsespColor: Color = Color.GREEN
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Rainbow ESP Color",
+            name = "Bats ESP Chroma Color",
             category = "Dungeons",
             subcategory = "ESP",
-            description = "Make all ESP colors rainbow."
+            description = "Chroma color for ESP."
         )
-        var chromaMode = false
+        var batsespChroma = false
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Tracers",
+            name = "Key ESP",
             category = "Dungeons",
             subcategory = "ESP",
-            description = "Draw tracers on esp mobs."
+            description = "Shows keys through walls."
         )
-        var espTracers = false
+        var keyesp = false
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "Key ESP Color",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Color for ESP."
+        )
+        var keyespColor: Color = Color.RED
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Key ESP Chroma Color",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Chroma color for ESP."
+        )
+        var keyespChroma = false
 
         @Property(
             type = PropertyType.SWITCH,
@@ -541,6 +668,14 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
             min = 10
         )
         var swapDelay = 100
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Lava Fishing ESP",
+            category = "Hacks",
+            description = "Shows lava fising spots through walls."
+        )
+        var lavaFishingEsp = false
 
         @Property(
             type = PropertyType.SWITCH,
@@ -940,6 +1075,38 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
         var macroType = 0
 
         @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Schedule Disable",
+            category = "Macro",
+            description = "Hours before macro will be auto disabled (0 for unlimited time).",
+            minF = 0f,
+            maxF = 12f,
+            decimalPlaces = 1
+        )
+        var macroStopTime = 0f
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Custom Pitch Toggle",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Override default pitch."
+        )
+        var customAngles = false
+
+        @Property(
+            type = PropertyType.NUMBER,
+            name = "Custom Pitch Value",
+            category = "Macro",
+            subcategory = "Nether Wart Macro",
+            description = "Override default pitch.",
+            min = -90,
+            max = 90,
+            increment = 1
+        )
+        var customPitch = 0
+
+        @Property(
             type = PropertyType.SELECTOR,
             name = "Farm Direction",
             category = "Macro",
@@ -1317,6 +1484,6 @@ class Config : Vigilant(File(this.modDir, "config.toml"), "SkySkipped", sortingB
             subcategory = "Farming HUD",
             description = "Text color of Farming HUD."
         )
-        var farmingHudColorText = Color.RED.darker()
+        var farmingHudColorText: Color = Color.RED.darker()
     }
 }

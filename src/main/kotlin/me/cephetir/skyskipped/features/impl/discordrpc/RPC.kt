@@ -17,20 +17,60 @@
 
 package me.cephetir.skyskipped.features.impl.discordrpc
 
-import gg.essential.api.EssentialAPI
-import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
-import net.minecraft.client.Minecraft
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import me.cephetir.skyskipped.event.SBInfo
+import me.cephetir.skyskipped.event.SkyblockIsland
+import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
-class RPC {
+object RPC : Feature() {
+    private val discordRPCManager = DiscordRPCManager()
 
-    @SubscribeEvent
+    fun init() = discordRPCManager.start()
+
+    fun shutdown() = discordRPCManager.stop()
+
+    fun reset(enabled: Boolean = Config.DRPC) {
+        if (enabled && !discordRPCManager.isActive) discordRPCManager.start()
+        else if (!enabled && discordRPCManager.isActive) discordRPCManager.stop()
+    }
+
+    //@SubscribeEvent
     fun update(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START && !discordRPCManager.isActive) return
-        if (Cache.isInDungeon) {
+        if (event.phase != TickEvent.Phase.START || !discordRPCManager.isActive) return
+
+        val detail = when (Config.drpcDetail) {
+            0 ->
+                if (SBInfo.island == SkyblockIsland.Unknown)
+                    if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
+                else SBInfo.island.formattedName
+
+            1 -> mc.session.username
+            2 -> if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
+            3 -> mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
+            4 -> Config.drpcText
+            else -> ""
+        }
+
+        val state = when (Config.drpcState) {
+            0 ->
+                if (SBInfo.island == SkyblockIsland.Unknown)
+                    if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
+                else SBInfo.island.formattedName
+
+            1 -> mc.session.username
+            2 -> if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
+            3 -> mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
+            4 -> Config.drpcText2
+            else -> ""
+        }
+
+        discordRPCManager.setDetailsLine(detail)
+        discordRPCManager.setStateLine(state)
+
+        /*if (Cache.inDungeon) {
             discordRPCManager.setDetailsLine("Playing " + Cache.dungeonName)
             discordRPCManager.setStateLine("Cleared: " + Cache.dungeonPercentage + " %")
         } else if (!Minecraft.getMinecraft().isSingleplayer && Minecraft.getMinecraft().theWorld != null && Minecraft.getMinecraft().netHandler != null) {
@@ -50,22 +90,6 @@ class RPC {
         } else {
             discordRPCManager.setDetailsLine("In main menu")
             discordRPCManager.setStateLine("Idle")
-        }
-    }
-
-    companion object {
-        val discordRPCManager = DiscordRPCManager()
-
-        fun init() {
-            discordRPCManager.start()
-        }
-
-        fun shutdown() {
-            discordRPCManager.stop()
-        }
-
-        fun reset() {
-            if (Config.DRPC && !discordRPCManager.isActive) discordRPCManager.start() else if (!Config.DRPC && discordRPCManager.isActive) discordRPCManager.stop()
-        }
+        }*/
     }
 }

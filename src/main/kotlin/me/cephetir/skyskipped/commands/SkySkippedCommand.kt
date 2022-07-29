@@ -24,6 +24,7 @@ import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.hacks.FailSafe
+import me.cephetir.skyskipped.features.impl.hacks.HotbarSaver
 import me.cephetir.skyskipped.features.impl.hacks.PetMacro
 import me.cephetir.skyskipped.gui.impl.GuiHudEditor
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
@@ -63,8 +64,7 @@ class SkySkippedCommand : CommandBase() {
 
         when (args[0]) {
             "gui" -> EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
-            "keybinds" -> EssentialAPI.getGuiUtil().openScreen(GuiItemSwap())
-            "kb" -> EssentialAPI.getGuiUtil().openScreen(GuiItemSwap())
+            "keybinds", "kb" -> EssentialAPI.getGuiUtil().openScreen(GuiItemSwap())
             "github" -> {
                 val text = UTextComponent("§cSkySkipped §f:: §eGithub: §fhttps://github.com/Cephetir/SkySkipped")
                 text.setHover(HoverEvent.Action.SHOW_TEXT, "§9Open URL in browser.")
@@ -85,18 +85,6 @@ class SkySkippedCommand : CommandBase() {
                     chat("§cSkySkipped §f:: §eJacob failsafe stopped and won't reenable macro!")
                 } else chat("§cSkySkipped §f:: §4Jacob failsafe wasn't triggered!")
             }
-            "help" -> chat(
-                """
-                    §cSkySkipped §f:: §eUsage:
-                    §cSkySkipped §f:: §e/sm §for§e /sm gui §f- §eOpens GUI
-                    §cSkySkipped §f:: §e/sm keybinds §for§e /sm kb §f- §eOpens item swap keybinds GUI
-                    §cSkySkipped §f:: §e/sm github §f- §eOpens official github page
-                    §cSkySkipped §f:: §e/sm pet [pet index (start counting from 1)] §f- §eAuto select pet quickly
-                    §cSkySkipped §f:: §e/sm trail [particle name] §f- §eSet trail particle
-                    §cSkySkipped §f:: §e/sm hud §f- §eOpens hud editor GUI
-                    §cSkySkipped §f:: §e/sm help §f- §eShow this message
-                    """.trimIndent()
-            )
             "dev" -> {
                 SkySkipped.devMode = !SkySkipped.devMode
                 chat("§cSkySkipped §f:: §eDev mode ${SkySkipped.devMode}")
@@ -106,15 +94,34 @@ class SkySkippedCommand : CommandBase() {
                 else chat("§cSkySkipped §f:: §4Specify particle name!")
             }
             "hud" -> EssentialAPI.getGuiUtil().openScreen(GuiHudEditor())
+            "hotbars", "hb" -> {
+                if (args.size >= 3) {
+                    val name = args[2]
+                    when (args[1]) {
+                        "save" -> HotbarSaver.savePreset(name)
+                        "select" -> HotbarSaver.selectPreset(name)
+                        "remove" -> HotbarSaver.removePreset(name)
+                        else -> chat("§cSkySkipped §f:: §4Invalid argument! Usage: /sm hb [save|select|remove] [preset name]")
+                    }
+                } else if (args.size >= 2 && args[1] == "list") {
+                    var text = "§cSkySkipped §f:: §eList of saved presets: "
+                    HotbarSaver.presets.forEach { text += "${it.name}, " }
+                    chat("${text.removeSuffix(", ")}.")
+                } else chat("§cSkySkipped §f:: §4Not enough arguments! Usage: /sm hb [save|select|remove] [preset name]")
+            }
+            "reload" -> SkySkipped.loadCosmetics()
             else -> chat(
                 """
                     §cSkySkipped §f:: §eUsage:
                     §cSkySkipped §f:: §e/sm §for§e /sm gui §f- §eOpens GUI
                     §cSkySkipped §f:: §e/sm keybinds §for§e /sm kb §f- §eOpens item swap keybinds GUI
-                    §cSkySkipped §f:: §e/sm github §f- §eOpens official github page
                     §cSkySkipped §f:: §e/sm pet [pet index (start counting from 1)] §f- §eAuto select pet very fast
+                    §cSkySkipped §f:: §e/sm keybinds §for§e /sm kb §f- §eOpen keybinds GUI
                     §cSkySkipped §f:: §e/sm trail [particle name] §f- §eSet trail particle
                     §cSkySkipped §f:: §e/sm hud §f- §eOpens hud editor GUI
+                    §cSkySkipped §f:: §e/sm hotbars §for§e /sm hb [save|select|remove|list] [preset name] §f- §eSave, select or remove hotbar preset
+                    §cSkySkipped §f:: §e/sm reload §f- §eReload cosmetics and custom names
+                    §cSkySkipped §f:: §e/sm github §f- §eOpens official github page
                     §cSkySkipped §f:: §e/sm help §f- §eShows this message
                     """.trimIndent()
             )

@@ -35,9 +35,9 @@ public abstract class MixinRendererLivingEntity {
     @Shadow
     protected ModelBase mainModel;
 
-    @Inject(method = "renderModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelBase;render(Lnet/minecraft/entity/Entity;FFFFFF)V"), cancellable = true)
-    public void doRender(final EntityLivingBase entity, final float limbSwing, final float limbSwingAmount, final float ageInTicks, final float netHeadYaw, final float headPitch, final float scaleFactor, CallbackInfo ci) {
-        if (MinecraftForge.EVENT_BUS.post(new RenderEntityModelEvent(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, this.mainModel)))
+    @Inject(method = "doRender(Lnet/minecraft/entity/EntityLivingBase;DDDFF)V", at = @At("RETURN"), cancellable = true)
+    public void onRender(EntityLivingBase entity, double x, double y, double z, float entityYaw, float partialTicks, CallbackInfo ci) {
+        if (MinecraftForge.EVENT_BUS.post(new RenderEntityModelEvent(entity, this.mainModel, partialTicks)))
             ci.cancel();
     }
 

@@ -18,8 +18,11 @@
 package me.cephetir.skyskipped.commands.dungeonCommands
 
 import gg.essential.api.EssentialAPI
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
+import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.client.Minecraft
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
@@ -58,33 +61,27 @@ class PartyCommand : CommandBase() {
 
     private var step = 0
     private var startedd = false
+
     @SubscribeEvent
-    fun onTick(event: ClientTickEvent?) {
+    fun onTick(event: ClientTickEvent) {
         if (startedd) return
-        Thread {
+        val toStop = this
+        BackgroundScope.launch {
             startedd = true
             when (step) {
                 0 -> {
                     Minecraft.getMinecraft().thePlayer.sendChatMessage("/p leave")
-                    timer(200L)
+                    delay(200L)
+                    step++
                 }
                 1 -> {
                     Minecraft.getMinecraft().thePlayer.sendChatMessage("/p " + Config.BotName)
-                    MinecraftForge.EVENT_BUS.unregister(this)
+                    MinecraftForge.EVENT_BUS.unregister(toStop)
                     started = false
                     step = 0
                 }
             }
             startedd = false
-        }.start()
-    }
-
-    private fun timer(millis: Long) {
-        try {
-            Thread.sleep(millis)
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
         }
-        step++
     }
 }

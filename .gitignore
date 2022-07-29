@@ -5,6 +5,10 @@ bin
 .metadata
 .classpath
 .project
+eclipse
+
+# vs code
+.vscode
 
 # idea
 out
@@ -18,6 +22,4 @@ build
 .gradle
 
 # other
-eclipse
 run
-/gradle.properties

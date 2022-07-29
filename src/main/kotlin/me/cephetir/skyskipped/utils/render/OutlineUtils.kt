@@ -17,63 +17,108 @@
 
 package me.cephetir.skyskipped.utils.render
 
-import me.cephetir.skyskipped.event.events.RenderEntityModelEvent
+import me.cephetir.skyskipped.mixins.IMixinRendererLivingEntity
 import net.minecraft.client.Minecraft
 import net.minecraft.client.model.ModelBase
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.shader.Framebuffer
-import net.minecraft.entity.Entity
+import net.minecraft.entity.EntityLivingBase
 import org.lwjgl.opengl.EXTFramebufferObject
 import org.lwjgl.opengl.GL11
-import java.awt.Color
 
 object OutlineUtils {
-    private fun outlineEntity(
+    fun outlineEntity(
         model: ModelBase,
-        entity: Entity?,
+        entity: EntityLivingBase,
         limbSwing: Float,
         limbSwingAmount: Float,
         ageInTicks: Float,
         headYaw: Float,
         headPitch: Float,
-        scaleFactor: Float
+        scaleFactor: Float,
+        partialTicks: Float,
+        color: Int
     ) {
+        val renderer = Minecraft.getMinecraft().renderManager.getEntityRenderObject<EntityLivingBase>(entity) as IMixinRendererLivingEntity
         val fancyGraphics = Minecraft.getMinecraft().gameSettings.fancyGraphics
         val gamma = Minecraft.getMinecraft().gameSettings.gammaSetting
         Minecraft.getMinecraft().gameSettings.fancyGraphics = false
         Minecraft.getMinecraft().gameSettings.gammaSetting = Float.MAX_VALUE
+        val f3 = (color shr 24 and 255).toFloat() / 255f
+        val f = (color shr 16 and 255).toFloat() / 255f
+        val f1 = (color shr 8 and 255).toFloat() / 255f
+        val f2 = (color and 255).toFloat() / 255f
         GlStateManager.resetColor()
-        setColor(Color.GREEN)
+        setColor(f, f1, f2, f3)
         renderOne()
         model.render(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch, scaleFactor)
-        setColor(Color.GREEN)
+        setColor(f, f1, f2, f3)
+        RenderUtils.renderLayers(
+            renderer,
+            entity,
+            limbSwing,
+            limbSwingAmount,
+            partialTicks,
+            ageInTicks,
+            headYaw,
+            headPitch,
+            scaleFactor,
+            f, f1,f2, f3
+        )
+        setColor(f, f1, f2, f3)
         renderTwo()
         model.render(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch, scaleFactor)
-        setColor(Color.GREEN)
+        setColor(f, f1, f2, f3)
+        RenderUtils.renderLayers(
+            renderer,
+            entity,
+            limbSwing,
+            limbSwingAmount,
+            partialTicks,
+            ageInTicks,
+            headYaw,
+            headPitch,
+            scaleFactor,
+            f, f1,f2, f3
+        )
+        setColor(f, f1, f2, f3)
         renderThree()
         model.render(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch, scaleFactor)
-        setColor(Color.GREEN)
-        renderFour(Color.GREEN)
+        RenderUtils.renderLayers(
+            renderer,
+            entity,
+            limbSwing,
+            limbSwingAmount,
+            partialTicks,
+            ageInTicks,
+            headYaw,
+            headPitch,
+            scaleFactor,
+            f, f1,f2, f3
+        )
+        setColor(f, f1, f2, f3)
+        setColor(f, f1, f2, f3)
+        renderFour()
         model.render(entity, limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch, scaleFactor)
-        setColor(Color.GREEN)
+        setColor(f, f1, f2, f3)
+        RenderUtils.renderLayers(
+            renderer,
+            entity,
+            limbSwing,
+            limbSwingAmount,
+            partialTicks,
+            ageInTicks,
+            headYaw,
+            headPitch,
+            scaleFactor,
+            f, f1,f2, f3
+        )
+        setColor(f, f1, f2, f3)
         renderFive()
-        setColor(Color.GREEN)
+        setColor(f, f1, f2, f3)
         Minecraft.getMinecraft().gameSettings.fancyGraphics = fancyGraphics
         Minecraft.getMinecraft().gameSettings.gammaSetting = gamma
-    }
-
-    fun outlineEntity(event: RenderEntityModelEvent) {
-        outlineEntity(
-            event.model,
-            event.entity,
-            event.limbSwing,
-            event.limbSwingAmount,
-            event.ageInTicks,
-            event.headYaw,
-            event.headPitch,
-            event.scaleFactor
-        )
     }
 
     private fun renderOne() {
@@ -106,8 +151,7 @@ object OutlineUtils {
         GL11.glPolygonMode(1032, 6913)
     }
 
-    private fun renderFour(color: Color) {
-        setColor(color)
+    private fun renderFour() {
         GL11.glDepthMask(false)
         GL11.glDisable(2929)
         GL11.glEnable(10754)
@@ -130,13 +174,8 @@ object OutlineUtils {
         GL11.glPopAttrib()
     }
 
-    private fun setColor(color: Color) {
-        GL11.glColor4d(
-            (color.red / 255.0f).toDouble(),
-            (color.green / 255.0f).toDouble(),
-            (color.blue / 255.0f).toDouble(),
-            (color.alpha / 255.0f).toDouble()
-        )
+    private fun setColor(f: Float, f1: Float, f2: Float, f3: Float) {
+        GlStateManager.color(f, f1, f2, f3)
     }
 
     private fun checkSetupFBO() {

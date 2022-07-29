@@ -17,11 +17,15 @@
 
 package me.cephetir.skyskipped.features.impl.macro
 
+import gg.essential.api.EssentialAPI
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.utils.ScreenshotUtils
 import me.cephetir.skyskipped.utils.TextUtils.isNumeric
+import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
@@ -44,27 +48,35 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 object RemoteControlling {
     private val mc = Minecraft.getMinecraft()
     private lateinit var jda: JDA
+
+    @Volatile
     private var connect = false
 
     fun setup() {
         SkySkipped.logger.info("Starting JDA...")
         if (!Loader.isModLoaded("skyskippedjdaaddon")) return SkySkipped.logger.error("Failed to start JDA! SkySkipped JDA Addon mod not loaded!")
 
-        jda = JDABuilder.createLight(Config.remoteControlUrl)
-            .disableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
-            .setBulkDeleteSplittingEnabled(false)
-            .setActivity(Activity.watching("over skyskipped macro"))
-            .addEventListeners(EventListener())
-            .build()
+        try {
+            jda = JDABuilder.createLight(Config.remoteControlUrl)
+                .disableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
+                .setBulkDeleteSplittingEnabled(false)
+                .setActivity(Activity.watching("over skyskipped macro"))
+                .addEventListeners(EventListener())
+                .build()
 
-        MinecraftForge.EVENT_BUS.register(this)
+            MinecraftForge.EVENT_BUS.register(RemoteControlling)
+        } catch (e: Exception) {
+            EssentialAPI.getNotifications().push("Failed to start JDA", "Invalid discord bot token!")
+            SkySkipped.logger.error("Failed to start JDA! Invalid discord bot token!")
+            e.printStackTrace()
+        }
     }
 
     fun stop() {
         if (this::jda.isInitialized) {
             SkySkipped.logger.info("Stopping JDA...")
             jda.shutdown()
-            MinecraftForge.EVENT_BUS.unregister(this)
+            MinecraftForge.EVENT_BUS.unregister(RemoteControlling)
         }
     }
 
@@ -114,19 +126,17 @@ object RemoteControlling {
                     mc.netHandler.networkManager.closeChannel(ChatComponentText("Disconnected using discord bot"))
                     event.message.reply("Successfully disconnected!").queue()
                 }
-                "inventory", "inv" -> {
-                    Thread {
-                        MacroManager.current.stopAndOpenInv()
-                        Thread.sleep(100L)
+                "inventory", "inv" -> BackgroundScope.launch {
+                    MacroManager.current.stopAndOpenInv()
+                    delay(100L)
 
-                        val ss = ScreenshotUtils.takeScreenshot()
-                        val channel = event.message.channel
-                        val embed = EmbedBuilder()
-                        embed.setImage("attachment://ss.png")
-                        channel.sendFile(ss, "ss.png").setEmbeds(embed.build()).queue()
+                    val ss = ScreenshotUtils.takeScreenshot()
+                    val channel = event.message.channel
+                    val embed = EmbedBuilder()
+                    embed.setImage("attachment://ss.png")
+                    channel.sendFile(ss, "ss.png").setEmbeds(embed.build()).queue()
 
-                        MacroManager.current.closeInvAndReturn()
-                    }.start()
+                    MacroManager.current.closeInvAndReturn()
                 }
                 else -> {
                     if (message.startsWith("run")) {

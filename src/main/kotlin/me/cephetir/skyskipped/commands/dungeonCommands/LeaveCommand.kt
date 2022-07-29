@@ -18,10 +18,13 @@
 package me.cephetir.skyskipped.commands.dungeonCommands
 
 import gg.essential.api.EssentialAPI
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.client.Minecraft
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
@@ -50,9 +53,8 @@ class LeaveCommand : CommandBase() {
     }
 
     override fun processCommand(sender: ICommandSender, args: Array<String>) {
-        if (args.isEmpty()) {
+        if (args.isEmpty())
             start(false)
-        }
     }
 
     private var party = false
@@ -67,18 +69,21 @@ class LeaveCommand : CommandBase() {
     private var startedd = false
 
     @SubscribeEvent
-    fun onTick(event: ClientTickEvent?) {
+    fun onTick(event: ClientTickEvent) {
         if (startedd) return
-        Thread {
+        val toStop = this
+        BackgroundScope.launch {
             startedd = true
             when (step) {
                 0 -> {
                     Minecraft.getMinecraft().thePlayer.sendChatMessage("/lobby")
-                    timer(Config.delay.toLong())
+                    delay(Config.delay.toLong())
+                    step++
                 }
                 1 -> {
                     Minecraft.getMinecraft().thePlayer.sendChatMessage("/play skyblock")
-                    timer(Config.delay.toLong())
+                    delay(Config.delay.toLong())
+                    step++
                 }
                 2 -> {
                     val scoreboard = Minecraft.getMinecraft().thePlayer.worldScoreboard
@@ -97,26 +102,14 @@ class LeaveCommand : CommandBase() {
                             ok = true
                         }
                     }
-                    if (!ok) {
-                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/warp dungeon_hub")
-                    }
-                    if (Config.EndParty && Config.BotName != "" || party) Features.partyCommand
-                        .start()
-                    MinecraftForge.EVENT_BUS.unregister(this)
+                    if (!ok) Minecraft.getMinecraft().thePlayer.sendChatMessage("/warp dungeon_hub")
+                    if (Config.EndParty && Config.BotName != "" || party) Features.partyCommand.start()
+                    MinecraftForge.EVENT_BUS.unregister(toStop)
                     started = false
                     step = 0
                 }
             }
             startedd = false
-        }.start()
-    }
-
-    private fun timer(millis: Long) {
-        try {
-            Thread.sleep(millis)
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
         }
-        step++
     }
 }

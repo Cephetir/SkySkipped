@@ -69,10 +69,7 @@ class ItemSwap : Feature() {
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
         for ((slots, step) in called) {
-            if (mc.currentScreen !is GuiInventory) {
-                called.clear()
-                return
-            }
+            if (mc.currentScreen !is GuiInventory) return called.clear()
             if (System.currentTimeMillis() - timer < Config.swapDelay) return
             timer = System.currentTimeMillis()
 

@@ -17,9 +17,12 @@
 
 package me.cephetir.skyskipped.features.impl.misc
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -29,19 +32,15 @@ class AutoStopFlying : Feature() {
     @SubscribeEvent
     fun onWorld(event: WorldEvent.Load) {
         if (!Config.stopFly) return
-        Thread {
-            try {
-                val last = System.currentTimeMillis()
-                var state = false
-                while(!state) {
-                    if(System.currentTimeMillis() - last >= 6000) return@Thread
-                    state = mc.thePlayer?.capabilities?.isFlying ?: continue && Cache.onIsland
-                    Thread.sleep(100)
-                }
-                mc.thePlayer.capabilities.isFlying = false
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
+        BackgroundScope.launch {
+            val last = System.currentTimeMillis()
+            var state = false
+            while (!state) {
+                if (System.currentTimeMillis() - last >= 6000) return@launch
+                state = mc.thePlayer?.capabilities?.isFlying ?: continue && Cache.onIsland
+                delay(100)
             }
-        }.start()
+            mc.thePlayer.capabilities.isFlying = false
+        }
     }
 }

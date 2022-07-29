@@ -17,16 +17,21 @@
 
 package me.cephetir.skyskipped.features.impl.macro
 
+import gg.essential.universal.UChat
 import me.cephetir.skyskipped.SkySkipped
+import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.features.impl.macro.macros.NetherwartMacro
 import me.cephetir.skyskipped.features.impl.macro.macros.SugarCaneMacro
-import net.minecraft.client.Minecraft
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.input.Keyboard
+import kotlin.math.roundToLong
 
-object MacroManager {
+object MacroManager : Feature() {
     val current: Macro
         get() = macros[Config.macroType]
 
@@ -36,17 +41,29 @@ object MacroManager {
     )
 
     var startTime = 0L
+    var stopTime = 0L
 
     @SubscribeEvent
     fun onInput(event: InputEvent.KeyInputEvent) {
-        if (Minecraft.getMinecraft().thePlayer == null ||
-            Minecraft.getMinecraft().theWorld == null ||
+        if (mc.thePlayer == null ||
+            mc.theWorld == null ||
             !Keyboard.getEventKeyState() ||
             Keyboard.getEventKey() != SkySkipped.macroKey.keyCode
         ) return
         startTime = System.currentTimeMillis()
+        stopTime = (Config.macroStopTime * 60 * 60 * 1000).roundToLong()
         if (current.enabled) return current.toggle()
-        //if (!Cache.onIsland) return UChat.chat("§cSkySkipped §f:: §4You're not on private island!")
+        if (!Cache.onIsland) return UChat.chat("§cSkySkipped §f:: §4You're not on private island!")
         current.toggle()
+    }
+
+    @SubscribeEvent
+    fun onTick(event: ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START || !current.enabled) return
+        if (stopTime != 0L && startTime - stopTime <= 0) {
+            current.toggle()
+            Macro.sendWebhook("Macro Disabled", "Macro disabled due to scheduled toggle!", true)
+            stopTime = 0L
+        }
     }
 }

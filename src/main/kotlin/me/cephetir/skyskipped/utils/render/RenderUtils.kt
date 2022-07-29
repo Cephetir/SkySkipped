@@ -17,16 +17,23 @@
 
 package me.cephetir.skyskipped.utils.render
 
-import me.cephetir.skyskipped.mixins.IMixinEntityRenderer
+import me.cephetir.skyskipped.mixins.IMixinLayerArmorBase
 import me.cephetir.skyskipped.mixins.IMixinMinecraft
 import me.cephetir.skyskipped.mixins.IMixinRenderManager
+import me.cephetir.skyskipped.mixins.IMixinRendererLivingEntity
 import net.minecraft.client.Minecraft
+import net.minecraft.client.model.ModelBase
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderGlobal
 import net.minecraft.client.renderer.Tessellator
+import net.minecraft.client.renderer.culling.Frustum
+import net.minecraft.client.renderer.entity.layers.LayerArmorBase
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.Entity
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.item.EntityArmorStand
+import net.minecraft.item.ItemArmor
 import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.Vec3
 import org.lwjgl.opengl.GL11.*
@@ -37,6 +44,7 @@ import kotlin.math.sin
 
 object RenderUtils {
     private val mc = Minecraft.getMinecraft()
+    private val frustrum = Frustum()
 
     @JvmStatic
     fun drawBox(pos: Vec3, color: Color, pt: Float) {
@@ -108,14 +116,15 @@ object RenderUtils {
         GlStateManager.enableCull()
     }
 
-    fun renderStarredMobBoundingBox(entity: Entity, partialTicks: Float, color: Int) {
+    fun renderStarredMobBoundingBox(entity: Entity, color: Int) {
         val rm = mc.renderManager as IMixinRenderManager
+        val partialTicks = (mc as IMixinMinecraft).timer.renderPartialTicks.toDouble()
         val renderPosX = rm.renderPosX
         val renderPosY = rm.renderPosY
         val renderPosZ = rm.renderPosZ
-        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks.toDouble() - renderPosX
-        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks.toDouble() - renderPosY
-        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks.toDouble() - renderPosZ
+        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks - renderPosX
+        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks - renderPosY
+        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks - renderPosZ
         val entityBox = entity.entityBoundingBox
         val aabb = AxisAlignedBB.fromBounds(
             entityBox.minX - entity.posX + x - 0.4,
@@ -128,14 +137,15 @@ object RenderUtils {
         drawFilledBoundingBox(aabb, color)
     }
 
-    fun renderMiniBoundingBox(entity: Entity, partialTicks: Float, color: Int) {
+    fun renderMiniBoundingBox(entity: Entity, color: Int) {
         val rm = mc.renderManager as IMixinRenderManager
+        val partialTicks = (mc as IMixinMinecraft).timer.renderPartialTicks.toDouble()
         val renderPosX = rm.renderPosX
         val renderPosY = rm.renderPosY
         val renderPosZ = rm.renderPosZ
-        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks.toDouble() - renderPosX
-        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks.toDouble() - renderPosY
-        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks.toDouble() - renderPosZ
+        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks - renderPosX
+        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks - renderPosY
+        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks - renderPosZ
         val entityBox = entity.entityBoundingBox.expand(0.1, 0.1, 0.1)
         val aabb = AxisAlignedBB.fromBounds(
             entityBox.minX - entity.posX + x,
@@ -148,14 +158,36 @@ object RenderUtils {
         drawFilledBoundingBox(aabb, color)
     }
 
-    fun renderBoundingBox(entity: Entity, partialTicks: Float, color: Int) {
+    fun renderKeyBoundingBox(entity: Entity, color: Int) {
         val rm = mc.renderManager as IMixinRenderManager
+        val partialTicks = (mc as IMixinMinecraft).timer.renderPartialTicks.toDouble()
         val renderPosX = rm.renderPosX
         val renderPosY = rm.renderPosY
         val renderPosZ = rm.renderPosZ
-        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks.toDouble() - renderPosX
-        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks.toDouble() - renderPosY
-        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks.toDouble() - renderPosZ
+        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks - renderPosX
+        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks - renderPosY
+        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks - renderPosZ
+        val bbox = entity.entityBoundingBox.contract(0.0, 0.5, 0.0)
+        val aabb = AxisAlignedBB(
+            bbox.minX - entity.posX + x,
+            bbox.minY - entity.posY + y + 0.5,
+            bbox.minZ - entity.posZ + z,
+            bbox.maxX - entity.posX + x,
+            bbox.maxY - entity.posY + y + 0.5,
+            bbox.maxZ - entity.posZ + z
+        )
+        drawFilledBoundingBox(aabb, color)
+    }
+
+    fun renderBoundingBox(entity: Entity, color: Int) {
+        val rm = mc.renderManager as IMixinRenderManager
+        val partialTicks = (mc as IMixinMinecraft).timer.renderPartialTicks.toDouble()
+        val renderPosX = rm.renderPosX
+        val renderPosY = rm.renderPosY
+        val renderPosZ = rm.renderPosZ
+        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks - renderPosX
+        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks - renderPosY
+        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks - renderPosZ
         val bbox = entity.entityBoundingBox
         var aabb = AxisAlignedBB(
             bbox.minX - entity.posX + x,
@@ -174,10 +206,10 @@ object RenderUtils {
         val renderPosX = rm.renderPosX
         val renderPosY = rm.renderPosY
         val renderPosZ = rm.renderPosZ
-        val x: Double = vec.xCoord - renderPosX
-        val y: Double = vec.yCoord - renderPosY
-        val z: Double = vec.zCoord - renderPosZ
-        val aabb = AxisAlignedBB(x - 0.05, y - 0.05, z - 0.05, x + 0.05, y + 0.05, z + 0.05)
+        val x = vec.xCoord - renderPosX
+        val y = vec.yCoord - renderPosY
+        val z = vec.zCoord - renderPosZ
+        val aabb = AxisAlignedBB(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1)
         drawFilledBoundingBox(aabb, color)
     }
 
@@ -293,32 +325,6 @@ object RenderUtils {
         GlStateManager.disableBlend()
     }
 
-    fun drawTracerLine(x: Double, y: Double, z: Double, color: Int, lineWdith: Float) {
-        val f3 = (color shr 24 and 255).toFloat() / 255.0f
-        val f = (color shr 16 and 255).toFloat() / 255.0f
-        val f1 = (color shr 8 and 255).toFloat() / 255.0f
-        val f2 = (color and 255).toFloat() / 255.0f
-        GlStateManager.pushMatrix()
-        GlStateManager.loadIdentity()
-        (mc.entityRenderer as IMixinEntityRenderer).orientCamera((mc as IMixinMinecraft).timer.renderPartialTicks)
-        GlStateManager.enableBlend()
-        glEnable(GL_LINE_SMOOTH)
-        glDisable(GL_DEPTH_TEST)
-        GlStateManager.disableTexture2D()
-        GlStateManager.blendFunc(770, 771)
-        glLineWidth(lineWdith)
-        GlStateManager.color(f, f1, f2, f3)
-        glBegin(2)
-        glVertex3d(0.0, 0.0 + Minecraft.getMinecraft().thePlayer.getEyeHeight(), 0.0)
-        glVertex3d(x, y, z)
-        glEnd()
-        GlStateManager.disableBlend()
-        GlStateManager.enableTexture2D()
-        glEnable(GL_DEPTH_TEST)
-        glDisable(GL_LINE_SMOOTH)
-        glPopMatrix()
-    }
-
     fun quickDrawRect(x: Float, y: Float, x2: Float, y2: Float) {
         glBegin(GL_QUADS)
         glVertex2d(x2.toDouble(), y.toDouble())
@@ -333,7 +339,7 @@ object RenderUtils {
         var paramYStart = paramYStart
         var paramXEnd = paramXEnd
         var paramYEnd = paramYEnd
-        var z = 0f
+        var z: Float
         if (paramXStart > paramXEnd) {
             z = paramXStart
             paramXStart = paramXEnd
@@ -381,4 +387,197 @@ object RenderUtils {
         glEnd()
         glDisable(GL_LINE_SMOOTH)
     }
+
+    fun isInViewFrustrum(entity: Entity): Boolean {
+        return isInViewFrustrum(entity.entityBoundingBox) || entity.ignoreFrustumCheck
+    }
+
+    private fun isInViewFrustrum(bb: AxisAlignedBB): Boolean {
+        val current = mc.renderViewEntity
+        frustrum.setPosition(current.posX, current.posY, current.posZ)
+        return frustrum.isBoundingBoxInFrustum(bb)
+    }
+
+    fun drawOutlinedEsp(entity: EntityLivingBase, model: ModelBase, color: Int, partialTicks: Float) {
+        val modelData = preModelDraw(entity, model, partialTicks)
+
+        OutlineUtils.outlineEntity(
+            model,
+            entity,
+            modelData.limbSwing,
+            modelData.limbSwingAmount,
+            modelData.age,
+            modelData.rotationYaw,
+            modelData.rotationPitch,
+            0.0625f,
+            partialTicks,
+            color
+        )
+
+        postModelDraw()
+    }
+
+    fun drawChamsEsp(entity: EntityLivingBase, model: ModelBase, color: Int, partialTicks: Float) {
+        val modelData = preModelDraw(entity, model, partialTicks)
+        val f3 = (color shr 24 and 255).toFloat() / 255f
+        val f = (color shr 16 and 255).toFloat() / 255f
+        val f1 = (color shr 8 and 255).toFloat() / 255f
+        val f2 = (color and 255).toFloat() / 255f
+
+        GlStateManager.pushMatrix()
+        // polygonOffsetLine
+        glEnable(10754)
+        GlStateManager.doPolygonOffset(1f, 1000000f)
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240f, 240f)
+
+        GlStateManager.enableBlend()
+        GlStateManager.disableTexture2D()
+        GlStateManager.disableLighting()
+        GlStateManager.blendFunc(770, 771)
+        GlStateManager.color(f, f1, f2, f3)
+
+        GlStateManager.disableDepth()
+        GlStateManager.depthMask(false)
+
+        model.render(
+            entity,
+            modelData.limbSwing,
+            modelData.limbSwingAmount,
+            modelData.age,
+            modelData.rotationYaw,
+            modelData.rotationPitch,
+            0.0625f
+        )
+        renderLayers(
+            modelData.renderer,
+            entity,
+            modelData.limbSwing,
+            modelData.limbSwingAmount,
+            partialTicks,
+            modelData.age,
+            modelData.rotationYaw,
+            modelData.rotationPitch,
+            0.0625f,
+            f, f1, f2, f3
+        )
+
+        GlStateManager.enableDepth()
+        GlStateManager.depthMask(true)
+        GlStateManager.color(f, f1, f2, f3)
+
+        model.render(
+            entity,
+            modelData.limbSwing,
+            modelData.limbSwingAmount,
+            modelData.age,
+            modelData.rotationYaw,
+            modelData.rotationPitch,
+            0.0625f
+        )
+        renderLayers(
+            modelData.renderer,
+            entity,
+            modelData.limbSwing,
+            modelData.limbSwingAmount,
+            partialTicks,
+            modelData.age,
+            modelData.rotationYaw,
+            modelData.rotationPitch,
+            0.0625f,
+            f, f1, f2, f3
+        )
+
+        GlStateManager.enableTexture2D()
+        GlStateManager.color(1f, 1f, 1f, 1f)
+        GlStateManager.disableBlend()
+        GlStateManager.enableLighting()
+
+        GlStateManager.doPolygonOffset(1f, -1000000f)
+        // polygonOffsetLine
+        glDisable(10754)
+        GlStateManager.popMatrix()
+
+        postModelDraw()
+    }
+
+    private fun preModelDraw(entity: EntityLivingBase, model: ModelBase, partialTicks: Float): ModelData {
+        val renderer = mc.renderManager.getEntityRenderObject<EntityLivingBase>(entity) as IMixinRendererLivingEntity
+        val renderManager = mc.renderManager as IMixinRenderManager
+
+        val renderYaw = renderer.interpolateRotation(entity.prevRenderYawOffset, entity.renderYawOffset, partialTicks)
+        val prevYaw = renderer.interpolateRotation(entity.prevRotationYawHead, entity.rotationYawHead, partialTicks)
+        val rotationYaw = prevYaw - renderYaw
+        val rotationPitch = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks
+        val limbSwing = entity.limbSwing - entity.limbSwingAmount * (1f - partialTicks)
+        val limbSwingAmout = entity.prevLimbSwingAmount + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTicks
+        val age = renderer.handleRotationFloat(entity, partialTicks)
+
+        GlStateManager.pushMatrix()
+        GlStateManager.disableCull()
+        model.swingProgress = entity.getSwingProgress(partialTicks)
+        model.isChild = entity.isChild
+        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks.toDouble()
+        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks.toDouble()
+        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks.toDouble()
+        GlStateManager.translate(x - renderManager.renderPosX, y - renderManager.renderPosY, z - renderManager.renderPosZ)
+        val f = renderer.interpolateRotation(entity.prevRenderYawOffset, entity.renderYawOffset, partialTicks)
+        renderer.rotateCorpse(entity, age, f, partialTicks)
+        GlStateManager.enableRescaleNormal()
+        GlStateManager.scale(-1f, -1f, 1f)
+        renderer.preRenderCallback(entity, partialTicks)
+        GlStateManager.translate(0.0f, -1.5078125f, 0.0f)
+        model.setLivingAnimations(entity, limbSwing, limbSwingAmout, partialTicks)
+        model.setRotationAngles(limbSwing, limbSwingAmout, age, rotationYaw, rotationPitch, 0.0625f, entity as Entity)
+
+        return ModelData(renderer, rotationYaw, rotationPitch, limbSwing, limbSwingAmout, age)
+    }
+
+    private fun postModelDraw() {
+        GlStateManager.resetColor()
+        GlStateManager.disableRescaleNormal()
+        GlStateManager.enableTexture2D()
+        GlStateManager.enableCull()
+        GlStateManager.popMatrix()
+    }
+
+    fun renderLayers(
+        renderer: IMixinRendererLivingEntity,
+        entitylivingbaseIn: EntityLivingBase,
+        p_177093_2_: Float,
+        p_177093_3_: Float,
+        partialTicks: Float,
+        p_177093_5_: Float,
+        p_177093_6_: Float,
+        p_177093_7_: Float,
+        p_177093_8_: Float,
+        red: Float,
+        green: Float,
+        blue: Float,
+        alpha: Float
+    ) {
+        for (layerrenderer in renderer.layerRenderers)
+            if (layerrenderer is LayerArmorBase<*>)
+                for (i in 1..4) {
+                    val itemstack = entitylivingbaseIn.getCurrentArmor(i - 1)
+                    if (itemstack == null || itemstack.item !is ItemArmor) continue
+
+                    val armorModel = layerrenderer.getArmorModel(i)
+                    armorModel.setModelAttributes(renderer.mainModel)
+                    armorModel.setLivingAnimations(entitylivingbaseIn, p_177093_2_, p_177093_3_, partialTicks)
+                    val layerrendererAccessor = layerrenderer as IMixinLayerArmorBase
+                    layerrendererAccessor.setModelPartVisible(armorModel, i)
+
+                    GlStateManager.color(red, green, blue, alpha)
+                    armorModel.render(entitylivingbaseIn, p_177093_2_, p_177093_3_, p_177093_5_, p_177093_6_, p_177093_7_, p_177093_8_)
+                }
+    }
+
+    data class ModelData(
+        val renderer: IMixinRendererLivingEntity,
+        val rotationYaw: Float,
+        val rotationPitch: Float,
+        val limbSwing: Float,
+        val limbSwingAmount: Float,
+        val age: Float
+    )
 }

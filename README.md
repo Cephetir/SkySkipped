@@ -60,6 +60,8 @@ Cephetir's cool mod for Hypixel and Skyblock
   - Swaps items in invenory on key press (usefull for armor)
 - Fast Break
   - Break additional blocks behind
+- Lava Fishing ESP
+  - Shows lava fising spots through walls
 </details>
 
 <details>
@@ -70,6 +72,7 @@ Cephetir's cool mod for Hypixel and Skyblock
     - Hides pet's candies counter in tooltip
 - Pets Overlay
     - Good-looking overlay for pets menu
+    - Aura option (auto gift collect)
 - Highlight Presents in Jerry Workshop
     - Highlight presents in Jerry Workshop
 - Perspective Toggle
@@ -105,9 +108,14 @@ Cephetir's cool mod for Hypixel and Skyblock
 <details>
     <summary>Commands</summary>
 
-- /sm or /sm gui - opens config gui
-- /sm keybind or /sm kb - epic item swapper
-- /sm pet [pet index] - auto select pet very fast
-- /sm github - opens official github page
-- /sm help - shows all commands list
+- /sm or /sm gui - Open config gui
+- /sm keybind or /sm kb - Epic item swapper
+- /sm pet [pet index] - Auto select pet very fast
+- /sm keybinds or /sm kb - Open keybinds GUI
+- /sm trail [particle name] - Set particle for Trail feature
+- /sm hud - Open hud editor GUI
+- /sm hotbars or /sm hb [save|select|remove|list] [preset name] - Save, select or remove hotbar preset
+- /sm reload - Reload cosmetics and custom names
+- /sm github - Open official github page
+- /sm help - Show all commands list
 </details>

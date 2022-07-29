@@ -22,13 +22,12 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import gg.essential.api.EssentialAPI
 import gg.essential.api.utils.Multithreading
-import gg.essential.api.utils.WebUtil
 import me.cephetir.skyskipped.commands.SkySkippedCommand
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.Listener
+import me.cephetir.skyskipped.event.SBInfo
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
-import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.features.impl.macro.RemoteControlling
 import me.cephetir.skyskipped.features.impl.misc.Metrics
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
@@ -62,9 +61,9 @@ class SkySkipped {
     companion object {
         const val MODID = "skyskipped"
         const val MOD_NAME = "SkySkipped"
-        const val VERSION = "3.1"
+        const val VERSION = "3.2"
 
-        val config = Config()
+        lateinit var config: Config
         val features = Features()
         val logger: Logger = LogManager.getLogger("SkySkipped")
         var devMode = false
@@ -73,8 +72,9 @@ class SkySkipped {
         val perspectiveToggle = KeyBinding("Better Perspective", Keyboard.KEY_NONE, "SkySkipped")
         val autoDojo = KeyBinding("Auto Dojo", Keyboard.KEY_NONE, "SkySkipped")
         val giftAura = KeyBinding("Gift Aura", Keyboard.KEY_NONE, "SkySkipped")
-        val keybinds = HashSet<GuiItemSwap.Keybind>()
+        val keybinds = hashSetOf<GuiItemSwap.Keybind>()
         val macroKey = KeyBinding("Toggle Macro", Keyboard.KEY_NONE, "SkySkipped")
+        val hotbarKey = KeyBinding("Swap Hotbar Layouts", Keyboard.KEY_NONE, "SkySkipped")
 
         private val cosmetics = hashMapOf<String, Pair<String, String>>()
         private val regex = Regex("(?:§.)*(?<prefix>\\[\\w\\w\\w(?:(?:§.)*\\+)*(?:§.)*])? *(?<username>\\w{3,16})(?:§.)* *:*")
@@ -87,49 +87,69 @@ class SkySkipped {
             for (matcher in result) {
                 val name = matcher.groups["username"]?.value?.trim() ?: continue
                 val nameRange = matcher.groups["username"]?.range ?: continue
-                val prefix = matcher.groups["prefix"]?.value?.trim()
                 val prefixRange = matcher.groups["prefix"]?.range
-                val newName = cosmetics[name]?.component1()?.replace("&", "§") ?: continue
-                val newPrefix = cosmetics[name]?.component2()?.replace("&", "§") ?: continue
+
+                val newName = cosmetics[name]?.first?.replace("&", "§") ?: continue
+                val newPrefix = cosmetics[name]?.second?.replace("&", "§") ?: continue
+
                 text = text.replaceRange(nameRange, newName)
-                if (prefix != null && prefixRange != null) text = text.replaceRange(prefixRange, newPrefix)
+                if (prefixRange != null) text = text.replaceRange(prefixRange, newPrefix)
             }
             if (text.contains(Minecraft.getMinecraft().thePlayer.displayNameString)) text = text.replace(
                 Minecraft.getMinecraft().thePlayer.displayNameString,
-                cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§")
-                    ?: return text
+                cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§") ?: return text
             )
             return text
         }
 
         @JvmStatic
         fun replaceCosmetics(message: String): String {
-            if (Minecraft.getMinecraft().thePlayer != null && message.contains(Minecraft.getMinecraft().thePlayer.displayName.formattedText))
-                return message.replace(
+            return if (Minecraft.getMinecraft().thePlayer != null && message.contains(Minecraft.getMinecraft().thePlayer.displayName.formattedText))
+                message.replace(
                     Minecraft.getMinecraft().thePlayer.displayNameString,
-                    cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§")
-                        ?: return message
+                    cosmetics[Minecraft.getMinecraft().thePlayer.displayNameString]?.component1()?.replace("&", "§") ?: return message
                 )
-            else return message
+            else message
+        }
+
+        fun loadCosmetics() {
+            cosmetics.clear()
+            val gson = Gson()
+            val body = HttpUtils.sendGet("https://api.github.com/gists/7af203131b17bd470e5453785916ef69", mapOf("Content-Type" to "application/json"))
+            val json = gson.fromJson(body, JsonObject::class.java) ?: return logger.info("Failed to download cosmetics!")
+            val content = json.getAsJsonObject("files")
+                .getAsJsonObject("cosmetics.json")
+                .getAsJsonPrimitive("content").asString
+            gson.fromJson(content, JsonArray::class.java).toList().forEach {
+                cosmetics[it.asJsonObject.getAsJsonPrimitive("name").asString] =
+                    Pair(
+                        it.asJsonObject.getAsJsonPrimitive("nick").asString,
+                        it.asJsonObject.getAsJsonPrimitive("prefix").asString
+                    )
+            }
+            logger.info("Successfully downloaded cosmetics!")
         }
     }
 
     @Mod.EventHandler
     fun onPreInit(event: FMLPreInitializationEvent) {
         logger.info("Starting SkySkipped...")
+
+        config = Config()
         config.preload()
         config.loadKeybinds()
+        config.loadHotbars()
+
         MinecraftForge.EVENT_BUS.register(this)
     }
 
     @Mod.EventHandler
     fun onInit(event: FMLInitializationEvent) {
         logger.info("Initializing SkySkipped...")
-        MinecraftForge.EVENT_BUS.register(RPC())
-        MinecraftForge.EVENT_BUS.register(Listener())
+
+        MinecraftForge.EVENT_BUS.register(SBInfo)
+        MinecraftForge.EVENT_BUS.register(Listener)
         features.register()
-        MinecraftForge.EVENT_BUS.register(MacroManager)
-        RPC.reset()
 
         ClientCommandHandler.instance.registerCommand(SkySkippedCommand())
         ClientCommandHandler.instance.registerCommand(Features.leaveCommand)
@@ -140,11 +160,16 @@ class SkySkipped {
         ClientRegistry.registerKeyBinding(autoDojo)
         ClientRegistry.registerKeyBinding(giftAura)
         ClientRegistry.registerKeyBinding(macroKey)
+        ClientRegistry.registerKeyBinding(hotbarKey)
 
         EssentialAPI.getShutdownHookUtil().register {
-            RPC.shutdown()
             config.saveKeybinds()
+            config.saveHotbars()
+            config.markDirty()
+            config.writeData()
+
             Metrics.update(false)
+            RPC.shutdown()
             RemoteControlling.stop()
         }
     }
@@ -153,35 +178,18 @@ class SkySkipped {
     fun onLoad(event: FMLLoadCompleteEvent) {
         logger.info("Checking for updates...")
         Multithreading.runAsync {
-            val version = WebUtil.fetchString("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt")
-                ?: return@runAsync
-            if (version != "Failed to fetch" && VERSION.toDouble() < version.toDouble()) {
+            val version = HttpUtils.sendGet("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt", null)?.toDouble() ?: return@runAsync
+            if (VERSION.toDouble() < version) {
                 logger.info("New version detected!")
                 EssentialAPI.getNotifications().push(
                     "SkySkipped",
-                    "New Version Detected: ${version.toDouble()}\nClick to Download",
+                    "New Version Detected: $version\nClick to Download",
                     10f,
                     action = { Desktop.getDesktop().browse(URI("https://github.com/Cephetir/SkySkipped/releases")) }
                 )
             } else logger.info("Latest version!")
 
-            val gson = Gson()
-            val body = HttpUtils.sendGet("https://api.github.com/gists/7af203131b17bd470e5453785916ef69", mapOf("Content-Type" to "application/json"))
-            val json = gson.fromJson(body, JsonObject::class.java)
-            if (json.isJsonNull) logger.info("Failed to download cosmetics!")
-            else {
-                val content = json.getAsJsonObject("files")
-                    .getAsJsonObject("cosmetics.json")
-                    .getAsJsonPrimitive("content").asString
-                gson.fromJson(content, JsonArray::class.java).toList().forEach {
-                    cosmetics[it.asJsonObject.getAsJsonPrimitive("name").asString] =
-                        Pair(
-                            it.asJsonObject.getAsJsonPrimitive("nick").asString,
-                            it.asJsonObject.getAsJsonPrimitive("prefix").asString
-                        )
-                }
-                logger.info("Successfully downloaded cosmetics!")
-            }
+            loadCosmetics()
         }
     }
 }
