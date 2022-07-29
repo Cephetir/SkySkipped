@@ -20,8 +20,8 @@ package me.cephetir.skyskipped.features.impl.dugeons
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.PingUtils
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import me.cephetir.skyskipped.utils.skyblock.PingUtils
 import net.minecraft.entity.monster.EntityZombie
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
@@ -41,7 +41,7 @@ class Pings : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Cache.isInDungeon || !Config.rabbitPing || rabPing) return
+        if (!Cache.inDungeon || !Config.rabbitPing || rabPing) return
         if (event.message.unformattedText.stripColor().contains("You have proven yourself. You may pass")) {
             PingUtils(100, "Rabbit Hat!")
             rabPing = true
@@ -50,7 +50,7 @@ class Pings : Feature() {
 
     @SubscribeEvent
     fun onEntityDeath(event: LivingDeathEvent) {
-        if (!Cache.isInDungeon || !Config.mimic || mimicPing) return
+        if (!Cache.inDungeon || !Config.mimic || mimicPing) return
         if (event.entity is EntityZombie) {
             val entity = event.entity as EntityZombie
             if (entity.isChild &&

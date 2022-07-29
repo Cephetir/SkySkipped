@@ -21,26 +21,20 @@ import gg.essential.universal.UChat
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.event.events.PlayerAttackEvent
-import me.cephetir.skyskipped.event.events.UpdateWalkingPlayerEvent
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.mixins.IMixinEntityPlayerSP
-import me.cephetir.skyskipped.utils.RotationUtils
-import me.cephetir.skyskipped.utils.ScoreboardUtils
+import me.cephetir.skyskipped.utils.InventoryUtils.findItemInHotbar
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import me.cephetir.skyskipped.utils.skyblock.ScoreboardUtils
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.entity.Entity
 import net.minecraft.entity.monster.EntityZombie
 import net.minecraft.init.Items
-import net.minecraft.network.Packet
-import net.minecraft.network.play.client.C09PacketHeldItemChange
-import net.minecraft.util.MathHelper
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.input.Keyboard
-import kotlin.math.abs
 
 
 open class AutoDojo : Feature() {
@@ -95,56 +89,6 @@ open class AutoDojo : Feature() {
         if (text.contains("CHALLENGE COMPLETED")) onDisable()
     }
 
-    // Discipline Mode
-    @SubscribeEvent
-    protected fun onMovePre(event: UpdateWalkingPlayerEvent.Pre) {
-        if (!enabled || mode != DojoMode.Discipline || true) {
-            event.isCanceled = true
-            return
-        }
-        event.isCanceled = false
-
-        target = getTarget()
-        if (target != null) {
-            val angles = RotationUtils.getServerAngles(target!!)
-            val yaw = (mc.thePlayer as IMixinEntityPlayerSP).lastReportedYaw -
-                    MathHelper.wrapAngleTo180_float((mc.thePlayer as IMixinEntityPlayerSP).lastReportedYaw - angles[0])
-            val pitch = (mc.thePlayer as IMixinEntityPlayerSP).lastReportedPitch -
-                    MathHelper.wrapAngleTo180_float((mc.thePlayer as IMixinEntityPlayerSP).lastReportedPitch - angles[1])
-
-            event.yaw = yaw
-            event.pitch = pitch
-        }
-    }
-
-    // Discipline Mode
-    @SubscribeEvent
-    protected fun onMovePost(event: UpdateWalkingPlayerEvent.Post) {
-        if (!enabled || mode != DojoMode.Discipline || true) {
-            event.isCanceled = true
-            return
-        }
-        event.isCanceled = false
-
-        if (target != null && mc.thePlayer.ticksExisted % 2 == 0) {
-            updateItemNoEvent()
-            if (mc.thePlayer.getDistanceToEntity(target) < 3.8) {
-                if (mc.thePlayer.isUsingItem) mc.playerController.onStoppedUsingItem(mc.thePlayer)
-                val angles = RotationUtils.getServerAngles(target!!)
-                if (abs((mc.thePlayer as IMixinEntityPlayerSP).lastReportedPitch - angles[1]) < 25.0f && abs((mc.thePlayer as IMixinEntityPlayerSP).lastReportedYaw - angles[0]) < 15.0f) {
-                    mc.thePlayer.swingItem()
-                    mc.playerController.attackEntity(
-                        mc.thePlayer,
-                        target
-                    )
-                    printdev("Hitting zombie ${mc.thePlayer.getDistanceToEntity(target)}")
-                    ignore.add(target!!)
-                    target = null
-                }
-            }
-        }
-    }
-
     // Discipline and Force Mode
     @SubscribeEvent
     protected fun onAttack(event: PlayerAttackEvent) {
@@ -196,26 +140,6 @@ open class AutoDojo : Feature() {
         val sneak = mc.theWorld.checkBlockCollision(adjustedBox)
 
         KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, sneak)
-    }
-
-    private fun findItemInHotbar(name: String): Int {
-        val inv = mc.thePlayer.inventory
-        for (i in 0..8) {
-            val curStack = inv.getStackInSlot(i)
-            if (curStack != null && curStack.displayName.contains(name))
-                return i
-        }
-        return -1
-    }
-
-    private fun updateItemNoEvent() =
-        mc.thePlayer.sendQueue.addToSendQueue(C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem) as Packet<*>)
-
-    private fun getTarget(): Entity? {
-        val entities = mc.theWorld.loadedEntityList.filter { it is EntityZombie && !ignore.contains(it) }
-            .sortedBy { mc.thePlayer.getDistanceToEntity(it) }
-        if (entities.isEmpty()) return null
-        return entities.first()
     }
 
     enum class DojoMode {

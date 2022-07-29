@@ -17,10 +17,12 @@
 
 package me.cephetir.skyskipped.features.impl.hacks
 
+import gg.essential.api.utils.Multithreading
 import gg.essential.universal.UChat
+import kotlinx.coroutines.*
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.event.events.PacketReceive
+import me.cephetir.skyskipped.event.events.PacketEvent
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinSugarCaneMacro
 import me.cephetir.skyskipped.utils.HttpUtils
@@ -28,6 +30,7 @@ import me.cephetir.skyskipped.utils.InventoryUtils
 import me.cephetir.skyskipped.utils.RotationClass
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.gui.inventory.GuiInventory
@@ -51,6 +54,7 @@ import xyz.apfelmus.cf4m.CF4M
 import xyz.apfelmus.cheeto.client.modules.world.AutoFarm
 import java.lang.reflect.Field
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.abs
 
 
@@ -101,7 +105,10 @@ open class FailSafe : Feature() {
 
     @SubscribeEvent
     protected fun onTick(event: ClientTickEvent) {
-        if (updateTicks++ >= 20) update()
+        if (updateTicks++ >= 20) {
+            update()
+            updateTicks = 0
+        }
     }
 
     @SubscribeEvent
@@ -129,7 +136,7 @@ open class FailSafe : Feature() {
 
             if (ticks >= 60 && !called) {
                 called = true
-                Thread {
+                BackgroundScope.launch {
                     try {
                         val pizza = pizza
                         val cheeto = cheeto
@@ -141,43 +148,43 @@ open class FailSafe : Feature() {
                             mc.gameSettings.keyBindJump.keyCode,
                             true
                         )
-                        Thread.sleep(100)
+                        delay(100)
 
                         // back
                         KeyBinding.setKeyBindState(
                             mc.gameSettings.keyBindBack.keyCode,
                             true
                         )
-                        Thread.sleep(300)
+                        delay(300)
                         KeyBinding.setKeyBindState(
                             mc.gameSettings.keyBindBack.keyCode,
                             false
                         )
-                        Thread.sleep(100)
+                        delay(100)
 
                         // left
                         KeyBinding.setKeyBindState(
                             mc.gameSettings.keyBindLeft.keyCode,
                             true
                         )
-                        Thread.sleep(300)
+                        delay(300)
                         KeyBinding.setKeyBindState(
                             mc.gameSettings.keyBindLeft.keyCode,
                             false
                         )
-                        Thread.sleep(100)
+                        delay(100)
 
                         // right
                         KeyBinding.setKeyBindState(
                             mc.gameSettings.keyBindRight.keyCode,
                             true
                         )
-                        Thread.sleep(300)
+                        delay(300)
                         KeyBinding.setKeyBindState(
                             mc.gameSettings.keyBindRight.keyCode,
                             false
                         )
-                        Thread.sleep(100)
+                        delay(100)
                         if (Config.failsafeJump) KeyBinding.setKeyBindState(
                             mc.gameSettings.keyBindJump.keyCode,
                             false
@@ -192,13 +199,13 @@ open class FailSafe : Feature() {
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
-                }.start()
+                }
             }
         }
     }
 
     @SubscribeEvent
-    protected fun jacob(event: PacketReceive) {
+    protected fun jacob(event: PacketEvent.ReceiveEvent) {
         if (
             !Cache.inSkyblock ||
             event.packet !is S3EPacketTeams ||
@@ -217,7 +224,7 @@ open class FailSafe : Feature() {
         if (split.size != 3) return
         val number = split[2].replace(",", "").toInt()
         printdev("Jacob crop amount $number")
-        if (number >= Config.netherWartJacobNumber) {
+        if (number >= Config.failSafeJacobNumber) {
             printdev("Jacob detected!")
             UChat.chat("§cSkySkipped §f:: §eJacob event failsafe triggered! Stopping macro...")
             if (pizza) {
@@ -234,9 +241,7 @@ open class FailSafe : Feature() {
     @SubscribeEvent
     protected fun onChat(event: ClientChatReceivedEvent) {
         if (!called4) return
-        if (!event.message.unformattedText.stripColor().keepScoreboardCharacters()
-                .contains("Come see me in the Hub", true)
-        ) return
+        if (!event.message.unformattedText.stripColor().keepScoreboardCharacters().contains("Come see me in the Hub", true)) return
         printdev("Detected jacob msg in chat")
         UChat.chat("§cSkySkipped §f:: §eJacob event ended! Starting macro again...")
         if (lastMacro) MacroBuilder.onKey()
@@ -284,7 +289,7 @@ open class FailSafe : Feature() {
             if (ticks2 >= ticksTimeout && !called2) {
                 printdev("Triggered desync failsafe!")
                 called2 = true
-                Thread {
+                BackgroundScope.launch {
                     try {
                         val extraDelay = Config.failSafeGlobalTime.toLong()
                         val pizza = pizza
@@ -296,15 +301,15 @@ open class FailSafe : Feature() {
                         val yaw = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
                         val pitch = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationPitch)
 
-                        Thread.sleep(extraDelay)
+                        delay(extraDelay)
                         mc.thePlayer.sendChatMessage("/hub")
-                        Thread.sleep(5000L + extraDelay)
+                        delay(5000L + extraDelay)
                         mc.thePlayer.sendChatMessage("/is")
-                        Thread.sleep(2500L + extraDelay)
+                        delay(2500L + extraDelay)
                         mc.thePlayer.rotationYaw += yaw - MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw)
                         mc.thePlayer.rotationPitch = pitch
 
-                        Thread.sleep(100L + extraDelay)
+                        delay(100L + extraDelay)
                         if (pizza) MacroBuilder.onKey()
                         else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
@@ -316,7 +321,7 @@ open class FailSafe : Feature() {
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
-                }.start()
+                }
             }
         }
     }
@@ -365,7 +370,7 @@ open class FailSafe : Feature() {
 
         if (pizza || cheeto) {
             called3 = true
-            Thread {
+            BackgroundScope.launch Thread@{
                 try {
                     val pizza = pizza
                     val cheeto = cheeto
@@ -375,7 +380,7 @@ open class FailSafe : Feature() {
 
                     val delay = Config.failSafeIslandDelay.toLong() * 1000L
                     val extraDelay = Config.failSafeGlobalTime.toLong()
-                    Thread.sleep(delay + extraDelay)
+                    delay(delay + extraDelay)
 
                     if (Cache.onIsland) {
                         if (pizza) MacroBuilder.onKey()
@@ -384,11 +389,11 @@ open class FailSafe : Feature() {
                         return@Thread
                     }
 
-                    goBack(delay, extraDelay)
-                    Thread.sleep(delay + extraDelay)
-                    if (!Cache.onIsland) goBack(delay, extraDelay)
+                    goBack(delay, extraDelay, currentCoroutineContext())
+                    delay(delay + extraDelay)
+                    if (!Cache.onIsland) goBack(delay, extraDelay, currentCoroutineContext())
 
-                    Thread.sleep(delay + extraDelay)
+                    delay(delay + extraDelay)
                     if (pizza) MacroBuilder.onKey()
                     else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
 
@@ -397,17 +402,17 @@ open class FailSafe : Feature() {
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
-            }.start()
+            }
         }
     }
 
-    private fun goBack(delay: Long, extraDelay: Long) {
+    private suspend fun goBack(delay: Long, extraDelay: Long, ctx: CoroutineContext) = withContext(ctx) {
         if (Cache.inSkyblock) mc.thePlayer.sendChatMessage("/is")
         else {
             mc.thePlayer.sendChatMessage("/l")
-            Thread.sleep(delay + extraDelay)
+            delay(delay + extraDelay)
             mc.thePlayer.sendChatMessage("/play sb")
-            Thread.sleep(delay + extraDelay)
+            delay(delay + extraDelay)
             mc.thePlayer.sendChatMessage("/is")
         }
     }
@@ -479,9 +484,9 @@ open class FailSafe : Feature() {
         val time = getRandom(Config.failSafeChangeYawSpeed * 60 + 250f, Config.failSafeChangeYawSpeed * 60 - 250f).toLong()
         RotationClass(RotationClass.Rotation(newYaw, newPitch), time)
 
-        Thread {
+        BackgroundScope.launch {
             try {
-                Thread.sleep(time + 500L + Config.failSafeGlobalTime)
+                delay(time + 500L + Config.failSafeGlobalTime)
                 if (p) MacroBuilder.onKey()
                 else if (c) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
                 lastY = mc.thePlayer.posY.toFloat()
@@ -489,7 +494,7 @@ open class FailSafe : Feature() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }.start()
+        }
     }
 
     @SubscribeEvent
@@ -499,7 +504,7 @@ open class FailSafe : Feature() {
         if (ticks7++ < Config.failSafeBanWaveTimer * 60 * 20) return
         ticks7 = 0
 
-        Thread {
+        Multithreading.runAsync {
             val status = HttpUtils.sendGet(
                 "https://api.snipes.wtf/bancheck",
                 mapOf("Content-Type" to "application/json")
@@ -522,7 +527,7 @@ open class FailSafe : Feature() {
                     called7 = true
                 }
             } else UChat.chat("§cSkySkipped §f:: §cCoudn't check current banwave status!")
-        }.start()
+        }
     }
 
     @SubscribeEvent
@@ -553,14 +558,14 @@ open class FailSafe : Feature() {
     }
 
     private fun clearInventory(onStart: Runnable, onEnd: Runnable) {
-        Thread {
+        BackgroundScope.launch Thread@{
             try {
                 onStart.run()
                 val extraDelay = Config.failSafeGlobalTime.toLong() / 2
-                Thread.sleep(1000L)
+                delay(1000L)
 
                 mc.displayGuiScreen(GuiInventory(mc.thePlayer))
-                Thread.sleep(1000L + extraDelay)
+                delay(1000L + extraDelay)
 
                 if (mc.currentScreen !is GuiInventory) {
                     printdev("Invenory closed")
@@ -590,7 +595,7 @@ open class FailSafe : Feature() {
                             (mc.currentScreen as GuiInventory).inventorySlots.windowId,
                             -999, 0, 0, mc.thePlayer
                         )
-                        Thread.sleep(500L + extraDelay)
+                        delay(500L + extraDelay)
                     }
                 } else printdev("no stone")
                 val crops = inv.filter {
@@ -611,9 +616,9 @@ open class FailSafe : Feature() {
                     return@Thread
                 }
 
-                Thread.sleep(1000L + extraDelay)
+                delay(1000L + extraDelay)
                 mc.thePlayer.sendChatMessage("/sbmenu")
-                Thread.sleep(1000L + extraDelay)
+                delay(1000L + extraDelay)
 
                 val startTime = System.currentTimeMillis()
                 var exit = false
@@ -625,7 +630,7 @@ open class FailSafe : Feature() {
                         onEnd.run()
                         return@Thread
                     }
-                    Thread.sleep(100L)
+                    delay(100L)
                     exit = mc.currentScreen != null && mc.currentScreen is GuiChest
                     if (exit) {
                         trades = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
@@ -638,7 +643,7 @@ open class FailSafe : Feature() {
                     (mc.currentScreen as GuiChest).inventorySlots.windowId,
                     trades!!.slotIndex, 0, 0, mc.thePlayer
                 )
-                Thread.sleep(500L + extraDelay)
+                delay(500L + extraDelay)
                 printdev("clicked trades")
 
                 val startTime2 = System.currentTimeMillis()
@@ -650,7 +655,7 @@ open class FailSafe : Feature() {
                         onEnd.run()
                         return@Thread
                     }
-                    Thread.sleep(100L)
+                    delay(100L)
                     sell = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
                         it.hasStack && it.stack.item.unlocalizedName.contains("hopper")
                     }
@@ -681,7 +686,7 @@ open class FailSafe : Feature() {
                             (mc.currentScreen as GuiChest).inventorySlots.windowId,
                             slot.slotNumber, 0, 0, mc.thePlayer
                         )
-                        Thread.sleep(500L + extraDelay)
+                        delay(500L + extraDelay)
                     }
                 } else printdev("no crops")
 
@@ -689,13 +694,13 @@ open class FailSafe : Feature() {
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
-        }.start()
+        }
     }
 
     private fun getRandom(a: Float, b: Float): Float = a + (b - a) * random.nextFloat()
 
     private fun update() {
-        if(Config.failSafeForce) {
+        if (Config.failSafeForce) {
             pizza = true
             cheeto = true
             return

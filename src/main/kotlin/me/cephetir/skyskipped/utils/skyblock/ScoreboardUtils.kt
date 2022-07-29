@@ -15,7 +15,7 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.utils
+package me.cephetir.skyskipped.utils.skyblock
 
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraft.client.Minecraft

@@ -20,23 +20,20 @@ package me.cephetir.skyskipped.features.impl.dugeons
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.inventory.ContainerChest
-import net.minecraftforge.client.event.GuiOpenEvent
+import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class ChestCloser : Feature() {
 
     @SubscribeEvent
-    fun onDrawBackground(event: GuiOpenEvent) {
-        if (event.gui is GuiChest && Cache.inSkyblock) {
-            val chestName =
-                ((event.gui as GuiChest).inventorySlots as ContainerChest).lowerChestInventory.displayName.unformattedText
-            if (Cache.isInDungeon && Config.chestCloser && chestName == "Chest")
-                Minecraft.getMinecraft().thePlayer.closeScreen()
-            else if (Cache.inSkyblock && Config.chestCloserCH && (chestName.contains("Loot Chest") || chestName.contains("Treasure Chest")))
-                Minecraft.getMinecraft().thePlayer.closeScreen()
+    fun onDrawBackground(event: DrawScreenEvent.Pre) {
+        if (event.gui !is GuiChest || !Cache.inSkyblock) return
+        val chestName = ((event.gui as GuiChest).inventorySlots as ContainerChest).lowerChestInventory.displayName.unformattedText
+        if (Cache.inDungeon && Config.chestCloser && chestName == "Chest") {
+            mc.thePlayer.closeScreen()
+            event.isCanceled = true
         }
     }
 }

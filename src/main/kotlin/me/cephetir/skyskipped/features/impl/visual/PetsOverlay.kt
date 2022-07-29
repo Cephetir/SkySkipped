@@ -17,14 +17,17 @@
 
 package me.cephetir.skyskipped.features.impl.visual
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinGuiContainer
 import me.cephetir.skyskipped.mixins.IMixinGuiScreen
-import me.cephetir.skyskipped.utils.ItemRarity.Companion.byBaseColor
 import me.cephetir.skyskipped.utils.render.RoundUtils.drawRoundedOutline
 import me.cephetir.skyskipped.utils.render.RoundUtils.drawRoundedRect
 import me.cephetir.skyskipped.utils.render.shaders.BlurUtils
+import me.cephetir.skyskipped.utils.skyblock.ItemRarity.Companion.byBaseColor
+import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.inventory.GuiChest
@@ -56,14 +59,10 @@ class PetsOverlay : Feature() {
         val container = (event.gui as GuiChest).inventorySlots as ContainerChest
         if (!container.lowerChestInventory.displayName.unformattedText.endsWith("Pets")) return
         petsOverlay = GuiPetsOverlay(event.gui as GuiChest)
-        Thread {
-            try {
-                Thread.sleep(50L)
-                petsOverlay!!.getPets()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }.start()
+        BackgroundScope.launch {
+            delay(50L)
+            petsOverlay!!.getPets()
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -478,10 +477,10 @@ class PetsOverlay : Feature() {
                             val displayName = compound.getString("Name")
                             if (displayName.contains("next page", true)) {
                                 container.handleMouseClick(slot, slot.slotNumber, 0, 0)
-                                Thread {
-                                    Thread.sleep(100L)
+                                BackgroundScope.launch {
+                                    delay(100L)
                                     getPet(index - 28, Minecraft.getMinecraft().currentScreen as GuiChest)
-                                }.start()
+                                }
                                 break
                             }
                         }

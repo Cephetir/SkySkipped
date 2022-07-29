@@ -19,7 +19,7 @@ package me.cephetir.skyskipped.mixins;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import me.cephetir.skyskipped.event.events.PacketReceive;
+import me.cephetir.skyskipped.event.events.PacketEvent;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraftforge.common.MinecraftForge;
@@ -31,8 +31,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = NetworkManager.class, priority = 1001)
 public abstract class MixinNetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
 
-    @Inject(method = "channelRead0*", at = @At("HEAD"))
+    @Inject(method = "channelRead0*", at = @At("HEAD"), cancellable = true)
     private void onReceivePacket(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
-        MinecraftForge.EVENT_BUS.post(new PacketReceive(context, packet));
+        if (MinecraftForge.EVENT_BUS.post(new PacketEvent.ReceiveEvent(packet)))
+            ci.cancel();
     }
 }

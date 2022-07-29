@@ -27,9 +27,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 class Trail : Feature() {
     private var timer = 0L
     private val particle: EnumParticleTypes
-        get() {
-            return EnumParticleTypes.values().find { it.name.equals(Config.trailParticle, true) } ?: EnumParticleTypes.DRIP_LAVA
-        }
+        get() = EnumParticleTypes.values().find { it.name.equals(Config.trailParticle, true) } ?: EnumParticleTypes.DRIP_LAVA
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {

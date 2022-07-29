@@ -31,6 +31,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinPlayerControllerMP {
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     public void attackEntity(EntityPlayer playerIn, Entity targetEntity, CallbackInfo ci) {
-        if(MinecraftForge.EVENT_BUS.post(new PlayerAttackEvent(targetEntity))) ci.cancel();
+        if (MinecraftForge.EVENT_BUS.post(new PlayerAttackEvent(targetEntity))) ci.cancel();
     }
 }

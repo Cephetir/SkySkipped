@@ -31,8 +31,8 @@ class Blocker : Feature() {
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (!Cache.inSkyblock || !Config.block) return
         if (event.entity !== mc.thePlayer || event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) return
-        val item = Cache.itemheld
-        if (!item.stripColor().containsAny(Config.blockList.split(", "))) return
+        val item = mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
+        if (!item.containsAny(Config.blockList.split(", "))) return
         mc.thePlayer.playSound("random.orb", 0.8f, 1f)
         event.isCanceled = true
     }

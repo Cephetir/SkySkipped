@@ -17,6 +17,7 @@
 
 package me.cephetir.skyskipped.mixins;
 
+import me.cephetir.skyskipped.config.Cache;
 import me.cephetir.skyskipped.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -26,6 +27,7 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import org.spongepowered.asm.mixin.Mixin;
@@ -65,7 +67,7 @@ public class MixinMinecraft {
      */
     @Inject(method = "sendClickBlockToController", at = @At("RETURN"))
     private void sendClickBlockToController(CallbackInfo ci) {
-        if(!Config.Companion.getFastBreak()) return;
+        if (!Config.Companion.getFastBreak() || !Cache.INSTANCE.getOnIsland()) return;
         int extraClicks = Config.Companion.getFastBreakNumber();
         boolean shouldClick = this.currentScreen == null && this.gameSettings.keyBindAttack.isKeyDown() && this.inGameHasFocus;
         if (this.objectMouseOver != null && extraClicks > 0 && shouldClick)
@@ -77,7 +79,7 @@ public class MixinMinecraft {
 
                 BlockPos newBlock = this.objectMouseOver.getBlockPos();
                 if (!newBlock.equals(clickedBlock) && this.theWorld.getBlockState(newBlock).getBlock() != Blocks.air) {
-                    this.thePlayer.swingItem();
+                    if (i % 3 == 0) this.thePlayer.sendQueue.addToSendQueue(new C0APacketAnimation());
                     this.playerController.clickBlock(newBlock, this.objectMouseOver.sideHit);
                 }
             }

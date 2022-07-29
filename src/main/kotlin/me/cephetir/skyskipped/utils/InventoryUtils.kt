@@ -31,4 +31,15 @@ object InventoryUtils {
         for (slot in inv) if (slot.hasStack) newInv.add(slot)
         return inv.size == newInv.size
     }
+
+    @JvmStatic
+    fun findItemInHotbar(name: String): Int {
+        val inv = Minecraft.getMinecraft().thePlayer.inventory
+        for (i in 0..8) {
+            val curStack = inv.getStackInSlot(i)
+            if (curStack != null && curStack.displayName.contains(name))
+                return i
+        }
+        return -1
+    }
 }

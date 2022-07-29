@@ -23,12 +23,11 @@ import me.cephetir.skyskipped.commands.dungeonCommands.PartyCommand
 import me.cephetir.skyskipped.features.impl.chat.AutoMaddoxPhone
 import me.cephetir.skyskipped.features.impl.chat.ChatSwapper
 import me.cephetir.skyskipped.features.impl.chat.Ping
+import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.features.impl.dugeons.*
-import me.cephetir.skyskipped.features.impl.hacks.AutoDojo
-import me.cephetir.skyskipped.features.impl.hacks.Blocker
-import me.cephetir.skyskipped.features.impl.hacks.FailSafe
-import me.cephetir.skyskipped.features.impl.hacks.ItemSwap
+import me.cephetir.skyskipped.features.impl.hacks.*
 import me.cephetir.skyskipped.features.impl.macro.FarmingHUD
+import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.features.impl.misc.AutoCookieClicker
 import me.cephetir.skyskipped.features.impl.misc.AutoStopFlying
 import me.cephetir.skyskipped.features.impl.misc.Metrics
@@ -43,9 +42,10 @@ class Features {
         val petsOverlay = PetsOverlay()
     }
 
-    var features = listOf(
+    private val features = listOf(
         ChestCloser(),
         ChatSwapper(),
+        RPC,
         ESP(),
         Blocker(),
         Ping(),
@@ -67,7 +67,10 @@ class Features {
         AutoDojo(),
         Trail(),
         AdminRoomDetection(),
+        MacroManager,
         FarmingHUD(),
+        HotbarSaver(),
+        LavaFishingSpots(),
     )
 
     fun register() = features.forEach { MinecraftForge.EVENT_BUS.register(it) }

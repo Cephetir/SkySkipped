@@ -19,90 +19,77 @@ package me.cephetir.skyskipped.event
 
 import gg.essential.api.EssentialAPI
 import me.cephetir.skyskipped.config.Cache
+import me.cephetir.skyskipped.event.events.PacketEvent
 import me.cephetir.skyskipped.features.impl.dugeons.AdminRoomDetection
-import me.cephetir.skyskipped.utils.ScoreboardUtils
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import me.cephetir.skyskipped.utils.skyblock.ScoreboardUtils
 import net.minecraft.client.Minecraft
+import net.minecraft.network.play.server.S38PacketPlayerListItem
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
-class Listener {
+object Listener {
+    private val areaRegex = Regex("§r§b§l(?<area>\\w+): §r§7(?<loc>[\\w ]+)§r")
+
     @SubscribeEvent(priority = EventPriority.HIGH)
     fun update(event: ClientTickEvent) {
         if (event.phase == TickEvent.Phase.START &&
+            Minecraft.getMinecraft().theWorld != null &&
+            EssentialAPI.getMinecraftUtil().isHypixel()
+        ) {
+            var foundSkyblock = false
+            var percentage = 0
+
+            val scoreObjective = Minecraft.getMinecraft().thePlayer.worldScoreboard.getObjectiveInDisplaySlot(1)
+            if (scoreObjective == null) {
+                Cache.inSkyblock = false
+                Cache.dungeonPercentage = 0
+                return
+            }
+            val scores = ScoreboardUtils.sidebarLines
+
+            if (scoreObjective.displayName.stripColor().startsWith("SKYBLOCK"))
+                foundSkyblock = true
+
+            if (foundSkyblock) {
+                scores.find { it.stripColor().keepScoreboardCharacters().contains("Cleared: ") }?.let {
+                    percentage = it.stripColor().keepScoreboardCharacters().substring(9).split(" ")[0].toInt()
+                }
+            }
+
+            Cache.inSkyblock = foundSkyblock
+            Cache.dungeonPercentage = percentage
+        }
+    }
+
+    @SubscribeEvent
+    fun onPacketReceive(event: PacketEvent.ReceiveEvent) {
+        if (event.packet is S38PacketPlayerListItem &&
+            (event.packet.action == S38PacketPlayerListItem.Action.UPDATE_DISPLAY_NAME || event.packet.action == S38PacketPlayerListItem.Action.ADD_PLAYER) &&
             !Minecraft.getMinecraft().isSingleplayer &&
             Minecraft.getMinecraft().theWorld != null &&
             Minecraft.getMinecraft().netHandler != null &&
             EssentialAPI.getMinecraftUtil().isHypixel()
         ) {
-            var foundDungeon = false
-            var foundSkyblock = false
-            var foundWorkshop = false
-            var foundIsland = false
-            var foundJacob = false
-            var percentage = 0
-            var dungeonName = ""
-            var itemheld = "Nothing"
-
-            val scoreObjective = Minecraft.getMinecraft().thePlayer.worldScoreboard.getObjectiveInDisplaySlot(1)
-            if (scoreObjective == null) {
-                Cache.inSkyblock = false
-                Cache.isInDungeon = false
-                Cache.inWorkshop = false
-                Cache.onIsland = false
-                Cache.isJacob = false
-                Cache.dungeonPercentage = 0
-                Cache.dungeonName = ""
-                Cache.itemheld = "Nothing"
-                return
-            }
-            val scores = ScoreboardUtils.sidebarLines
-
-            if (scoreObjective.displayName.stripColor().startsWith("SKYBLOCK")) foundSkyblock = true
-
-            if (foundSkyblock) {
-                for (text in scores) {
-                    val strippedLine = text.stripColor().keepScoreboardCharacters().trim()
-                    if (strippedLine.contains("Cleared: ")) {
-                        foundDungeon = true
-                        percentage = strippedLine.substring(9).split(" ")[0].toInt()
-                    } else if (text.startsWith(" §7⏣")) {
-                        if (foundDungeon) dungeonName = strippedLine.trim()
-                        else if (strippedLine.contains("Jerry's Workshop")) foundWorkshop = true
-                        else if (strippedLine.contains("Your Island")) foundIsland = true
-                    } else if (strippedLine.contains("Jacob's Contest")) foundJacob = true
+            event.packet.entries.forEach { playerData ->
+                val name = playerData?.displayName?.formattedText ?: playerData?.profile?.name ?: return@forEach
+                areaRegex.matchEntire(name)?.let { result ->
+                    Cache.softInDungeon = Cache.inSkyblock && result.groups["area"]?.value == "Dungeon"
+                    return@forEach
                 }
-
-                if (Minecraft.getMinecraft().thePlayer.inventory.getCurrentItem() != null)
-                    itemheld = Minecraft.getMinecraft().thePlayer.heldItem.displayName
-                        .stripColor().keepScoreboardCharacters().trim()
             }
-
-            Cache.inSkyblock = foundSkyblock
-            Cache.isInDungeon = foundDungeon
-            Cache.inWorkshop = foundWorkshop
-            Cache.onIsland = foundIsland
-            Cache.isJacob = foundJacob
-            Cache.dungeonPercentage = percentage
-            Cache.dungeonName = dungeonName
-            Cache.itemheld = itemheld
         }
     }
 
     @SubscribeEvent
     fun onWorldLoad(event: WorldEvent.Load) {
         Cache.inSkyblock = false
-        Cache.isInDungeon = false
-        Cache.inWorkshop = false
-        Cache.onIsland = false
-        Cache.isJacob = false
+        Cache.softInDungeon = false
         Cache.dungeonPercentage = 0
-        Cache.dungeonName = ""
-        Cache.itemheld = "Nothing"
         AdminRoomDetection.scanned = false
     }
 }

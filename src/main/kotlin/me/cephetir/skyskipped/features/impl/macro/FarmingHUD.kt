@@ -61,7 +61,7 @@ class FarmingHUD : Feature() {
         }
     private val profit: Long
         get() = when (macro) {
-            is NetherwartMacro -> macro.cropsMined() * 10
+            is NetherwartMacro -> macro.cropsMined() * 2
             is SugarCaneMacro -> macro.cropsMined() * 2
             else -> 0L
         }
