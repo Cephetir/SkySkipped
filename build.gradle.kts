@@ -90,7 +90,7 @@ dependencies {
     include("gg.essential:loader-launchwrapper:1.1.3")
     implementation("gg.essential:essential-1.8.9-forge:3760")
 
-    implementation("com.kohlschutter.junixsocket:junixsocket-common:2.0.4")
+    implementation("com.kohlschutter.junixsocket:junixsocket-common:2.5.1")
     include("com.kohlschutter.junixsocket:junixsocket-native-common:2.0.4") {
         exclude(module = "log4j")
     }
