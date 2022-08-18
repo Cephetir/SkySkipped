@@ -18,7 +18,7 @@
 package me.cephetir.skyskipped.utils.render
 
 import me.cephetir.skyskipped.mixins.IMixinRendererLivingEntity
-import net.minecraft.client.Minecraft
+import me.cephetir.skyskipped.utils.mc
 import net.minecraft.client.model.ModelBase
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.OpenGlHelper
@@ -40,15 +40,15 @@ object OutlineUtils {
         partialTicks: Float,
         color: Int
     ) {
-        val renderer = Minecraft.getMinecraft().renderManager.getEntityRenderObject<EntityLivingBase>(entity) as IMixinRendererLivingEntity
-        val fancyGraphics = Minecraft.getMinecraft().gameSettings.fancyGraphics
-        val gamma = Minecraft.getMinecraft().gameSettings.gammaSetting
-        Minecraft.getMinecraft().gameSettings.fancyGraphics = false
-        Minecraft.getMinecraft().gameSettings.gammaSetting = Float.MAX_VALUE
-        val f3 = (color shr 24 and 255).toFloat() / 255f
+        val renderer = mc.renderManager.getEntityRenderObject<EntityLivingBase>(entity) as IMixinRendererLivingEntity
+        val fancyGraphics = mc.gameSettings.fancyGraphics
+        val gamma = mc.gameSettings.gammaSetting
+        mc.gameSettings.fancyGraphics = false
+        mc.gameSettings.gammaSetting = Float.MAX_VALUE
         val f = (color shr 16 and 255).toFloat() / 255f
         val f1 = (color shr 8 and 255).toFloat() / 255f
         val f2 = (color and 255).toFloat() / 255f
+        val f3 = (color shr 24 and 255).toFloat() / 255f
         GlStateManager.resetColor()
         setColor(f, f1, f2, f3)
         renderOne()
@@ -117,8 +117,8 @@ object OutlineUtils {
         setColor(f, f1, f2, f3)
         renderFive()
         setColor(f, f1, f2, f3)
-        Minecraft.getMinecraft().gameSettings.fancyGraphics = fancyGraphics
-        Minecraft.getMinecraft().gameSettings.gammaSetting = gamma
+        mc.gameSettings.fancyGraphics = fancyGraphics
+        mc.gameSettings.gammaSetting = gamma
     }
 
     private fun renderOne() {
@@ -179,7 +179,7 @@ object OutlineUtils {
     }
 
     private fun checkSetupFBO() {
-        val fbo = Minecraft.getMinecraft().framebuffer
+        val fbo = mc.framebuffer
         if (fbo != null && fbo.depthBuffer > -1) {
             setupFBO(fbo)
             fbo.depthBuffer = -1
@@ -193,8 +193,8 @@ object OutlineUtils {
         EXTFramebufferObject.glRenderbufferStorageEXT(
             36161,
             34041,
-            Minecraft.getMinecraft().displayWidth,
-            Minecraft.getMinecraft().displayHeight
+            mc.displayWidth,
+            mc.displayHeight
         )
         EXTFramebufferObject.glFramebufferRenderbufferEXT(36160, 36128, 36161, stencilDepthBufferId)
         EXTFramebufferObject.glFramebufferRenderbufferEXT(36160, 36096, 36161, stencilDepthBufferId)

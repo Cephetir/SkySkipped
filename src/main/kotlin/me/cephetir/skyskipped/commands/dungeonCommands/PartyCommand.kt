@@ -22,8 +22,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
+import me.cephetir.skyskipped.utils.mc
 import me.cephetir.skyskipped.utils.threading.BackgroundScope
-import net.minecraft.client.Minecraft
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
 import net.minecraftforge.common.MinecraftForge
@@ -70,12 +70,12 @@ class PartyCommand : CommandBase() {
             startedd = true
             when (step) {
                 0 -> {
-                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/p leave")
+                    mc.thePlayer.sendChatMessage("/p leave")
                     delay(200L)
                     step++
                 }
                 1 -> {
-                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/p " + Config.BotName)
+                    mc.thePlayer.sendChatMessage("/p " + Config.BotName)
                     MinecraftForge.EVENT_BUS.unregister(toStop)
                     started = false
                     step = 0

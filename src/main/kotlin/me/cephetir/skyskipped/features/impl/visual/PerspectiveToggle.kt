@@ -20,20 +20,25 @@ package me.cephetir.skyskipped.features.impl.visual
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.KeybindUtils.isDown
 import me.cephetir.skyskipped.utils.TextUtils.containsAny
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.InputEvent
-import org.lwjgl.input.Keyboard
+import net.minecraftforge.fml.common.gameevent.TickEvent
 
 
 class PerspectiveToggle : Feature() {
+    private var keybindLastState = false
+
     @SubscribeEvent
-    fun onKey(event: InputEvent.KeyInputEvent) {
-        if (mc.thePlayer == null || mc.theWorld == null) return
-        if (!Config.betterPerspective) return
-        if (!Keyboard.getEventKeyState()) return
-        if (Keyboard.getEventKey() == SkySkipped.perspectiveToggle.keyCode)
-            if (Config.betterPerspectiveItems == "" || mc.thePlayer.heldItem == null || mc.thePlayer.heldItem.displayName.containsAny(Config.betterPerspectiveItems.split(", ")))
-                mc.gameSettings.thirdPersonView = if (mc.gameSettings.thirdPersonView == 3) 0 else 3
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null || !Config.betterPerspective) return
+
+        val down = SkySkipped.perspectiveToggle.isDown()
+        if (down == keybindLastState) return
+        keybindLastState = down
+        if (!down && Config.betterPerspectiveMode == 1) return
+
+        if (Config.betterPerspectiveItems == "" || mc.thePlayer.heldItem == null || mc.thePlayer.heldItem.displayName.containsAny(Config.betterPerspectiveItems.split(", ")))
+            mc.gameSettings.thirdPersonView = if (mc.gameSettings.thirdPersonView == 3) 0 else 3
     }
 }

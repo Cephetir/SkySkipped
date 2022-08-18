@@ -42,7 +42,7 @@ class AdminRoomDetection : Feature() {
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (!scanned && Config.adminRoom && Cache.softInDungeon) {
+        if (!scanned && Config.adminRoom && Cache.inDungeon) {
             scanned = true
             BackgroundScope.launch { scan() }
         }

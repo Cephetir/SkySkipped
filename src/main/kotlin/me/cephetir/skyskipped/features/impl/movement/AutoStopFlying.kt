@@ -15,7 +15,7 @@
  *  0. You just DO WHAT THE FUCK YOU WANT TO.
  */
 
-package me.cephetir.skyskipped.features.impl.misc
+package me.cephetir.skyskipped.features.impl.movement
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

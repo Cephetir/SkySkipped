@@ -28,7 +28,6 @@ import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.render.RenderUtils
 import me.cephetir.skyskipped.utils.render.RoundUtils
 import me.cephetir.skyskipped.utils.render.shaders.BlurUtils
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.scoreboard.*
@@ -169,7 +168,7 @@ class CustomScoreboard : Feature() {
         } else if (Config.customSbNumbers && text.startsWith(EnumChatFormatting.RED.toString() + "") &&
             Pattern.compile("\\d+").matcher(txt).matches()
         ) ""
-        else if (Minecraft.getMinecraft().thePlayer != null && text.contains(Minecraft.getMinecraft().thePlayer.displayNameString) && !Config.advancedCustomNames)
+        else if (mc.thePlayer != null && text.contains(mc.thePlayer.displayNameString) && !Config.advancedCustomNames)
             SkySkipped.getCosmetics(text)
         else text
     }

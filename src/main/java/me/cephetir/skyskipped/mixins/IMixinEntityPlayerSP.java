@@ -28,4 +28,28 @@ public interface IMixinEntityPlayerSP {
 
     @Accessor("lastReportedPitch")
     float getLastReportedPitch();
+
+    @Accessor("lastReportedYaw")
+    void setLastReportedYaw(float yaw);
+
+    @Accessor("lastReportedPitch")
+    void setLastReportedPitch(float pitch);
+
+    @Accessor("lastReportedPosX")
+    double getLastReportedPosX();
+
+    @Accessor("lastReportedPosX")
+    void setLastReportedPosX(double x);
+
+    @Accessor("lastReportedPosY")
+    double getLastReportedPosY();
+
+    @Accessor("lastReportedPosY")
+    void setLastReportedPosY(double y);
+
+    @Accessor("lastReportedPosZ")
+    double getLastReportedPosZ();
+
+    @Accessor("lastReportedPosZ")
+    void setLastReportedPosZ(double z);
 }

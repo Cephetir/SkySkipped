@@ -17,28 +17,21 @@
 
 package me.cephetir.skyskipped.config
 
-import me.cephetir.skyskipped.event.SBInfo
+import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.event.SkyblockIsland
 
 object Cache {
-    @JvmField
-    var softInDungeon = false
     val inDungeon
-        get() = SBInfo.island == SkyblockIsland.Dungeon
-
-    @JvmField
-    var dungeonPercentage = 0
-    val dungeonName
-        get() = if (inDungeon) SBInfo.location else ""
+        get() = Listener.island == SkyblockIsland.Dungeon
 
     @JvmField
     var inSkyblock = false
     val inWorkshop
-        get() = SBInfo.island == SkyblockIsland.JerryWorkshop
+        get() = Listener.island == SkyblockIsland.JerryWorkshop
     val onIsland
-        get() = SBInfo.island == SkyblockIsland.PrivateIsland
+        get() = Listener.island == SkyblockIsland.PrivateIsland
     val isJacob
-        get() = SBInfo.jacobEvent
+        get() = Listener.jacobEvent
 
     @JvmField
     var prevIP = ""

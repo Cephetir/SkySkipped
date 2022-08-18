@@ -17,13 +17,17 @@
 
 package me.cephetir.skyskipped.features.impl.visual
 
+import gg.essential.api.utils.Multithreading
 import gg.essential.universal.UChat
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.KeybindUtils.isDown
+import me.cephetir.skyskipped.utils.RotationClass
+import me.cephetir.skyskipped.utils.RotationUtils
+import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.render.RenderUtils
-import net.minecraft.client.Minecraft
 import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.init.Items
@@ -35,55 +39,57 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.event.entity.player.PlayerUseItemEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
-import org.lwjgl.input.Keyboard
+import java.util.concurrent.TimeUnit
 
 /*
 *   Huge Thanks to Sylvezar!
 */
 class PresentHighlight : Feature() {
-    private var clicked: MutableList<EntityArmorStand> = ArrayList()
+    private var clicked = mutableListOf<EntityArmorStand>()
     private var lastArmorStand: EntityArmorStand? = null
 
     private var auraToggle = false
 
     @SubscribeEvent
     fun onWorldRender(event: RenderWorldLastEvent) {
-        if (Minecraft.getMinecraft().theWorld == null || !Config.presents || !Cache.inWorkshop) return
-        val entities = Minecraft.getMinecraft().theWorld.loadedEntityList
-        for (entity in entities) {
+        if (mc.theWorld == null || !Config.presents || !Cache.inWorkshop) return
+        val entities = mc.theWorld.loadedEntityList
+        for (entity in entities)
             if (entity is EntityArmorStand && shouldDraw(entity) && !clicked.contains(entity))
                 RenderUtils.drawBox(
                     entity.positionVector,
                     Config.presentsColor,
                     event.partialTicks
                 )
-        }
     }
 
     private var timer = 0
+
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (mc.thePlayer == null || mc.theWorld == null || event.phase != TickEvent.Phase.START) return
+        if (!auraToggle || mc.thePlayer == null || mc.theWorld == null || event.phase != TickEvent.Phase.START) return
         if (timer++ < 20) return
         timer = 0
-        val entities = Minecraft.getMinecraft().theWorld.loadedEntityList
-        for (entity in entities)
-            if (entity is EntityArmorStand &&
-                shouldDraw(entity) &&
-                !clicked.contains(entity) &&
-                mc.thePlayer.getDistanceToEntity(entity) <= 4.2f
-            ) {
+
+        val entities = mc.theWorld.loadedEntityList
+        entities.sortedBy { mc.thePlayer.getDistanceToEntity(it) }.find {
+            (it is EntityArmorStand) && shouldDraw(it) && !clicked.contains(it) && (mc.thePlayer.getDistanceToEntity(it) <= 4.2f)
+        }?.let {
+            val rotation = RotationUtils.getServerAngles(it)
+            RotationClass(RotationClass.Rotation(rotation[0], rotation[1]), 500L)
+
+            Multithreading.schedule({
                 mc.thePlayer.swingItem()
                 mc.playerController.attackEntity(
                     mc.thePlayer,
-                    entity
+                    it
                 )
-                clicked.add(entity)
-                break
-            }
+            }, 500L, TimeUnit.MILLISECONDS)
+
+            clicked.add(it as EntityArmorStand)
+        }
     }
 
     private fun shouldDraw(armorstand: EntityArmorStand): Boolean {
@@ -92,10 +98,10 @@ class PresentHighlight : Feature() {
             if (helmet == null || helmet.item != Items.skull) return false
             if (armorstand.hasCustomName() && armorstand.customNameTag.contains("CLICK TO OPEN")) return true
             else if (helmet.hasTagCompound()) {
-                if (helmet.tagCompound.toString().contains(
-                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTBmNTM5ODUxMGIxYTA1YWZjNWIyMDFlYWQ4YmZjNTgzZTU3ZDcyMDJmNTE5M2IwYjc2MWZjYmQwYWUyIn19fQ"
-                    )
-                ) return true
+                if (helmet.tagCompound.toString()
+                        .contains("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTBmNTM5ODUxMGIxYTA1YWZjNWIyMDFlYWQ4YmZjNTgzZTU3ZDcyMDJmNTE5M2IwYjc2MWZjYmQwYWUyIn19fQ")
+                )
+                    return true
             }
         }
         return false
@@ -103,7 +109,7 @@ class PresentHighlight : Feature() {
 
     @SubscribeEvent
     fun onWorldUnload(event: WorldEvent.Unload) {
-        clicked = ArrayList()
+        clicked.clear()
         lastArmorStand = null
     }
 
@@ -129,26 +135,26 @@ class PresentHighlight : Feature() {
 
     @SubscribeEvent
     fun onClientChatReceivedEvent(e: ClientChatReceivedEvent) {
-        if (e.message.unformattedText.contains("GIFT! You found a White Gift!") || e.message.unformattedText.contains("You have already found this Gift this year!")) {
+        val msg = e.message.unformattedText.stripColor()
+        if (msg.contains("GIFT! You found a White Gift!") || msg.contains("You have already found this Gift this year!"))
             if (lastArmorStand != null) {
                 clicked.add(lastArmorStand!!)
                 lastArmorStand = null
             }
-        }
     }
 
-    @SubscribeEvent
-    fun onInput(event: InputEvent.KeyInputEvent) {
-        if (mc.thePlayer == null || mc.theWorld == null) return
-        if (!Keyboard.getEventKeyState()) return
-        if (Keyboard.getEventKey() != SkySkipped.giftAura.keyCode) return
+    private var keybindLastState = false
 
-        if (!auraToggle) {
-            auraToggle = true
-            UChat.chat("§cSkySkipped §f:: §eGift Aura Enabled!")
-        } else {
-            auraToggle = false
-            UChat.chat("§cSkySkipped §f:: §eGift Aura Disabled!")
-        }
+    @SubscribeEvent
+    fun onInput(event: ClientTickEvent) {
+        if (mc.thePlayer == null || mc.theWorld == null) return
+
+        val down = SkySkipped.giftAura.isDown()
+        if (down == keybindLastState) return
+        keybindLastState = down
+        if (!down) return
+
+        auraToggle = !auraToggle
+        UChat.chat("§cSkySkipped §f:: §eGift Aura ${if (auraToggle) "§aEnabled" else "§cDisabled"}!")
     }
 }

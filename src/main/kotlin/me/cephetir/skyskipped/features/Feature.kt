@@ -22,7 +22,7 @@ import me.cephetir.skyskipped.SkySkipped
 import net.minecraft.client.Minecraft
 
 abstract class Feature {
-    val mc: Minecraft = Minecraft.getMinecraft()
+    protected val mc: Minecraft = Minecraft.getMinecraft()
 
     protected fun printdev(text: String) {
         if (SkySkipped.devMode) {

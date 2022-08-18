@@ -17,12 +17,11 @@
 
 package me.cephetir.skyskipped.utils
 
-import net.minecraft.client.Minecraft
 import net.minecraft.inventory.Slot
 
 object InventoryUtils {
     @JvmStatic
-    fun getInventory(): List<Slot> = Minecraft.getMinecraft().thePlayer.inventoryContainer.inventorySlots.subList(9, 44)
+    fun getInventory(): List<Slot> = mc.thePlayer.inventoryContainer.inventorySlots.subList(9, 44)
 
     @JvmStatic
     fun isFull(): Boolean {
@@ -34,7 +33,7 @@ object InventoryUtils {
 
     @JvmStatic
     fun findItemInHotbar(name: String): Int {
-        val inv = Minecraft.getMinecraft().thePlayer.inventory
+        val inv = mc.thePlayer.inventory
         for (i in 0..8) {
             val curStack = inv.getStackInSlot(i)
             if (curStack != null && curStack.displayName.contains(name))

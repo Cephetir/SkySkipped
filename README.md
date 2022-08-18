@@ -1,4 +1,5 @@
 # SkySkipped
+[![GitHub release](https://img.shields.io/github/downloads/Cephetir/SkySkipped/latest/total)](https://github.com/Cephetir/SkySkipped/releases)
 [![CodeFactor](https://www.codefactor.io/repository/github/cephetir/skyskipped/badge)](https://www.codefactor.io/repository/github/cephetir/skyskipped)\
 Cephetir's cool mod for Hypixel and Skyblock
 

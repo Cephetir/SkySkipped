@@ -21,7 +21,7 @@ import com.google.gson.JsonObject
 import gg.essential.api.utils.Multithreading
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.HttpUtils
-import net.minecraft.client.Minecraft
+import me.cephetir.skyskipped.utils.mc
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -41,7 +41,7 @@ class Metrics : Feature() {
     companion object {
         fun update(online: Boolean) {
             val obj = JsonObject()
-            obj.addProperty("name", Minecraft.getMinecraft().session.username)
+            obj.addProperty("name", mc.session.username)
             obj.addProperty("online", online)
             HttpUtils.sendPost(
                 "https://skyskipped-website.vercel.app/api/user",

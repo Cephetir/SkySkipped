@@ -18,7 +18,7 @@
 package me.cephetir.skyskipped.features.impl.hacks
 
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.event.SBInfo
+import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.event.SkyblockIsland
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.render.RenderUtils
@@ -37,7 +37,7 @@ class LavaFishingSpots : Feature() {
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Config.lavaFishingEsp || SBInfo.island != SkyblockIsland.CrystalHollows) return
+        if (event.phase != TickEvent.Phase.START || !Config.lavaFishingEsp || Listener.island != SkyblockIsland.CrystalHollows) return
 
         lava.clear()
         val blocks = mc.theWorld.capturedBlockSnapshots.map { it.pos }.filter {
@@ -49,7 +49,7 @@ class LavaFishingSpots : Feature() {
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!Config.lavaFishingEsp || lava.isEmpty() || SBInfo.island != SkyblockIsland.CrystalHollows) return
+        if (!Config.lavaFishingEsp || lava.isEmpty() || Listener.island != SkyblockIsland.CrystalHollows) return
 
         for (pos in lava)
             RenderUtils.drawBox(Vec3(pos), Color.RED, event.partialTicks)

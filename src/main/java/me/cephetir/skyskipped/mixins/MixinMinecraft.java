@@ -19,17 +19,17 @@ package me.cephetir.skyskipped.mixins;
 
 import me.cephetir.skyskipped.config.Cache;
 import me.cephetir.skyskipped.config.Config;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
-import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Timer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,9 +38,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
-    @Shadow
-    public GuiScreen currentScreen;
-
     @Shadow
     public GameSettings gameSettings;
 
@@ -51,9 +48,6 @@ public class MixinMinecraft {
     public MovingObjectPosition objectMouseOver;
 
     @Shadow
-    private Entity renderViewEntity;
-
-    @Shadow
     public PlayerControllerMP playerController;
 
     @Shadow
@@ -62,26 +56,38 @@ public class MixinMinecraft {
     @Shadow
     public EntityPlayerSP thePlayer;
 
-    /*
-     *  @Author Apfelsaft
-     */
+    @Shadow
+    public EntityRenderer entityRenderer;
+
+    @Shadow
+    private Timer timer;
+
     @Inject(method = "sendClickBlockToController", at = @At("RETURN"))
     private void sendClickBlockToController(CallbackInfo ci) {
         if (!Config.Companion.getFastBreak() || !Cache.INSTANCE.getOnIsland()) return;
+
         int extraClicks = Config.Companion.getFastBreakNumber();
-        boolean shouldClick = this.currentScreen == null && this.gameSettings.keyBindAttack.isKeyDown() && this.inGameHasFocus;
+        boolean shouldClick = Minecraft.getMinecraft().currentScreen == null && this.gameSettings.keyBindAttack.isKeyDown() && this.inGameHasFocus;
         if (this.objectMouseOver != null && extraClicks > 0 && shouldClick)
             for (int i = 0; i < extraClicks; i++) {
-                BlockPos clickedBlock = this.objectMouseOver.getBlockPos();
-                this.objectMouseOver = this.renderViewEntity.rayTrace(this.playerController.getBlockReachDistance(), 1.0F);
-                if (this.objectMouseOver == null || this.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK)
-                    break;
-
-                BlockPos newBlock = this.objectMouseOver.getBlockPos();
-                if (!newBlock.equals(clickedBlock) && this.theWorld.getBlockState(newBlock).getBlock() != Blocks.air) {
-                    if (i % 3 == 0) this.thePlayer.sendQueue.addToSendQueue(new C0APacketAnimation());
-                    this.playerController.clickBlock(newBlock, this.objectMouseOver.sideHit);
-                }
+                BlockPos prevBlockPos = this.objectMouseOver.getBlockPos();
+                BlockPos blockpos;
+                this.entityRenderer.getMouseOver(this.timer.renderPartialTicks);
+                if (this.objectMouseOver == null
+                        || (blockpos = this.objectMouseOver.getBlockPos()) == null
+                        || this.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK
+                        || blockpos.equals(prevBlockPos)
+                        || this.theWorld.getBlockState(blockpos).getBlock().getMaterial() == Material.air
+                        || this.theWorld.getBlockState(blockpos).getBlock() == Blocks.dirt
+                        || this.theWorld.getBlockState(blockpos).getBlock().getMaterial() == Material.rock
+                ) break;
+                this.playerController.clickBlock(blockpos, this.objectMouseOver.sideHit);
+                if (i % 3 == 0) this.thePlayer.swingItem();
             }
     }
+
+//    @Inject(method = "displayGuiScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiScreen;onGuiClosed()V"))
+//    private void onGuiClose(GuiScreen guiScreenIn, CallbackInfo ci) {
+//        MinecraftForge.EVENT_BUS.register(new GuiCloseEvent(Minecraft.getMinecraft().currentScreen));
+//    }
 }

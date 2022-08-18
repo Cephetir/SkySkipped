@@ -17,38 +17,39 @@
 
 package me.cephetir.skyskipped.utils.render
 
-import me.cephetir.skyskipped.mixins.IMixinLayerArmorBase
-import me.cephetir.skyskipped.mixins.IMixinMinecraft
-import me.cephetir.skyskipped.mixins.IMixinRenderManager
-import me.cephetir.skyskipped.mixins.IMixinRendererLivingEntity
-import net.minecraft.client.Minecraft
+import me.cephetir.skyskipped.mixins.*
+import me.cephetir.skyskipped.utils.mc
+import net.minecraft.client.entity.AbstractClientPlayer
 import net.minecraft.client.model.ModelBase
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraft.client.renderer.RenderGlobal
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.culling.Frustum
+import net.minecraft.client.renderer.entity.RenderPlayer
 import net.minecraft.client.renderer.entity.layers.LayerArmorBase
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.item.EntityArmorStand
+import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemArmor
 import net.minecraft.util.AxisAlignedBB
+import net.minecraft.util.MathHelper
+import net.minecraft.util.ResourceLocation
 import net.minecraft.util.Vec3
 import org.lwjgl.opengl.GL11.*
 import java.awt.Color
+import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
 
 object RenderUtils {
-    private val mc = Minecraft.getMinecraft()
     private val frustrum = Frustum()
 
-    @JvmStatic
     fun drawBox(pos: Vec3, color: Color, pt: Float) {
-        val viewer: Entity = Minecraft.getMinecraft().renderViewEntity
+        val viewer: Entity = mc.renderViewEntity
         val viewerX: Double = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * pt
         val viewerY: Double = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * pt
         val viewerZ: Double = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ) * pt
@@ -60,7 +61,6 @@ object RenderUtils {
         drawFilledBoundingBox(AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1), color, 0.6f)
     }
 
-    @JvmStatic
     fun drawFilledBoundingBox(aabb: AxisAlignedBB, c: Color, alphaMultiplier: Float) {
         GlStateManager.disableDepth()
         GlStateManager.disableCull()
@@ -116,69 +116,6 @@ object RenderUtils {
         GlStateManager.enableCull()
     }
 
-    fun renderStarredMobBoundingBox(entity: Entity, color: Int) {
-        val rm = mc.renderManager as IMixinRenderManager
-        val partialTicks = (mc as IMixinMinecraft).timer.renderPartialTicks.toDouble()
-        val renderPosX = rm.renderPosX
-        val renderPosY = rm.renderPosY
-        val renderPosZ = rm.renderPosZ
-        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks - renderPosX
-        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks - renderPosY
-        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks - renderPosZ
-        val entityBox = entity.entityBoundingBox
-        val aabb = AxisAlignedBB.fromBounds(
-            entityBox.minX - entity.posX + x - 0.4,
-            entityBox.minY - entity.posY + y - if (entity.customNameTag.contains("Fels")) 3.15 else 2.1,
-            entityBox.minZ - entity.posZ + z - 0.4,
-            entityBox.maxX - entity.posX + x + 0.4,
-            entityBox.maxY - entity.posY + y,
-            entityBox.maxZ - entity.posZ + z + 0.4
-        )
-        drawFilledBoundingBox(aabb, color)
-    }
-
-    fun renderMiniBoundingBox(entity: Entity, color: Int) {
-        val rm = mc.renderManager as IMixinRenderManager
-        val partialTicks = (mc as IMixinMinecraft).timer.renderPartialTicks.toDouble()
-        val renderPosX = rm.renderPosX
-        val renderPosY = rm.renderPosY
-        val renderPosZ = rm.renderPosZ
-        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks - renderPosX
-        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks - renderPosY
-        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks - renderPosZ
-        val entityBox = entity.entityBoundingBox.expand(0.1, 0.1, 0.1)
-        val aabb = AxisAlignedBB.fromBounds(
-            entityBox.minX - entity.posX + x,
-            entityBox.minY - entity.posY + y,
-            entityBox.minZ - entity.posZ + z,
-            entityBox.maxX - entity.posX + x,
-            entityBox.maxY - entity.posY + y,
-            entityBox.maxZ - entity.posZ + z
-        )
-        drawFilledBoundingBox(aabb, color)
-    }
-
-    fun renderKeyBoundingBox(entity: Entity, color: Int) {
-        val rm = mc.renderManager as IMixinRenderManager
-        val partialTicks = (mc as IMixinMinecraft).timer.renderPartialTicks.toDouble()
-        val renderPosX = rm.renderPosX
-        val renderPosY = rm.renderPosY
-        val renderPosZ = rm.renderPosZ
-        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks - renderPosX
-        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks - renderPosY
-        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks - renderPosZ
-        val bbox = entity.entityBoundingBox.contract(0.0, 0.5, 0.0)
-        val aabb = AxisAlignedBB(
-            bbox.minX - entity.posX + x,
-            bbox.minY - entity.posY + y + 0.5,
-            bbox.minZ - entity.posZ + z,
-            bbox.maxX - entity.posX + x,
-            bbox.maxY - entity.posY + y + 0.5,
-            bbox.maxZ - entity.posZ + z
-        )
-        drawFilledBoundingBox(aabb, color)
-    }
-
     fun renderBoundingBox(entity: Entity, color: Int) {
         val rm = mc.renderManager as IMixinRenderManager
         val partialTicks = (mc as IMixinMinecraft).timer.renderPartialTicks.toDouble()
@@ -201,19 +138,7 @@ object RenderUtils {
         drawFilledBoundingBox(aabb, color)
     }
 
-    fun renderSmallBox(vec: Vec3, color: Int) {
-        val rm = mc.renderManager as IMixinRenderManager
-        val renderPosX = rm.renderPosX
-        val renderPosY = rm.renderPosY
-        val renderPosZ = rm.renderPosZ
-        val x = vec.xCoord - renderPosX
-        val y = vec.yCoord - renderPosY
-        val z = vec.zCoord - renderPosZ
-        val aabb = AxisAlignedBB(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1)
-        drawFilledBoundingBox(aabb, color)
-    }
-
-    private fun drawFilledBoundingBox(aabb: AxisAlignedBB, color: Int) {
+    fun drawFilledBoundingBox(aabb: AxisAlignedBB, color: Int) {
         GlStateManager.enableBlend()
         GlStateManager.disableDepth()
         GlStateManager.disableLighting()
@@ -281,7 +206,6 @@ object RenderUtils {
         )
     }
 
-    // Tenacity momento ez
     fun animate(endPoint: Float, current: Float, speed: Float): Float {
         val sped = speed.coerceIn(0f, 1f)
         val shouldContinueAnimation = endPoint > current
@@ -327,72 +251,18 @@ object RenderUtils {
 
     fun quickDrawRect(x: Float, y: Float, x2: Float, y2: Float) {
         glBegin(GL_QUADS)
-        glVertex2d(x2.toDouble(), y.toDouble())
-        glVertex2d(x.toDouble(), y.toDouble())
-        glVertex2d(x.toDouble(), y2.toDouble())
-        glVertex2d(x2.toDouble(), y2.toDouble())
+        glVertex2f(x2, y)
+        glVertex2f(x, y)
+        glVertex2f(x, y2)
+        glVertex2f(x2, y2)
         glEnd()
-    }
-
-    fun fastRoundedRect(paramXStart: Float, paramYStart: Float, paramXEnd: Float, paramYEnd: Float, radius: Float) {
-        var paramXStart = paramXStart
-        var paramYStart = paramYStart
-        var paramXEnd = paramXEnd
-        var paramYEnd = paramYEnd
-        var z: Float
-        if (paramXStart > paramXEnd) {
-            z = paramXStart
-            paramXStart = paramXEnd
-            paramXEnd = z
-        }
-        if (paramYStart > paramYEnd) {
-            z = paramYStart
-            paramYStart = paramYEnd
-            paramYEnd = z
-        }
-        val x1 = (paramXStart + radius).toDouble()
-        val y1 = (paramYStart + radius).toDouble()
-        val x2 = (paramXEnd - radius).toDouble()
-        val y2 = (paramYEnd - radius).toDouble()
-        glEnable(GL_LINE_SMOOTH)
-        glLineWidth(1f)
-        glBegin(GL_POLYGON)
-        val degree = Math.PI / 180
-        run {
-            var i = 0.0
-            while (i <= 90) {
-                glVertex2d(x2 + sin(i * degree) * radius, y2 + cos(i * degree) * radius)
-                i += 1.0
-            }
-        }
-        run {
-            var i = 90.0
-            while (i <= 180) {
-                glVertex2d(x2 + sin(i * degree) * radius, y1 + cos(i * degree) * radius)
-                i += 1.0
-            }
-        }
-        run {
-            var i = 180.0
-            while (i <= 270) {
-                glVertex2d(x1 + sin(i * degree) * radius, y1 + cos(i * degree) * radius)
-                i += 1.0
-            }
-        }
-        var i = 270.0
-        while (i <= 360) {
-            glVertex2d(x1 + sin(i * degree) * radius, y2 + cos(i * degree) * radius)
-            i += 1.0
-        }
-        glEnd()
-        glDisable(GL_LINE_SMOOTH)
     }
 
     fun isInViewFrustrum(entity: Entity): Boolean {
         return isInViewFrustrum(entity.entityBoundingBox) || entity.ignoreFrustumCheck
     }
 
-    private fun isInViewFrustrum(bb: AxisAlignedBB): Boolean {
+    fun isInViewFrustrum(bb: AxisAlignedBB): Boolean {
         val current = mc.renderViewEntity
         frustrum.setPosition(current.posX, current.posY, current.posZ)
         return frustrum.isBoundingBoxInFrustum(bb)
@@ -501,7 +371,8 @@ object RenderUtils {
     }
 
     private fun preModelDraw(entity: EntityLivingBase, model: ModelBase, partialTicks: Float): ModelData {
-        val renderer = mc.renderManager.getEntityRenderObject<EntityLivingBase>(entity) as IMixinRendererLivingEntity
+        val render = mc.renderManager.getEntityRenderObject<EntityLivingBase>(entity)
+        val renderer = render as IMixinRendererLivingEntity
         val renderManager = mc.renderManager as IMixinRenderManager
 
         val renderYaw = renderer.interpolateRotation(entity.prevRenderYawOffset, entity.renderYawOffset, partialTicks)
@@ -527,7 +398,8 @@ object RenderUtils {
         renderer.preRenderCallback(entity, partialTicks)
         GlStateManager.translate(0.0f, -1.5078125f, 0.0f)
         model.setLivingAnimations(entity, limbSwing, limbSwingAmout, partialTicks)
-        model.setRotationAngles(limbSwing, limbSwingAmout, age, rotationYaw, rotationPitch, 0.0625f, entity as Entity)
+        model.setRotationAngles(limbSwing, limbSwingAmout, age, rotationYaw, rotationPitch, 0.0625f, entity)
+        if (render is RenderPlayer && entity is AbstractClientPlayer) (render as IMixinRenderPlayer).setModelVisibilities(entity)
 
         return ModelData(renderer, rotationYaw, rotationPitch, limbSwing, limbSwingAmout, age)
     }
@@ -555,6 +427,7 @@ object RenderUtils {
         blue: Float,
         alpha: Float
     ) {
+        if (entitylivingbaseIn is EntityPlayer) return
         for (layerrenderer in renderer.layerRenderers)
             if (layerrenderer is LayerArmorBase<*>)
                 for (i in 1..4) {
@@ -580,4 +453,179 @@ object RenderUtils {
         val limbSwingAmount: Float,
         val age: Float
     )
+
+    fun drawCycle(
+        x: Double,
+        y: Double,
+        z: Double,
+        radius: Float,
+        height: Float,
+        color: Int,
+        partialTicks: Float
+    ) {
+        val alpha = (color shr 24 and 0xFF) / 255.0f
+        val r = (color shr 16 and 0xFF) / 255f
+        val g = (color shr 8 and 0xFF) / 255f
+        val b = (color and 0xFF) / 255f
+
+        GlStateManager.pushMatrix()
+        glNormal3f(0.0f, 1.0f, 0.0f)
+
+        GlStateManager.disableLighting()
+        GlStateManager.depthMask(false)
+        GlStateManager.enableDepth()
+        GlStateManager.enableBlend()
+        GlStateManager.depthFunc(GL_LEQUAL)
+        GlStateManager.disableCull()
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
+        GlStateManager.enableAlpha()
+        GlStateManager.disableTexture2D()
+        GlStateManager.disableDepth()
+
+        /*var il = 0.0
+        val tessellator = Tessellator.getInstance()
+        val worldrenderer = tessellator.worldRenderer
+        while (il < 0.05) {
+            GlStateManager.pushMatrix()
+            GlStateManager.disableTexture2D()
+            glLineWidth(2F)
+            worldrenderer.begin(1, DefaultVertexFormats.POSITION)
+            val pix2 = Math.PI * 2.0
+            for (i in 0..90) {
+                GlStateManager.color(r, g, b, alpha)
+                worldrenderer.pos(x + radius * cos(i * pix2 / 45.0), y + il, z + radius * sin(i * pix2 / 45.0)).endVertex()
+            }
+            tessellator.draw()
+            GlStateManager.enableTexture2D()
+            GlStateManager.popMatrix()
+            il += 0.0006
+        }*/
+
+        GlStateManager.color(r, g, b, alpha)
+        var x1 = x
+        var y1 = y
+        var z1 = z
+        val renderViewEntity = mc.renderViewEntity
+        val viewX = renderViewEntity.prevPosX + (renderViewEntity.posX - renderViewEntity.prevPosX) * partialTicks.toDouble()
+        val viewY = renderViewEntity.prevPosY + (renderViewEntity.posY - renderViewEntity.prevPosY) * partialTicks.toDouble()
+        val viewZ = renderViewEntity.prevPosZ + (renderViewEntity.posZ - renderViewEntity.prevPosZ) * partialTicks.toDouble()
+        x1 -= viewX
+        y1 -= viewY
+        z1 -= viewZ
+        val tessellator = Tessellator.getInstance()
+        val worldrenderer = tessellator.worldRenderer
+        worldrenderer.begin(GL_QUAD_STRIP, DefaultVertexFormats.POSITION)
+        var currentAngle = 0f
+        val angleStep = 0.1f
+        while (currentAngle < 2 * Math.PI) {
+            val xOffset = radius * cos(currentAngle.toDouble()).toFloat()
+            val zOffset = radius * sin(currentAngle.toDouble()).toFloat()
+            worldrenderer.pos(x1 + xOffset, y1 + height, z1 + zOffset).endVertex()
+            worldrenderer.pos(x1 + xOffset, y1 + 0, z1 + zOffset).endVertex()
+            currentAngle += angleStep
+        }
+        worldrenderer.pos(x1 + radius, y1 + height, z1).endVertex()
+        worldrenderer.pos(x1 + radius, y1 + 0.0, z1).endVertex()
+        tessellator.draw()
+
+        GlStateManager.enableDepth()
+        GlStateManager.enableCull()
+        GlStateManager.enableTexture2D()
+        GlStateManager.enableDepth()
+        GlStateManager.depthMask(true)
+        GlStateManager.enableLighting()
+        GlStateManager.disableBlend()
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
+        GlStateManager.popMatrix()
+    }
+
+    fun drawBeaconBeam(entity: EntityLivingBase, color: Int) {
+        val partialTicks = (mc as IMixinMinecraft).timer.renderPartialTicks
+        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks
+        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks
+        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks
+
+        renderBeaconBeam(x, y, z, color, partialTicks)
+    }
+
+    private val beaconBeam = ResourceLocation("textures/entity/beacon_beam.png")
+    fun renderBeaconBeam(x: Double, y: Double, z: Double, color: Int, partialTicks: Float) {
+        val player = mc.thePlayer
+        val playerX = player.prevPosX + (player.posX - player.prevPosX) * partialTicks
+        val playerY = player.prevPosY + (player.posY - player.prevPosY) * partialTicks
+        val playerZ = player.prevPosZ + (player.posZ - player.prevPosZ) * partialTicks
+        GlStateManager.pushMatrix()
+        GlStateManager.translate(-playerX, -playerY, -playerZ)
+        val height = 300
+        val bottomOffset = 0
+        val topOffset = bottomOffset + height
+        val tessellator = Tessellator.getInstance()
+        val worldrenderer = tessellator.worldRenderer
+        mc.textureManager.bindTexture(beaconBeam)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, 10497.0f)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, 10497.0f)
+        GlStateManager.disableLighting()
+        GlStateManager.disableDepth()
+        GlStateManager.enableTexture2D()
+        GlStateManager.tryBlendFuncSeparate(770, 1, 1, 0)
+        GlStateManager.enableBlend()
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
+        val time = mc.theWorld.totalWorldTime + partialTicks.toDouble()
+        val d1 = MathHelper.func_181162_h(-time * 0.2 - MathHelper.floor_double(-time * 0.1).toDouble())
+        val alpha = (color shr 24 and 0xFF) / 255.0f
+        val r = (color shr 16 and 0xFF) / 255f
+        val g = (color shr 8 and 0xFF) / 255f
+        val b = (color and 0xFF) / 255f
+        val d2 = time * 0.025 * -1.5
+        val d4 = 0.5 + cos(d2 + 2.356194490192345) * 0.2
+        val d5 = 0.5 + sin(d2 + 2.356194490192345) * 0.2
+        val d6 = 0.5 + cos(d2 + PI / 4.0) * 0.2
+        val d7 = 0.5 + sin(d2 + PI / 4.0) * 0.2
+        val d8 = 0.5 + cos(d2 + 3.9269908169872414) * 0.2
+        val d9 = 0.5 + sin(d2 + 3.9269908169872414) * 0.2
+        val d10 = 0.5 + cos(d2 + 5.497787143782138) * 0.2
+        val d11 = 0.5 + sin(d2 + 5.497787143782138) * 0.2
+        val d14 = -1.0 + d1
+        val d15 = height.toDouble() * 2.5 + d14
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR)
+        worldrenderer.pos(x + d4, y + topOffset, z + d5).tex(1.0, d15).color(r, g, b, alpha).endVertex()
+        worldrenderer.pos(x + d4, y + bottomOffset, z + d5).tex(1.0, d14).color(r, g, b, 1.0f).endVertex()
+        worldrenderer.pos(x + d6, y + bottomOffset, z + d7).tex(0.0, d14).color(r, g, b, 1.0f).endVertex()
+        worldrenderer.pos(x + d6, y + topOffset, z + d7).tex(0.0, d15).color(r, g, b, alpha).endVertex()
+        worldrenderer.pos(x + d10, y + topOffset, z + d11).tex(1.0, d15).color(r, g, b, alpha).endVertex()
+        worldrenderer.pos(x + d10, y + bottomOffset, z + d11).tex(1.0, d14).color(r, g, b, 1.0f).endVertex()
+        worldrenderer.pos(x + d8, y + bottomOffset, z + d9).tex(0.0, d14).color(r, g, b, 1.0f).endVertex()
+        worldrenderer.pos(x + d8, y + topOffset, z + d9).tex(0.0, d15).color(r, g, b, alpha).endVertex()
+        worldrenderer.pos(x + d6, y + topOffset, z + d7).tex(1.0, d15).color(r, g, b, alpha).endVertex()
+        worldrenderer.pos(x + d6, y + bottomOffset, z + d7).tex(1.0, d14).color(r, g, b, 1.0f).endVertex()
+        worldrenderer.pos(x + d10, y + bottomOffset, z + d11).tex(0.0, d14).color(r, g, b, 1.0f).endVertex()
+        worldrenderer.pos(x + d10, y + topOffset, z + d11).tex(0.0, d15).color(r, g, b, alpha).endVertex()
+        worldrenderer.pos(x + d8, y + topOffset, z + d9).tex(1.0, d15).color(r, g, b, alpha).endVertex()
+        worldrenderer.pos(x + d8, y + bottomOffset, z + d9).tex(1.0, d14).color(r, g, b, 1.0f).endVertex()
+        worldrenderer.pos(x + d4, y + bottomOffset, z + d5).tex(0.0, d14).color(r, g, b, 1.0f).endVertex()
+        worldrenderer.pos(x + d4, y + topOffset, z + d5).tex(0.0, d15).color(r, g, b, alpha).endVertex()
+        tessellator.draw()
+        val d12 = -1.0 + d1
+        val d13 = height + d12
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR)
+        worldrenderer.pos(x + 0.2, y + topOffset, z + 0.2).tex(1.0, d13).color(r, g, b, 0.25f * alpha).endVertex()
+        worldrenderer.pos(x + 0.2, y + bottomOffset, z + 0.2).tex(1.0, d12).color(r, g, b, 0.25f).endVertex()
+        worldrenderer.pos(x + 0.8, y + bottomOffset, z + 0.2).tex(0.0, d12).color(r, g, b, 0.25f).endVertex()
+        worldrenderer.pos(x + 0.8, y + topOffset, z + 0.2).tex(0.0, d13).color(r, g, b, 0.25f * alpha).endVertex()
+        worldrenderer.pos(x + 0.8, y + topOffset, z + 0.8).tex(1.0, d13).color(r, g, b, 0.25f * alpha).endVertex()
+        worldrenderer.pos(x + 0.8, y + bottomOffset, z + 0.8).tex(1.0, d12).color(r, g, b, 0.25f).endVertex()
+        worldrenderer.pos(x + 0.2, y + bottomOffset, z + 0.8).tex(0.0, d12).color(r, g, b, 0.25f).endVertex()
+        worldrenderer.pos(x + 0.2, y + topOffset, z + 0.8).tex(0.0, d13).color(r, g, b, 0.25f * alpha).endVertex()
+        worldrenderer.pos(x + 0.8, y + topOffset, z + 0.2).tex(1.0, d13).color(r, g, b, 0.25f * alpha).endVertex()
+        worldrenderer.pos(x + 0.8, y + bottomOffset, z + 0.2).tex(1.0, d12).color(r, g, b, 0.25f).endVertex()
+        worldrenderer.pos(x + 0.8, y + bottomOffset, z + 0.8).tex(0.0, d12).color(r, g, b, 0.25f).endVertex()
+        worldrenderer.pos(x + 0.8, y + topOffset, z + 0.8).tex(0.0, d13).color(r, g, b, 0.25f * alpha).endVertex()
+        worldrenderer.pos(x + 0.2, y + topOffset, z + 0.8).tex(1.0, d13).color(r, g, b, 0.25f * alpha).endVertex()
+        worldrenderer.pos(x + 0.2, y + bottomOffset, z + 0.8).tex(1.0, d12).color(r, g, b, 0.25f).endVertex()
+        worldrenderer.pos(x + 0.2, y + bottomOffset, z + 0.2).tex(0.0, d12).color(r, g, b, 0.25f).endVertex()
+        worldrenderer.pos(x + 0.2, y + topOffset, z + 0.2).tex(0.0, d13).color(r, g, b, 0.25f * alpha).endVertex()
+        tessellator.draw()
+        GlStateManager.enableDepth()
+        GlStateManager.popMatrix()
+    }
 }

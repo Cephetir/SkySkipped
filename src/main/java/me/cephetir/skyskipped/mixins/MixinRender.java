@@ -27,6 +27,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 public class MixinRender {
     @ModifyArg(method = "renderLivingLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I"))
     public String renderName(String text) {
-        return SkySkipped.replaceCosmetics(text);
+        return SkySkipped.getCosmetics(text);
     }
 }
