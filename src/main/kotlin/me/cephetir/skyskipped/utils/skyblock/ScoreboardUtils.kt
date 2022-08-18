@@ -18,7 +18,7 @@
 package me.cephetir.skyskipped.utils.skyblock
 
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import net.minecraft.client.Minecraft
+import me.cephetir.skyskipped.utils.mc
 import net.minecraft.scoreboard.Score
 import net.minecraft.scoreboard.ScorePlayerTeam
 
@@ -27,7 +27,7 @@ object ScoreboardUtils {
 
     val sidebarLines: List<String>
         get() {
-            val scoreboard = Minecraft.getMinecraft().theWorld?.scoreboard ?: return emptyList()
+            val scoreboard = mc.theWorld?.scoreboard ?: return emptyList()
             val objective = scoreboard.getObjectiveInDisplaySlot(1) ?: return emptyList()
             val scores = scoreboard.getSortedScores(objective).filter { input: Score? ->
                 input != null && input.playerName != null && !input.playerName.startsWith("#")

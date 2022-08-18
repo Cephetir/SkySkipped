@@ -28,16 +28,13 @@ import me.cephetir.skyskipped.mixins.IMixinSugarCaneMacro
 import me.cephetir.skyskipped.utils.HttpUtils
 import me.cephetir.skyskipped.utils.InventoryUtils
 import me.cephetir.skyskipped.utils.RotationClass
+import me.cephetir.skyskipped.utils.TextUtils.containsAny
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.threading.BackgroundScope
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
-import net.minecraft.client.gui.inventory.GuiInventory
 import net.minecraft.client.settings.KeyBinding
-import net.minecraft.init.Items
 import net.minecraft.inventory.ContainerChest
-import net.minecraft.inventory.ContainerPlayer
 import net.minecraft.inventory.Slot
 import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraft.util.BlockPos
@@ -262,7 +259,7 @@ open class FailSafe : Feature() {
             }
 
             val ticksTimeout = Config.failSafeDesyncTime * 20
-            val stack = Minecraft.getMinecraft().thePlayer.heldItem
+            val stack = mc.thePlayer.heldItem
             if (stack == null ||
                 !stack.hasTagCompound() ||
                 !stack.tagCompound.hasKey("ExtraAttributes", 10)
@@ -427,26 +424,24 @@ open class FailSafe : Feature() {
         if (InventoryUtils.isFull()) {
             printdev("Inventory is full!")
             ticks5++
-        } else ticks5 = 0
+        } else ticks5 = ticks5--.coerceAtLeast(0)
 
         if (!called5 && ticks5 >= 50) {
             printdev("Triggering full invenory failsafe!")
             called5 = true
-            clearInventory({
-                UChat.chat("§cSkySkipped §f:: §eInventory is full! Cleanning...")
-                val pizza = pizza
-                val cheeto = cheeto
+
+            val pizza = pizza
+            val cheeto = cheeto
+            UChat.chat("§cSkySkipped §f:: §eInventory is full! Cleanning...")
+            if (pizza) MacroBuilder.onKey()
+            else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+
+            clearInventory {
                 if (pizza) MacroBuilder.onKey()
                 else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-            },
-                {
-                    val pizza = pizza
-                    val cheeto = cheeto
-                    if (pizza) MacroBuilder.onKey()
-                    else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                    called5 = false
-                    ticks5 = 0
-                })
+                called5 = false
+                ticks5 = 0
+            }
         }
     }
 
@@ -539,86 +534,28 @@ open class FailSafe : Feature() {
         if (ticks8++ >= Config.failSafeInvConfigTime * 60 * 20 && !called8) {
             called8 = true
             printdev("Clearing inv...")
-            clearInventory({
-                UChat.chat("§cSkySkipped §f:: §eCleanning inventory...")
-                val pizza = pizza
-                val cheeto = cheeto
+            UChat.chat("§cSkySkipped §f:: §eCleanning inventory...")
+            val pizza = pizza
+            val cheeto = cheeto
+            if (pizza) MacroBuilder.onKey()
+            else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
+
+            clearInventory {
                 if (pizza) MacroBuilder.onKey()
                 else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-            },
-                {
-                    val pizza = pizza
-                    val cheeto = cheeto
-                    if (pizza) MacroBuilder.onKey()
-                    else if (cheeto) CF4M.INSTANCE.moduleManager.toggle("AutoFarm")
-                    called8 = false
-                    ticks8 = 0
-                })
+                called8 = false
+                ticks8 = 0
+            }
         }
     }
 
-    private fun clearInventory(onStart: Runnable, onEnd: Runnable) {
+    private fun clearInventory(onEnd: Runnable) {
         BackgroundScope.launch Thread@{
             try {
-                onStart.run()
                 val extraDelay = Config.failSafeGlobalTime.toLong() / 2
-                delay(1000L)
 
-                mc.displayGuiScreen(GuiInventory(mc.thePlayer))
-                delay(1000L + extraDelay)
-
-                if (mc.currentScreen !is GuiInventory) {
-                    printdev("Invenory closed")
-                    mc.thePlayer.closeScreen()
-                    onEnd.run()
-                    return@Thread
-                }
-                val inv = ((mc.currentScreen as GuiInventory).inventorySlots as ContainerPlayer).inventorySlots
-                val stoneSlots = inv.filter {
-                    it.hasStack && it.stack.displayName.stripColor().keepScoreboardCharacters()
-                        .contains("Stone", true)
-                }
-                if (stoneSlots.isNotEmpty()) {
-                    printdev("Stone detected!")
-                    for (slot in stoneSlots) {
-                        if (mc.currentScreen !is GuiInventory) {
-                            printdev("Invenory closed")
-                            mc.thePlayer.closeScreen()
-                            onEnd.run()
-                            return@Thread
-                        }
-                        mc.playerController.windowClick(
-                            (mc.currentScreen as GuiInventory).inventorySlots.windowId,
-                            slot.slotNumber, 0, 0, mc.thePlayer
-                        )
-                        mc.playerController.windowClick(
-                            (mc.currentScreen as GuiInventory).inventorySlots.windowId,
-                            -999, 0, 0, mc.thePlayer
-                        )
-                        delay(500L + extraDelay)
-                    }
-                } else printdev("no stone")
-                val crops = inv.filter {
-                    it.hasStack && when (it.stack.item) {
-                        Items.nether_wart -> true
-                        Items.reeds -> true
-                        Items.potato -> true
-                        Items.carrot -> true
-                        Items.melon -> true
-                        else -> it.stack.displayName.contains("mushroom") || it.stack.displayName.contains("wart")
-                    }
-                }
-                mc.thePlayer.closeScreen()
-                if (crops.isEmpty()) {
-                    printdev("no crops")
-                    mc.thePlayer.closeScreen()
-                    onEnd.run()
-                    return@Thread
-                }
-
-                delay(1000L + extraDelay)
                 mc.thePlayer.sendChatMessage("/sbmenu")
-                delay(1000L + extraDelay)
+                delay(500L + extraDelay)
 
                 val startTime = System.currentTimeMillis()
                 var exit = false
@@ -643,8 +580,8 @@ open class FailSafe : Feature() {
                     (mc.currentScreen as GuiChest).inventorySlots.windowId,
                     trades!!.slotIndex, 0, 0, mc.thePlayer
                 )
-                delay(500L + extraDelay)
                 printdev("clicked trades")
+                delay(500L + extraDelay)
 
                 val startTime2 = System.currentTimeMillis()
                 var sell: Slot? = null
@@ -657,21 +594,14 @@ open class FailSafe : Feature() {
                     }
                     delay(100L)
                     sell = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots.find {
-                        it.hasStack && it.stack.item.unlocalizedName.contains("hopper")
+                        it.hasStack && it.stack.displayName.stripColor().startsWith("Coal")
                     }
                 }
                 printdev("found sell")
 
                 val inventory = ((mc.currentScreen as GuiChest).inventorySlots as ContainerChest).inventorySlots
                 val cropss = inventory.filter {
-                    it.hasStack && when (it.stack.item) {
-                        Items.nether_wart -> true
-                        Items.reeds -> true
-                        Items.potato -> true
-                        Items.carrot -> true
-                        Items.melon -> true
-                        else -> it.stack.displayName.contains("mushroom")
-                    }
+                    it.hasStack && it.stack.displayName.containsAny("wart", "sugar cane", "cocoa bean", "mushroom") && !it.stack.displayName.containsAny("hoe", "axe")
                 }
                 if (cropss.isNotEmpty()) {
                     printdev("Crops found!")
@@ -686,9 +616,12 @@ open class FailSafe : Feature() {
                             (mc.currentScreen as GuiChest).inventorySlots.windowId,
                             slot.slotNumber, 0, 0, mc.thePlayer
                         )
-                        delay(500L + extraDelay)
+                        delay(200L)
                     }
                 } else printdev("no crops")
+
+                mc.thePlayer.closeScreen()
+                printdev("Invenory closed")
 
                 onEnd.run()
             } catch (e: InterruptedException) {

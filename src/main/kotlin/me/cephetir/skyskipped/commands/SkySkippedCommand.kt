@@ -19,6 +19,7 @@ package me.cephetir.skyskipped.commands
 
 import gg.essential.api.EssentialAPI
 import gg.essential.universal.UChat.chat
+import gg.essential.universal.UDesktop
 import gg.essential.universal.wrappers.message.UTextComponent
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
@@ -26,10 +27,11 @@ import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.hacks.FailSafe
 import me.cephetir.skyskipped.features.impl.hacks.HotbarSaver
 import me.cephetir.skyskipped.features.impl.hacks.PetMacro
+import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.gui.impl.GuiHudEditor
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import me.cephetir.skyskipped.utils.TextUtils.isNumeric
-import net.minecraft.client.Minecraft
+import me.cephetir.skyskipped.utils.mc
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
 import net.minecraft.event.ClickEvent
@@ -55,7 +57,7 @@ class SkySkippedCommand : CommandBase() {
     }
 
     override fun addTabCompletionOptions(sender: ICommandSender, args: Array<String>, pos: BlockPos): List<String>? {
-        return if (args.size == 1) getListOfStringsMatchingLastWord(args, "github", "crit", "help", "gui", "pet")
+        return if (args.size == 1) getListOfStringsMatchingLastWord(args, "pet", "keybinds", "trail", "hud", "hotbars", "packetThottle", "config", "reload", "github", "help")
         else null
     }
 
@@ -71,28 +73,33 @@ class SkySkippedCommand : CommandBase() {
                 text.setClick(ClickEvent.Action.OPEN_URL, "https://github.com/Cephetir/SkySkipped")
                 sender.addChatMessage(text)
             }
+
             "pet" -> {
                 if (args.size >= 2 && args[1].isNumeric() && args[1].toInt() > 0) {
-                    val player = Minecraft.getMinecraft().thePlayer
+                    val player = mc.thePlayer
                     if (Config.petsOverlay) Features.petsOverlay.auto = args[1].toInt()
                     else MinecraftForge.EVENT_BUS.register(PetMacro(args[1].toInt()))
                     player.sendChatMessage("/pets")
                 } else chat("§cSkySkipped §f:: §4Specify pet index! Usage: /sm pet [pet index (start counting from 1)]")
             }
+
             "stop" -> {
                 if (FailSafe.called4) {
                     FailSafe.called4 = false
                     chat("§cSkySkipped §f:: §eJacob failsafe stopped and won't reenable macro!")
                 } else chat("§cSkySkipped §f:: §4Jacob failsafe wasn't triggered!")
             }
+
             "dev" -> {
                 SkySkipped.devMode = !SkySkipped.devMode
                 chat("§cSkySkipped §f:: §eDev mode ${SkySkipped.devMode}")
             }
+
             "trail" -> {
                 if (args.size >= 2) Config.trailParticle = args[1]
                 else chat("§cSkySkipped §f:: §4Specify particle name!")
             }
+
             "hud" -> EssentialAPI.getGuiUtil().openScreen(GuiHudEditor())
             "hotbars", "hb" -> {
                 if (args.size >= 3) {
@@ -109,6 +116,15 @@ class SkySkippedCommand : CommandBase() {
                     chat("${text.removeSuffix(", ")}.")
                 } else chat("§cSkySkipped §f:: §4Not enough arguments! Usage: /sm hb [save|select|remove] [preset name]")
             }
+
+            "packetThottle" -> if (args.size < 2)
+                chat("§cSkySkipped §f:: §eYou was packet thottled ${MacroManager.packetThrottleAmout} times.")
+            else if (args[1] == "reset") {
+                MacroManager.packetThrottleAmout = 0
+                chat("§cSkySkipped §f:: §ePacket thottle counter was reseted.")
+            }
+
+            "config" -> UDesktop.open(Config.modDir)
             "reload" -> SkySkipped.loadCosmetics()
             else -> chat(
                 """
@@ -120,6 +136,8 @@ class SkySkippedCommand : CommandBase() {
                     §cSkySkipped §f:: §e/sm trail [particle name] §f- §eSet trail particle
                     §cSkySkipped §f:: §e/sm hud §f- §eOpens hud editor GUI
                     §cSkySkipped §f:: §e/sm hotbars §for§e /sm hb [save|select|remove|list] [preset name] §f- §eSave, select or remove hotbar preset
+                    §cSkySkipped §f:: §e/sm packetThottle (reset) §f- §eShow packet thottle amount
+                    §cSkySkipped §f:: §e/sm config §f- §eReload cosmetics and custom names
                     §cSkySkipped §f:: §e/sm reload §f- §eReload cosmetics and custom names
                     §cSkySkipped §f:: §e/sm github §f- §eOpens official github page
                     §cSkySkipped §f:: §e/sm help §f- §eShows this message

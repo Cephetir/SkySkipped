@@ -18,7 +18,7 @@
 package me.cephetir.skyskipped.features.impl.discordrpc
 
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.event.SBInfo
+import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.event.SkyblockIsland
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
@@ -43,9 +43,9 @@ object RPC : Feature() {
 
         val detail = when (Config.drpcDetail) {
             0 ->
-                if (SBInfo.island == SkyblockIsland.Unknown)
+                if (Listener.island == SkyblockIsland.Unknown)
                     if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
-                else SBInfo.island.formattedName
+                else Listener.island.formattedName
 
             1 -> mc.session.username
             2 -> if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
@@ -56,9 +56,9 @@ object RPC : Feature() {
 
         val state = when (Config.drpcState) {
             0 ->
-                if (SBInfo.island == SkyblockIsland.Unknown)
+                if (Listener.island == SkyblockIsland.Unknown)
                     if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
-                else SBInfo.island.formattedName
+                else Listener.island.formattedName
 
             1 -> mc.session.username
             2 -> if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"

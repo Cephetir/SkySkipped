@@ -20,6 +20,7 @@ package me.cephetir.skyskipped.features.impl.dugeons
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.KeybindUtils.isDown
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockPos
@@ -44,7 +45,7 @@ class AutoGhostBlock : Feature() {
     }
 
     private fun onSneak() {
-        if (mc.gameSettings.keyBindSneak.isKeyDown) {
+        if (mc.gameSettings.keyBindSneak.isDown()) {
             val playerPos: BlockPos = mc.thePlayer.position
             val playerVec: Vec3 = mc.thePlayer.positionVector
             val vec3i = Vec3i(3, 1, 3)
@@ -66,7 +67,7 @@ class AutoGhostBlock : Feature() {
                         mc.theWorld.setBlockToAir(blockPos)
                 }
             }
-        } else if (mc.gameSettings.keyBindJump.isKeyDown) {
+        } else if (mc.gameSettings.keyBindJump.isDown()) {
             val playerPos: BlockPos = mc.thePlayer.position
             val playerVec: Vec3 = mc.thePlayer.positionVector
             val vec3i = Vec3i(3, 2, 3)
@@ -86,7 +87,7 @@ class AutoGhostBlock : Feature() {
     }
 
     private fun onKey() {
-        if (SkySkipped.autoGhostBlockKey.isKeyDown) {
+        if (SkySkipped.autoGhostBlockKey.isDown()) {
             val playerPos: BlockPos = mc.thePlayer.position
             val playerVec: Vec3 = mc.thePlayer.positionVector
             val vec3i = Vec3i(3, 1, 3)

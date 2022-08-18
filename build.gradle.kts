@@ -19,16 +19,14 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.7.10"
-    kotlin("plugin.serialization") version "1.6.21"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("gg.essential.loom") version "0.10.0.+"
     id("dev.architectury.architectury-pack200") version "0.1.3"
-    id("io.github.juuxel.loom-quiltflower") version "1.7.2"
     java
     idea
 }
 
-version = "3.2"
+version = "3.3"
 group = "me.cephetir"
 
 base {
@@ -43,23 +41,17 @@ repositories {
     maven("https://jitpack.io")
 }
 
-quiltflower {
-    quiltflowerVersion.set("1.8.1")
-}
-
 loom {
     silentMojangMappingsLicense()
     launchConfigs {
         getByName("client") {
-            property("elementa.dev", "true")
-            property("elementa.debug", "true")
-            property("elementa.invalid_usage", "warn")
             property("mixin.debug.verbose", "true")
             property("mixin.debug.export", "true")
             property("mixin.dumpTargetOnFailure", "true")
             property("legacy.debugClassLoading", "true")
             property("legacy.debugClassLoadingSave", "true")
             property("legacy.debugClassLoadingFiner", "true")
+            arg("--tweakClass", "gg.essential.loader.stage0.EssentialSetupTweaker")
             arg("--mixin", "mixins.sm.json")
         }
     }
@@ -90,8 +82,7 @@ dependencies {
     include("gg.essential:loader-launchwrapper:1.1.3")
     implementation("gg.essential:essential-1.8.9-forge:3760")
 
-    implementation("com.kohlschutter.junixsocket:junixsocket-common:2.0.4")
-    include("com.kohlschutter.junixsocket:junixsocket-native-common:2.0.4") {
+    include("com.github.jagrosh:DiscordIPC:18b6096") {
         exclude(module = "log4j")
     }
 
@@ -112,6 +103,9 @@ sourceSets {
 }
 
 tasks {
+    wrapper.get().doFirst {
+        delete("$buildDir/libs/")
+    }
     processResources {
         inputs.property("version", project.version)
         inputs.property("mcversion", "1.8.9")
@@ -138,8 +132,9 @@ tasks {
         enabled = false
     }
     remapJar {
-        archiveClassifier.set("")
-        input.set(shadowJar.get().archiveFile)
+        val file = shadowJar.get().archiveFile
+        archiveClassifier.set(file.hashCode().toString())
+        input.set(file)
     }
     shadowJar {
         archiveClassifier.set("dev")
@@ -171,25 +166,7 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "1.8"
-            freeCompilerArgs =
-                listOf(
-                    "-opt-in=kotlin.RequiresOptIn",
-                    "-Xjvm-default=all",
-                    "-Xrelease=8",
-                    "-Xbackend-threads=0",
-                    //"-Xuse-k2"
-                )
-            languageVersion = "1.6"
         }
-        kotlinDaemonJvmArguments.set(
-            listOf(
-                "-Xmx2G",
-                "-Dkotlin.enableCacheBuilding=true",
-                "-Dkotlin.useParallelTasks=true",
-                "-Dkotlin.enableFastIncremental=true",
-                //"-Xbackend-threads=0"
-            )
-        )
     }
 }
 

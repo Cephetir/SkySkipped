@@ -25,6 +25,7 @@ import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.utils.ScreenshotUtils
 import me.cephetir.skyskipped.utils.TextUtils.isNumeric
+import me.cephetir.skyskipped.utils.mc
 import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.JDA
@@ -32,9 +33,8 @@ import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import net.dv8tion.jda.api.hooks.SubscribeEvent
+import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.cache.CacheFlag
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiMainMenu
 import net.minecraft.client.gui.GuiMultiplayer
 import net.minecraft.client.multiplayer.GuiConnecting
@@ -42,11 +42,11 @@ import net.minecraft.client.multiplayer.ServerData
 import net.minecraft.util.ChatComponentText
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Loader
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
 
 object RemoteControlling {
-    private val mc = Minecraft.getMinecraft()
     private lateinit var jda: JDA
 
     @Volatile
@@ -59,6 +59,7 @@ object RemoteControlling {
         try {
             jda = JDABuilder.createLight(Config.remoteControlUrl)
                 .disableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
+                .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .setBulkDeleteSplittingEnabled(false)
                 .setActivity(Activity.watching("over skyskipped macro"))
                 .addEventListeners(EventListener())
@@ -66,9 +67,9 @@ object RemoteControlling {
 
             MinecraftForge.EVENT_BUS.register(RemoteControlling)
         } catch (e: Exception) {
+            e.printStackTrace()
             EssentialAPI.getNotifications().push("Failed to start JDA", "Invalid discord bot token!")
             SkySkipped.logger.error("Failed to start JDA! Invalid discord bot token!")
-            e.printStackTrace()
         }
     }
 
@@ -85,7 +86,7 @@ object RemoteControlling {
         if (connect) mc.displayGuiScreen(
             GuiConnecting(
                 GuiMultiplayer(GuiMainMenu()),
-                Minecraft.getMinecraft(),
+                mc,
                 ServerData(Cache.prevName, Cache.prevIP, Cache.prevIsLan)
             )
         )
@@ -96,6 +97,7 @@ object RemoteControlling {
             var message = event.message.contentStripped
             if (!message.startsWith("!")) return
             message = message.removePrefix("!").trim()
+            println("Received command $message")
 
             if (mc.thePlayer == null || mc.theWorld == null) {
                 if (message.startsWith("connect") || message.startsWith("c")) {

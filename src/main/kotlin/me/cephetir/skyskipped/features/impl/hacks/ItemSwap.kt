@@ -22,12 +22,12 @@ import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.KeybindUtils.isDown
 import net.minecraft.client.gui.inventory.GuiInventory
 import net.minecraft.inventory.Slot
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import org.lwjgl.input.Keyboard
 
 class ItemSwap : Feature() {
     private val called = mutableMapOf<Pair<Slot, Slot>, Int>()
@@ -38,7 +38,7 @@ class ItemSwap : Feature() {
         if (mc.currentScreen !is GuiInventory) return
 
         for (keybind in SkySkipped.keybinds) {
-            val down = Keyboard.isKeyDown(keybind.keyCode)
+            val down = keybind.isDown(true)
             if (down == keybind.lastState) continue
             keybind.lastState = down
             if (!down) continue

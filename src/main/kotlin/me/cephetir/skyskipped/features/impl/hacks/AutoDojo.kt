@@ -23,6 +23,7 @@ import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.event.events.PlayerAttackEvent
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.InventoryUtils.findItemInHotbar
+import me.cephetir.skyskipped.utils.KeybindUtils.isDown
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.skyblock.ScoreboardUtils
@@ -32,9 +33,7 @@ import net.minecraft.entity.monster.EntityZombie
 import net.minecraft.init.Items
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
-import org.lwjgl.input.Keyboard
 
 
 open class AutoDojo : Feature() {
@@ -72,11 +71,15 @@ open class AutoDojo : Feature() {
         return UChat.chat("§cSkySkipped §f:: §eAuto dojo §cdisabled§e!")
     }
 
+    private var keybindLastState = false
     @SubscribeEvent
-    protected fun onKey(event: InputEvent.KeyInputEvent) {
+    protected fun onKey(event: ClientTickEvent) {
         if (mc.thePlayer == null || mc.theWorld == null || !Cache.inSkyblock) return
-        if (!Keyboard.getEventKeyState()) return
-        if (Keyboard.getEventKey() != SkySkipped.autoDojo.keyCode) return
+
+        val down = SkySkipped.autoDojo.isDown()
+        if (down == keybindLastState) return
+        keybindLastState = down
+        if (!down) return
 
         if (enabled) onDisable()
         else onEnable()

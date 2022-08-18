@@ -17,15 +17,12 @@
 
 package me.cephetir.skyskipped.utils.render
 
-import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import org.lwjgl.opengl.GL11
 import kotlin.math.cos
 import kotlin.math.sin
 
 object RoundUtils {
-    val mc = Minecraft.getMinecraft()!!
-    val fr = mc.fontRendererObj
 
     fun enableGL2D() {
         GL11.glDisable(2929)

@@ -19,18 +19,21 @@ package me.cephetir.skyskipped.features.impl.macro.macros
 
 import gg.essential.api.utils.Multithreading
 import gg.essential.universal.UChat
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.impl.macro.Macro
 import me.cephetir.skyskipped.features.impl.macro.failsafes.Failsafes
 import me.cephetir.skyskipped.utils.HttpUtils
 import me.cephetir.skyskipped.utils.InventoryUtils
+import me.cephetir.skyskipped.utils.RandomUtils
 import me.cephetir.skyskipped.utils.RotationClass
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.skyblock.ScoreboardUtils
+import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.block.Block
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiChat
 import net.minecraft.client.gui.GuiDisconnected
 import net.minecraft.client.gui.GuiMainMenu
@@ -49,9 +52,7 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase
-import kotlin.math.abs
-import kotlin.math.ceil
-import kotlin.math.roundToInt
+import kotlin.math.*
 
 class SugarCaneMacro : Macro("SugarCane") {
     private val events = Events(this)
@@ -173,8 +174,7 @@ class SugarCaneMacro : Macro("SugarCane") {
                 sendWebhook("Somebody is visiting you", message, false)
             else if (message.contains("has invited you to join their party!"))
                 sendWebhook("Received Party Request", message, false)
-
-            if (message.startsWith("[Important] This server will restart soon:")) {
+            else if (message.startsWith("[Important] This server will restart soon:")) {
                 unpressKeys()
                 mc.thePlayer.sendChatMessage("/setspawn")
                 printdev("Detected server reboot")
@@ -183,6 +183,7 @@ class SugarCaneMacro : Macro("SugarCane") {
                 Failsafes.desyncWaitTimer = System.currentTimeMillis()
                 Failsafes.desyncF = true
             }
+
             return
         }
 
@@ -198,10 +199,12 @@ class SugarCaneMacro : Macro("SugarCane") {
         when (farmingState) {
             FarmingState.SETUP -> setup()
             FarmingState.FARM -> {
-                applyFailsafes()
-                checkRotation()
+                if (applyFailsafes()) return
                 checkDirection()
+                checkRotation()
+                randomEvent()
             }
+
             FarmingState.CLIMB -> climb()
             FarmingState.STUCK -> Failsafes.stuck { farmingState = FarmingState.SETUP }
             FarmingState.DESYNED -> Failsafes.desynced(true) { farmingState = FarmingState.SETUP }
@@ -221,6 +224,10 @@ class SugarCaneMacro : Macro("SugarCane") {
     private fun setup() {
         unpressKeys()
         mc.displayGuiScreen(null)
+        if (!Cache.onIsland) {
+            farmingState = FarmingState.WARPED
+            return
+        }
         if (rotating == null) {
             val yaw = if (farmType == FarmType.NORMAL) when (farmDirectionNormal) {
                 FarmDirectionNormal.POSITIVE -> 45f
@@ -232,8 +239,9 @@ class SugarCaneMacro : Macro("SugarCane") {
                 FarmDirection.WEST -> 90f
                 FarmDirection.EAST -> -90f
             }
+            val pitch = if (Config.customAngles) Config.customPitch.toFloat() else 0f
             printdev("Rotate yaw and pitch: $yaw 0")
-            rotating = RotationClass(RotationClass.Rotation(yaw, 0f), 1500L)
+            rotating = RotationClass(RotationClass.Rotation(yaw, pitch), 1500L)
         }
         if (rotating!!.done) {
             printdev("Finished rotating")
@@ -273,9 +281,10 @@ class SugarCaneMacro : Macro("SugarCane") {
     private fun onTickPost() {
         if (farmingState != FarmingState.FARM) return
         unpressKeys()
+        if (stopMove) return
         if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return
 
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.keyCode, true)
+        KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.keyCode, !stopAttack)
         val flag = movementDirection == MovementDirection.LEFT
         if (farmType == FarmType.NORMAL) {
             KeyBinding.setKeyBindState(mc.gameSettings.keyBindRight.keyCode, !flag)
@@ -341,14 +350,17 @@ class SugarCaneMacro : Macro("SugarCane") {
                     x = 1
                     z2 = 1
                 }
+
                 FarmDirection.WEST -> {
                     z = 1
                     x2 = -1
                 }
+
                 FarmDirection.NORTH -> {
                     x = -1
                     z2 = -1
                 }
+
                 FarmDirection.EAST -> {
                     z = -1
                     x2 = 1
@@ -358,20 +370,20 @@ class SugarCaneMacro : Macro("SugarCane") {
 
             val side =
                 if (movementDirection == MovementDirection.LEFT) BlockPos(
-                    mc.thePlayer.posX + x,
+                    floor(mc.thePlayer.posX) + x,
                     y,
-                    mc.thePlayer.posZ + z
+                    floor(mc.thePlayer.posZ) + z
                 )
                 else BlockPos(
-                    mc.thePlayer.posX + x * -1,
+                    floor(mc.thePlayer.posX) + x * -1,
                     y,
-                    mc.thePlayer.posZ + z * -1
+                    floor(mc.thePlayer.posZ) + z * -1
                 )
 
             val frwrd = BlockPos(
-                mc.thePlayer.posX + x2,
+                floor(mc.thePlayer.posX) + x2,
                 y,
-                mc.thePlayer.posZ + z2
+                floor(mc.thePlayer.posZ) + z2
             )
 
             val sideBlock = mc.theWorld.getBlockState(side)
@@ -384,12 +396,6 @@ class SugarCaneMacro : Macro("SugarCane") {
                     farmingState = FarmingState.CLIMB
                     return
                 }
-            }
-
-            forward = false
-            if (ignoreBlocks.contains(frwrdBlock.block)) {
-                forward = true
-                printdev("Going forward")
             }
 
             if (farmType == FarmType.DROPDOWN) {
@@ -408,17 +414,31 @@ class SugarCaneMacro : Macro("SugarCane") {
                 }
             }
 
-            if (!ignoreBlocks.contains(sideBlock.block)) {
-                movementDirection =
-                    if (movementDirection == MovementDirection.LEFT) MovementDirection.RIGHT
-                    else MovementDirection.LEFT
-                printdev("Changing direction to ${movementDirection.name}")
+            val motion = when (farmDirection) {
+                FarmDirection.NORTH, FarmDirection.SOUTH -> mc.thePlayer.motionZ
+                FarmDirection.WEST, FarmDirection.EAST -> mc.thePlayer.motionX
+            }
+            val moving = round(abs(motion) % 1.0 * 10000.0) / 10000.0
 
-                if (Config.sugarCaneSetSpawn && System.currentTimeMillis() - spawnTimer >= 1000) {
-                    UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
-                    mc.thePlayer.sendChatMessage("/sethome")
-                    spawnTimer = System.currentTimeMillis()
-                }
+            if (moving != 0.0 && Config.macroLagbackFix) return
+            if (ignoreBlocks.contains(sideBlock.block)) return
+
+            if (ignoreBlocks.contains(frwrdBlock.block)) {
+                forward = true
+                printdev("Going forward")
+                return
+            }
+            forward = false
+
+            movementDirection =
+                if (movementDirection == MovementDirection.LEFT) MovementDirection.RIGHT
+                else MovementDirection.LEFT
+            printdev("Changing direction to ${movementDirection.name}")
+
+            if (Config.sugarCaneSetSpawn && System.currentTimeMillis() - spawnTimer >= 1000) {
+                UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
+                mc.thePlayer.sendChatMessage("/sethome")
+                spawnTimer = System.currentTimeMillis()
             }
         }
     }
@@ -433,28 +453,73 @@ class SugarCaneMacro : Macro("SugarCane") {
 
         val yaw = mc.thePlayer.rotationYaw
         val pitch = mc.thePlayer.rotationPitch
-        if (lastyaw != yaw || lastpitch != pitch) {
+        if (lastyaw !in yaw - 0.1..yaw + 0.1 || lastpitch !in pitch - 0.1..pitch + 0.1) {
             printdev("Detected rotation change")
             farmingState = FarmingState.SETUP
             rotating = null
         }
     }
 
-    private fun applyFailsafes() {
+
+    private var randomEventTimer = 0
+    private var stopMove = false
+    private var stopAttack = false
+
+    private fun randomEvent() {
+        if (!Config.macroRandomization) return
+        if (randomEventTimer++ < 900) return
+        randomEventTimer = 0
+        if (RandomUtils.getRandom(1, 5) != 1) return
+
+        printdev("Random event happens!")
+        when (RandomUtils.getRandom(1, 3)) {
+            1 -> {
+                stopMove = true
+                BackgroundScope.launch { delay(500L); stopAttack = false }
+                printdev("Random event is stop move")
+            }
+
+            2 -> {
+                stopAttack = true
+                BackgroundScope.launch { delay(3000L); stopAttack = false }
+                printdev("Random event is stop attack")
+            }
+
+            3 -> {
+                mc.thePlayer.rotationYaw = RandomUtils.getRandom(-90f, 90f)
+                mc.thePlayer.rotationPitch = RandomUtils.getRandom(-90f, 90f)
+                farmingState = FarmingState.IDLE
+                BackgroundScope.launch { delay(1000L); farmingState = FarmingState.SETUP }
+                printdev("Random event is random rotation")
+            }
+        }
+    }
+
+    private fun applyFailsafes(): Boolean {
         if (bedrockFailsafe()) {
             UChat.chat("§cSkySkipped §f:: §eBedrock detected! Applying cage failsafe...")
             sendWebhook("Bedrock Cage", "Found bedrock around player! Applying failsafe...", true)
             farmingState = FarmingState.BEDROCK_CAGE
             Failsafes.bedrockTimer = System.currentTimeMillis() + 3500L
-            return
+            return true
         }
-        if (warpBackFailsafe()) return
-        if (captchaFailsafe()) return
-        if (fullInvFailsafe()) return
-        if (unstuckFailsafe()) return
-        if (desyncFailsafe()) return
-        if (jacobFailsafe()) return
+        if (warpBackFailsafe()) return true
+        if (captchaFailsafe()) return true
+        if (fullInvFailsafe()) return true
+
+        val unstuck = unstuckFailsafe()
+        if (unstuck == 2) return true
+        else if (unstuck == 1) return false
+
+        val desync = desyncFailsafe()
+        if (desync == 2) return true
+        else if (desync == 1) return false
+
+        if (jacobFailsafe()) return true
         banwaveChecker()
+
+        mc.thePlayer.inventory.currentItem = Config.autoPickSlot - 1
+        return false
     }
 
     private fun bedrockFailsafe(): Boolean {
@@ -468,14 +533,15 @@ class SugarCaneMacro : Macro("SugarCane") {
         return false
     }
 
-    private fun unstuckFailsafe(): Boolean {
-        var stuck = false
-        if (!Config.sugarCaneStuck) return false
+    private fun unstuckFailsafe(): Int {
+        if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return 0
+        var stuck = 0
+        if (!Config.sugarCaneStuck) return 0
         if (Failsafes.lastPos == null) Failsafes.lastPos = mc.thePlayer.position
         else {
             if (checkPos(mc.thePlayer.position)) {
                 Failsafes.ticksStuck++
-                if (Failsafes.ticksStuck >= 10) stuck = true
+                if (Failsafes.ticksStuck >= 10) stuck = 1
             } else {
                 Failsafes.lastPos = mc.thePlayer.position
                 Failsafes.ticksStuck = 0
@@ -486,24 +552,26 @@ class SugarCaneMacro : Macro("SugarCane") {
             printdev("Detected stuck")
             farmingState = FarmingState.STUCK
             Failsafes.stuckSteps = Failsafes.StuckSteps.SETUP
+            stuck = 2
         }
         return stuck
     }
 
-    private fun desyncFailsafe(): Boolean {
-        var desynced = false
-        if (!Config.sugarCaneDesync) return false
+    private fun desyncFailsafe(): Int {
+        if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return 0
+        var desynced = 0
+        if (!Config.sugarCaneDesync) return 0
         if (Failsafes.ticksWarpDesync >= 0) {
             Failsafes.ticksWarpDesync--
-            return false
+            return 0
         }
 
         val ticksTimeout = Config.sugarCaneDesyncTime * 20
-        val stack = Minecraft.getMinecraft().thePlayer.heldItem
+        val stack = mc.thePlayer.heldItem
         if (stack == null ||
             !stack.hasTagCompound() ||
             !stack.tagCompound.hasKey("ExtraAttributes", 10)
-        ) return false
+        ) return 0
         var newCount = -1L
         val tag = stack.tagCompound
         if (tag.hasKey("ExtraAttributes", 10)) {
@@ -513,21 +581,21 @@ class SugarCaneMacro : Macro("SugarCane") {
             else if (ea.hasKey("farmed_cultivating", 99))
                 newCount = ea.getLong("farmed_cultivating")
         }
-        printdev("Current counter: $newCount")
-        if (newCount == -1L) return false
+        if (newCount == -1L) return 0
         if (newCount > Failsafes.lastCount) {
             if (Failsafes.startCount == -1L) Failsafes.startCount = newCount
             Failsafes.lastCount = newCount
             Failsafes.ticksDesync = 0
         } else {
             Failsafes.ticksDesync++
-            if (Failsafes.ticksDesync >= ticksTimeout / 3) desynced = true
+            if (Failsafes.ticksDesync >= ticksTimeout / 3) desynced = 1
         }
 
         if (Failsafes.ticksDesync >= ticksTimeout) {
             printdev("Detected desync")
             farmingState = FarmingState.DESYNED
             Failsafes.desyncedSteps = Failsafes.DesyncedSteps.SETUP
+            desynced = 2
         }
         return desynced
     }
@@ -547,9 +615,8 @@ class SugarCaneMacro : Macro("SugarCane") {
         if (!Cache.isJacob) return false
         printdev("Jacob event is on!")
 
-        val lines = ScoreboardUtils.sidebarLines
-        for (text in lines) {
-            val line = text.stripColor().trim()
+        val lines = ScoreboardUtils.sidebarLines.map { it.stripColor().keepScoreboardCharacters().trim() }
+        for (line in lines) {
             if (!line.contains("with")) continue
             val split = line.split(" ")
             if (split.size != 3) return false
@@ -570,17 +637,17 @@ class SugarCaneMacro : Macro("SugarCane") {
     }
 
     private fun fullInvFailsafe(): Boolean {
+        if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return false
         if (!Config.sugarCaneFullInv) return false
 
         if (InventoryUtils.isFull()) {
             printdev("Inventory is full!")
             Failsafes.fullInvTicks++
-        } else Failsafes.fullInvTicks = 0
+        } else Failsafes.fullInvTicks--
 
         if (Failsafes.fullInvTicks >= 50) {
             printdev("Triggering full invenory failsafe!")
             farmingState = FarmingState.CLEAR_INV
-            Failsafes.clearInvSteps = Failsafes.ClearInvSteps.SETUP
             return true
         }
 
@@ -648,7 +715,7 @@ class SugarCaneMacro : Macro("SugarCane") {
                 mc.displayGuiScreen(
                     GuiConnecting(
                         GuiMultiplayer(GuiMainMenu()),
-                        Minecraft.getMinecraft(),
+                        mc,
                         ServerData(Cache.prevName, Cache.prevIP, Cache.prevIsLan)
                     )
                 )

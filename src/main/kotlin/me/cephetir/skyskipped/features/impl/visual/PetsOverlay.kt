@@ -23,12 +23,12 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.IMixinGuiContainer
 import me.cephetir.skyskipped.mixins.IMixinGuiScreen
+import me.cephetir.skyskipped.utils.mc
 import me.cephetir.skyskipped.utils.render.RoundUtils.drawRoundedOutline
 import me.cephetir.skyskipped.utils.render.RoundUtils.drawRoundedRect
 import me.cephetir.skyskipped.utils.render.shaders.BlurUtils
 import me.cephetir.skyskipped.utils.skyblock.ItemRarity.Companion.byBaseColor
 import me.cephetir.skyskipped.utils.threading.BackgroundScope
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.renderer.GlStateManager
@@ -479,7 +479,7 @@ class PetsOverlay : Feature() {
                                 container.handleMouseClick(slot, slot.slotNumber, 0, 0)
                                 BackgroundScope.launch {
                                     delay(100L)
-                                    getPet(index - 28, Minecraft.getMinecraft().currentScreen as GuiChest)
+                                    getPet(index - 28, mc.currentScreen as GuiChest)
                                 }
                                 break
                             }

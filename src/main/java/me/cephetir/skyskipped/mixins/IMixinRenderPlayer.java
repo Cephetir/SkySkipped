@@ -17,12 +17,13 @@
 
 package me.cephetir.skyskipped.mixins;
 
-import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.RenderPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(EntityRenderer.class)
-public interface IMixinEntityRenderer {
-    @Invoker("orientCamera")
-    void orientCamera(float partialTicks);
+@Mixin(RenderPlayer.class)
+public interface IMixinRenderPlayer {
+    @Invoker("setModelVisibilities")
+    void setModelVisibilities(AbstractClientPlayer clientPlayer);
 }

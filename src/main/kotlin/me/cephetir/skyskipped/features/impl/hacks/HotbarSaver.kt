@@ -21,76 +21,67 @@ import gg.essential.universal.UChat
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.features.Feature
-import net.minecraft.client.Minecraft
+import me.cephetir.skyskipped.utils.KeybindUtils.isDown
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.inventory.Slot
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import org.lwjgl.input.Keyboard
 import org.lwjgl.util.Timer
 
-class HotbarSaver : Feature() {
+object HotbarSaver : Feature() {
     private var keybindLastState = false
+    val presets = mutableListOf<HotbarPreset>()
+    private var currentPreset: HotbarPreset? = null
 
-    companion object {
-        val presets = mutableListOf<HotbarPreset>()
-        private var currentPreset: HotbarPreset? = null
+    fun savePreset(name: String) {
+        val items = mutableListOf<String>()
+        val inv = mc.thePlayer.inventoryContainer
+        for (slot in inv.inventorySlots.subList(36, 44))
+            items.add(slot.stack?.displayName ?: "EMPTY")
+        val preset = HotbarPreset(name, items)
+        presets.add(preset)
+        if (currentPreset == null) currentPreset = preset
+        UChat.chat("§cSkySkipped §f:: §eSuccessfully saved preset \"$name\"!")
+    }
 
-        fun savePreset(name: String) {
-            val items = mutableListOf<String>()
-            val inv = Minecraft.getMinecraft().thePlayer.inventoryContainer
-            for (slot in inv.inventorySlots.subList(36, 44))
-                items.add(slot.stack?.displayName ?: "EMPTY")
-            val preset = HotbarPreset(name, items)
-            presets.add(preset)
-            if (currentPreset == null) currentPreset = preset
-            UChat.chat("§cSkySkipped §f:: §eSuccessfully saved preset \"$name\"!")
-        }
+    fun selectPreset(name: String) {
+        currentPreset = presets.find { it.name.equals(name, true) }
+        if (currentPreset != null) UChat.chat("§cSkySkipped §f:: §eSuccessfully selected preset \"${currentPreset!!.name}\"!")
+        else UChat.chat("§cSkySkipped §f:: §4Unknown preset \"$name\"!")
+    }
 
-        fun selectPreset(name: String) {
-            currentPreset = presets.find { it.name.equals(name, true) }
-            if (currentPreset != null) UChat.chat("§cSkySkipped §f:: §eSuccessfully selected preset \"${currentPreset!!.name}\"!")
-            else UChat.chat("§cSkySkipped §f:: §4Unknown preset \"$name\"!")
-        }
-
-        fun removePreset(name: String) {
-            val preset = presets.find { it.name.equals(name, true) } ?: return UChat.chat("§cSkySkipped §f:: §4Unknown preset \"$name\"!")
-            presets.remove(preset)
-            if (currentPreset == preset) currentPreset = null
-            UChat.chat("§cSkySkipped §f:: §eSuccessfully removed preset \"$name\"!")
-        }
+    fun removePreset(name: String) {
+        val preset = presets.find { it.name.equals(name, true) } ?: return UChat.chat("§cSkySkipped §f:: §4Unknown preset \"$name\"!")
+        presets.remove(preset)
+        if (currentPreset == preset) currentPreset = null
+        UChat.chat("§cSkySkipped §f:: §eSuccessfully removed preset \"$name\"!")
     }
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || !Cache.inSkyblock || Listener.called) return
+        if (mc.currentScreen !is GuiChest) return
 
-        val down = Keyboard.isKeyDown(SkySkipped.hotbarKey.keyCode)
+        val down = SkySkipped.hotbarKey.isDown(true)
         if (down == keybindLastState) return
         keybindLastState = down
         if (!down) return
 
         if (currentPreset == null)
             return UChat.chat("§cSkySkipped §f:: §4No hotbar preset selected!")
-        if (mc.currentScreen !is GuiChest)
-            return UChat.chat("§cSkySkipped §f:: §4You must open chest (backpack or enderchest)!")
 
-        Listener.preset = currentPreset!!
         Listener.startTimer = Timer()
         Listener.called = true
         MinecraftForge.EVENT_BUS.register(Listener())
     }
 
-    class Listener {
+    private class Listener {
         companion object {
-            lateinit var preset: HotbarPreset
             var startTimer: Timer = Timer()
             var called = false
         }
-
-        private val mc = Minecraft.getMinecraft()
 
         private var step = 0
         private var hotbarSlot = -1
@@ -101,6 +92,7 @@ class HotbarSaver : Feature() {
         fun onRender(event: RenderWorldLastEvent) {
             Timer.tick()
             if (startTimer.time >= 10) return MinecraftForge.EVENT_BUS.unregister(this)
+            if (currentPreset == null) return MinecraftForge.EVENT_BUS.unregister(this)
 
             when (step) {
                 // Init
@@ -112,7 +104,7 @@ class HotbarSaver : Feature() {
                 }
                 // Throw Items
                 1 -> {
-                    if (timer.time < 0.2f) return
+                    if (timer.time < 0.1f) return
                     if (mc.currentScreen == null || mc.currentScreen !is GuiChest) {
                         UChat.chat("§cSkySkipped §f:: §4Error! Chest was closed!")
                         return MinecraftForge.EVENT_BUS.unregister(this)
@@ -131,12 +123,11 @@ class HotbarSaver : Feature() {
                 }
                 // Proccess
                 2 -> {
-                    if (timer.time < 0.2f) return
+                    if (timer.time < 0.1f) return
                     if (mc.currentScreen == null || mc.currentScreen !is GuiChest) {
                         UChat.chat("§cSkySkipped §f:: §4Error! Chest was closed!")
                         return MinecraftForge.EVENT_BUS.unregister(this)
                     }
-                    timer.reset()
                     if (hotbarSlot >= 89) {
                         step = 3
                         return
@@ -145,7 +136,7 @@ class HotbarSaver : Feature() {
                     val chest = mc.currentScreen as GuiChest
                     val container = chest.inventorySlots
                     if (slot == null) {
-                        val item = preset.items[hotbarSlot - 81]
+                        val item = currentPreset!!.items[hotbarSlot - 81]
                         if (item == "EMPTY") {
                             hotbarSlot++
                             return
@@ -162,6 +153,7 @@ class HotbarSaver : Feature() {
                         slot = null
                         hotbarSlot++
                     }
+                    timer.reset()
                 }
                 // Reset
                 3 -> {

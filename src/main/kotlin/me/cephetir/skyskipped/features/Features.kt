@@ -21,6 +21,7 @@ import me.cephetir.skyskipped.commands.dungeonCommands.FragRun
 import me.cephetir.skyskipped.commands.dungeonCommands.LeaveCommand
 import me.cephetir.skyskipped.commands.dungeonCommands.PartyCommand
 import me.cephetir.skyskipped.features.impl.chat.AutoMaddoxPhone
+import me.cephetir.skyskipped.features.impl.chat.ChatSearch
 import me.cephetir.skyskipped.features.impl.chat.ChatSwapper
 import me.cephetir.skyskipped.features.impl.chat.Ping
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
@@ -28,14 +29,12 @@ import me.cephetir.skyskipped.features.impl.dugeons.*
 import me.cephetir.skyskipped.features.impl.hacks.*
 import me.cephetir.skyskipped.features.impl.macro.FarmingHUD
 import me.cephetir.skyskipped.features.impl.macro.MacroManager
-import me.cephetir.skyskipped.features.impl.misc.AutoCookieClicker
-import me.cephetir.skyskipped.features.impl.misc.AutoStopFlying
-import me.cephetir.skyskipped.features.impl.misc.Metrics
+import me.cephetir.skyskipped.features.impl.misc.*
+import me.cephetir.skyskipped.features.impl.movement.AutoStopFlying
 import me.cephetir.skyskipped.features.impl.visual.*
 import net.minecraftforge.common.MinecraftForge
 
 class Features {
-
     companion object {
         val leaveCommand = LeaveCommand()
         val partyCommand = PartyCommand()
@@ -69,8 +68,15 @@ class Features {
         AdminRoomDetection(),
         MacroManager,
         FarmingHUD(),
-        HotbarSaver(),
+        HotbarSaver,
         LavaFishingSpots(),
+        ItemRadius(),
+        ZeroPingGui(),
+        TerminalEsp(),
+        AntiEscrow(),
+        AutoSalvage(),
+        ChatSearch(),
+        SearchContainer(),
     )
 
     fun register() = features.forEach { MinecraftForge.EVENT_BUS.register(it) }

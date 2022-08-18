@@ -17,7 +17,6 @@
 
 package me.cephetir.skyskipped.utils
 
-import net.minecraft.client.Minecraft
 import net.minecraft.util.MathHelper
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.common.MinecraftForge
@@ -25,8 +24,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.pow
 
 class RotationClass(rotation: Rotation, time: Long) {
-    private val mc: Minecraft = Minecraft.getMinecraft()
-
     private var startRot = Rotation(0f, 0f)
     private var endRot = Rotation(0f, 0f)
     private var startTime = 0L

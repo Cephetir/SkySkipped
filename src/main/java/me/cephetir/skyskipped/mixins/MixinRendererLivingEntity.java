@@ -43,6 +43,6 @@ public abstract class MixinRendererLivingEntity {
 
     @ModifyArg(method = "renderName*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I"))
     public String renderName(String text) {
-        return SkySkipped.replaceCosmetics(text);
+        return SkySkipped.getCosmetics(text);
     }
 }

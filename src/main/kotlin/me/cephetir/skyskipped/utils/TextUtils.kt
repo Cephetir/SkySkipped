@@ -34,11 +34,13 @@ object TextUtils {
     @JvmStatic
     fun String.isNumeric(): Boolean = this.matches(NUMERIC) // ty stackoverflow
 
-    fun CharSequence?.containsAny(vararg sequences: CharSequence): Boolean = this.containsAny(sequences.toList())
+    fun CharSequence.equalsAny(vararg sequences: CharSequence): Boolean = this.equalsAny(sequences.toList())
+    fun CharSequence.equalsAny(sequences: List<CharSequence>): Boolean =
+        sequences.any { it != "" && this == it }
 
-    fun CharSequence?.containsAny(sequences: List<CharSequence>): Boolean =
-        if (this == null) false
-        else sequences.any { it != "" && this.contains(it, true) }
+    fun CharSequence.containsAny(vararg sequences: CharSequence): Boolean = this.containsAny(sequences.toList())
+    fun CharSequence.containsAny(sequences: List<CharSequence>): Boolean =
+        sequences.any { it != "" && this.contains(it, true) }
 
     fun String.keepIntegerCharactersOnly(): String = INTEGER_CHARACTERS.replace(this, "")
 

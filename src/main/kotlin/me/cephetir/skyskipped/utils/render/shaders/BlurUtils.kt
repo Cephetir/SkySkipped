@@ -20,9 +20,9 @@ package me.cephetir.skyskipped.utils.render.shaders
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.mixins.IMixinMinecraft
 import me.cephetir.skyskipped.mixins.IMixinShaderGroup
+import me.cephetir.skyskipped.utils.mc
 import me.cephetir.skyskipped.utils.render.RenderUtils
 import me.cephetir.skyskipped.utils.render.RoundUtils
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.OpenGlHelper
@@ -32,7 +32,6 @@ import net.minecraft.client.shader.ShaderGroup
 import net.minecraft.util.ResourceLocation
 
 object BlurUtils {
-    private val mc = Minecraft.getMinecraft()
     private val shaderGroup = ShaderGroup(mc.textureManager, mc.resourceManager, mc.framebuffer, ResourceLocation("shaders/post/blurArea.json"))
     private val framebuffer = (shaderGroup as IMixinShaderGroup).mainFramebuffer
     private val frbuffer = shaderGroup.getFramebufferRaw("result")

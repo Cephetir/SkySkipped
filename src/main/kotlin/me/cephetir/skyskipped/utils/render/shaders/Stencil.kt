@@ -17,14 +17,13 @@
 
 package me.cephetir.skyskipped.utils.render.shaders
 
-import net.minecraft.client.Minecraft
+import me.cephetir.skyskipped.utils.mc
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.shader.Framebuffer
 import org.lwjgl.opengl.EXTFramebufferObject
 import org.lwjgl.opengl.GL11
 
 object Stencil {
-    private val mc = Minecraft.getMinecraft()
 
     fun dispose() {
         GL11.glDisable(GL11.GL_STENCIL_TEST)
@@ -80,7 +79,7 @@ object Stencil {
         EXTFramebufferObject.glDeleteRenderbuffersEXT(fbo.depthBuffer)
         val stencil_depth_buffer_ID = EXTFramebufferObject.glGenRenderbuffersEXT()
         EXTFramebufferObject.glBindRenderbufferEXT(36161, stencil_depth_buffer_ID)
-        EXTFramebufferObject.glRenderbufferStorageEXT(36161, 34041, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight)
+        EXTFramebufferObject.glRenderbufferStorageEXT(36161, 34041, mc.displayWidth, mc.displayHeight)
         EXTFramebufferObject.glFramebufferRenderbufferEXT(36160, 36128, 36161, stencil_depth_buffer_ID)
         EXTFramebufferObject.glFramebufferRenderbufferEXT(36160, 36096, 36161, stencil_depth_buffer_ID)
     }

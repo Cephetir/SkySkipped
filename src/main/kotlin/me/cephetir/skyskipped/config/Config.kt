@@ -27,9 +27,10 @@ import gg.essential.vigilance.data.SortingBehavior
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.features.impl.hacks.HotbarSaver
+import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.features.impl.macro.RemoteControlling
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
-import net.minecraft.client.Minecraft
+import me.cephetir.skyskipped.utils.mc
 import java.awt.Color
 import java.io.File
 
@@ -49,6 +50,11 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             else RemoteControlling.stop()
         }
 
+        registerListener<Int>("macroType") {
+            MacroManager.current = MacroManager.macros[it]
+        }
+
+
         addDependency("espMode", "esp")
         addDependency("playeresp", "esp")
         addDependency("starredmobsesp", "esp")
@@ -62,6 +68,9 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         addDependency("batsespChroma", "batsesp")
         addDependency("keyespColor", "keyesp")
         addDependency("keyespChroma", "keyesp")
+        addDependency("customespColor", "customesp")
+        addDependency("customespChroma", "customesp")
+        addDependency("customespText", "customesp")
 
         addDependency("drpcDetail", "DRPC")
         addDependency("drpcState", "DRPC")
@@ -72,6 +81,7 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
 
         addDependency("autoGBMode", "autoGB")
         addDependency("betterPerspectiveItems", "betterPerspective")
+        addDependency("betterPerspectiveMode", "betterPerspective")
 
         addDependency("customSbText", "customSb")
         addDependency("customSbLobby", "customSb")
@@ -232,12 +242,22 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         SkySkipped.logger.info("Saved keybinds!")
     }
 
+    fun loadScripts() {
+        try {
+            if (!macroScriptsFolder.exists())
+                macroScriptsFolder.mkdirs()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+    }
+
     private class ConfigSorting : SortingBehavior() {
         private val categories = listOf(
             "Dungeons",
             "Macro",
             "Failsafes (Legacy)",
             "Visual",
+            "Movement",
             "Hacks",
             "Chat",
             "Slayers",
@@ -251,8 +271,8 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
     }
 
     companion object {
-        @JvmStatic
-        val modDir = File(File(Minecraft.getMinecraft().mcDataDir, "config"), "skyskipped")
+        val modDir = File(File(mc.mcDataDir, "config"), "skyskipped")
+        val macroScriptsFolder = File(modDir, "scripts")
 
         @Property(
             type = PropertyType.SWITCH,
@@ -442,6 +462,51 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
 
         @Property(
             type = PropertyType.SWITCH,
+            name = "Custom ESP",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Shows custom mobs through walls."
+        )
+        var customesp = false
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Custom ESP Mobs",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Enter nametag name above mob.\nSplit with \", \""
+        )
+        var customespText = "Enderman, Zombie"
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "Custom ESP Color",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Color for ESP."
+        )
+        var customespColor: Color = Color.BLUE
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Custom ESP Chroma Color",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Chroma color for ESP."
+        )
+        var customespChroma = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Terminal ESP",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Shows terminals on f7 boss fight through walls."
+        )
+        var terminalEsp = false
+
+        @Property(
+            type = PropertyType.SWITCH,
             name = "Unstuck Failsafe",
             category = "Failsafes (Legacy)",
             subcategory = "Unstuck",
@@ -473,7 +538,7 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             category = "Failsafes (Legacy)",
             subcategory = "Jacob",
             description = "Amount of crops mined for Jacob failsafe to stop.",
-            min = 100000,
+            min = 10000,
             max = 1000000,
             increment = 1
         )
@@ -873,6 +938,16 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         var betterPerspective = true
 
         @Property(
+            type = PropertyType.SELECTOR,
+            name = "Perspective Toggle Mode",
+            category = "Visual",
+            subcategory = "Perspective Toggle",
+            description = "Mode for perspective toggle.",
+            options = ["Hold", "Toggle"]
+        )
+        var betterPerspectiveMode = 0
+
+        @Property(
             type = PropertyType.TEXT,
             name = "Perspective Item",
             category = "Visual",
@@ -1044,7 +1119,7 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         @Property(
             type = PropertyType.SWITCH,
             name = "Stop fly",
-            category = "Misc",
+            category = "Movement",
             description = "Stop flying on private island."
         )
         var stopFly = false
@@ -1089,22 +1164,55 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             type = PropertyType.SWITCH,
             name = "Custom Pitch Toggle",
             category = "Macro",
-            subcategory = "Nether Wart Macro",
             description = "Override default pitch."
         )
         var customAngles = false
 
         @Property(
-            type = PropertyType.NUMBER,
+            type = PropertyType.SLIDER,
             name = "Custom Pitch Value",
             category = "Macro",
-            subcategory = "Nether Wart Macro",
             description = "Override default pitch.",
             min = -90,
             max = 90,
             increment = 1
         )
         var customPitch = 0
+
+        @Property(
+            type = PropertyType.NUMBER,
+            name = "Auto Pick Slot With Hoe",
+            category = "Macro",
+            description = "Auto picks slot when macro is started.",
+            min = 1,
+            max = 9,
+            increment = 1
+        )
+        var autoPickSlot = 1
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Macro Randomization",
+            category = "Macro",
+            description = "Randomize certain actions to look more legit (may fix packet thottle and desync)."
+        )
+        var macroRandomization = true
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Custom Macro Script Name",
+            category = "Macro",
+            description = "Name of custom macro script which will be ran during macro.\nAll scripts should be placed in \"config/skyskipped/scripts\"."
+        )
+        var macroScript = "example.txt"
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Lagback Fix",
+            category = "Macro",
+            description = "Enable this if youre experiencing lagbacks."
+        )
+        var macroLagbackFix = false
 
         @Property(
             type = PropertyType.SELECTOR,
@@ -1485,5 +1593,107 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             description = "Text color of Farming HUD."
         )
         var farmingHudColorText: Color = Color.RED.darker()
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Gyro Radius",
+            category = "Dungeons",
+            subcategory = "Item Radius",
+            description = "Renders a circle while holding Gyrokinetic Wand where mobs will be pulled in."
+        )
+        var gyroRadius = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Hyperion Radius",
+            category = "Dungeons",
+            subcategory = "Item Radius",
+            description = "Renders a circle Hyperion dmg area."
+        )
+        var hypRadius = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Dungeons Only",
+            category = "Dungeons",
+            subcategory = "Item Radius",
+            description = "Enable radiuses only in dungeons."
+        )
+        var onlyDungeonRadius = true
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Zero Ping Gui",
+            category = "Misc",
+            description = "Use GUIs without lags."
+        )
+        var zeroPingGui = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Better Cocoa Beans Sizes",
+            category = "Hacks",
+            description = "Make hitbox of cocoa beans bigger and smaller if not grown."
+        )
+        var beansSize = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Keep Focus",
+            category = "Hacks",
+            description = "Always keep minecraft window in focus."
+        )
+        var keepFocus = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Anti Escrow AH",
+            category = "Misc",
+            subcategory = "Anti Escrow",
+            description = "Reopens ah if escrow happens."
+        )
+        var antiEscrowAh = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Anti Escrow AH Bin",
+            category = "Misc",
+            subcategory = "Anti Escrow",
+            description = "Reopens ah after you buy bin."
+        )
+        var antiEscrowAhBin = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Anti Escrow BZ",
+            category = "Misc",
+            subcategory = "Anti Escrow",
+            description = "Reopens bz if escrow happens."
+        )
+        var antiEscrowBz = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Salvage",
+            category = "Hacks",
+            description = "Fixed version of auto salvage that works with both dungeon and lava fishing gear."
+        )
+        var autoSalvage = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Chat Search",
+            category = "Chat",
+            description = "Search text in chat by pressing Ctrl + F."
+        )
+        var chatSearch = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Container Search",
+            category = "Misc",
+            description = "Search items in containers by pressing Ctrl + F."
+        )
+        var containerSearch = false
     }
 }

@@ -19,21 +19,20 @@ package me.cephetir.skyskipped.features.impl.dugeons
 
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.event.events.PacketEvent
 import me.cephetir.skyskipped.features.Feature
-import net.minecraft.client.gui.inventory.GuiChest
-import net.minecraft.inventory.ContainerChest
-import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent
+import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import net.minecraft.network.play.client.C0DPacketCloseWindow
+import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class ChestCloser : Feature() {
 
     @SubscribeEvent
-    fun onDrawBackground(event: DrawScreenEvent.Pre) {
-        if (event.gui !is GuiChest || !Cache.inSkyblock) return
-        val chestName = ((event.gui as GuiChest).inventorySlots as ContainerChest).lowerChestInventory.displayName.unformattedText
-        if (Cache.inDungeon && Config.chestCloser && chestName == "Chest") {
-            mc.thePlayer.closeScreen()
-            event.isCanceled = true
-        }
+    fun onPacket(event: PacketEvent.ReceiveEvent) {
+        if (!Config.chestCloser || event.packet !is S2DPacketOpenWindow || !Cache.inDungeon || event.packet.windowTitle.unformattedText.stripColor() != "Chest") return
+
+        event.isCanceled = true
+        mc.netHandler.networkManager.sendPacket(C0DPacketCloseWindow(event.packet.windowId))
     }
 }

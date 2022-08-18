@@ -19,18 +19,21 @@ package me.cephetir.skyskipped.features.impl.macro.macros
 
 import gg.essential.api.utils.Multithreading
 import gg.essential.universal.UChat
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.impl.macro.Macro
 import me.cephetir.skyskipped.features.impl.macro.failsafes.Failsafes
 import me.cephetir.skyskipped.utils.HttpUtils
 import me.cephetir.skyskipped.utils.InventoryUtils
+import me.cephetir.skyskipped.utils.RandomUtils
 import me.cephetir.skyskipped.utils.RotationClass
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.skyblock.ScoreboardUtils
+import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.block.Block
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiChat
 import net.minecraft.client.gui.GuiDisconnected
 import net.minecraft.client.gui.GuiMainMenu
@@ -49,9 +52,7 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase
-import kotlin.math.abs
-import kotlin.math.ceil
-import kotlin.math.roundToInt
+import kotlin.math.*
 
 class NetherwartMacro : Macro("NetherWart") {
     private val events = Events(this)
@@ -169,8 +170,7 @@ class NetherwartMacro : Macro("NetherWart") {
                 sendWebhook("Somebody is visiting you", message, false)
             else if (message.contains("has invited you to join their party!"))
                 sendWebhook("Received Party Request", message, false)
-
-            if (message.startsWith("[Important] This server will restart soon:")) {
+            else if (message.startsWith("[Important] This server will restart soon:")) {
                 unpressKeys()
                 mc.thePlayer.sendChatMessage("/setspawn")
                 printdev("Detected server reboot")
@@ -179,6 +179,7 @@ class NetherwartMacro : Macro("NetherWart") {
                 Failsafes.desyncWaitTimer = System.currentTimeMillis()
                 Failsafes.desyncF = true
             }
+
             return
         }
 
@@ -195,9 +196,11 @@ class NetherwartMacro : Macro("NetherWart") {
             FarmingState.SETUP -> setup()
             FarmingState.FARM -> {
                 if (applyFailsafes()) return
-                checkRotation()
                 checkDirection()
+                checkRotation()
+                randomEvent()
             }
+
             FarmingState.CLIMB -> climb()
             FarmingState.STUCK -> Failsafes.stuck { farmingState = FarmingState.SETUP }
             FarmingState.DESYNED -> Failsafes.desynced(true) { farmingState = FarmingState.SETUP }
@@ -270,9 +273,10 @@ class NetherwartMacro : Macro("NetherWart") {
     private fun onTickPost() {
         if (farmingState != FarmingState.FARM) return
         unpressKeys()
+        if (stopMove) return
         if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return
 
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.keyCode, true)
+        KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.keyCode, !stopAttack)
         KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.keyCode, forward)
         KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.keyCode, false)
         val flag = movementDirection == MovementDirection.LEFT
@@ -317,14 +321,17 @@ class NetherwartMacro : Macro("NetherWart") {
                 x = 1
                 z2 = 1
             }
+
             FarmDirection.WEST -> {
                 z = 1
                 x2 = -1
             }
+
             FarmDirection.NORTH -> {
                 x = -1
                 z2 = -1
             }
+
             FarmDirection.EAST -> {
                 z = -1
                 x2 = 1
@@ -334,20 +341,20 @@ class NetherwartMacro : Macro("NetherWart") {
 
         val side =
             if (movementDirection == MovementDirection.LEFT) BlockPos(
-                mc.thePlayer.posX + x,
+                floor(mc.thePlayer.posX) + x,
                 y,
-                mc.thePlayer.posZ + z
+                floor(mc.thePlayer.posZ) + z
             )
             else BlockPos(
-                mc.thePlayer.posX + x * -1,
+                floor(mc.thePlayer.posX) + x * -1,
                 y,
-                mc.thePlayer.posZ + z * -1
+                floor(mc.thePlayer.posZ) + z * -1
             )
 
         val frwrd = BlockPos(
-            mc.thePlayer.posX + x2,
+            floor(mc.thePlayer.posX) + x2,
             y,
-            mc.thePlayer.posZ + z2
+            floor(mc.thePlayer.posZ) + z2
         )
 
         val sideBlock = mc.theWorld.getBlockState(side)
@@ -360,12 +367,6 @@ class NetherwartMacro : Macro("NetherWart") {
                 farmingState = FarmingState.CLIMB
                 return
             }
-        }
-
-        forward = false
-        if (ignoreBlocks.contains(frwrdBlock.block)) {
-            forward = true
-            printdev("Going forward")
         }
 
         if (farmType == FarmType.DROPDOWN) {
@@ -384,17 +385,34 @@ class NetherwartMacro : Macro("NetherWart") {
             }
         }
 
-        if (!ignoreBlocks.contains(sideBlock.block)) {
-            movementDirection =
-                if (movementDirection == MovementDirection.LEFT) MovementDirection.RIGHT
-                else MovementDirection.LEFT
-            printdev("Changing direction to ${movementDirection.name}")
+        printdev("Checking direction")
+        val motion = when (farmDirection) {
+            FarmDirection.NORTH, FarmDirection.SOUTH -> mc.thePlayer.motionZ
+            FarmDirection.WEST, FarmDirection.EAST -> mc.thePlayer.motionX
+        }
+        val moving = round(abs(motion) % 1.0 * 10000.0) / 10000.0
 
-            if (Config.netherWartSetSpawn && System.currentTimeMillis() - spawnTimer >= 1000) {
-                UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
-                mc.thePlayer.sendChatMessage("/sethome")
-                spawnTimer = System.currentTimeMillis()
-            }
+        printdev("Checking velo")
+        if (moving != 0.0 && Config.macroLagbackFix) return
+        printdev("Checking side block ${sideBlock.block.localizedName}")
+        if (ignoreBlocks.contains(sideBlock.block)) return
+
+        if (ignoreBlocks.contains(frwrdBlock.block)) {
+            forward = true
+            printdev("Going forward")
+            return
+        }
+        forward = false
+
+        movementDirection =
+            if (movementDirection == MovementDirection.LEFT) MovementDirection.RIGHT
+            else MovementDirection.LEFT
+        printdev("Changing direction to ${movementDirection.name}")
+
+        if (Config.netherWartSetSpawn && System.currentTimeMillis() - spawnTimer >= 1000) {
+            UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
+            mc.thePlayer.sendChatMessage("/sethome")
+            spawnTimer = System.currentTimeMillis()
         }
     }
 
@@ -408,10 +426,44 @@ class NetherwartMacro : Macro("NetherWart") {
 
         val yaw = mc.thePlayer.rotationYaw
         val pitch = mc.thePlayer.rotationPitch
-        if (lastyaw != yaw || lastpitch != pitch) {
+        if (lastyaw !in yaw - 0.1..yaw + 0.1 || lastpitch !in pitch - 0.1..pitch + 0.1) {
             printdev("Detected rotation change")
             farmingState = FarmingState.SETUP
             rotating = null
+        }
+    }
+
+    private var randomEventTimer = 0
+    private var stopMove = false
+    private var stopAttack = false
+
+    private fun randomEvent() {
+        if (!Config.macroRandomization) return
+        if (randomEventTimer++ < 900) return
+        randomEventTimer = 0
+        if (RandomUtils.getRandom(1, 5) != 1) return
+
+        printdev("Random event happens!")
+        when (RandomUtils.getRandom(1, 3)) {
+            1 -> {
+                stopMove = true
+                BackgroundScope.launch { delay(500L); stopAttack = false }
+                printdev("Random event is stop move")
+            }
+
+            2 -> {
+                stopAttack = true
+                BackgroundScope.launch { delay(3000L); stopAttack = false }
+                printdev("Random event is stop attack")
+            }
+
+            3 -> {
+                mc.thePlayer.rotationYaw = RandomUtils.getRandom(-90f, 90f)
+                mc.thePlayer.rotationPitch = RandomUtils.getRandom(-90f, 90f)
+                farmingState = FarmingState.IDLE
+                BackgroundScope.launch { delay(1000L); farmingState = FarmingState.SETUP }
+                printdev("Random event is random rotation")
+            }
         }
     }
 
@@ -426,10 +478,19 @@ class NetherwartMacro : Macro("NetherWart") {
         if (warpBackFailsafe()) return true
         if (captchaFailsafe()) return true
         if (fullInvFailsafe()) return true
-        if (unstuckFailsafe()) return true
-        if (desyncFailsafe()) return true
+
+        val unstuck = unstuckFailsafe()
+        if (unstuck == 2) return true
+        else if (unstuck == 1) return false
+
+        val desync = desyncFailsafe()
+        if (desync == 2) return true
+        else if (desync == 1) return false
+
         if (jacobFailsafe()) return true
         banwaveChecker()
+
+        mc.thePlayer.inventory.currentItem = Config.autoPickSlot - 1
         return false
     }
 
@@ -444,14 +505,15 @@ class NetherwartMacro : Macro("NetherWart") {
         return false
     }
 
-    private fun unstuckFailsafe(): Boolean {
-        var stuck = false
-        if (!Config.netherWartStuck) return false
+    private fun unstuckFailsafe(): Int {
+        if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return 0
+        var stuck = 0
+        if (!Config.netherWartStuck) return 0
         if (Failsafes.lastPos == null) Failsafes.lastPos = mc.thePlayer.position
         else {
             if (checkPos(mc.thePlayer.position)) {
                 Failsafes.ticksStuck++
-                if (Failsafes.ticksStuck >= 10) stuck = true
+                if (Failsafes.ticksStuck >= 10) stuck = 1
             } else {
                 Failsafes.lastPos = mc.thePlayer.position
                 Failsafes.ticksStuck = 0
@@ -462,24 +524,26 @@ class NetherwartMacro : Macro("NetherWart") {
             printdev("Detected stuck")
             farmingState = FarmingState.STUCK
             Failsafes.stuckSteps = Failsafes.StuckSteps.SETUP
+            stuck = 2
         }
         return stuck
     }
 
-    private fun desyncFailsafe(): Boolean {
-        var desynced = false
-        if (!Config.netherWartDesync) return false
+    private fun desyncFailsafe(): Int {
+        if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return 0
+        var desynced = 0
+        if (!Config.netherWartDesync) return 0
         if (Failsafes.ticksWarpDesync >= 0) {
             Failsafes.ticksWarpDesync--
-            return false
+            return 0
         }
 
         val ticksTimeout = Config.netherWartDesyncTime * 20
-        val stack = Minecraft.getMinecraft().thePlayer.heldItem
+        val stack = mc.thePlayer.heldItem
         if (stack == null ||
             !stack.hasTagCompound() ||
             !stack.tagCompound.hasKey("ExtraAttributes", 10)
-        ) return false
+        ) return 0
         var newCount = -1L
         val tag = stack.tagCompound
         if (tag.hasKey("ExtraAttributes", 10)) {
@@ -489,21 +553,21 @@ class NetherwartMacro : Macro("NetherWart") {
             else if (ea.hasKey("farmed_cultivating", 99))
                 newCount = ea.getLong("farmed_cultivating")
         }
-        printdev("Current counter: $newCount")
-        if (newCount == -1L) return false
+        if (newCount == -1L) return 0
         if (newCount > Failsafes.lastCount) {
             if (Failsafes.startCount == -1L) Failsafes.startCount = newCount
             Failsafes.lastCount = newCount
             Failsafes.ticksDesync = 0
         } else {
             Failsafes.ticksDesync++
-            if (Failsafes.ticksDesync >= ticksTimeout / 3) desynced = true
+            if (Failsafes.ticksDesync >= ticksTimeout / 3) desynced = 1
         }
 
         if (Failsafes.ticksDesync >= ticksTimeout) {
             printdev("Detected desync")
             farmingState = FarmingState.DESYNED
             Failsafes.desyncedSteps = Failsafes.DesyncedSteps.SETUP
+            desynced = 2
         }
         return desynced
     }
@@ -523,9 +587,8 @@ class NetherwartMacro : Macro("NetherWart") {
         if (!Cache.isJacob) return false
         printdev("Jacob event is on!")
 
-        val lines = ScoreboardUtils.sidebarLines
-        for (text in lines) {
-            val line = text.stripColor().trim()
+        val lines = ScoreboardUtils.sidebarLines.map { it.stripColor().keepScoreboardCharacters().trim() }
+        for (line in lines) {
             if (!line.contains("with")) continue
             val split = line.split(" ")
             if (split.size != 3) return false
@@ -546,17 +609,17 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private fun fullInvFailsafe(): Boolean {
+        if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return false
         if (!Config.netherWartFullInv) return false
 
         if (InventoryUtils.isFull()) {
             printdev("Inventory is full!")
             Failsafes.fullInvTicks++
-        } else Failsafes.fullInvTicks = 0
+        } else Failsafes.fullInvTicks--
 
         if (Failsafes.fullInvTicks >= 50) {
             printdev("Triggering full invenory failsafe!")
             farmingState = FarmingState.CLEAR_INV
-            Failsafes.clearInvSteps = Failsafes.ClearInvSteps.SETUP
             return true
         }
 
@@ -624,7 +687,7 @@ class NetherwartMacro : Macro("NetherWart") {
                 mc.displayGuiScreen(
                     GuiConnecting(
                         GuiMultiplayer(GuiMainMenu()),
-                        Minecraft.getMinecraft(),
+                        mc,
                         ServerData(Cache.prevName, Cache.prevIP, Cache.prevIsLan)
                     )
                 )

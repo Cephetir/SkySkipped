@@ -19,7 +19,7 @@ package me.cephetir.skyskipped.utils.render.shaders
 
 import me.cephetir.skyskipped.mixins.IMixinMinecraft
 import me.cephetir.skyskipped.mixins.IMixinShaderGroup
-import net.minecraft.client.Minecraft
+import me.cephetir.skyskipped.utils.mc
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.OpenGlHelper
@@ -40,7 +40,6 @@ object ShadowUtils {
     private var lastWidth = 0f
     private var lastHeight = 0f
     private var lastStrength = 0f
-    private val mc = Minecraft.getMinecraft()
     private val blurDirectory = ResourceLocation("skyskipped/shadow.json")
 
     private fun initBlur(sc: ScaledResolution, strength: Float) {

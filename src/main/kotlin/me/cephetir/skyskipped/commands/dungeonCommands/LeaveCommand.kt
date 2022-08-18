@@ -24,8 +24,8 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.skyskipped.utils.TextUtils.stripColor
+import me.cephetir.skyskipped.utils.mc
 import me.cephetir.skyskipped.utils.threading.BackgroundScope
-import net.minecraft.client.Minecraft
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
 import net.minecraft.scoreboard.ScorePlayerTeam
@@ -76,17 +76,17 @@ class LeaveCommand : CommandBase() {
             startedd = true
             when (step) {
                 0 -> {
-                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/lobby")
+                    mc.thePlayer.sendChatMessage("/lobby")
                     delay(Config.delay.toLong())
                     step++
                 }
                 1 -> {
-                    Minecraft.getMinecraft().thePlayer.sendChatMessage("/play skyblock")
+                    mc.thePlayer.sendChatMessage("/play skyblock")
                     delay(Config.delay.toLong())
                     step++
                 }
                 2 -> {
-                    val scoreboard = Minecraft.getMinecraft().thePlayer.worldScoreboard
+                    val scoreboard = mc.thePlayer.worldScoreboard
                     val scoreObjective = scoreboard.getObjectiveInDisplaySlot(1)
                     val scores =
                         scoreboard.getSortedScores(scoreObjective)
@@ -102,7 +102,7 @@ class LeaveCommand : CommandBase() {
                             ok = true
                         }
                     }
-                    if (!ok) Minecraft.getMinecraft().thePlayer.sendChatMessage("/warp dungeon_hub")
+                    if (!ok) mc.thePlayer.sendChatMessage("/warp dungeon_hub")
                     if (Config.EndParty && Config.BotName != "" || party) Features.partyCommand.start()
                     MinecraftForge.EVENT_BUS.unregister(toStop)
                     started = false
