@@ -86,7 +86,7 @@ dependencies {
         exclude(module = "log4j")
     }
 
-    implementation("com.github.DV8FromTheWorld:JDA:v5.0.0-alpha.17") {
+    implementation("com.github.DV8FromTheWorld:JDA:v5.0.0-alpha.19") {
         exclude(module = "opus-java")
     }
 
