@@ -50,7 +50,7 @@ class AutoSalvage : Feature() {
         if (!slotSalvage.hasStack) return
 
         if (slotItem.hasStack)
-            mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 31, 2, 0, mc.thePlayer)
+            mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 31, 2, 3, mc.thePlayer)
         else {
             val itemsToSalvage = mc.thePlayer.inventoryContainer.inventorySlots.filter { it.hasStack && shouldSalvage(it.stack) }
             if (itemsToSalvage.isEmpty()) stop = true
