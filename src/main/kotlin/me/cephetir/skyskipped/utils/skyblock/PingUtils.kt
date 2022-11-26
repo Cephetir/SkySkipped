@@ -17,39 +17,41 @@
 
 package me.cephetir.skyskipped.utils.skyblock
 
-import gg.essential.universal.ChatColor
-import me.cephetir.skyskipped.utils.mc
+import me.cephetir.bladecore.core.event.BladeEventBus
+import me.cephetir.bladecore.core.event.listener.listener
+import me.cephetir.bladecore.utils.player
+import me.cephetir.bladecore.utils.threading.safeListener
+import me.cephetir.bladecore.utils.world
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraftforge.client.event.RenderGameOverlayEvent
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
-class PingUtils(private var ticks: Int, private val text: String) {
+class PingUtils(private var ticks: Int, private val text: String, private val sound: Boolean = true, private val dynamicText: (() -> String)? = null) {
 
     init {
-        MinecraftForge.EVENT_BUS.register(this)
-    }
+        listener<ClientTickEvent> {
+            if (it.phase != TickEvent.Phase.START) return@listener
+            if (world == null || player == null) return@listener BladeEventBus.unsubscribe(this)
 
-    @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
-        if (mc.theWorld == null || mc.thePlayer == null) return MinecraftForge.EVENT_BUS.unregister(this)
+            if (ticks <= 0) BladeEventBus.unsubscribe(this, true)
+            if (sound && ticks % 2 == 0) player!!.playSound("random.orb", 1f, 1f)
+            ticks--
+        }
 
-        if (ticks <= 0) MinecraftForge.EVENT_BUS.unregister(this)
-        if (ticks % 4 == 0) mc.thePlayer.playSound("random.orb", 1f, 1f)
-        ticks--
-    }
+        safeListener<RenderGameOverlayEvent.Text> {
+            GlStateManager.pushMatrix()
+            GlStateManager.scale(1.5f, 1.5f, 1.5f)
+            val displayText = dynamicText?.invoke() ?: text
+            mc.fontRendererObj.drawStringWithShadow(
+                "§4§l$displayText",
+                it.resolution.scaledWidth / 1.5f / 2f - mc.fontRendererObj.getStringWidth(displayText) / 2f,
+                it.resolution.scaledHeight / 1.5f / 2f - 6.75f, -1
+            )
+            GlStateManager.scale(1f / 1.5f, 1f / 1.5f, 1f / 1.5f)
+            GlStateManager.popMatrix()
+        }
 
-    @SubscribeEvent
-    fun draw(event: RenderGameOverlayEvent.Text) {
-        GlStateManager.pushMatrix()
-        GlStateManager.scale(1.5f, 1.5f, 1.5f)
-        mc.fontRendererObj.drawStringWithShadow(
-            ChatColor.DARK_RED.toString() + ChatColor.BOLD + text,
-            event.resolution.scaledWidth / 1.5f / 2f - mc.fontRendererObj.getStringWidth(text) / 2f,
-            event.resolution.scaledHeight / 1.5f / 2f - 6.75f, -1
-        )
-        GlStateManager.scale( 1f / 1.5f, 1f / 1.5f, 1f / 1.5f)
-        GlStateManager.popMatrix()
+        BladeEventBus.subscribe(this)
     }
 }

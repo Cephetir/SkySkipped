@@ -18,12 +18,15 @@
 package me.cephetir.skyskipped.features.impl.misc
 
 import gg.essential.elementa.utils.withAlpha
+import me.cephetir.bladecore.utils.threading.safeListener
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.events.DrawSlotEvent
 import me.cephetir.skyskipped.features.Feature
 import net.minecraft.client.gui.Gui
+import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.inventory.GuiContainer
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.util.ChatAllowedCharacters
 import net.minecraftforge.client.event.GuiOpenEvent
 import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -39,8 +42,9 @@ class SearchContainer : Feature() {
         if (mc.currentScreen !is GuiContainer || !Config.containerSearch) return
         if (!Keyboard.getEventKeyState()) return
         if (Keyboard.isRepeatEvent()) return
+        val key = Keyboard.getEventKey()
 
-        if (Keyboard.getEventKey() == Keyboard.KEY_F && Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+        if (key == Keyboard.KEY_F && GuiScreen.isCtrlKeyDown()) {
             capturingText = !capturingText
             text = ""
             return
@@ -48,34 +52,30 @@ class SearchContainer : Feature() {
         if (!capturingText) return
 
         event.isCanceled = true
-        if (Keyboard.getEventKey() == Keyboard.KEY_BACK)
-            text = text.dropLast(1)
-        else if (Keyboard.getEventKey() == Keyboard.KEY_RETURN || Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-            capturingText = false
-            text = ""
-        } else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.getEventKey() != Keyboard.KEY_LCONTROL)
-            text += Keyboard.getEventCharacter().uppercase()
-        else if (!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.getEventKey() != Keyboard.KEY_LCONTROL)
-            text += Keyboard.getEventCharacter().lowercase()
+        val char = Keyboard.getEventCharacter()
+        when (key) {
+            Keyboard.KEY_RETURN, Keyboard.KEY_ESCAPE -> capturingText = false
+            Keyboard.KEY_BACK -> text = text.dropLast(1)
+            else -> if (ChatAllowedCharacters.isAllowedCharacter(char))
+                text += if (GuiScreen.isShiftKeyDown()) char.uppercase() else char.lowercase()
+        }
     }
 
     @SubscribeEvent
     fun onGuiRender(event: GuiScreenEvent.DrawScreenEvent.Post) {
-        if (!Config.containerSearch) return
+        if (!Config.containerSearch || !capturingText) return
         val gui = event.gui
-        if (capturingText) {
-            GlStateManager.pushMatrix()
-            GlStateManager.scale(1.5f, 1.5f, 1.5f)
-            mc.fontRendererObj.drawString(
-                text + "_",
-                gui.width / 2f / 1.5f - mc.fontRendererObj.getStringWidth(text + "_") / 2f,
-                ((gui.height - 166) / 2f - mc.fontRendererObj.FONT_HEIGHT) / 1.5f,
-                Color.RED.rgb,
-                false
-            )
-            GlStateManager.scale(1f / 1.5f, 1f / 1.5f, 1f / 1.5f)
-            GlStateManager.popMatrix()
-        }
+        GlStateManager.pushMatrix()
+        GlStateManager.scale(1.5f, 1.5f, 1.5f)
+        mc.fontRendererObj.drawString(
+            text + "_",
+            gui.width / 2f / 1.5f - mc.fontRendererObj.getStringWidth(text + "_") / 2f,
+            ((gui.height - 166) / 2f - mc.fontRendererObj.FONT_HEIGHT - 5) / 1.5f,
+            Color.RED.rgb,
+            false
+        )
+        GlStateManager.scale(1f / 1.5f, 1f / 1.5f, 1f / 1.5f)
+        GlStateManager.popMatrix()
     }
 
     @SubscribeEvent
@@ -84,31 +84,29 @@ class SearchContainer : Feature() {
         text = ""
     }
 
-    @SubscribeEvent
-    fun onDraw(event: DrawSlotEvent.Pre) {
-        if (!Config.containerSearch) return
-        if (!capturingText) return
-        val slot = event.slot
-        if (slot.hasStack && slot.stack.displayName.contains(text, true)) Gui.drawRect(
-            slot.xDisplayPosition,
-            slot.yDisplayPosition,
-            slot.xDisplayPosition + 16,
-            slot.yDisplayPosition + 16,
-            Color.WHITE.withAlpha(169).rgb
-        )
-    }
+    init {
+        safeListener<DrawSlotEvent.Pre> {
+            if (!Config.containerSearch || !capturingText) return@safeListener
+            val slot = it.slot
+            if (slot.hasStack && slot.stack.displayName.contains(text, true)) Gui.drawRect(
+                slot.xDisplayPosition,
+                slot.yDisplayPosition,
+                slot.xDisplayPosition + 16,
+                slot.yDisplayPosition + 16,
+                Color.WHITE.withAlpha(169).rgb
+            )
+        }
 
-    @SubscribeEvent
-    fun onDraw(event: DrawSlotEvent.Post) {
-        if (!Config.containerSearch) return
-        if (!capturingText) return
-        val slot = event.slot
-        if (!slot.hasStack || !slot.stack.displayName.contains(text, true)) Gui.drawRect(
-            slot.xDisplayPosition,
-            slot.yDisplayPosition,
-            slot.xDisplayPosition + 16,
-            slot.yDisplayPosition + 16,
-            Color.BLACK.withAlpha(169).rgb
-        )
+        safeListener<DrawSlotEvent.Post> {
+            if (!Config.containerSearch || !capturingText) return@safeListener
+            val slot = it.slot
+            if (!slot.hasStack || !slot.stack.displayName.contains(text, true)) Gui.drawRect(
+                slot.xDisplayPosition,
+                slot.yDisplayPosition,
+                slot.xDisplayPosition + 16,
+                slot.yDisplayPosition + 16,
+                Color.BLACK.withAlpha(169).rgb
+            )
+        }
     }
 }

@@ -17,14 +17,14 @@
 
 package me.cephetir.skyskipped.features.impl.hacks
 
+import me.cephetir.bladecore.core.listeners.SkyblockListener
+import me.cephetir.bladecore.utils.TextUtils.equalsAny
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.minecraft.skyblock.ItemUtils.getExtraAttributes
+import me.cephetir.bladecore.utils.minecraft.skyblock.ItemUtils.getSkyBlockID
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.TextUtils.equalsAny
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import me.cephetir.skyskipped.utils.skyblock.ItemUtils.getExtraAttributes
-import me.cephetir.skyskipped.utils.skyblock.ItemUtils.getSkyBlockID
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.item.ItemStack
 import net.minecraftforge.client.event.GuiOpenEvent
@@ -40,9 +40,9 @@ class AutoSalvage : Feature() {
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.END || !Cache.inSkyblock || !Config.autoSalvage || stop) return
-        if (mc.currentScreen !is GuiChest || !(Listener.lastOpenContainerName?.stripColor()?.contains("Salvage Item") ?: return)) return
-        if (tickTimer++ % 5 != 0) return
+        if (event.phase != TickEvent.Phase.START || !Cache.onSkyblock || !Config.autoSalvage || stop) return
+        if (mc.currentScreen !is GuiChest || !(SkyblockListener.lastOpenContainerName?.stripColor()?.contains("Salvage Item") ?: return)) return
+        if (tickTimer++ % 10 != 0) return
 
         val chest = mc.currentScreen as GuiChest
         val slotSalvage = chest.inventorySlots.getSlot(31)
@@ -50,11 +50,11 @@ class AutoSalvage : Feature() {
         if (!slotSalvage.hasStack) return
 
         if (slotItem.hasStack)
-            mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 31, 2, 0, mc.thePlayer)
+            mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 31, 0, 0, mc.thePlayer)
         else {
-            val itemsToSalvage = mc.thePlayer.inventoryContainer.inventorySlots.filter { it.hasStack && shouldSalvage(it.stack) }
+            val itemsToSalvage = mc.thePlayer.openContainer.inventorySlots.filter { it.hasStack && shouldSalvage(it.stack) }
             if (itemsToSalvage.isEmpty()) stop = true
-            else mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, 45 + itemsToSalvage[0].slotNumber, 0, 1, mc.thePlayer)
+            else mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, itemsToSalvage.first().slotNumber, 0, 1, mc.thePlayer)
         }
     }
 
@@ -71,7 +71,7 @@ class AutoSalvage : Feature() {
     private fun shouldSalvage(item: ItemStack): Boolean {
         val attributes = item.getExtraAttributes() ?: return false
                 // Dungeons
-        return (attributes.hasKey("baseStatBoostPercentage") && !attributes.hasKey("dungeon_item_level") && item.getSkyBlockID() != "ICE_SPRAY_WAND") ||
+        return !(!attributes.hasKey("baseStatBoostPercentage") || attributes.hasKey("dungeon_item_level") || item.getSkyBlockID() == "ICE_SPRAY_WAND") ||
                 // Lava Fishing
                 item.getSkyBlockID().equalsAny(
                     "BLADE_OF_THE_VOLCANO",

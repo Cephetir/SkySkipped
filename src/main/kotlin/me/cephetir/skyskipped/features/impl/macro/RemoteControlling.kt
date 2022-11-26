@@ -20,13 +20,16 @@ package me.cephetir.skyskipped.features.impl.macro
 import gg.essential.api.EssentialAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.cephetir.bladecore.core.event.BladeEventBus
+import me.cephetir.bladecore.core.event.listener.listener
+import me.cephetir.bladecore.utils.TextUtils.isNumeric
+import me.cephetir.bladecore.utils.threading.BackgroundScope
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.utils.ScreenshotUtils
-import me.cephetir.skyskipped.utils.TextUtils.isNumeric
 import me.cephetir.skyskipped.utils.mc
-import me.cephetir.skyskipped.utils.threading.BackgroundScope
+import me.cephetir.skyskipped.utils.skyblock.Queues
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
@@ -34,15 +37,14 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.requests.GatewayIntent
+import net.dv8tion.jda.api.utils.FileUpload
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 import net.minecraft.client.gui.GuiMainMenu
 import net.minecraft.client.gui.GuiMultiplayer
 import net.minecraft.client.multiplayer.GuiConnecting
 import net.minecraft.client.multiplayer.ServerData
 import net.minecraft.util.ChatComponentText
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Loader
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
 
@@ -65,11 +67,11 @@ object RemoteControlling {
                 .addEventListeners(EventListener())
                 .build()
 
-            MinecraftForge.EVENT_BUS.register(RemoteControlling)
+            BladeEventBus.subscribe(RemoteControlling)
         } catch (e: Exception) {
-            e.printStackTrace()
-            EssentialAPI.getNotifications().push("Failed to start JDA", "Invalid discord bot token!")
+            if (mc.fontRendererObj != null) EssentialAPI.getNotifications().push("Failed to start JDA", "Invalid discord bot token!")
             SkySkipped.logger.error("Failed to start JDA! Invalid discord bot token!")
+            e.printStackTrace()
         }
     }
 
@@ -77,19 +79,20 @@ object RemoteControlling {
         if (this::jda.isInitialized) {
             SkySkipped.logger.info("Stopping JDA...")
             jda.shutdown()
-            MinecraftForge.EVENT_BUS.unregister(RemoteControlling)
+            BladeEventBus.unsubscribe(RemoteControlling)
         }
     }
 
-    @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
-        if (connect) mc.displayGuiScreen(
-            GuiConnecting(
-                GuiMultiplayer(GuiMainMenu()),
-                mc,
-                ServerData(Cache.prevName, Cache.prevIP, Cache.prevIsLan)
+    init {
+        listener<ClientTickEvent> {
+            if (connect) mc.displayGuiScreen(
+                GuiConnecting(
+                    GuiMultiplayer(GuiMainMenu()),
+                    mc,
+                    ServerData(Cache.prevName, Cache.prevIP, Cache.prevIsLan)
+                )
             )
-        )
+        }
     }
 
     class EventListener : ListenerAdapter() {
@@ -112,22 +115,26 @@ object RemoteControlling {
                     if (!MacroManager.current.enabled) event.message.reply("No macro currently active!").queue()
                     else event.message.reply(MacroManager.current.info()).queue()
                 }
+
                 "toggle", "t" -> {
                     if (!MacroManager.current.enabled) event.message.reply("Started macro!").queue()
                     else event.message.reply("Stopped macro!").queue()
                     MacroManager.current.toggle()
                 }
+
                 "screenshot", "ss" -> {
                     val ss = ScreenshotUtils.takeScreenshot()
                     val channel = event.message.channel
                     val embed = EmbedBuilder()
                     embed.setImage("attachment://ss.png")
-                    channel.sendFile(ss, "ss.png").setEmbeds(embed.build()).queue()
+                    channel.sendFiles(FileUpload.fromData(ss, "ss.png")).setEmbeds(embed.build()).queue()
                 }
+
                 "disconnect", "dc" -> {
                     mc.netHandler.networkManager.closeChannel(ChatComponentText("Disconnected using discord bot"))
                     event.message.reply("Successfully disconnected!").queue()
                 }
+
                 "inventory", "inv" -> BackgroundScope.launch {
                     MacroManager.current.stopAndOpenInv()
                     delay(100L)
@@ -136,14 +143,15 @@ object RemoteControlling {
                     val channel = event.message.channel
                     val embed = EmbedBuilder()
                     embed.setImage("attachment://ss.png")
-                    channel.sendFile(ss, "ss.png").setEmbeds(embed.build()).queue()
+                    channel.sendFiles(FileUpload.fromData(ss, "ss.png")).setEmbeds(embed.build()).queue()
 
                     MacroManager.current.closeInvAndReturn()
                 }
+
                 else -> {
                     if (message.startsWith("run")) {
                         val command = message.removePrefix("run ")
-                        mc.thePlayer.sendChatMessage(command)
+                        Queues.sendCommand(command)
                         event.message.reply("Successfully sent $command").queue()
                     } else if (message.startsWith("switch")) {
                         val name = message.removePrefix("switch ").replace(" ", "")

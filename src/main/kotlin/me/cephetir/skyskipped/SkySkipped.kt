@@ -19,22 +19,24 @@ package me.cephetir.skyskipped
 
 import com.google.gson.Gson
 import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import gg.essential.api.EssentialAPI
 import gg.essential.api.utils.Multithreading
+import me.cephetir.bladecore.core.cache.impl.MapCache
+import me.cephetir.bladecore.core.event.BladeEventBus
+import me.cephetir.bladecore.utils.HttpUtils
+import me.cephetir.bladecore.utils.ShutdownHook
 import me.cephetir.skyskipped.commands.SkySkippedCommand
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.features.impl.macro.RemoteControlling
 import me.cephetir.skyskipped.features.impl.misc.Metrics
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
-import me.cephetir.skyskipped.utils.HttpUtils
+import me.cephetir.skyskipped.utils.CustomName
 import me.cephetir.skyskipped.utils.mc
-import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.client.settings.KeyBinding
 import net.minecraftforge.client.ClientCommandHandler
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
@@ -52,7 +54,7 @@ import java.net.URI
     name = SkySkipped.MOD_NAME,
     version = SkySkipped.VERSION,
     acceptedMinecraftVersions = "[1.8.9]",
-    modLanguageAdapter = "gg.essential.api.utils.KotlinAdapter",
+    modLanguageAdapter = "me.cephetir.bladecore.utils.KotlinAdapter",
     clientSideOnly = true,
     dependencies = "after:skyskippedjdaaddon"
 )
@@ -60,7 +62,7 @@ class SkySkipped {
     companion object {
         const val MODID = "skyskipped"
         const val MOD_NAME = "SkySkipped"
-        const val VERSION = "3.3"
+        const val VERSION = "3.4"
 
         lateinit var config: Config
         val features = Features()
@@ -75,13 +77,18 @@ class SkySkipped {
         val macroKey = KeyBinding("Toggle Macro", Keyboard.KEY_NONE, "SkySkipped")
         val hotbarKey = KeyBinding("Swap Hotbar Layouts", Keyboard.KEY_NONE, "SkySkipped")
 
-        private val cosmetics = hashMapOf<String, Pair<String, String>>()
-        private val regex = Regex("(?:§.)*(?<prefix>\\[\\w\\w\\w(?:(?:§.)*\\+)*(?:§.)*])? *(?<username>\\w{3,16})(?:§.)* *:*")
+        private val cosmetics = hashSetOf<CustomName>()
+        private val regex =
+            Regex("(?:§.)*(?<rank>\\[(?:§.)*\\d+(?:§.)*\\])? ?(?:§.)*(?<prefix>\\[\\w\\w\\w(?:§.)*(?:\\+(?:§.)*)*])? ?(?<username>\\w{3,16})(?:§.)*:*")
+        val cosmeticCache = MapCache<String, String>(10000)
 
         @JvmStatic
-        fun getCosmetics(message: String): String {
-            if (mc.thePlayer == null) return message
-            var text = message
+        fun getCosmetics(message: String?): String? {
+            if (mc.thePlayer == null || message == null) return message
+            if (cosmeticCache.isCached(message))
+                return cosmeticCache.get(message)!!
+
+            var text = message!!
             val result = regex.findAll(text)
             var displace = 0
             for (matcher in result) {
@@ -90,31 +97,62 @@ class SkySkipped {
                 val nameRange = username.range
                 val prefixRange = matcher.groups["prefix"]?.range
 
-                val newName = cosmetics[name]?.first?.replace("&", "§") ?: continue
-                val newPrefix = cosmetics[name]?.second?.replace("&", "§") ?: continue
+                val customName = cosmetics.find { it.name == name }?.getNick() ?: continue
+                val newName = customName.nick.replace("&", "§")
+                val newPrefix = customName.prefix.replace("&", "§")
 
                 text = text.replaceRange(IntRange(nameRange.first + displace, nameRange.last + displace), newName)
                 if (prefixRange != null) text = text.replaceRange(IntRange(prefixRange.first + displace, prefixRange.last + displace), newPrefix)
 
                 displace += (newName.length - (nameRange.last - nameRange.first + 1)) + (if (prefixRange != null) (newPrefix.length - (prefixRange.last - prefixRange.first + 1)) else 0)
             }
+
+            cosmeticCache.cache(message, text)
             return text
         }
 
+        private val gson = Gson()
         fun loadCosmetics() {
+            cosmetics.forEach { BladeEventBus.unsubscribe(it) }
             cosmetics.clear()
-            val gson = Gson()
             val body = HttpUtils.sendGet(
-                "https://gist.githubusercontent.com/Cephetir/7af203131b17bd470e5453785916ef69/raw/cosmetics.json",
+                "https://gist.githubusercontent.com/Cephetir/327b7738f91cd11636a5ae35029dd83c/raw",
                 mapOf("Content-Type" to "application/json")
             )
             gson.fromJson(body, JsonArray::class.java)?.toList()?.forEach {
-                cosmetics[it.asJsonObject.getAsJsonPrimitive("name").asString] =
-                    Pair(
-                        it.asJsonObject.getAsJsonPrimitive("nick").asString,
-                        it.asJsonObject.getAsJsonPrimitive("prefix").asString
+                it as JsonObject
+                val name = it.getAsJsonPrimitive("name").asString
+                if (it.getAsJsonPrimitive("animated").asBoolean) {
+                    val nicks = mutableListOf<CustomName.Nick>()
+                    val frames = it.getAsJsonArray("frames")
+                    frames.sortedBy { frame ->
+                        frame as JsonObject
+                        frame.getAsJsonPrimitive("index").asInt
+                    }.forEach { frame ->
+                        frame as JsonObject
+                        nicks.add(
+                            CustomName.Nick(
+                                frame.getAsJsonPrimitive("nick").asString,
+                                frame.getAsJsonPrimitive("prefix").asString,
+                                frame.getAsJsonPrimitive("nextIn").asInt
+                            )
+                        )
+                    }
+                    cosmetics.add(CustomName(name, true, nicks))
+                } else cosmetics.add(
+                    CustomName(
+                        name, false,
+                        listOf(
+                            CustomName.Nick(
+                                it.asJsonObject.getAsJsonPrimitive("nick").asString,
+                                it.asJsonObject.getAsJsonPrimitive("prefix").asString,
+                                -1
+                            )
+                        )
                     )
+                )
             } ?: return logger.info("Failed to download cosmetics!")
+            cosmeticCache.resetCache()
             logger.info("Successfully downloaded cosmetics!")
         }
     }
@@ -128,17 +166,12 @@ class SkySkipped {
         config.loadKeybinds()
         config.loadHotbars()
         config.loadScripts()
-
-        BackgroundScope.start()
-
-        MinecraftForge.EVENT_BUS.register(this)
     }
 
     @Mod.EventHandler
     fun onInit(event: FMLInitializationEvent) {
         logger.info("Initializing SkySkipped...")
 
-        MinecraftForge.EVENT_BUS.register(Listener)
         features.register()
 
         ClientCommandHandler.instance.registerCommand(SkySkippedCommand())
@@ -152,7 +185,7 @@ class SkySkipped {
         ClientRegistry.registerKeyBinding(macroKey)
         ClientRegistry.registerKeyBinding(hotbarKey)
 
-        EssentialAPI.getShutdownHookUtil().register {
+        ShutdownHook.register {
             config.saveKeybinds()
             config.saveHotbars()
             config.markDirty()
@@ -161,7 +194,6 @@ class SkySkipped {
             Metrics.update(false)
             RPC.shutdown()
             RemoteControlling.stop()
-            BackgroundScope.stop()
         }
     }
 

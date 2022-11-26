@@ -17,10 +17,12 @@
 
 package me.cephetir.skyskipped.utils
 
+import me.cephetir.bladecore.core.event.BladeEventBus
+import me.cephetir.bladecore.core.event.listener.listener
+import me.cephetir.bladecore.utils.player
+import me.cephetir.bladecore.utils.world
 import net.minecraft.util.MathHelper
 import net.minecraftforge.client.event.RenderWorldLastEvent
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.pow
 
 class RotationClass(rotation: Rotation, time: Long) {
@@ -38,20 +40,22 @@ class RotationClass(rotation: Rotation, time: Long) {
         endRot = Rotation(startRot.yaw + neededChange.yaw, startRot.pitch + neededChange.pitch)
         startTime = System.currentTimeMillis()
         endTime = System.currentTimeMillis() + time
-        MinecraftForge.EVENT_BUS.register(this)
-    }
 
-    @SubscribeEvent
-    fun update(event: RenderWorldLastEvent) {
-        if (System.currentTimeMillis() <= endTime) {
-            mc.thePlayer.rotationYaw = interpolate(startRot.yaw, endRot.yaw)
-            mc.thePlayer.rotationPitch = interpolate(startRot.pitch, endRot.pitch)
-        } else if (!done) {
-            mc.thePlayer.rotationYaw = endRot.yaw
-            mc.thePlayer.rotationPitch = endRot.pitch
-            done = true
-            MinecraftForge.EVENT_BUS.unregister(this)
+        listener<RenderWorldLastEvent> {
+            if (world == null || player == null) return@listener BladeEventBus.unsubscribe(this)
+
+            if (System.currentTimeMillis() <= endTime) {
+                mc.thePlayer.rotationYaw = interpolate(startRot.yaw, endRot.yaw)
+                mc.thePlayer.rotationPitch = interpolate(startRot.pitch, endRot.pitch)
+            } else if (!done) {
+                mc.thePlayer.rotationYaw = endRot.yaw
+                mc.thePlayer.rotationPitch = endRot.pitch
+                done = true
+                BladeEventBus.unsubscribe(this)
+            }
         }
+
+        BladeEventBus.subscribe(this)
     }
 
     private fun interpolate(start: Float, end: Float): Float {

@@ -17,21 +17,40 @@
 
 package me.cephetir.skyskipped.features.impl.dugeons
 
+import me.cephetir.bladecore.core.event.listener.listener
+import me.cephetir.bladecore.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.skyblock.PingUtils
+import me.cephetir.skyskipped.utils.skyblock.Queues
 import net.minecraft.entity.monster.EntityZombie
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 class Pings : Feature() {
+    private var ffTimer = -1L
 
-    var rabPing = false
-    var mimicPing = false
+    init {
+        listener<ClientChatReceivedEvent> {
+            if (!Cache.inDungeon || !Config.fireFreezePing) return@listener
+            val msg = it.message.unformattedText.stripColor()
+            if (msg.startsWith("[BOSS] The Professor: Oh? You found my Guardians one weakness?")) {
+                ffTimer = System.currentTimeMillis() + 5000L
+                PingUtils(110, "", false) {
+                    val seconds = max(0.0, ((this.ffTimer - System.currentTimeMillis()) / 10.0).roundToInt() / 100.0)
+                    "§4Use §c§lFire §3§lFreeze §4in: §c${seconds}s"
+                }
+            }
+        }
+    }
+
+    private var rabPing = false
+    private var mimicPing = false
 
     @SubscribeEvent
     fun onWorldLoad(event: WorldEvent.Load) {
@@ -43,7 +62,7 @@ class Pings : Feature() {
     fun onChat(event: ClientChatReceivedEvent) {
         if (!Cache.inDungeon || !Config.rabbitPing || rabPing) return
         if (event.message.unformattedText.stripColor().contains("You have proven yourself. You may pass")) {
-            PingUtils(100, "Rabbit Hat!")
+            PingUtils(50, "Rabbit Hat!")
             rabPing = true
         }
     }
@@ -59,7 +78,7 @@ class Pings : Feature() {
                 entity.getCurrentArmor(2) == null &&
                 entity.getCurrentArmor(3) == null
             ) {
-                mc.thePlayer.sendChatMessage("/pc " + Config.mimicText)
+                Queues.sendMessage("/pc " + Config.mimicText)
                 mimicPing = true
             }
         }

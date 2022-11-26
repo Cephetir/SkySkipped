@@ -18,9 +18,9 @@
 package me.cephetir.skyskipped.features.impl.chat
 
 import gg.essential.api.EssentialAPI
+import me.cephetir.bladecore.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraft.util.ChatComponentText
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent

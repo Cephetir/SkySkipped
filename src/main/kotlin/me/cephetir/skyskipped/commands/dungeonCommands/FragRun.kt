@@ -17,10 +17,10 @@
 
 package me.cephetir.skyskipped.commands.dungeonCommands
 
+import me.cephetir.bladecore.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.features.Features
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 

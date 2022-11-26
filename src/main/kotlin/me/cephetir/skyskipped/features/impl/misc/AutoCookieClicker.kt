@@ -17,26 +17,24 @@
 
 package me.cephetir.skyskipped.features.impl.misc
 
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.threading.safeListener
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.events.DrawSlotEvent
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.lwjgl.input.Mouse
 
 class AutoCookieClicker : Feature() {
-    @SubscribeEvent
-    fun onDraw(event: DrawSlotEvent.Pre) {
-        if (event.slot.hasStack &&
-            event.slot.stack.displayName.stripColor().endsWith(" Cookies") &&
-            Config.cookieClicker
-        )
-            mc.playerController.windowClick(
-                event.gui.inventorySlots.windowId,
-                event.slot.slotNumber,
-                Mouse.getButtonIndex("BUTTON2"),
-                0,
-                mc.thePlayer
-            )
+    init {
+        safeListener<DrawSlotEvent.Pre> {
+            if (it.slot.hasStack && it.slot.stack.displayName.stripColor().endsWith(" Cookies") && Config.cookieClicker)
+                playerController.windowClick(
+                    it.gui.inventorySlots.windowId,
+                    it.slot.slotNumber,
+                    Mouse.getButtonIndex("BUTTON2"),
+                    0,
+                    mc.thePlayer
+                )
+        }
     }
 }

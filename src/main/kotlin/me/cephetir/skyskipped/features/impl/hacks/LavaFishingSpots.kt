@@ -17,9 +17,10 @@
 
 package me.cephetir.skyskipped.features.impl.hacks
 
+import me.cephetir.bladecore.core.listeners.SkyblockIsland
+import me.cephetir.bladecore.core.listeners.SkyblockListener
+import me.cephetir.bladecore.utils.world
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.event.Listener
-import me.cephetir.skyskipped.event.SkyblockIsland
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.render.RenderUtils
 import net.minecraft.init.Blocks
@@ -37,19 +38,19 @@ class LavaFishingSpots : Feature() {
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Config.lavaFishingEsp || Listener.island != SkyblockIsland.CrystalHollows) return
+        if (event.phase != TickEvent.Phase.START || !Config.lavaFishingEsp || SkyblockListener.island != SkyblockIsland.CrystalHollows) return
 
         lava.clear()
-        val blocks = mc.theWorld.capturedBlockSnapshots.map { it.pos }.filter {
+        val blocks = world?.capturedBlockSnapshots?.map { it.pos }?.filter {
             val block = mc.theWorld.getBlockState(it).block
             it.y >= 65 && (block == Blocks.lava || block == Blocks.flowing_lava)
-        }
+        } ?: return
         lava.addAll(blocks)
     }
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!Config.lavaFishingEsp || lava.isEmpty() || Listener.island != SkyblockIsland.CrystalHollows) return
+        if (!Config.lavaFishingEsp || lava.isEmpty() || SkyblockListener.island != SkyblockIsland.CrystalHollows) return
 
         for (pos in lava)
             RenderUtils.drawBox(Vec3(pos), Color.RED, event.partialTicks)

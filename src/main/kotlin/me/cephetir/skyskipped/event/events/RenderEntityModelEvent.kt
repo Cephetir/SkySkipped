@@ -17,14 +17,14 @@
 
 package me.cephetir.skyskipped.event.events
 
+import me.cephetir.bladecore.core.event.Cancellable
+import me.cephetir.bladecore.core.event.Event
+import me.cephetir.bladecore.core.event.ICancellable
 import net.minecraft.client.model.ModelBase
 import net.minecraft.entity.EntityLivingBase
-import net.minecraftforge.fml.common.eventhandler.Cancelable
-import net.minecraftforge.fml.common.eventhandler.Event
 
-@Cancelable
 class RenderEntityModelEvent(
     val entity: EntityLivingBase,
     val model: ModelBase,
     val partialTicks: Float
-) : Event()
+) : Event, ICancellable by Cancellable()

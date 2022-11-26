@@ -17,13 +17,14 @@
 
 package me.cephetir.skyskipped.features.impl.chat
 
+import me.cephetir.bladecore.utils.TextUtils.keepScoreboardCharacters
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.minecraft.skyblock.ScoreboardUtils
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.InventoryUtils
-import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import me.cephetir.skyskipped.utils.skyblock.ScoreboardUtils
+import me.cephetir.skyskipped.utils.skyblock.Queues
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -32,7 +33,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 class AutoMaddoxPhone : Feature() {
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (!Config.autoMaddox || !Cache.inSkyblock || event.phase != TickEvent.Phase.START) return
+        if (!Config.autoMaddox || !Cache.onSkyblock || event.phase != TickEvent.Phase.START) return
         val scoreboard = ScoreboardUtils.sidebarLines
 
         for (line in scoreboard) {
@@ -58,11 +59,11 @@ class AutoMaddoxPhone : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Config.autoMaddox || !Cache.inSkyblock) return
+        if (!Config.autoMaddox || !Cache.onSkyblock) return
         val message = event.message.unformattedText.stripColor()
         if (message.contains("[OPEN MENU]") && !message.contains(":")) {
             val command = event.message.siblings.find { it.unformattedText.contains("[OPEN MENU]") }?.chatStyle?.chatClickEvent?.value ?: return
-            mc.thePlayer.sendChatMessage(command)
+            Queues.sendCommand(command)
         }
     }
 }

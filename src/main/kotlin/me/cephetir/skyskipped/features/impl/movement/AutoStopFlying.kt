@@ -19,10 +19,10 @@ package me.cephetir.skyskipped.features.impl.movement
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.cephetir.bladecore.utils.threading.BackgroundScope
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 

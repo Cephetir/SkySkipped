@@ -18,8 +18,8 @@
 package me.cephetir.skyskipped.utils.render.shaders
 
 import me.cephetir.skyskipped.SkySkipped
-import me.cephetir.skyskipped.mixins.IMixinMinecraft
-import me.cephetir.skyskipped.mixins.IMixinShaderGroup
+import me.cephetir.skyskipped.mixins.accessors.IMixinMinecraft
+import me.cephetir.skyskipped.mixins.accessors.IMixinShaderGroup
 import me.cephetir.skyskipped.utils.mc
 import me.cephetir.skyskipped.utils.render.RenderUtils
 import me.cephetir.skyskipped.utils.render.RoundUtils

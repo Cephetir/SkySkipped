@@ -17,12 +17,12 @@
 
 package me.cephetir.skyskipped.features.impl.macro
 
+import me.cephetir.bladecore.utils.TextUtils.formatTime
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.features.impl.macro.macros.NetherwartMacro
 import me.cephetir.skyskipped.features.impl.macro.macros.SugarCaneMacro
 import me.cephetir.skyskipped.gui.impl.GuiHudEditor
-import me.cephetir.skyskipped.utils.TextUtils.formatTime
 import me.cephetir.skyskipped.utils.render.RoundUtils
 import me.cephetir.skyskipped.utils.render.shaders.BlurUtils
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent

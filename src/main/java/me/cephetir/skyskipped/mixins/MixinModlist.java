@@ -41,6 +41,6 @@ public class MixinModlist {
         } catch (Exception e) {
             return;
         }
-        this.modTags.entrySet().removeIf(mod -> !mod.getKey().equalsIgnoreCase("fml") && !mod.getKey().equalsIgnoreCase("forge") && !mod.getKey().equalsIgnoreCase("mcp"));
+        this.modTags.keySet().removeIf(mod -> !mod.matches("fml|forge|mcp|optifine|skyblockaddons|skytils"));
     }
 }

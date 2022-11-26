@@ -17,11 +17,11 @@
 
 package me.cephetir.skyskipped.features.impl.visual
 
+import me.cephetir.bladecore.utils.TextUtils.containsAny
+import me.cephetir.bladecore.utils.minecraft.KeybindUtils.isDown
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.KeybindUtils.isDown
-import me.cephetir.skyskipped.utils.TextUtils.containsAny
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 

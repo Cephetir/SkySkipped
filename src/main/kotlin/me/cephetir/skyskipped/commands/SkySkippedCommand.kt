@@ -21,23 +21,22 @@ import gg.essential.api.EssentialAPI
 import gg.essential.universal.UChat.chat
 import gg.essential.universal.UDesktop
 import gg.essential.universal.wrappers.message.UTextComponent
+import me.cephetir.bladecore.core.event.BladeEventBus
+import me.cephetir.bladecore.utils.TextUtils.isNumeric
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
-import me.cephetir.skyskipped.features.impl.hacks.FailSafe
 import me.cephetir.skyskipped.features.impl.hacks.HotbarSaver
 import me.cephetir.skyskipped.features.impl.hacks.PetMacro
 import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.gui.impl.GuiHudEditor
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
-import me.cephetir.skyskipped.utils.TextUtils.isNumeric
 import me.cephetir.skyskipped.utils.mc
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
 import net.minecraft.util.BlockPos
-import net.minecraftforge.common.MinecraftForge
 
 class SkySkippedCommand : CommandBase() {
     override fun getCommandName(): String {
@@ -64,7 +63,7 @@ class SkySkippedCommand : CommandBase() {
     override fun processCommand(sender: ICommandSender, args: Array<String>) {
         if (args.isEmpty()) return EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
 
-        when (args[0]) {
+        when (args[0].lowercase()) {
             "gui" -> EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
             "keybinds", "kb" -> EssentialAPI.getGuiUtil().openScreen(GuiItemSwap())
             "github" -> {
@@ -78,16 +77,9 @@ class SkySkippedCommand : CommandBase() {
                 if (args.size >= 2 && args[1].isNumeric() && args[1].toInt() > 0) {
                     val player = mc.thePlayer
                     if (Config.petsOverlay) Features.petsOverlay.auto = args[1].toInt()
-                    else MinecraftForge.EVENT_BUS.register(PetMacro(args[1].toInt()))
+                    else BladeEventBus.subscribe(PetMacro(args[1].toInt()), true)
                     player.sendChatMessage("/pets")
                 } else chat("§cSkySkipped §f:: §4Specify pet index! Usage: /sm pet [pet index (start counting from 1)]")
-            }
-
-            "stop" -> {
-                if (FailSafe.called4) {
-                    FailSafe.called4 = false
-                    chat("§cSkySkipped §f:: §eJacob failsafe stopped and won't reenable macro!")
-                } else chat("§cSkySkipped §f:: §4Jacob failsafe wasn't triggered!")
             }
 
             "dev" -> {
@@ -117,7 +109,7 @@ class SkySkippedCommand : CommandBase() {
                 } else chat("§cSkySkipped §f:: §4Not enough arguments! Usage: /sm hb [save|select|remove] [preset name]")
             }
 
-            "packetThottle" -> if (args.size < 2)
+            "packetthrottle", "pt" -> if (args.size < 2)
                 chat("§cSkySkipped §f:: §eYou was packet thottled ${MacroManager.packetThrottleAmout} times.")
             else if (args[1] == "reset") {
                 MacroManager.packetThrottleAmout = 0
@@ -136,7 +128,7 @@ class SkySkippedCommand : CommandBase() {
                     §cSkySkipped §f:: §e/sm trail [particle name] §f- §eSet trail particle
                     §cSkySkipped §f:: §e/sm hud §f- §eOpens hud editor GUI
                     §cSkySkipped §f:: §e/sm hotbars §for§e /sm hb [save|select|remove|list] [preset name] §f- §eSave, select or remove hotbar preset
-                    §cSkySkipped §f:: §e/sm packetThottle (reset) §f- §eShow packet thottle amount
+                    §cSkySkipped §f:: §e/sm packetThrottle §for§e /sm pt (reset) §f- §eShow packet thottle amount
                     §cSkySkipped §f:: §e/sm config §f- §eReload cosmetics and custom names
                     §cSkySkipped §f:: §e/sm reload §f- §eReload cosmetics and custom names
                     §cSkySkipped §f:: §e/sm github §f- §eOpens official github page
