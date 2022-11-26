@@ -19,20 +19,21 @@ package me.cephetir.skyskipped.features.impl.visual
 
 import com.mojang.realmsclient.gui.ChatFormatting
 import gg.essential.universal.ChatColor
-import me.cephetir.skyskipped.SkySkipped
+import me.cephetir.bladecore.utils.TextUtils.keepScoreboardCharacters
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.threading.safeListener
 import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.config.Config.Companion.coinsToggle
 import me.cephetir.skyskipped.event.events.ScoreboardRenderEvent
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.render.RenderUtils
 import me.cephetir.skyskipped.utils.render.RoundUtils
 import me.cephetir.skyskipped.utils.render.shaders.BlurUtils
+import me.cephetir.skyskipped.utils.render.shaders.ShadowUtils
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.scoreboard.*
 import net.minecraft.util.EnumChatFormatting
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 import java.text.DecimalFormat
 import java.util.regex.Pattern
@@ -43,11 +44,12 @@ class CustomScoreboard : Feature() {
     private var lastWidth = 0f
     private var lastHeight = 0f
 
-    @SubscribeEvent
-    fun onDraw(event: ScoreboardRenderEvent) {
-        if (!Config.customSb) return
-        event.isCanceled = true
-        renderScoreboard(event.objective, event.resolution)
+    init {
+        safeListener<ScoreboardRenderEvent> {
+            if (!Config.customSb) return@safeListener
+            it.cancel()
+            renderScoreboard(it.objective, it.resolution)
+        }
     }
 
     private fun renderScoreboard(objective: ScoreObjective, resolution: ScaledResolution) {
@@ -104,20 +106,27 @@ class CustomScoreboard : Feature() {
                 lastHeight = h
             }
 
-            if (Config.customSbBlurT) BlurUtils.blurArea(
+            if (Config.customSbBlurT) BlurUtils.blurAreaRounded(
                 x, y,
                 x + w, y + h,
+                8f,
                 Config.customSbBlur
-            ) else RenderUtils.drawRect(
-                x - 1,
-                y - 1,
-                x + w + 1,
-                y + h + 1,
+            )
+            if (Config.customSbBg) RoundUtils.drawRoundedRect(
+                x - 0.5f,
+                y - 0.5f,
+                x + w + 0.5f,
+                y + h + 0.5f,
+                5f,
                 Config.customSbBgColor.rgb
+            )
+            if (Config.customSbShadow) ShadowUtils.shadow(Config.customSbShadowStr,
+                { RoundUtils.drawRoundedRect(x, y, x + w, y + h, 5f, Color(0, 0, 0, 190).rgb) },
+                { RoundUtils.drawRoundedRect(x, y, x + w, y + h, 5f) }
             )
             if (Config.customSbOutline) RoundUtils.drawRoundedOutline(
                 x - 1, y - 1, x + w + 1, y + h + 1,
-                5.0f,
+                5f,
                 2.5f,
                 if (!Config.customSbOutlineColorRainbow) Config.customSbOutlineColor.rgb
                 else RenderUtils.getChroma(3000F, 0),
@@ -159,17 +168,12 @@ class CustomScoreboard : Feature() {
 
     private fun a(text: String): String {
         val txt = text.stripColor().keepScoreboardCharacters().trim()
-        return if (Config.coinsToggle && txt.startsWith("Purse: ")) {
-            val coins = txt.substring(7).split(" ").toTypedArray()[0].replace(",", "").toDouble()
+        return if (coinsToggle && txt.startsWith("Purse: ")) {
+            val coins = txt.substring(7).split(" ")[0].replace(",", "").toDouble()
             val needed = coins + Config.coins
             val format = DecimalFormat("###,###.##")
             val s = format.format(needed).replace(" ", ",")
             "Purse: " + ChatColor.GOLD + s
-        } else if (Config.customSbNumbers && text.startsWith(EnumChatFormatting.RED.toString() + "") &&
-            Pattern.compile("\\d+").matcher(txt).matches()
-        ) ""
-        else if (mc.thePlayer != null && text.contains(mc.thePlayer.displayNameString) && !Config.advancedCustomNames)
-            SkySkipped.getCosmetics(text)
-        else text
+        } else text
     }
 }

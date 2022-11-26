@@ -33,6 +33,7 @@ import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import me.cephetir.skyskipped.utils.mc
 import java.awt.Color
 import java.io.File
+import kotlin.reflect.jvm.javaField
 
 class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFile, "SkySkipped", sortingBehavior = ConfigSorting()) {
     init {
@@ -41,16 +42,16 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             configFile.createNewFile()
         }
 
-        registerListener<Boolean>("DRPC") {
+        registerListener<Boolean>(::DRPC.javaField!!) {
             RPC.reset(it)
         }
 
-        registerListener<Boolean>("remoteControl") {
+        registerListener<Boolean>(::remoteControl.javaField!!) {
             if (it) RemoteControlling.setup()
             else RemoteControlling.stop()
         }
 
-        registerListener<Int>("macroType") {
+        registerListener<Int>(::macroType.javaField!!) {
             MacroManager.current = MacroManager.macros[it]
         }
 
@@ -86,21 +87,15 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         addDependency("customSbText", "customSb")
         addDependency("customSbLobby", "customSb")
         addDependency("customSbBlurT", "customSb")
+        addDependency("customSbBg", "customSb")
+        addDependency("customSbBgColor", "customSbBg")
+        addDependency("customSbShadow", "customSb")
+        addDependency("customSbShadowStr", "customSbShadow")
         addDependency("customSbBlur", "customSbBlurT")
         addDependency("customSbOutline", "customSb")
         addDependency("customSbOutlineColor", "customSbOutline")
         addDependency("customSbOutlineColorRainbow", "customSbOutline")
 
-        addDependency("failsafeJump", "failSafe")
-        addDependency("fastBreakNumber", "fastBreak")
-        addDependency("failSafeDesyncTime", "failSafeDesync")
-        addDependency("failSafeIslandDelay", "failSafeIsland")
-        addDependency("failSafeJacobNumber", "failSafeJacob")
-        addDependency("failSafeChangeYawRandom", "failSafeChangeYaw")
-        addDependency("failSafeChangeYawSpeed", "failSafeChangeYaw")
-        addDependency("failSafeBanWaveTimer", "failSafeBanWave")
-        addDependency("failSafeBanWaveDisable", "failSafeBanWave")
-        addDependency("failSafeInvConfigTime", "failSafeInvConfig")
         addDependency("blockList", "block")
 
         addDependency("petsBgBlur", "petsOverlay")
@@ -113,7 +108,8 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         addDependency("coins", "coinsToggle")
         addDependency("mimicText", "mimic")
 
-        addDependency("customPitch", "customAngles")
+        addDependency("customPitch", "customPitchToggle")
+        addDependency("customYaw", "customYawToggle")
         addDependency("netherWartDesyncTime", "netherWartDesync")
         addDependency("netherWartJacobNumber", "netherWartJacob")
         addDependency("netherWartBanWaveCheckerDisable", "netherWartBanWaveChecker")
@@ -125,7 +121,12 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         addDependency("farmingHudColor", "farmingHud")
         addDependency("farmingHudColorText", "farmingHud")
 
+        addDependency("stopBreakingList", "stopBreaking")
+        addDependency("autoReplyGuild", "autoReply")
+        addDependency("fpsSpoofNumber", "fpsSpoof")
+
         setSubcategoryDescription("Hacks", "Item Swapper", "Set keybinds for Item Swapper in special gui \"/sm kb\"")
+        setSubcategoryDescription("Hacks", "Hotbar Swapper", "Set hotbar presets for Hotbar Swapper using command \"/sm hb\"")
 
         initialize()
     }
@@ -239,7 +240,7 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
-        SkySkipped.logger.info("Saved keybinds!")
+        SkySkipped.logger.info("Saved hotbars!")
     }
 
     fun loadScripts() {
@@ -507,202 +508,12 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
 
         @Property(
             type = PropertyType.SWITCH,
-            name = "Unstuck Failsafe",
-            category = "Failsafes (Legacy)",
-            subcategory = "Unstuck",
-            description = "Prevent stacking in blocks for Pizza and Cheeto Client."
+            name = "Wither Door ESP",
+            category = "Dungeons",
+            subcategory = "ESP",
+            description = "Shows wither doors though walls in dungeons."
         )
-        var failSafe = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Jump When Stuck",
-            category = "Failsafes (Legacy)",
-            subcategory = "Unstuck",
-            description = "Jump when stuck."
-        )
-        var failsafeJump = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Jacob Failsafe",
-            category = "Failsafes (Legacy)",
-            subcategory = "Jacob",
-            description = "Stops Pizza and Cheeto Client's macros on jacob event start."
-        )
-        var failSafeJacob = false
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Jacob Failsafe Stop At",
-            category = "Failsafes (Legacy)",
-            subcategory = "Jacob",
-            description = "Amount of crops mined for Jacob failsafe to stop.",
-            min = 10000,
-            max = 1000000,
-            increment = 1
-        )
-        var failSafeJacobNumber = 400000
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Desync Failsafe",
-            category = "Failsafes (Legacy)",
-            subcategory = "Desync",
-            description = "Stops Pizza and Cheeto Client's macros when hypixel decides to stop breaking crops."
-        )
-        var failSafeDesync = false
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Desync Failsafe Timeout",
-            category = "Failsafes (Legacy)",
-            subcategory = "Desync",
-            description = "Seconds to wait for failsafe to trigger.",
-            min = 1,
-            max = 20,
-            increment = 1
-        )
-        var failSafeDesyncTime = 5
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Set Spawn",
-            category = "Failsafes (Legacy)",
-            subcategory = "Auto Set Spawn",
-            description = "Automatically sets home on layer switch when Pizza's or Cheeto Client's macro enabled."
-        )
-        var failSafeSpawn = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Warp Back To Island Failsafe",
-            category = "Failsafes (Legacy)",
-            subcategory = "Auto Warp Back",
-            description = "Automatically warps you to island."
-        )
-        var failSafeIsland = false
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Auto Warp Back Failsafe Delay",
-            category = "Failsafes (Legacy)",
-            subcategory = "Auto Warp Back",
-            description = "Delay in seconds between warps. Set more if you have bad ping (1s ~ 100 ping, 5s ~ 300ping)",
-            minF = 0.5f,
-            maxF = 10f,
-            decimalPlaces = 1
-        )
-        var failSafeIslandDelay = 4f
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Full Inventory Failsafe",
-            category = "Failsafes (Legacy)",
-            subcategory = "Inventory",
-            description = "Inventory cleaning when full."
-        )
-        var failSafeInv = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Rotation",
-            category = "Failsafes (Legacy)",
-            subcategory = "Auto Rotation",
-            description = "Rotates you 180 deg on Y change for vertical farms."
-        )
-        var failSafeChangeYaw = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Rotation Randomness",
-            category = "Failsafes (Legacy)",
-            subcategory = "Auto Rotation",
-            description = "Will make rotation yaw random from -2.5 to 2.5."
-        )
-        var failSafeChangeYawRandom = true
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Auto Rotation Speed",
-            category = "Failsafes (Legacy)",
-            subcategory = "Auto Rotation",
-            description = "Speed in seconds rotation takes.",
-            minF = 0.3f,
-            maxF = 3f,
-            decimalPlaces = 1
-        )
-        var failSafeChangeYawSpeed = 1.5f
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Ban Wave Checker",
-            category = "Failsafes (Legacy)",
-            subcategory = "Ban Wave",
-            description = "Checks if there's a ban wave happens right now."
-        )
-        var failSafeBanWave = false
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Ban Wave Checker Timer",
-            category = "Failsafes (Legacy)",
-            subcategory = "Ban Wave",
-            description = "Delay in minutes between banwave checks.",
-            minF = 0.1f,
-            maxF = 30f,
-            decimalPlaces = 1
-        )
-        var failSafeBanWaveTimer = 5f
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Ban Wave Auto Macro Disable",
-            category = "Failsafes (Legacy)",
-            subcategory = "Ban Wave",
-            description = "Disable macro when ban wave happens."
-        )
-        var failSafeBanWaveDisable = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Configurable Inventory Failsafe",
-            category = "Failsafes (Legacy)",
-            subcategory = "Inventory",
-            description = "Inventory cleaning on specific crops amount."
-        )
-        var failSafeInvConfig = false
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Inventory Failsafe Timer",
-            category = "Failsafes (Legacy)",
-            subcategory = "Inventory",
-            description = "Time in minutes between inventory cleaning.",
-            minF = 30f,
-            maxF = 360f,
-            decimalPlaces = 1
-        )
-        var failSafeInvConfigTime = 120f
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Global Extra Delay for Failsafes",
-            category = "Failsafes (Legacy)",
-            description = "Time in ms between actions (Use only if high ping!).",
-            min = 0,
-            max = 10000,
-            increment = 10
-        )
-        var failSafeGlobalTime = 0
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Force Macro Mode",
-            category = "Failsafes (Legacy)",
-            description = "Forcely enable all failsafes.\n! WARNING: It will brake most failsafes!"
-        )
-        var failSafeForce = false
+        var witherDoorEsp = false
 
         @Property(
             type = PropertyType.SWITCH,
@@ -715,7 +526,7 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
 
         @Property(
             type = PropertyType.TEXT,
-            name = "Ability list",
+            name = "Item list",
             category = "Hacks",
             subcategory = "Block ability",
             description = "List of items to block ability. Split with \", \"."
@@ -733,6 +544,18 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             min = 10
         )
         var swapDelay = 100
+
+        @Property(
+            type = PropertyType.SLIDER,
+            name = "Hotbar Swap Delay",
+            category = "Hacks",
+            subcategory = "Hotbar Swapper",
+            description = "Delay between items swapping.",
+            increment = 10,
+            max = 1000,
+            min = 10
+        )
+        var hotbarSwapDelay = 100
 
         @Property(
             type = PropertyType.SWITCH,
@@ -801,7 +624,7 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             name = "Amount of Coins",
             category = "Super Secret Settings",
             description = "Amount of Coins to add in purse",
-            max = Int.MAX_VALUE,
+            max = 10_000_000_000.toInt(),
             increment = 10000000
         )
         var coins = 10000000
@@ -928,6 +751,7 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         )
         var adminRoom = false
 
+
         @Property(
             type = PropertyType.SWITCH,
             name = "Perspective Toggle",
@@ -996,6 +820,15 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         var customSbBlur = 20f
 
         @Property(
+            type = PropertyType.SWITCH,
+            name = "Scoreboard Background",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Scoreboard background."
+        )
+        var customSbBg = true
+
+        @Property(
             type = PropertyType.COLOR,
             name = "Scoreboard Background Color",
             category = "Visual",
@@ -1021,6 +854,27 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             description = "Color for scoreboard outline."
         )
         var customSbOutlineColor: Color = Color(87, 0, 247, 255)
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Scoreboard Shadow",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Scoreboard Shadow."
+        )
+        var customSbShadow = true
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Scoreboard Shadow Strength",
+            category = "Visual",
+            subcategory = "Scoreboard",
+            description = "Strength for scoreboard shadow.",
+            minF = 5f,
+            maxF = 25f,
+            decimalPlaces = 1
+        )
+        var customSbShadowStr = 15f
 
         @Property(
             type = PropertyType.SWITCH,
@@ -1133,14 +987,6 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         var cookieClicker = false
 
         @Property(
-            type = PropertyType.SWITCH,
-            name = "Advanced Custom Names",
-            category = "Misc",
-            description = "Redraws text in all menus and guis.\nCan make performance issues!"
-        )
-        var advancedCustomNames = false
-
-        @Property(
             type = PropertyType.SELECTOR,
             name = "Macro Type",
             category = "Macro",
@@ -1166,18 +1012,42 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             category = "Macro",
             description = "Override default pitch."
         )
-        var customAngles = false
+        var customYawToggle = false
 
         @Property(
-            type = PropertyType.SLIDER,
+            type = PropertyType.TEXT,
+            name = "Custom Yaw Value",
+            category = "Macro",
+            description = "Override default yaw."
+        )
+        var customYaw = "0"
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Custom Pitch Toggle",
+            category = "Macro",
+            description = "Override default pitch."
+        )
+        var customPitchToggle = false
+
+        @Property(
+            type = PropertyType.TEXT,
             name = "Custom Pitch Value",
             category = "Macro",
-            description = "Override default pitch.",
-            min = -90,
-            max = 90,
-            increment = 1
+            description = "Override default pitch."
         )
-        var customPitch = 0
+        var customPitch = "0"
+
+        @Property(
+            type = PropertyType.DECIMAL_SLIDER,
+            name = "Rotation Difference",
+            category = "Macro",
+            description = "Rotation difference needed for auto rotation rotate your head back.",
+            minF = 0f,
+            maxF = 50f,
+            decimalPlaces = 1
+        )
+        var rotationDiff = 0.2f
 
         @Property(
             type = PropertyType.NUMBER,
@@ -1190,12 +1060,12 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         )
         var autoPickSlot = 1
 
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Macro Randomization",
-            category = "Macro",
-            description = "Randomize certain actions to look more legit (may fix packet thottle and desync)."
-        )
+        //        @Property(
+//            type = PropertyType.SWITCH,
+//            name = "Macro Randomization",
+//            category = "Macro",
+//            description = "Randomize certain actions to look more legit (may fix packet thottle and desync)."
+//        )
         var macroRandomization = true
 
         @Property(
@@ -1623,6 +1493,33 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
 
         @Property(
             type = PropertyType.SWITCH,
+            name = "In Third Person Only",
+            category = "Dungeons",
+            subcategory = "Item Radius",
+            description = "Enable radiuses only in third person view."
+        )
+        var onlyThirdPersonRadius = false
+
+        @Property(
+            type = PropertyType.COLOR,
+            name = "Item Radius Color",
+            category = "Dungeons",
+            subcategory = "Item Radius",
+            description = "Color for item radius."
+        )
+        var radiusColor: Color = Color.GREEN
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Item Radius Chroma Color",
+            category = "Dungeons",
+            subcategory = "Item Radius",
+            description = "Chroma color for item radius."
+        )
+        var radiusColorChroma = true
+
+        @Property(
+            type = PropertyType.SWITCH,
             name = "Zero Ping Gui",
             category = "Misc",
             description = "Use GUIs without lags."
@@ -1695,5 +1592,118 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             description = "Search items in containers by pressing Ctrl + F."
         )
         var containerSearch = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Stop Breaking Blocks",
+            category = "Hacks",
+            subcategory = "Stop Breaking",
+            description = "Stops you from breaking certain blocks list."
+        )
+        var stopBreaking = false
+
+        @Property(
+            type = PropertyType.TEXT,
+            name = "Stop Breaking Blocks List",
+            category = "Hacks",
+            subcategory = "Stop Breaking",
+            description = "List of blocks to stop breaking."
+        )
+        var stopBreakingList = "dirt"
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Reply",
+            category = "Chat",
+            description = "Auto replys to \"wc\" and \"gg\" with \"\"wc\" - someonesIgn\"."
+        )
+        var autoReply = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Reply Guild Only",
+            category = "Chat",
+            description = "Auto Reply will work only in guild chat."
+        )
+        var autoReplyGuild = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Fps Spoofer",
+            category = "Misc",
+            subcategory = "Fps Spoofer",
+            description = "Big numbers are funni."
+        )
+        var fpsSpoof = false
+
+        @Property(
+            type = PropertyType.SLIDER,
+            name = "Fps Spoofer Number",
+            category = "Misc",
+            subcategory = "Fps Spoofer",
+            description = "Big numbers are funni.",
+            max = Int.MAX_VALUE,
+            min = 0,
+            increment = 10
+        )
+        var fpsSpoofNumber = 69420
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "M3 Professor Fire Freeze Timer",
+            category = "Dungeons",
+            description = "Timer until fire freeze use in M3 boss fight."
+        )
+        var fireFreezePing = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Remove Carpet Bounds",
+            category = "Hacks",
+            description = "Removes carpet hitboxes."
+        )
+        var removeCarpets = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Auto Redirect Middle Clicks",
+            category = "Misc",
+            description = "Redirect middle clicks to left clicks to not get kicked to lobby.\nWorks with other mods!"
+        )
+        var redirectClicks = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Shiny Blocks Esp",
+            category = "Hacks",
+            subcategory = "Shiny Blocks",
+            description = "Shiny Blocks Esp in the End"
+        )
+        var shinyBlocksEsp = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Shiny Blocks Aura",
+            category = "Hacks",
+            subcategory = "Shiny Blocks",
+            description = "Auto mine Shiny Blocks in the End"
+        )
+        var shinyBlocksAura = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Optimize NEU's equipment overlay",
+            category = "Misc",
+            description = "Disable NEU's useless code which lags game hard."
+        )
+        var neuOptimize = false
+
+        @Property(
+            type = PropertyType.SWITCH,
+            name = "Stop Rendering Falling Blocks",
+            category = "Misc",
+            description = "Improve fps by not rendering useless dungeon shit."
+        )
+        var stopFallingBlocks = false
     }
 }

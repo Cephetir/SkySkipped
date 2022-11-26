@@ -19,16 +19,16 @@ package me.cephetir.skyskipped.features.impl.visual
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.cephetir.bladecore.utils.threading.BackgroundScope
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.mixins.IMixinGuiContainer
-import me.cephetir.skyskipped.mixins.IMixinGuiScreen
+import me.cephetir.skyskipped.mixins.accessors.IMixinGuiContainer
+import me.cephetir.skyskipped.mixins.accessors.IMixinGuiScreen
 import me.cephetir.skyskipped.utils.mc
 import me.cephetir.skyskipped.utils.render.RoundUtils.drawRoundedOutline
 import me.cephetir.skyskipped.utils.render.RoundUtils.drawRoundedRect
 import me.cephetir.skyskipped.utils.render.shaders.BlurUtils
 import me.cephetir.skyskipped.utils.skyblock.ItemRarity.Companion.byBaseColor
-import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.renderer.GlStateManager
@@ -97,14 +97,18 @@ class PetsOverlay : Feature() {
         if (event.phase != TickEvent.Phase.START) return
         if (!Config.petsOverlay) return
         if (petsOverlay == null) return
+        if (mc.currentScreen == null) {
+            petsOverlay = null
+            return
+        }
         ticks++
-        if (ticks == 10) {
+        if (ticks == 20) {
             ticks = 0
             petsOverlay!!.getPets()
         }
     }
 
-    inner class GuiPetsOverlay(private var chest: GuiChest) {
+    inner class GuiPetsOverlay(var chest: GuiChest) {
         private var pets: List<Pet> = ArrayList()
         private var width: Int
         private var height: Int

@@ -17,10 +17,10 @@
 
 package me.cephetir.skyskipped.features.impl.macro
 
+import me.cephetir.bladecore.utils.HttpUtils
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.features.impl.macro.failsafes.Failsafes
-import me.cephetir.skyskipped.utils.HttpUtils
 import me.cephetir.skyskipped.utils.mc
 import java.awt.SystemTray
 import java.awt.TrayIcon

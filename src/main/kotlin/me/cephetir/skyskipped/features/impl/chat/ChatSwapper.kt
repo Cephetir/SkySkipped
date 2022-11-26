@@ -18,8 +18,10 @@
 package me.cephetir.skyskipped.features.impl.chat
 
 import gg.essential.api.EssentialAPI
+import me.cephetir.bladecore.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.skyblock.Queues
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -29,12 +31,12 @@ class ChatSwapper : Feature() {
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
         if (!EssentialAPI.getMinecraftUtil().isHypixel() || !Config.chatSwapper) return
-        val msg = event.message.unformattedText
+        val msg = event.message.unformattedText.stripColor()
         if ((msg.startsWith("You have been kicked from the party") || msg.contains("has disbanded") || msg.startsWith("You left the party") || msg.contains("was disbanded")) && inParty) {
-            mc.thePlayer.sendChatMessage("/chat all")
+            Queues.sendCommand("/chat all")
             inParty = false
-        } else if ((msg.startsWith("You have joined") || msg.startsWith("Party Members") || msg.contains("joined the ")) && !inParty) {
-            mc.thePlayer.sendChatMessage("/chat p")
+        } else if (((msg.startsWith("You have joined") && msg.endsWith(" party!")) || msg.startsWith("Party Members") || msg.contains("joined the party") || msg.contains("joined the dungeon group")) && !inParty) {
+            Queues.sendCommand("/chat p")
             inParty = true
         }
     }

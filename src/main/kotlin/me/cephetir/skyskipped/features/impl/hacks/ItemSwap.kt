@@ -22,19 +22,21 @@ import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.KeybindUtils.isDown
+import me.cephetir.skyskipped.gui.impl.GuiItemSwap
+import net.minecraft.client.gui.GuiChat
 import net.minecraft.client.gui.inventory.GuiInventory
 import net.minecraft.inventory.Slot
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import org.lwjgl.input.Keyboard
 
 class ItemSwap : Feature() {
     private val called = mutableMapOf<Pair<Slot, Slot>, Int>()
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Cache.inSkyblock) return
+        if (event.phase != TickEvent.Phase.START || !Cache.onSkyblock) return
         if (mc.currentScreen !is GuiInventory) return
 
         for (keybind in SkySkipped.keybinds) {
@@ -63,6 +65,10 @@ class ItemSwap : Feature() {
             else UChat.chat("§cSkySkipped §f:: §4Can't find first or second item to swap!")
         }
     }
+
+    fun GuiItemSwap.Keybind.isDown(inGui: Boolean = false) =
+        if (this.keyCode == Keyboard.KEY_NONE || (!inGui && (me.cephetir.skyskipped.utils.mc.currentScreen != null || me.cephetir.skyskipped.utils.mc.currentScreen is GuiChat))) false
+        else Keyboard.isKeyDown(this.keyCode)
 
     private var timer = System.currentTimeMillis()
 

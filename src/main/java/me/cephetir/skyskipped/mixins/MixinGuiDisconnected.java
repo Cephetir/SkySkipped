@@ -3,7 +3,7 @@
  * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
  * Version 2, December 2004
  *
- * Copyright (C) 2021 Cephetir
+ * Copyright (C) 2022 Cephetir
  *
  * Everyone is permitted to copy and distribute verbatim or modified
  * copies of this license document, and changing it is allowed as long
@@ -18,6 +18,7 @@
 package me.cephetir.skyskipped.mixins;
 
 import me.cephetir.skyskipped.config.Cache;
+import me.cephetir.skyskipped.mixins.accessors.IMixinGuiScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiDisconnected;

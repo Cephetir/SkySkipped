@@ -17,7 +17,7 @@
 
 package me.cephetir.skyskipped.utils
 
-import me.cephetir.skyskipped.mixins.IMixinEntityPlayerSP
+import me.cephetir.skyskipped.mixins.accessors.IMixinEntityPlayerSP
 import net.minecraft.entity.Entity
 import net.minecraft.util.MathHelper
 import net.minecraft.util.Vec3

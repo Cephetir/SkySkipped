@@ -18,6 +18,7 @@
 package me.cephetir.skyskipped.features.impl.visual
 
 import gg.essential.elementa.utils.withAlpha
+import me.cephetir.bladecore.utils.threading.safeListener
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.event.events.DrawSlotEvent
 import me.cephetir.skyskipped.features.Feature
@@ -64,14 +65,15 @@ class HighlightUnlockedGemSots : Feature() {
         if (found) items.add(stack!!.getUUID() ?: return)
     }
 
-    @SubscribeEvent
-    fun onSlotDraw(event: DrawSlotEvent.Post) {
-        val stack = event.slot.stack ?: return
-        if (items.contains(stack.getUUID() ?: return)) {
-            GlStateManager.pushMatrix()
-            GlStateManager.translate(0f, 0f, 299f)
-            event.slot.highlight()
-            GlStateManager.popMatrix()
+    init {
+        safeListener<DrawSlotEvent.Post> {
+            val stack = it.slot.stack ?: return@safeListener
+            if (items.contains(stack.getUUID() ?: return@safeListener)) {
+                GlStateManager.pushMatrix()
+                GlStateManager.translate(0f, 0f, 299f)
+                it.slot.highlight()
+                GlStateManager.popMatrix()
+            }
         }
     }
 

@@ -20,16 +20,16 @@ package me.cephetir.skyskipped.features.impl.macro
 import gg.essential.universal.UChat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.minecraft.KeybindUtils.isDown
+import me.cephetir.bladecore.utils.threading.BackgroundJob
+import me.cephetir.bladecore.utils.threading.BackgroundScope
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.features.impl.macro.macros.NetherwartMacro
 import me.cephetir.skyskipped.features.impl.macro.macros.SugarCaneMacro
-import me.cephetir.skyskipped.utils.KeybindUtils.isDown
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import me.cephetir.skyskipped.utils.threading.BackgroundJob
-import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -54,7 +54,7 @@ object MacroManager : Feature() {
 
     @SubscribeEvent
     fun onInput(event: ClientTickEvent) {
-        if (!Cache.inSkyblock || mc.thePlayer == null || mc.theWorld == null) return
+        if (!Cache.onSkyblock || mc.thePlayer == null || mc.theWorld == null) return
 
         val down = SkySkipped.macroKey.isDown()
         if (down == keybindLastState) return

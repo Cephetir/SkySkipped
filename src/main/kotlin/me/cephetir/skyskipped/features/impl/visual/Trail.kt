@@ -38,7 +38,7 @@ class Trail : Feature() {
 
         mc.theWorld.spawnParticle(
             particle,
-            mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ,
+            mc.thePlayer.posX, mc.thePlayer.posY + 0.1, mc.thePlayer.posZ,
             0.0, 0.0, 0.0
         )
     }

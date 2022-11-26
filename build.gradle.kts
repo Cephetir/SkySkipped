@@ -18,27 +18,20 @@ import dev.architectury.pack200.java.Pack200Adapter
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.7.21"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("gg.essential.loom") version "0.10.0.+"
+    id("io.github.juuxel.loom-quiltflower-mini") version "7d04f32023"
     id("dev.architectury.architectury-pack200") version "0.1.3"
     java
     idea
 }
 
-version = "3.3"
+version = "3.4"
 group = "me.cephetir"
 
 base {
     archivesName.set("SkySkipped")
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven("https://repo.sk1er.club/repository/maven-public/")
-    maven("https://repo.sk1er.club/repository/maven-releases/")
-    maven("https://jitpack.io")
 }
 
 loom {
@@ -51,7 +44,7 @@ loom {
             property("legacy.debugClassLoading", "true")
             property("legacy.debugClassLoadingSave", "true")
             property("legacy.debugClassLoadingFiner", "true")
-            arg("--tweakClass", "gg.essential.loader.stage0.EssentialSetupTweaker")
+            arg("--tweakClass", "me.cephetir.bladecore.loader.BladeCoreTweaker")
             arg("--mixin", "mixins.sm.json")
         }
     }
@@ -74,26 +67,26 @@ val include: Configuration by configurations.creating {
     configurations.implementation.get().extendsFrom(this)
 }
 
+repositories {
+    mavenCentral()
+    maven("https://jitpack.io")
+    maven("https://maven.ilarea.ru/snapshots")
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
 
-    include("gg.essential:loader-launchwrapper:1.1.3")
-    implementation("gg.essential:essential-1.8.9-forge:3760")
+    include("me.cephetir:bladecore-loader-1.8.9-forge:1.1")
+    implementation("me.cephetir:bladecore-1.8.9-forge:0.0.1-beta5.5")
 
-    include("com.github.jagrosh:DiscordIPC:18b6096") {
-        exclude(module = "log4j")
-    }
-
-    implementation("com.github.DV8FromTheWorld:JDA:v5.0.0-alpha.17") {
+    implementation("com.github.DV8FromTheWorld:JDA:v5.0.0-alpha.19") {
         exclude(module = "opus-java")
     }
 
     annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
     compileOnly("org.spongepowered:mixin:0.8.5")
-
-    implementation(files("libs/Pizza_Client-1.1.3-pre1.jar", "libs/ChromaHUD-3.0.jar"))
 }
 
 sourceSets {
@@ -122,7 +115,7 @@ tasks {
                     "ForceLoadAsMod" to true,
                     "ModSide" to "CLIENT",
                     "ModType" to "FML",
-                    "TweakClass" to "gg.essential.loader.stage0.EssentialSetupTweaker",
+                    "TweakClass" to "me.cephetir.bladecore.loader.BladeCoreTweaker",
                     "TweakOrder" to "0",
                     "MixinConfigs" to "mixins.sm.json"
                 )
@@ -166,7 +159,23 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "1.8"
+            languageVersion = "1.7"
+
+            freeCompilerArgs =
+                listOf(
+                    "-Xjvm-default=all",
+                    "-Xbackend-threads=0",
+                    "-Xuse-k2"
+                )
         }
+        kotlinDaemonJvmArguments.set(
+            listOf(
+                "-Xmx2G",
+                "-Dkotlin.enableCacheBuilding=true",
+                "-Dkotlin.useParallelTasks=true",
+                "-Dkotlin.enableFastIncremental=true"
+            )
+        )
     }
 }
 

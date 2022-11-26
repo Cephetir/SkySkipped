@@ -17,10 +17,10 @@
 
 package me.cephetir.skyskipped.features.impl.dugeons
 
+import me.cephetir.bladecore.utils.minecraft.KeybindUtils.isDown
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.KeybindUtils.isDown
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockPos

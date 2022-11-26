@@ -19,14 +19,14 @@ package me.cephetir.skyskipped.features.impl.visual
 
 import gg.essential.api.utils.Multithreading
 import gg.essential.universal.UChat
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.minecraft.KeybindUtils.isDown
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.KeybindUtils.isDown
 import me.cephetir.skyskipped.utils.RotationClass
 import me.cephetir.skyskipped.utils.RotationUtils
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.render.RenderUtils
 import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityArmorStand
@@ -74,36 +74,38 @@ class PresentHighlight : Feature() {
         timer = 0
 
         val entities = mc.theWorld.loadedEntityList
-        entities.sortedBy { mc.thePlayer.getDistanceToEntity(it) }.find {
-            (it is EntityArmorStand) && shouldDraw(it) && !clicked.contains(it) && (mc.thePlayer.getDistanceToEntity(it) <= 4.2f)
+        entities.filterIsInstance<EntityArmorStand>().sortedBy { mc.thePlayer.getDistanceToEntity(it) }.find {
+            shouldDraw(it) && !clicked.contains(it) && mc.thePlayer.getDistanceToEntity(it) <= 3.5f
         }?.let {
+            printdev("Rotating...")
             val rotation = RotationUtils.getServerAngles(it)
-            RotationClass(RotationClass.Rotation(rotation[0], rotation[1]), 500L)
+            RotationClass(RotationClass.Rotation(rotation[0], rotation[1]), 300L)
 
             Multithreading.schedule({
-                mc.thePlayer.swingItem()
-                mc.playerController.attackEntity(
+                mc.playerController.interactWithEntitySendPacket(
                     mc.thePlayer,
                     it
                 )
-            }, 500L, TimeUnit.MILLISECONDS)
+                printdev("CLICKED GIFT")
+            }, 300L, TimeUnit.MILLISECONDS)
 
-            clicked.add(it as EntityArmorStand)
-        }
+            clicked.add(it)
+        } ?: printdev("cant find any gift")
     }
 
     private fun shouldDraw(armorstand: EntityArmorStand): Boolean {
-        if (!armorstand.isSmall && armorstand.isInvisible) {
-            val helmet = armorstand.getEquipmentInSlot(4)
-            if (helmet == null || helmet.item != Items.skull) return false
-            if (armorstand.hasCustomName() && armorstand.customNameTag.contains("CLICK TO OPEN")) return true
-            else if (helmet.hasTagCompound()) {
-                if (helmet.tagCompound.toString()
-                        .contains("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTBmNTM5ODUxMGIxYTA1YWZjNWIyMDFlYWQ4YmZjNTgzZTU3ZDcyMDJmNTE5M2IwYjc2MWZjYmQwYWUyIn19fQ")
-                )
-                    return true
-            }
-        }
+        val helmet = armorstand.getEquipmentInSlot(4)
+        if (helmet == null || helmet.item != Items.skull) return false
+
+        if (armorstand.hasCustomName() &&
+            armorstand.customNameTag.stripColor().contains("CLICK TO OPEN") ||
+            armorstand.customNameTag.stripColor().contains("From: ")
+        ) return true
+        else if (helmet.hasTagCompound() &&
+            helmet.tagCompound.toString()
+                .contains("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTBmNTM5ODUxMGIxYTA1YWZjNWIyMDFlYWQ4YmZjNTgzZTU3ZDcyMDJmNTE5M2IwYjc2MWZjYmQwYWUyIn19fQ")
+        ) return true
+
         return false
     }
 
@@ -154,6 +156,7 @@ class PresentHighlight : Feature() {
         keybindLastState = down
         if (!down) return
 
+        clicked.clear()
         auraToggle = !auraToggle
         UChat.chat("§cSkySkipped §f:: §eGift Aura ${if (auraToggle) "§aEnabled" else "§cDisabled"}!")
     }

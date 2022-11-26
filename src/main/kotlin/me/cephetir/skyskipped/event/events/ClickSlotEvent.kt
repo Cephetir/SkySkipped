@@ -17,10 +17,12 @@
 
 package me.cephetir.skyskipped.event.events
 
+import me.cephetir.bladecore.core.event.Cancellable
+import me.cephetir.bladecore.core.event.Event
+import me.cephetir.bladecore.core.event.ICancellable
 import net.minecraft.client.gui.inventory.GuiContainer
 import net.minecraft.inventory.Slot
-import net.minecraftforge.fml.common.eventhandler.Cancelable
-import net.minecraftforge.fml.common.eventhandler.Event
 
-@Cancelable
-class ClickSlotEvent(val gui: GuiContainer, val slot: Slot?, val button: Int) : Event()
+class ClickSlotEvent(val gui: GuiContainer, val slot: Slot?, val button: Int) : Event, ICancellable by Cancellable()
+
+class ClickSlotControllerEvent(val windowId: Int, var slot: Int, var button: Int, var mode: Int) : Event

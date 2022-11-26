@@ -17,10 +17,10 @@
 
 package me.cephetir.skyskipped.features.impl.hacks
 
+import me.cephetir.bladecore.core.event.BladeEventBus
 import me.cephetir.skyskipped.features.impl.visual.PetsOverlay
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -31,6 +31,6 @@ class PetMacro(private val index: Int) {
         if (event.gui !is GuiChest) return
         val chest = event.gui as GuiChest
         PetsOverlay.getPet(index, chest)
-        MinecraftForge.EVENT_BUS.unregister(this)
+        BladeEventBus.unsubscribe(this, true)
     }
 }

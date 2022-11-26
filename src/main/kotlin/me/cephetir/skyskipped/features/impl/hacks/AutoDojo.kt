@@ -18,15 +18,16 @@
 package me.cephetir.skyskipped.features.impl.hacks
 
 import gg.essential.universal.UChat
+import me.cephetir.bladecore.core.event.listener.listener
+import me.cephetir.bladecore.utils.TextUtils.keepScoreboardCharacters
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.minecraft.KeybindUtils.isDown
+import me.cephetir.bladecore.utils.minecraft.skyblock.ScoreboardUtils
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.event.events.PlayerAttackEvent
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.InventoryUtils.findItemInHotbar
-import me.cephetir.skyskipped.utils.KeybindUtils.isDown
-import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import me.cephetir.skyskipped.utils.skyblock.ScoreboardUtils
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.entity.Entity
 import net.minecraft.entity.monster.EntityZombie
@@ -74,7 +75,7 @@ open class AutoDojo : Feature() {
     private var keybindLastState = false
     @SubscribeEvent
     protected fun onKey(event: ClientTickEvent) {
-        if (mc.thePlayer == null || mc.theWorld == null || !Cache.inSkyblock) return
+        if (mc.thePlayer == null || mc.theWorld == null || !Cache.onSkyblock) return
 
         val down = SkySkipped.autoDojo.isDown()
         if (down == keybindLastState) return
@@ -93,43 +94,44 @@ open class AutoDojo : Feature() {
     }
 
     // Discipline and Force Mode
-    @SubscribeEvent
-    protected fun onAttack(event: PlayerAttackEvent) {
-        if (!enabled || mode == DojoMode.NONE) return
-        when (mode) {
-            DojoMode.Discipline -> {
-                if (event.target !is EntityZombie) return
-                val helmet = event.target.getEquipmentInSlot(4) ?: return printdev("helmet is null")
+    init {
+        listener<PlayerAttackEvent> {
+            if (!enabled || mode == DojoMode.NONE) return@listener
+            when (mode) {
+                DojoMode.Discipline -> {
+                    if (it.target !is EntityZombie) return@listener
+                    val helmet = it.target.getEquipmentInSlot(4) ?: return@listener printdev("helmet is null")
 
-                when (helmet.item) {
-                    Items.leather_helmet -> {
-                        var sword = findItemInHotbar("Wooden Sword")
-                        if (sword == -1) sword = 0
-                        mc.thePlayer.inventory.currentItem = sword
-                    }
-                    Items.iron_helmet -> {
-                        var sword = findItemInHotbar("Iron Sword")
-                        if (sword == -1) sword = 1
-                        mc.thePlayer.inventory.currentItem = sword
-                    }
-                    Items.golden_helmet -> {
-                        var sword = findItemInHotbar("Golden Sword")
-                        if (sword == -1) sword = 2
-                        mc.thePlayer.inventory.currentItem = sword
-                    }
-                    Items.diamond_helmet -> {
-                        var sword = findItemInHotbar("Diamond Sword")
-                        if (sword == -1) sword = 3
-                        mc.thePlayer.inventory.currentItem = sword
+                    when (helmet.item) {
+                        Items.leather_helmet -> {
+                            var sword = findItemInHotbar("Wooden Sword")
+                            if (sword == -1) sword = 0
+                            mc.thePlayer.inventory.currentItem = sword
+                        }
+                        Items.iron_helmet -> {
+                            var sword = findItemInHotbar("Iron Sword")
+                            if (sword == -1) sword = 1
+                            mc.thePlayer.inventory.currentItem = sword
+                        }
+                        Items.golden_helmet -> {
+                            var sword = findItemInHotbar("Golden Sword")
+                            if (sword == -1) sword = 2
+                            mc.thePlayer.inventory.currentItem = sword
+                        }
+                        Items.diamond_helmet -> {
+                            var sword = findItemInHotbar("Diamond Sword")
+                            if (sword == -1) sword = 3
+                            mc.thePlayer.inventory.currentItem = sword
+                        }
                     }
                 }
+                DojoMode.Force -> {
+                    if (it.target !is EntityZombie) return@listener
+                    val helmet = it.target.getEquipmentInSlot(4) ?: return@listener printdev("helmet is null")
+                    if (helmet.item == Items.leather_helmet) it.cancel()
+                }
+                else -> return@listener
             }
-            DojoMode.Force -> {
-                if (event.target !is EntityZombie) return
-                val helmet = event.target.getEquipmentInSlot(4) ?: return printdev("helmet is null")
-                if (helmet.item == Items.leather_helmet) event.isCanceled = true
-            }
-            else -> return
         }
     }
 

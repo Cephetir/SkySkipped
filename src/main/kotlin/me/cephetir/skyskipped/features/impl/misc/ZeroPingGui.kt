@@ -17,12 +17,13 @@
 
 package me.cephetir.skyskipped.features.impl.misc
 
+import me.cephetir.bladecore.core.event.listener.listener
+import me.cephetir.bladecore.core.listeners.SkyblockListener
+import me.cephetir.bladecore.utils.player
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.event.Listener
 import me.cephetir.skyskipped.event.events.ClickSlotEvent
 import me.cephetir.skyskipped.features.Feature
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 class ZeroPingGui : Feature() {
     private val ignore = listOf(
@@ -43,13 +44,14 @@ class ZeroPingGui : Feature() {
         "Present Item"
     )
 
-    @SubscribeEvent
-    fun onGuiClick(event: ClickSlotEvent) {
-        if (!Cache.inSkyblock || !Config.zeroPingGui || event.button != 0 || event.slot == null) return
-        val stack = event.gui.inventorySlots.getSlot(0).stack ?: return
-        if (stack.displayName != " " || stack.itemDamage != 15 || ignore.contains(Listener.lastOpenContainerName)) return
+    init {
+        listener<ClickSlotEvent> {
+            if (!Cache.onSkyblock || !Config.zeroPingGui || it.button != 0 || it.slot == null) return@listener
+            val stack = it.gui.inventorySlots.getSlot(0).stack ?: return@listener
+            if (stack.displayName != " " || stack.itemDamage != 15 || ignore.contains(SkyblockListener.lastOpenContainerName)) return@listener
 
-        event.isCanceled = true
-        mc.playerController.windowClick(event.gui.inventorySlots.windowId, event.slot.slotNumber, 2, 3, mc.thePlayer)
+            it.cancel()
+            mc.playerController.windowClick(it.gui.inventorySlots.windowId, it.slot.slotNumber, 2, 3, player)
+        }
     }
 }

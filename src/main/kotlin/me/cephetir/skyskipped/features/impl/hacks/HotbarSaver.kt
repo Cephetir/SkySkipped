@@ -18,17 +18,20 @@
 package me.cephetir.skyskipped.features.impl.hacks
 
 import gg.essential.universal.UChat
+import me.cephetir.bladecore.core.event.BladeEventBus
+import me.cephetir.bladecore.core.event.listener.asyncListener
+import me.cephetir.bladecore.utils.minecraft.KeybindUtils.isDown
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
+import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.KeybindUtils.isDown
+import me.cephetir.skyskipped.utils.Timer
 import net.minecraft.client.gui.inventory.GuiChest
+import net.minecraft.client.gui.inventory.GuiInventory
 import net.minecraft.inventory.Slot
 import net.minecraftforge.client.event.RenderWorldLastEvent
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import org.lwjgl.util.Timer
 
 object HotbarSaver : Feature() {
     private var keybindLastState = false
@@ -61,8 +64,8 @@ object HotbarSaver : Feature() {
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Cache.inSkyblock || Listener.called) return
-        if (mc.currentScreen !is GuiChest) return
+        if (event.phase != TickEvent.Phase.START || !Cache.onSkyblock || Listener.called) return
+        if (mc.currentScreen !is GuiChest && mc.currentScreen !is GuiInventory) return
 
         val down = SkySkipped.hotbarKey.isDown(true)
         if (down == keybindLastState) return
@@ -72,95 +75,98 @@ object HotbarSaver : Feature() {
         if (currentPreset == null)
             return UChat.chat("§cSkySkipped §f:: §4No hotbar preset selected!")
 
-        Listener.startTimer = Timer()
+        UChat.chat("§cSkySkipped §f:: §eStarted swapping hotbar...")
         Listener.called = true
-        MinecraftForge.EVENT_BUS.register(Listener())
+        Listener.startTimer.reset()
+        BladeEventBus.subscribe(Listener())
     }
 
     private class Listener {
         companion object {
-            var startTimer: Timer = Timer()
+            val startTimer = Timer()
             var called = false
         }
 
+        private var count = 81
         private var step = 0
         private var hotbarSlot = -1
-        private lateinit var timer: Timer
+        private val timer = Timer()
         private var slot: Slot? = null
 
-        @SubscribeEvent
-        fun onRender(event: RenderWorldLastEvent) {
-            Timer.tick()
-            if (startTimer.time >= 10) return MinecraftForge.EVENT_BUS.unregister(this)
-            if (currentPreset == null) return MinecraftForge.EVENT_BUS.unregister(this)
-
-            when (step) {
-                // Init
-                0 -> {
-                    hotbarSlot = 81
-                    slot = null
-                    timer = Timer()
-                    step = 1
+        init {
+            asyncListener<RenderWorldLastEvent> {
+                Timer.update()
+                if (mc.currentScreen == null || (mc.currentScreen !is GuiChest && mc.currentScreen !is GuiInventory)) {
+                    UChat.chat("§cSkySkipped §f:: §4Error! Chest was closed!")
+                    called = false
+                    return@asyncListener BladeEventBus.unsubscribe(this)
                 }
-                // Throw Items
-                1 -> {
-                    if (timer.time < 0.1f) return
-                    if (mc.currentScreen == null || mc.currentScreen !is GuiChest) {
-                        UChat.chat("§cSkySkipped §f:: §4Error! Chest was closed!")
-                        return MinecraftForge.EVENT_BUS.unregister(this)
-                    }
-                    timer.reset()
-
-                    val chest = mc.currentScreen as GuiChest
-                    val container = chest.inventorySlots
-                    mc.playerController.windowClick(container.windowId, hotbarSlot, 0, 1, mc.thePlayer)
-
-                    hotbarSlot++
-                    if (hotbarSlot >= 89) {
-                        hotbarSlot = 81
-                        step = 2
-                    }
+                if (currentPreset == null) {
+                    called = false
+                    return@asyncListener BladeEventBus.unsubscribe(this)
                 }
-                // Proccess
-                2 -> {
-                    if (timer.time < 0.1f) return
-                    if (mc.currentScreen == null || mc.currentScreen !is GuiChest) {
-                        UChat.chat("§cSkySkipped §f:: §4Error! Chest was closed!")
-                        return MinecraftForge.EVENT_BUS.unregister(this)
-                    }
-                    if (hotbarSlot >= 89) {
-                        step = 3
-                        return
-                    }
+                if (startTimer.time >= 30_000) {
+                    UChat.chat("§cSkySkipped §f:: §4Something went wrong while swapping hotbar!")
+                    called = false
+                    return@asyncListener BladeEventBus.unsubscribe(this)
+                }
 
-                    val chest = mc.currentScreen as GuiChest
-                    val container = chest.inventorySlots
-                    if (slot == null) {
-                        val item = currentPreset!!.items[hotbarSlot - 81]
+                when (step) {
+                    // Init
+                    0 -> {
+                        count = if (mc.currentScreen is GuiChest) 81 else 36
+                        hotbarSlot = count
+                        slot = null
+                        timer.reset()
+                        timer.start()
+                        startTimer.start()
+                        step = 1
+                    }
+                    // Proccess
+                    1 -> {
+                        if (timer.time < Config.hotbarSwapDelay) return@asyncListener
+                        if (hotbarSlot >= count + 8) {
+                            step = 2
+                            return@asyncListener
+                        }
+                        val item = currentPreset!!.items[hotbarSlot - count]
                         if (item == "EMPTY") {
                             hotbarSlot++
-                            return
+                            return@asyncListener
                         }
-                        slot = container.inventorySlots.find { it.hasStack && it.stack.displayName == item }
-                        if (slot == null) {
-                            UChat.chat("§cSkySkipped §f:: §4Error! Cannot find $item!")
-                            return MinecraftForge.EVENT_BUS.unregister(this)
-                        }
-                        mc.playerController.windowClick(container.windowId, slot!!.slotNumber, 0, 0, mc.thePlayer)
-                    } else {
-                        mc.playerController.windowClick(container.windowId, hotbarSlot, 0, 0, mc.thePlayer)
+                        timer.reset()
 
-                        slot = null
-                        hotbarSlot++
+                        val container = mc.thePlayer.openContainer
+                        val current = container.inventorySlots[hotbarSlot]
+                        if (current.hasStack && current.stack.displayName != item) {
+                            mc.playerController.windowClick(container.windowId, hotbarSlot, 0, 1, mc.thePlayer)
+                            return@asyncListener
+                        }
+
+                        if (slot == null) {
+                            slot = container.inventorySlots.find { it.hasStack && it.stack.displayName == item }
+                            if (slot == null) {
+                                UChat.chat("§cSkySkipped §f:: §4Error! Cannot find $item!")
+                                hotbarSlot++
+                                return@asyncListener
+                            }
+                            mc.playerController.windowClick(container.windowId, slot!!.slotNumber, 0, 0, mc.thePlayer)
+                        } else {
+                            mc.playerController.windowClick(container.windowId, hotbarSlot, 0, 0, mc.thePlayer)
+
+                            slot = null
+                            hotbarSlot++
+                        }
                     }
-                    timer.reset()
-                }
-                // Reset
-                3 -> {
-                    timer.pause()
-                    step = 0
-                    called = false
-                    MinecraftForge.EVENT_BUS.unregister(this)
+                    // Reset
+                    2 -> {
+                        step = 0
+                        called = false
+                        startTimer.stop()
+                        timer.stop()
+                        BladeEventBus.unsubscribe(this)
+                        UChat.chat("§cSkySkipped §f:: §eSuccessfully swapped hotbar!")
+                    }
                 }
             }
         }

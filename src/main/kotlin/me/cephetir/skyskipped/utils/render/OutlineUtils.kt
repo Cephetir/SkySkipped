@@ -17,7 +17,7 @@
 
 package me.cephetir.skyskipped.utils.render
 
-import me.cephetir.skyskipped.mixins.IMixinRendererLivingEntity
+import me.cephetir.skyskipped.mixins.accessors.IMixinRendererLivingEntity
 import me.cephetir.skyskipped.utils.mc
 import net.minecraft.client.model.ModelBase
 import net.minecraft.client.renderer.GlStateManager
@@ -45,10 +45,10 @@ object OutlineUtils {
         val gamma = mc.gameSettings.gammaSetting
         mc.gameSettings.fancyGraphics = false
         mc.gameSettings.gammaSetting = Float.MAX_VALUE
+        val f3 = (color shr 24 and 255).toFloat() / 255f
         val f = (color shr 16 and 255).toFloat() / 255f
         val f1 = (color shr 8 and 255).toFloat() / 255f
         val f2 = (color and 255).toFloat() / 255f
-        val f3 = (color shr 24 and 255).toFloat() / 255f
         GlStateManager.resetColor()
         setColor(f, f1, f2, f3)
         renderOne()
@@ -116,7 +116,6 @@ object OutlineUtils {
         )
         setColor(f, f1, f2, f3)
         renderFive()
-        setColor(f, f1, f2, f3)
         mc.gameSettings.fancyGraphics = fancyGraphics
         mc.gameSettings.gammaSetting = gamma
     }

@@ -19,8 +19,8 @@ package me.cephetir.skyskipped.features.impl.misc
 
 import com.google.gson.JsonObject
 import gg.essential.api.utils.Multithreading
+import me.cephetir.bladecore.utils.HttpUtils
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.HttpUtils
 import me.cephetir.skyskipped.utils.mc
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent

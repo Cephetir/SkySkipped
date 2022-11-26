@@ -21,18 +21,20 @@ import gg.essential.api.utils.Multithreading
 import gg.essential.universal.UChat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.cephetir.bladecore.core.event.BladeEventBus
+import me.cephetir.bladecore.utils.HttpUtils
+import me.cephetir.bladecore.utils.TextUtils.keepScoreboardCharacters
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.minecraft.skyblock.ScoreboardUtils
+import me.cephetir.bladecore.utils.threading.BackgroundScope
+import me.cephetir.bladecore.utils.threading.safeListener
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.impl.macro.Macro
 import me.cephetir.skyskipped.features.impl.macro.failsafes.Failsafes
-import me.cephetir.skyskipped.utils.HttpUtils
 import me.cephetir.skyskipped.utils.InventoryUtils
 import me.cephetir.skyskipped.utils.RandomUtils
 import me.cephetir.skyskipped.utils.RotationClass
-import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import me.cephetir.skyskipped.utils.skyblock.ScoreboardUtils
-import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.block.Block
 import net.minecraft.client.gui.GuiChat
 import net.minecraft.client.gui.GuiDisconnected
@@ -47,9 +49,7 @@ import net.minecraft.init.Items
 import net.minecraft.util.BlockPos
 import net.minecraft.util.IChatComponent
 import net.minecraftforge.client.event.ClientChatReceivedEvent
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase
 import kotlin.math.*
@@ -91,12 +91,11 @@ class SugarCaneMacro : Macro("SugarCane") {
     private var checkerTicks = 0
     private var checkerStopped = false
 
-    open class Events(private val macro: SugarCaneMacro) {
-        @SubscribeEvent
-        protected fun onTick(event: ClientTickEvent) = macro.onTick(event)
-
-        @SubscribeEvent
-        protected fun onChat(event: ClientChatReceivedEvent) = macro.onChat(event.message.unformattedText.stripColor().keepScoreboardCharacters())
+    class Events(private val macro: SugarCaneMacro) {
+        init {
+            safeListener<ClientTickEvent> { macro.onTick(it) }
+            safeListener<ClientChatReceivedEvent> { macro.onChat(it.message.unformattedText.stripColor().keepScoreboardCharacters()) }
+        }
     }
 
     override fun info() = "Macro: Sugar Cane Macro, Settings: ${farmDirection.name}, ${farmType.name}, State: ${farmingState.name}"
@@ -113,7 +112,7 @@ class SugarCaneMacro : Macro("SugarCane") {
     private fun onEnable() {
         reset()
         unpressKeys()
-        MinecraftForge.EVENT_BUS.register(events)
+        BladeEventBus.subscribe(events)
         UChat.chat("§cSkySkipped §f:: §eSugar Cane Macro §aEnabled§e! Settings: ${farmDirection.name}, ${farmType.name}")
     }
 
@@ -123,7 +122,7 @@ class SugarCaneMacro : Macro("SugarCane") {
             mc.gameSettings.renderDistanceChunks = lastDist
         }
 
-        MinecraftForge.EVENT_BUS.unregister(events)
+        BladeEventBus.unsubscribe(events)
         unpressKeys()
         reset()
         UChat.chat("§cSkySkipped §f:: §eSugar Cane Macro §cDisabled§e!")
@@ -229,7 +228,20 @@ class SugarCaneMacro : Macro("SugarCane") {
             return
         }
         if (rotating == null) {
-            val yaw = if (farmType == FarmType.NORMAL) when (farmDirectionNormal) {
+            val ya = try {
+                Config.customYaw.toFloat()
+            } catch (ex: NumberFormatException) {
+                ex.printStackTrace()
+                69420f
+            }
+            val pi = try {
+                Config.customPitch.toFloat()
+            } catch (ex: NumberFormatException) {
+                ex.printStackTrace()
+                69420f
+            }
+            val yaw = if (Config.customYawToggle && ya != 69420f) ya
+            else if (farmType == FarmType.NORMAL) when (farmDirectionNormal) {
                 FarmDirectionNormal.POSITIVE -> 45f
                 FarmDirectionNormal.NEGATIVE -> -45f
             }
@@ -239,9 +251,9 @@ class SugarCaneMacro : Macro("SugarCane") {
                 FarmDirection.WEST -> 90f
                 FarmDirection.EAST -> -90f
             }
-            val pitch = if (Config.customAngles) Config.customPitch.toFloat() else 0f
-            printdev("Rotate yaw and pitch: $yaw 0")
-            rotating = RotationClass(RotationClass.Rotation(yaw, pitch), 1500L)
+            val pitch = if (Config.customPitchToggle && pi != 69420f) pi else 0f
+            printdev("Rotate yaw and pitch: $yaw $pitch")
+            rotating = RotationClass(RotationClass.Rotation(yaw, pitch), if (yaw > 80 || pitch > 80) 1500L else 750L)
         }
         if (rotating!!.done) {
             printdev("Finished rotating")
@@ -320,6 +332,7 @@ class SugarCaneMacro : Macro("SugarCane") {
     private val ignoreBlocks = listOf<Block>(
         Blocks.air,
         Blocks.water,
+        Blocks.flowing_water,
         Blocks.wall_sign,
         Blocks.ladder,
         Blocks.reeds
@@ -453,7 +466,9 @@ class SugarCaneMacro : Macro("SugarCane") {
 
         val yaw = mc.thePlayer.rotationYaw
         val pitch = mc.thePlayer.rotationPitch
-        if (lastyaw !in yaw - 0.1..yaw + 0.1 || lastpitch !in pitch - 0.1..pitch + 0.1) {
+        if (lastyaw !in (yaw - Config.rotationDiff)..(yaw + Config.rotationDiff) ||
+            lastpitch !in (pitch - Config.rotationDiff)..(pitch + Config.rotationDiff)
+        ) {
             printdev("Detected rotation change")
             farmingState = FarmingState.SETUP
             rotating = null
@@ -466,10 +481,11 @@ class SugarCaneMacro : Macro("SugarCane") {
     private var stopAttack = false
 
     private fun randomEvent() {
+        return
         if (!Config.macroRandomization) return
         if (randomEventTimer++ < 900) return
         randomEventTimer = 0
-        if (RandomUtils.getRandom(1, 5) != 1) return
+        if (RandomUtils.getRandom(1, 3) != 1) return
 
         printdev("Random event happens!")
         when (RandomUtils.getRandom(1, 3)) {

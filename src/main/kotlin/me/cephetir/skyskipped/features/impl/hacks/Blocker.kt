@@ -17,11 +17,11 @@
 
 package me.cephetir.skyskipped.features.impl.hacks
 
+import me.cephetir.bladecore.utils.TextUtils.containsAny
+import me.cephetir.bladecore.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.TextUtils.containsAny
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -29,7 +29,7 @@ class Blocker : Feature() {
 
     @SubscribeEvent
     fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (!Cache.inSkyblock || !Config.block) return
+        if (!Cache.onSkyblock || !Config.block) return
         if (event.entity !== mc.thePlayer || event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) return
         val item = mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
         if (!item.containsAny(Config.blockList.split(", "))) return

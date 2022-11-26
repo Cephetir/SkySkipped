@@ -17,135 +17,59 @@
 
 package me.cephetir.skyskipped.features.impl.discordrpc
 
-import com.jagrosh.discordipc.IPCClient
-import com.jagrosh.discordipc.IPCListener
 import com.jagrosh.discordipc.entities.RichPresence
+import com.jagrosh.discordipc.exceptions.NoDiscordClientException
+import me.cephetir.bladecore.core.listeners.SkyblockIsland
+import me.cephetir.bladecore.core.listeners.SkyblockListener
+import me.cephetir.bladecore.discord.AbstractDiscordIPC
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.threading.BackgroundScope
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.event.Listener
-import me.cephetir.skyskipped.event.SkyblockIsland
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.mc
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
-import org.json.JSONObject
 import java.time.OffsetDateTime
 
-class DiscordRPCManager : IPCListener {
-    private var client: IPCClient? = null
-    private var detailsLine: String? = null
-    private var stateLine: String? = null
-    private var startTimestamp: OffsetDateTime? = null
-    private var connected = false
+class DiscordRPCManager : AbstractDiscordIPC() {
+    override val APP_ID = 867366183057752094L
+    override val rpcBuilder: RichPresence.Builder = RichPresence.Builder()
+        .setLargeImage("large", "SkySkipped v${SkySkipped.VERSION}")
 
-    fun start() {
+    override fun handleConnect() {
+        SkySkipped.logger.info("Starting Discord RPC...")
         try {
-            if (isActive) return
-            SkySkipped.logger.info("Starting Discord RP...")
-            stateLine = "Starting..."
-            detailsLine = ""
-            startTimestamp = OffsetDateTime.now()
-            client = IPCClient(APPLICATION_ID)
-            client!!.setListener(this)
-            try {
-                client!!.connect()
-            } catch (e: Exception) {
-                SkySkipped.logger.error("Failed to connect to Discord RPC: " + e.message)
-            }
-        } catch (ex: Throwable) {
-            SkySkipped.logger.error("DiscordRP has thrown an unexpected error while trying to start...")
-            ex.printStackTrace()
+            ipc!!.connect()
+            rpcBuilder.setStartTimestamp(OffsetDateTime.now())
+            val richPresence = rpcBuilder.build()
+            ipc!!.sendRichPresence(richPresence)
+            BackgroundScope.launchLooping(updateJob)
+            SkySkipped.logger.info("Discord RPC initialised successfully!")
+        } catch (e: NoDiscordClientException) {
+            SkySkipped.logger.error("No discord client found for RPC, stopping")
         }
     }
 
-    fun stop() {
-        if (isActive) {
-            client!!.close()
-            connected = false
-        }
+    override fun handleDisconnect() {
+        SkySkipped.logger.info("Shutting down Discord RPC...")
+        BackgroundScope.cancel(updateJob)
+        ipc!!.close()
     }
 
-    val isActive: Boolean
-        get() = client != null && connected
+    override fun updateRPC(): RichPresence = rpcBuilder
+        .setDetails(getLine(Config.drpcDetail))
+        .setState(getLine(if (Config.drpcState == 4) 5 else Config.drpcState))
+        .build()
 
-    private fun updatePresence() {
-        detailsLine = when (Config.drpcDetail) {
-            0 ->
-                if (Listener.island == SkyblockIsland.Unknown)
-                    if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
-                else Listener.island.formattedName
+    private fun getLine(line: Int): String = when (line) {
+        0 ->
+            if (SkyblockListener.island == SkyblockIsland.Unknown)
+                if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
+            else SkyblockListener.island.formattedName
 
-            1 -> mc.session.username
-            2 -> if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
-            3 -> mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
-            4 -> Config.drpcText
-            else -> ""
-        }
-
-        stateLine = when (Config.drpcState) {
-            0 ->
-                if (Listener.island == SkyblockIsland.Unknown)
-                    if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
-                else Listener.island.formattedName
-
-            1 -> mc.session.username
-            2 -> if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
-            3 -> mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
-            4 -> Config.drpcText2
-            else -> ""
-        }
-
-        val presence = RichPresence.Builder()
-            .setDetails(detailsLine)
-            .setState(stateLine)
-            .setStartTimestamp(startTimestamp)
-            .setLargeImage("large", "SkySkipped v" + SkySkipped.VERSION)
-            .build()
-        client!!.sendRichPresence(presence)
-    }
-
-    fun setStateLine(status: String?) {
-        stateLine = status
-    }
-
-    fun setDetailsLine(status: String?) {
-        detailsLine = status
-    }
-
-    override fun onReady(client: IPCClient) {
-        SkySkipped.logger.info("Discord RPC started")
-        connected = true
-        MinecraftForge.EVENT_BUS.register(this)
-    }
-
-    private var tickCounter = 0
-    @SubscribeEvent
-    fun onClientTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !isActive) return
-        tickCounter++
-        if (tickCounter % 200 == 0) {
-            updatePresence()
-            tickCounter = 0
-        }
-    }
-
-    override fun onClose(client: IPCClient, json: JSONObject?) {
-        SkySkipped.logger.info("Discord RPC closed")
-        this.client = null
-        connected = false
-        MinecraftForge.EVENT_BUS.unregister(this)
-    }
-
-    override fun onDisconnect(client: IPCClient, t: Throwable) {
-        SkySkipped.logger.info("Discord RPC disconnected")
-        this.client = null
-        connected = false
-        MinecraftForge.EVENT_BUS.unregister(this)
-    }
-
-    companion object {
-        private const val APPLICATION_ID = 867366183057752094L
+        1 -> mc.session.username
+        2 -> if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
+        3 -> mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
+        4 -> Config.drpcText
+        5 -> Config.drpcText2
+        else -> ""
     }
 }

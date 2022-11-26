@@ -20,7 +20,7 @@ package me.cephetir.skyskipped.features.impl.chat
 import gg.essential.universal.UMouse
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.mixins.IMixinGuiNewChat
+import me.cephetir.skyskipped.mixins.accessors.IMixinGuiNewChat
 import net.minecraft.client.gui.ChatLine
 import net.minecraft.client.gui.GuiChat
 import net.minecraft.client.gui.ScaledResolution

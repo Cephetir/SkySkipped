@@ -17,7 +17,7 @@
 
 package me.cephetir.skyskipped.utils.render
 
-import me.cephetir.skyskipped.mixins.*
+import me.cephetir.skyskipped.mixins.accessors.*
 import me.cephetir.skyskipped.utils.mc
 import net.minecraft.client.entity.AbstractClientPlayer
 import net.minecraft.client.model.ModelBase
@@ -32,7 +32,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.item.EntityArmorStand
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.monster.EntitySkeleton
 import net.minecraft.item.ItemArmor
 import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.MathHelper
@@ -47,6 +47,14 @@ import kotlin.math.sin
 
 object RenderUtils {
     private val frustrum = Frustum()
+
+    fun getViewerPos(partialTicks: Float): Triple<Double, Double, Double> {
+        val viewer = mc.renderViewEntity
+        val viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * partialTicks
+        val viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * partialTicks
+        val viewerZ = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ) * partialTicks
+        return Triple(viewerX, viewerY, viewerZ)
+    }
 
     fun drawBox(pos: Vec3, color: Color, pt: Float) {
         val viewer: Entity = mc.renderViewEntity
@@ -198,13 +206,11 @@ object RenderUtils {
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
     }
 
-    fun getChroma(speed: Float, offset: Int): Int {
-        return Color.HSBtoRGB(
-            ((System.currentTimeMillis() - offset.toLong() * 10L) % speed.toLong()).toFloat() / speed,
-            0.88f,
-            0.88f
-        )
-    }
+    fun getChroma(speed: Float, offset: Int): Int = Color.HSBtoRGB(
+        ((System.currentTimeMillis() - offset.toLong() * 10L) % speed.toLong()).toFloat() / speed,
+        0.88f,
+        0.88f
+    )
 
     fun animate(endPoint: Float, current: Float, speed: Float): Float {
         val sped = speed.coerceIn(0f, 1f)
@@ -427,7 +433,7 @@ object RenderUtils {
         blue: Float,
         alpha: Float
     ) {
-        if (entitylivingbaseIn is EntityPlayer) return
+        if (entitylivingbaseIn !is EntitySkeleton) return
         for (layerrenderer in renderer.layerRenderers)
             if (layerrenderer is LayerArmorBase<*>)
                 for (i in 1..4) {
@@ -480,7 +486,7 @@ object RenderUtils {
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
         GlStateManager.enableAlpha()
         GlStateManager.disableTexture2D()
-        GlStateManager.disableDepth()
+        //GlStateManager.disableDepth()
 
         /*var il = 0.0
         val tessellator = Tessellator.getInstance()
@@ -528,7 +534,7 @@ object RenderUtils {
         worldrenderer.pos(x1 + radius, y1 + 0.0, z1).endVertex()
         tessellator.draw()
 
-        GlStateManager.enableDepth()
+        //GlStateManager.enableDepth()
         GlStateManager.enableCull()
         GlStateManager.enableTexture2D()
         GlStateManager.enableDepth()

@@ -17,11 +17,11 @@
 
 package me.cephetir.skyskipped.mixins;
 
+import me.cephetir.bladecore.core.event.BladeEventBus;
 import me.cephetir.skyskipped.event.events.ClickSlotEvent;
 import me.cephetir.skyskipped.event.events.DrawSlotEvent;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Slot;
-import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,17 +35,17 @@ public abstract class MixinGuiContainer {
 
     @Inject(method = "drawSlot", at = @At("HEAD"))
     private void onDrawSlot(Slot slot, CallbackInfo ci) {
-        MinecraftForge.EVENT_BUS.post(new DrawSlotEvent.Pre((GuiContainer) (Object) this, slot));
+        BladeEventBus.INSTANCE.post(new DrawSlotEvent.Pre((GuiContainer) (Object) this, slot));
     }
 
     @Inject(method = "drawSlot", at = @At("RETURN"))
     private void onDrawSlotPost(Slot slot, CallbackInfo ci) {
-        MinecraftForge.EVENT_BUS.post(new DrawSlotEvent.Post((GuiContainer) (Object) this, slot));
+        BladeEventBus.INSTANCE.post(new DrawSlotEvent.Post((GuiContainer) (Object) this, slot));
     }
 
     @Inject(method = "handleMouseClick", at = @At("HEAD"), cancellable = true)
     private void handleMouseClick(Slot slotIn, int slotId, int clickedButton, int clickType, CallbackInfo ci) {
-        if (MinecraftForge.EVENT_BUS.post(new ClickSlotEvent((GuiContainer) (Object) this, slotIn, clickedButton)))
+        if (BladeEventBus.INSTANCE.post(new ClickSlotEvent((GuiContainer) (Object) this, slotIn, clickedButton)))
             ci.cancel();
     }
 }

@@ -20,14 +20,14 @@ package me.cephetir.skyskipped.features.impl.macro.failsafes
 import gg.essential.universal.UChat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.cephetir.bladecore.utils.TextUtils.containsAny
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.threading.BackgroundScope
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.features.impl.macro.Macro
 import me.cephetir.skyskipped.utils.RandomUtils
 import me.cephetir.skyskipped.utils.RotationClass
-import me.cephetir.skyskipped.utils.TextUtils.containsAny
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
-import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.client.gui.GuiChat
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.settings.KeyBinding
@@ -78,8 +78,8 @@ object Failsafes : Feature() {
         warpTimer = System.currentTimeMillis()
 
         if (Cache.onIsland) getBack.run()
-        else if (Cache.inSkyblock) mc.thePlayer.sendChatMessage("/is")
-        else if (!Cache.inSkyblock) {
+        else if (Cache.onSkyblock) mc.thePlayer.sendChatMessage("/is")
+        else if (!Cache.onSkyblock) {
             mc.thePlayer.sendChatMessage("/l")
             BackgroundScope.launch {
                 delay(300L)

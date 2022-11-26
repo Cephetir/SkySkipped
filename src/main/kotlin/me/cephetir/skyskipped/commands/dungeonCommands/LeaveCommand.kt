@@ -20,16 +20,16 @@ package me.cephetir.skyskipped.commands.dungeonCommands
 import gg.essential.api.EssentialAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.cephetir.bladecore.core.event.BladeEventBus
+import me.cephetir.bladecore.utils.TextUtils.keepScoreboardCharacters
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.bladecore.utils.threading.BackgroundScope
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
-import me.cephetir.skyskipped.utils.TextUtils.keepScoreboardCharacters
-import me.cephetir.skyskipped.utils.TextUtils.stripColor
 import me.cephetir.skyskipped.utils.mc
-import me.cephetir.skyskipped.utils.threading.BackgroundScope
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
 import net.minecraft.scoreboard.ScorePlayerTeam
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
@@ -61,7 +61,7 @@ class LeaveCommand : CommandBase() {
     fun start(party: Boolean) {
         if (started || !EssentialAPI.getMinecraftUtil().isHypixel()) return
         started = true
-        MinecraftForge.EVENT_BUS.register(this)
+        BladeEventBus.subscribe(this, true)
         this.party = party
     }
 
@@ -104,7 +104,7 @@ class LeaveCommand : CommandBase() {
                     }
                     if (!ok) mc.thePlayer.sendChatMessage("/warp dungeon_hub")
                     if (Config.EndParty && Config.BotName != "" || party) Features.partyCommand.start()
-                    MinecraftForge.EVENT_BUS.unregister(toStop)
+                    BladeEventBus.unsubscribe(toStop, true)
                     started = false
                     step = 0
                 }
