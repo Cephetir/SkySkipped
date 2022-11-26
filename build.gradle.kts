@@ -79,7 +79,7 @@ dependencies {
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
 
     include("me.cephetir:bladecore-loader-1.8.9-forge:1.1")
-    implementation("me.cephetir:bladecore-1.8.9-forge:0.0.1-beta5.5")
+    implementation("me.cephetir:bladecore-1.8.9-forge:0.0.1")
 
     implementation("com.github.DV8FromTheWorld:JDA:v5.0.0-alpha.19") {
         exclude(module = "opus-java")
