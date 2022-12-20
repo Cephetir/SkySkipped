@@ -1,10 +1,12 @@
 # SkySkipped
-[![GitHub release](https://img.shields.io/github/downloads/Cephetir/SkySkipped/latest/total)](https://github.com/Cephetir/SkySkipped/releases)
+[![GitHub release](https://img.shields.io/github/downloads/Cephetir/SkySkipped/total)](https://github.com/Cephetir/SkySkipped/releases)
 [![CodeFactor](https://www.codefactor.io/repository/github/cephetir/skyskipped/badge)](https://www.codefactor.io/repository/github/cephetir/skyskipped)\
-Cephetir's cool mod for Hypixel and Skyblock \
-**This mod is NOT related to SkytilsMod**
+Cephetir's mod for Hypixel and Skyblock \
+Website: https://skyskipped-website.vercel.app \
+**This mod is NOT related to SkytilsMod!**
 
 ## Features
+Outdated! [join discord](https://discord.gg/SXk5K3ZzdE) for full features list!
 <details>
     <summary>Chat</summary>
 

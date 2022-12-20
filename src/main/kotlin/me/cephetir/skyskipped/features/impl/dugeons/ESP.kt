@@ -1,18 +1,26 @@
 /*
  *
- * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
- * Version 2, December 2004
+ * MIT License
  *
- * Copyright (C) 2022 Cephetir
+ * Copyright (c) 2022 Cephetir
  *
- * Everyone is permitted to copy and distribute verbatim or modified
- * copies of this license document, and changing it is allowed as long
- * as the name is changed.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
- * TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
- *  0. You just DO WHAT THE FUCK YOU WANT TO.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 package me.cephetir.skyskipped.features.impl.dugeons
@@ -92,7 +100,7 @@ class ESP : Feature() {
                         break
                     }
                 } else for (cname in Config.customespText.split(", ")) {
-                    if (!it.entity.name.contains(cname, true)) continue
+                    if (it.entity.name?.contains(cname, true) == false) continue
                     drawEsp(
                         it.entity,
                         it.model,
@@ -130,7 +138,7 @@ class ESP : Feature() {
                 }
 
                 is EntityOtherPlayerMP ->
-                    if (Config.starredmobsesp && it.entity.name.trim() == "Shadow Assassin")
+                    if (Config.starredmobsesp && it.entity.name?.trim() == "Shadow Assassin")
                         drawEsp(
                             it.entity,
                             it.model,
@@ -165,7 +173,7 @@ class ESP : Feature() {
 
         listener<EntityJoinWorldEvent>(-1, receiveCanceled = true) {
             if (!Cache.inDungeon || !Config.esp) return@listener
-            if ((it.entity is EntityOtherPlayerMP && it.entity.name.trim() == "Shadow Assassin") || it.entity is EntityEnderman)
+            if ((it.entity is EntityOtherPlayerMP && it.entity.name?.trim() == "Shadow Assassin") || it.entity is EntityEnderman)
                 it.entity.isInvisible = false
         }
 
@@ -244,7 +252,7 @@ class ESP : Feature() {
                 if (!e.entityBoundingBox.intersectsWith(aabb)) continue@entity
                 when (e) {
                     is EntityOtherPlayerMP -> {
-                        if (e.health <= 0.0f) continue@entity
+                        if (e.health <= 0.0f || e.getName() == null) continue@entity
                         when (e.getName().trim()) {
                             "Lost Adventurer", "Diamond Guy" -> starredMobs[entityIn] = (e as EntityLivingBase)
                             else -> {
