@@ -1,26 +1,19 @@
 /*
+ * SkySkipped - Hypixel Skyblock QOL mod
+ * Copyright (C) 2023  Cephetir
  *
- * MIT License
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Copyright (c) 2022 Cephetir
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.cephetir.skyskipped
@@ -29,11 +22,12 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import gg.essential.api.EssentialAPI
-import gg.essential.api.utils.Multithreading
+import kotlinx.coroutines.launch
 import me.cephetir.bladecore.core.cache.impl.MapCache
 import me.cephetir.bladecore.core.event.BladeEventBus
 import me.cephetir.bladecore.utils.HttpUtils
 import me.cephetir.bladecore.utils.ShutdownHook
+import me.cephetir.bladecore.utils.threading.BackgroundScope
 import me.cephetir.skyskipped.commands.SkySkippedCommand
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
@@ -96,7 +90,7 @@ class SkySkipped {
             if (cosmeticCache.isCached(message))
                 return cosmeticCache.get(message)!!
 
-            var text = message!!
+            var text = message
             val result = regex.findAll(text)
             var displace = 0
             for (matcher in result) {
@@ -126,7 +120,7 @@ class SkySkipped {
             val body = HttpUtils.sendGet(
                 "https://gist.githubusercontent.com/Cephetir/327b7738f91cd11636a5ae35029dd83c/raw",
                 mapOf("Content-Type" to "application/json")
-            )
+            ) ?: return
             gson.fromJson(body, JsonArray::class.java)?.toList()?.forEach {
                 it as JsonObject
                 val name = it.getAsJsonPrimitive("name").asString
@@ -208,17 +202,20 @@ class SkySkipped {
     @Mod.EventHandler
     fun onLoad(event: FMLLoadCompleteEvent) {
         logger.info("Checking for updates...")
-        Multithreading.runAsync {
-            val version = HttpUtils.sendGet("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt", null)?.toDouble() ?: return@runAsync
-            if (VERSION.toDouble() < version) {
-                logger.info("New version detected!")
-                EssentialAPI.getNotifications().push(
-                    "SkySkipped",
-                    "New Version Detected: $version\nClick to Download",
-                    10f,
-                    action = { Desktop.getDesktop().browse(URI("https://github.com/Cephetir/SkySkipped/releases")) }
-                )
-            } else logger.info("Latest version!")
+
+        BackgroundScope.launch {
+            run {
+                val version = HttpUtils.sendGet("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt", null)?.toDouble() ?: return@run
+                if (VERSION.toDouble() < version) {
+                    logger.info("New version detected!")
+                    EssentialAPI.getNotifications().push(
+                        "SkySkipped",
+                        "New Version Detected: $version\nClick to Download",
+                        10f,
+                        action = { Desktop.getDesktop().browse(URI("https://github.com/Cephetir/SkySkipped/releases")) }
+                    )
+                } else logger.info("Latest version!")
+            }
 
             loadCosmetics()
         }

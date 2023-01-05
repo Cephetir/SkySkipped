@@ -1,26 +1,19 @@
 /*
+ * SkySkipped - Hypixel Skyblock QOL mod
+ * Copyright (C) 2023  Cephetir
  *
- * MIT License
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Copyright (c) 2022 Cephetir
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package me.cephetir.skyskipped.features.impl.dugeons
@@ -36,6 +29,7 @@ import me.cephetir.skyskipped.utils.skyblock.PingUtils
 import me.cephetir.skyskipped.utils.skyblock.Queues
 import net.minecraft.entity.monster.EntityZombie
 import net.minecraft.init.Blocks
+import net.minecraft.util.BlockPos
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.world.WorldEvent
@@ -47,6 +41,7 @@ import kotlin.math.roundToInt
 class Pings : Feature() {
     private var ffTimer = -1L
     private var lastGo = -1L
+    private var saidGo = false
 
     init {
         listener<ClientChatReceivedEvent> {
@@ -64,10 +59,15 @@ class Pings : Feature() {
         listener<ClientTickEvent> {
             if (!Cache.inDungeon || !Config.autoGo || player == null || world == null) return@listener
             if (System.currentTimeMillis() - lastGo < 2000L) return@listener
-            if (world!!.getBlockState(player!!.position).block != Blocks.portal) return@listener
+            if (world!!.getBlockState(BlockPos(player!!.posX, player!!.posY, player!!.posZ)).block != Blocks.portal) {
+                saidGo = false
+                return@listener
+            }
+            if (saidGo) return@listener
 
             player!!.sendChatMessage("going")
             lastGo = System.currentTimeMillis()
+            saidGo = true
         }
     }
 
