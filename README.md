@@ -1,13 +1,13 @@
 # SkySkipped
-## Join the discord server! https://discord.gg/SXk5K3ZzdE
+## Join the discord server! https://discord.gg/bDkfEF26rf
 [![GitHub release](https://img.shields.io/github/downloads/Cephetir/SkySkipped/total)](https://github.com/Cephetir/SkySkipped/releases)
 [![CodeFactor](https://www.codefactor.io/repository/github/cephetir/skyskipped/badge)](https://www.codefactor.io/repository/github/cephetir/skyskipped)\
 Cephetir's mod for Hypixel and Skyblock \
 Website: https://skyskipped-website.vercel.app \
-**This mod is NOT related to SkytilsMod!**
+
 
 ## Features
-Outdated! [join discord](https://discord.gg/SXk5K3ZzdE) for full features list!
+Outdated! [join discord](https://discord.gg/bDkfEF26rf) for full features list!
 <details>
     <summary>Chat</summary>
 
