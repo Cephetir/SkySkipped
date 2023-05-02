@@ -27,11 +27,11 @@ public interface IMixinEntityPlayerSP {
     @Accessor("lastReportedYaw")
     float getLastReportedYaw();
 
-    @Accessor("lastReportedPitch")
-    float getLastReportedPitch();
-
     @Accessor("lastReportedYaw")
     void setLastReportedYaw(float yaw);
+
+    @Accessor("lastReportedPitch")
+    float getLastReportedPitch();
 
     @Accessor("lastReportedPitch")
     void setLastReportedPitch(float pitch);

@@ -45,7 +45,7 @@ public class MixinEquipmentOverlay {
     @Dynamic
     @Inject(method = "updateGuiInfo", at = @At("HEAD"), cancellable = true)
     private void updateGuiInfo(GuiScreen screen, CallbackInfo ci) {
-        if (!Config.Companion.getNeuOptimize()) return;
+        if (!Config.neuOptimize.getValue()) return;
         try {
             if (petOverlayInstance == null || customArmourInstance == null) {
                 Class<?> neu = Class.forName("io.github.moulberry.notenoughupdates.NotEnoughUpdates");

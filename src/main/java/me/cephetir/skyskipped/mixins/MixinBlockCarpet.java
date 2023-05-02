@@ -41,7 +41,7 @@ public class MixinBlockCarpet extends Block {
 
     @Inject(method = "setBlockBoundsFromMeta", at = @At(value = "HEAD"), cancellable = true)
     public void setBlockBoundsFromMeta(int meta, CallbackInfo ci) {
-        if (!Config.Companion.getRemoveCarpets()) return;
+        if (!Config.removeCarpets.getValue()) return;
         this.setBlockBounds(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f);
         ci.cancel();
     }

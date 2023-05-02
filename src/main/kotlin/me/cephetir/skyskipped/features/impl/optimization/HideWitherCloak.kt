@@ -16,20 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.cephetir.skyskipped.features.impl.misc
+package me.cephetir.skyskipped.features.impl.optimization
 
-import me.cephetir.bladecore.core.event.events.PacketEvent
 import me.cephetir.bladecore.core.event.listener.listener
-import me.cephetir.bladecore.core.listeners.SkyblockListener
+import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.event.events.RenderEntityModelEvent
 import me.cephetir.skyskipped.features.Feature
-import net.minecraft.network.play.server.S0EPacketSpawnObject
+import net.minecraft.entity.monster.EntityCreeper
 
-class StopFallingBlocks : Feature() {
+class HideWitherCloak : Feature() {
     init {
-        listener<PacketEvent.Receive> {
-            if (!Config.stopFallingBlocks || !SkyblockListener.onSkyblock || it.packet !is S0EPacketSpawnObject || (it.packet as S0EPacketSpawnObject).type != 70) return@listener
+        listener<RenderEntityModelEvent> {
+            if (!Config.hideWitherCloak.value || !Cache.onSkyblock || it.entity !is EntityCreeper || it.entity.onGround || it.entity.maxHealth != 20f || !it.entity.powered)
+                return@listener
+
             it.cancel()
+            it.entity.worldObj.removeEntity(it.entity)
         }
     }
 }

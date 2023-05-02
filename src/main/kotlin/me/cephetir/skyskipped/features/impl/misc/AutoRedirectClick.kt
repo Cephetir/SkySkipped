@@ -27,7 +27,7 @@ import me.cephetir.skyskipped.features.Feature
 class AutoRedirectClick : Feature() {
     init {
         listener<ClickSlotControllerEvent> {
-            if (Config.redirectClicks && SkyblockListener.onSkyblock && it.button == 2)
+            if (Config.redirectClicks.value && SkyblockListener.onSkyblock && it.button == 2)
                 it.button = 0
         }
     }

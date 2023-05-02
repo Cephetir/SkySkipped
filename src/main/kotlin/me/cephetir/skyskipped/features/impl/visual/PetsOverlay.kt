@@ -55,7 +55,7 @@ class PetsOverlay : Feature() {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onGuiOpen(event: GuiOpenEvent) {
-        if (!Config.petsOverlay) return
+        if (!Config.petsOverlay.value) return
         if (event.gui !is GuiChest) return
         val container = (event.gui as GuiChest).inventorySlots as ContainerChest
         if (!container.lowerChestInventory.displayName.unformattedText.endsWith("Pets")) return
@@ -68,7 +68,7 @@ class PetsOverlay : Feature() {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onDrawScreen(event: DrawScreenEvent.Pre) {
-        if (!Config.petsOverlay) return
+        if (!Config.petsOverlay.value) return
         if (event.gui !is GuiChest) return
         if (petsOverlay == null) return
         val container = (event.gui as GuiChest).inventorySlots as ContainerChest
@@ -80,7 +80,7 @@ class PetsOverlay : Feature() {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onActionPerformed(event: GuiScreenEvent.MouseInputEvent) {
-        if (!Config.petsOverlay) return
+        if (!Config.petsOverlay.value) return
         if (event.gui !is GuiChest) return
         if (petsOverlay == null) return
         val container = (event.gui as GuiChest).inventorySlots as ContainerChest
@@ -96,7 +96,7 @@ class PetsOverlay : Feature() {
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
-        if (!Config.petsOverlay) return
+        if (!Config.petsOverlay.value) return
         if (petsOverlay == null) return
         if (mc.currentScreen == null) {
             petsOverlay = null
@@ -203,7 +203,7 @@ class PetsOverlay : Feature() {
                 rectHeight.toFloat(),
                 width - rectWidth + 20f,
                 bottom.toFloat(),
-                Config.petsBgBlur
+                Config.petsBgBlur.value.toFloat()
             )
             Gui.drawRect(0, 0, width, height, Color(0, 0, 0, 150).rgb)
             drawRoundedOutline(
@@ -212,8 +212,8 @@ class PetsOverlay : Feature() {
                 width - rectWidth + 20f,
                 bottom.toFloat(),
                 4.5f,
-                Config.petsBorderWidth,
-                Config.petsBorderColor.rgb
+                Config.petsBorderWidth.value.toFloat(),
+                Color(Config.petsBorderColorR.value.toInt(), Config.petsBorderColorG.value.toInt(), Config.petsBorderColorB.value.toInt()).rgb
             )
             GlStateManager.scale(1.5f, 1.5f, 1.5f)
             mc.fontRendererObj.drawString(

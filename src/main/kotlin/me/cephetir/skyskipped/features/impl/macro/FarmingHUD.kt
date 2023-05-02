@@ -18,6 +18,7 @@
 
 package me.cephetir.skyskipped.features.impl.macro
 
+import gg.essential.elementa.utils.withAlpha
 import me.cephetir.bladecore.utils.TextUtils.formatTime
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
@@ -28,19 +29,20 @@ import me.cephetir.skyskipped.utils.render.RoundUtils
 import me.cephetir.skyskipped.utils.render.shaders.BlurUtils
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import java.awt.Color
 import kotlin.math.roundToInt
 
 class FarmingHUD : Feature() {
     companion object {
         var x: Float
-            get() = Config.farmingHudX
+            get() = Config.farmingHudX.value.toFloat()
             set(value) {
-                Config.farmingHudX = value
+                Config.farmingHudX.value = value.toDouble()
             }
         var y: Float
-            get() = Config.farmingHudY
+            get() = Config.farmingHudY.value.toFloat()
             set(value) {
-                Config.farmingHudY = value
+                Config.farmingHudY.value = value.toDouble()
             }
 
         var width = 0
@@ -56,8 +58,8 @@ class FarmingHUD : Feature() {
         get() = (System.currentTimeMillis() - MacroManager.startTime).formatTime()
     private val timeBanCheck: String
         get() = when (macro) {
-            is NetherwartMacro -> ((Config.netherWartBanWaveCheckerTimer * 60000).toLong() - macro.banwaveCheckIn()).formatTime()
-            is SugarCaneMacro -> ((Config.sugarCaneBanWaveCheckerTimer * 60000).toLong() - macro.banwaveCheckIn()).formatTime()
+            is NetherwartMacro -> ((Config.netherWartBanWaveCheckerTimer.value * 60000).toLong() - macro.banwaveCheckIn()).formatTime()
+            is SugarCaneMacro -> ((Config.sugarCaneBanWaveCheckerTimer.value * 60000).toLong() - macro.banwaveCheckIn()).formatTime()
             else -> "0s"
         }
     private val profit: Long
@@ -71,7 +73,7 @@ class FarmingHUD : Feature() {
 
     @SubscribeEvent
     fun onRender(event: TickEvent.RenderTickEvent) {
-        if (!Config.farmingHud || !enabled || mc.thePlayer == null || mc.theWorld == null) return
+        if (!Config.farmingHud.value || !enabled || mc.thePlayer == null || mc.theWorld == null) return
 
         val lines = text.split("\n")
         width = 0
@@ -95,20 +97,20 @@ class FarmingHUD : Feature() {
             x + width,
             y + height,
             5f,
-            Config.farmingHudColor.rgb
+            Color.BLACK.withAlpha(110).rgb
         )
 
         val lineX = x + 5
         var lineY = y + 5
         for (line in lines) {
-            mc.fontRendererObj.drawString(line, lineX.roundToInt(), lineY.roundToInt(), Config.farmingHudColorText.rgb)
+            mc.fontRendererObj.drawString(line, lineX.roundToInt(), lineY.roundToInt(), Color.RED.darker().rgb)
             lineY += 11
         }
     }
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (!Config.farmingHud || !enabled || mc.thePlayer == null || mc.theWorld == null || event.phase != TickEvent.Phase.START) return
+        if (!Config.farmingHud.value || !enabled || mc.thePlayer == null || null == mc.theWorld || event.phase != TickEvent.Phase.START) return
 
         text = """
                | Welcome Back, ${mc.thePlayer.displayNameString}!

@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = EntityPlayer.class, remap = false)
 public class MixinEntityPlayer {
-    @Inject(method = "getDisplayNameString", at=@At("RETURN"), cancellable = true)
+    @Inject(method = "getDisplayNameString", at = @At("RETURN"), cancellable = true)
     private void getDisplayNameString(CallbackInfoReturnable<String> cir) {
         cir.setReturnValue(SkySkipped.getCosmetics(cir.getReturnValue()));
     }

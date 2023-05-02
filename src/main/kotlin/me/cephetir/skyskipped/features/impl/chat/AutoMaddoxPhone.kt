@@ -34,7 +34,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 class AutoMaddoxPhone : Feature() {
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (!Config.autoMaddox || !Cache.onSkyblock || event.phase != TickEvent.Phase.START) return
+        if (!Config.autoMaddox.value || !Cache.onSkyblock || event.phase != TickEvent.Phase.START) return
         val scoreboard = ScoreboardUtils.sidebarLines
 
         for (line in scoreboard) {
@@ -60,7 +60,7 @@ class AutoMaddoxPhone : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Config.autoMaddox || !Cache.onSkyblock) return
+        if (!Config.autoMaddox.value || !Cache.onSkyblock) return
         val message = event.message.unformattedText.stripColor()
         if (message.contains("[OPEN MENU]") && !message.contains(":")) {
             val command = event.message.siblings.find { it.unformattedText.contains("[OPEN MENU]") }?.chatStyle?.chatClickEvent?.value ?: return

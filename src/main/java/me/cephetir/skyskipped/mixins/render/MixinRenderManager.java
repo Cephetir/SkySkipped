@@ -37,10 +37,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MixinRenderManager {
 
     @Shadow
-    public abstract <T extends Entity> Render<T> getEntityRenderObject(Entity entityIn);
+    public TextureManager renderEngine;
 
     @Shadow
-    public TextureManager renderEngine;
+    public abstract <T extends Entity> Render<T> getEntityRenderObject(Entity entityIn);
 
     @Inject(method = "doRenderEntity(Lnet/minecraft/entity/Entity;DDDFFZ)Z", at = @At("HEAD"), cancellable = true)
     public void onRender(Entity entity, double x, double y, double z, float entityYaw, float partialTicks, boolean p_147939_10_, CallbackInfoReturnable<Boolean> cir) {

@@ -42,7 +42,7 @@ public class MixinBlockCocoa extends Block {
 
     @Inject(method = "getCollisionBoundingBox", at = @At(value = "HEAD"), cancellable = true)
     private void fixBoxWhenColliding(World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<AxisAlignedBB> cir) {
-        if (!Config.Companion.getBeansSize()) return;
+        if (!Config.beansSize.getValue()) return;
         IBlockState ibs = worldIn.getBlockState(pos);
         int i = ibs.getValue(BlockCocoa.AGE);
         int j = 4 + i * 2;
@@ -66,7 +66,7 @@ public class MixinBlockCocoa extends Block {
 
     @Inject(method = "setBlockBoundsBasedOnState", at = @At(value = "HEAD"), cancellable = true)
     private void increaseBlockBox(IBlockAccess worldIn, BlockPos pos, CallbackInfo ci) {
-        if (!Config.Companion.getBeansSize()) return;
+        if (!Config.beansSize.getValue()) return;
         float f = worldIn.getBlockState(pos).getValue(BlockCocoa.AGE) < 2 ? 0f : 1f;
         this.setBlockBounds(0.0f, 0.0f, 0.0f, f, f, f);
         ci.cancel();

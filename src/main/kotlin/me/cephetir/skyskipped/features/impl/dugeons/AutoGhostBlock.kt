@@ -18,128 +18,76 @@
 
 package me.cephetir.skyskipped.features.impl.dugeons
 
-import me.cephetir.bladecore.utils.minecraft.KeybindUtils.isDown
-import me.cephetir.skyskipped.SkySkipped
+import me.cephetir.bladecore.core.event.listener.listener
+import me.cephetir.bladecore.utils.player
+import me.cephetir.bladecore.utils.world
 import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.event.events.BlockCollisionEvent
 import me.cephetir.skyskipped.features.Feature
-import net.minecraft.block.state.IBlockState
+import net.minecraft.block.*
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockPos
-import net.minecraft.util.Vec3
-import net.minecraft.util.Vec3i
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent
-import kotlin.math.abs
+import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
+import kotlin.math.floor
 
 
 class AutoGhostBlock : Feature() {
+    private var canBeUsed = false
+    private var active = false
+    private var ticks = 0
 
-    @SubscribeEvent
-    fun onPlayerTick(event: PlayerTickEvent) {
-        if (!Config.autoGB || mc.thePlayer == null || mc.theWorld == null || event.phase != TickEvent.Phase.START) return
-        when(Config.autoGBMode) {
-            0 -> onSneak()
-            1 -> onKey()
-            else -> onSneak()
+    init {
+        listener<ClientTickEvent> {
+            if (!Config.autoGB.value || player == null || mc.currentScreen != null) return@listener
+            canBeUsed = player!!.onGround &&
+                    player!!.isCollidedVertically &&
+                    isAllowed(world!!.getBlockState(BlockPos(player!!.posX, player!!.posY, player!!.posZ)).block)
+            --ticks
+
+            if (canBeUsed && !active && ((Config.autoGBMode.value == 1 && Config.autoGBKey.isKeyDown()) || (Config.autoGBMode.value == 0 && mc.gameSettings.keyBindSneak.isKeyDown))) {
+                //world!!.setBlockToAir(BlockPos(player!!.posX, player!!.posY, player!!.posZ))
+                active = true
+                ticks = 2
+            } else if (active && !insideOfBlock()) {
+                player!!.setVelocity(0.0, player!!.motionY, 0.0)
+                active = false
+            } else if (active) {
+                // Make ghost blocks in front
+            }
+        }
+
+        listener<BlockCollisionEvent> {
+            if (!Config.autoGB.value || player == null || !active || it.entity != player || it.boundingBox == null) return@listener
+
+            if (it.boundingBox!!.maxY > player!!.entityBoundingBox.minY || mc.gameSettings.keyBindSneak.isKeyDown || ticks >= 0)
+                it.cancel()
+        }
+
+        listener<WorldEvent.Load> {
+            canBeUsed = false
+            active = false
+            ticks = 0
         }
     }
 
-    private fun onSneak() {
-        if (mc.gameSettings.keyBindSneak.isDown()) {
-            val playerPos: BlockPos = mc.thePlayer.position
-            val playerVec: Vec3 = mc.thePlayer.positionVector
-            val vec3i = Vec3i(3, 1, 3)
-            val vec3i2 = Vec3i(3, 2, 3)
-            for (blockPos in BlockPos.getAllInBox(playerPos.add(vec3i), playerPos.subtract(vec3i2))) {
-                val diffX = abs(blockPos.x + 0.5 - playerVec.xCoord)
-                val diffZ = abs(blockPos.z + 0.5 - playerVec.zCoord)
-                val diffY = blockPos.y - playerVec.yCoord
-                if (diffX < 1 && diffZ < 1) {
-                    val blockState: IBlockState = mc.theWorld.getBlockState(blockPos)
+    private fun isAllowed(block: Block): Boolean {
+        return block is BlockStairs || block is BlockFence || block is BlockFenceGate || block is BlockWall || block == Blocks.hopper || block is BlockSkull
+    }
 
-                    if (isStair(blockState) && diffY == -0.5)
-                        mc.theWorld.setBlockToAir(blockPos)
-                    else if (blockState.block == Blocks.skull && diffY == 0.0 && diffX < 0.5 && diffZ < 0.5)
-                        mc.theWorld.setBlockToAir(blockPos)
-                    else if (blockState.block == Blocks.hopper && diffY == -0.625)
-                        mc.theWorld.setBlockToAir(blockPos)
-                    else if (isFence(blockState) && diffY <= 0 && diffX < 0.5 && diffZ < 0.5)
-                        mc.theWorld.setBlockToAir(blockPos)
-                }
-            }
-        } else if (mc.gameSettings.keyBindJump.isDown()) {
-            val playerPos: BlockPos = mc.thePlayer.position
-            val playerVec: Vec3 = mc.thePlayer.positionVector
-            val vec3i = Vec3i(3, 2, 3)
-            val vec3i2 = Vec3i(3, 0, 3)
-            for (blockPos in BlockPos.getAllInBox(playerPos.add(vec3i), playerPos.subtract(vec3i2))) {
-                val diffX = abs(blockPos.x + 0.5 - playerVec.xCoord)
-                val diffZ = abs(blockPos.z + 0.5 - playerVec.zCoord)
-                val diffY = blockPos.y - playerVec.yCoord
-                if (diffX < 1 && diffZ < 1) {
-                    val blockState: IBlockState = mc.theWorld.getBlockState(blockPos)
-
-                    if (isStair(blockState) && diffY > 1.2 && diffY < 1.3)
-                        mc.theWorld.setBlockToAir(blockPos)
+    private fun insideOfBlock(): Boolean {
+        val box = player!!.entityBoundingBox
+        for (i in floor(box.minX).toInt()..floor(box.maxX).toInt()) {
+            for (j in floor(box.minY).toInt()..floor(box.maxY).toInt()) {
+                for (k in floor(box.minZ).toInt()..floor(box.maxZ).toInt()) {
+                    val block = world!!.getBlockState(BlockPos(i, j, k)).block
+                    if (block == null || block is BlockAir) continue
+                    val blockBB = block.getCollisionBoundingBox(world, BlockPos(i, j, k), world!!.getBlockState(BlockPos(i, j, k)))
+                    if (blockBB == null || !box.intersectsWith(blockBB)) continue
+                    return true
                 }
             }
         }
+        return false
     }
-
-    private fun onKey() {
-        if (SkySkipped.autoGhostBlockKey.isDown()) {
-            val playerPos: BlockPos = mc.thePlayer.position
-            val playerVec: Vec3 = mc.thePlayer.positionVector
-            val vec3i = Vec3i(3, 1, 3)
-            val vec3i2 = Vec3i(3, 2, 3)
-            for (blockPos in BlockPos.getAllInBox(playerPos.add(vec3i), playerPos.subtract(vec3i2))) {
-                val diffX = abs(blockPos.x + 0.5 - playerVec.xCoord)
-                val diffZ = abs(blockPos.z + 0.5 - playerVec.zCoord)
-                val diffY = blockPos.y - playerVec.yCoord
-                if (diffX < 1 && diffZ < 1) {
-                    val blockState: IBlockState = mc.theWorld.getBlockState(blockPos)
-
-                    if (isStair(blockState) && diffY == -0.5) {
-                        mc.theWorld.setBlockToAir(blockPos)
-                        return
-                    }
-                    else if (blockState.block == Blocks.skull && diffY == 0.0 && diffX < 0.5 && diffZ < 0.5) {
-                        mc.theWorld.setBlockToAir(blockPos)
-                        return
-                    }
-                    else if (blockState.block == Blocks.hopper && diffY == -0.625) {
-                        mc.theWorld.setBlockToAir(blockPos)
-                        return
-                    }
-                    else if (isFence(blockState) && diffY <= 0 && diffX < 0.5 && diffZ < 0.5) {
-                        mc.theWorld.setBlockToAir(blockPos)
-                        return
-                    }
-                }
-            }
-
-            val playerPos2: BlockPos = mc.thePlayer.position
-            val playerVec2: Vec3 = mc.thePlayer.positionVector
-            val vec3i4 = Vec3i(3, 2, 3)
-            val vec3i3 = Vec3i(3, 0, 3)
-            for (blockPos in BlockPos.getAllInBox(playerPos2.add(vec3i4), playerPos2.subtract(vec3i3))) {
-                val diffX = abs(blockPos.x + 0.5 - playerVec2.xCoord)
-                val diffZ = abs(blockPos.z + 0.5 - playerVec2.zCoord)
-                val diffY = blockPos.y - playerVec2.yCoord
-                if (diffX < 1 && diffZ < 1) {
-                    val blockState: IBlockState = mc.theWorld.getBlockState(blockPos)
-
-                    if (isStair(blockState) && diffY > 1.2 && diffY < 1.3)
-                        mc.theWorld.setBlockToAir(blockPos)
-                }
-            }
-        }
-    }
-
-    private fun isStair(blockState: IBlockState): Boolean =
-        blockState.block == Blocks.acacia_stairs || blockState.block == Blocks.birch_stairs || blockState.block == Blocks.brick_stairs || blockState.block == Blocks.stone_brick_stairs || blockState.block == Blocks.stone_stairs || blockState.block == Blocks.dark_oak_stairs || blockState.block == Blocks.jungle_stairs || blockState.block == Blocks.spruce_stairs || blockState.block == Blocks.red_sandstone_stairs || blockState.block == Blocks.sandstone_stairs || blockState.block == Blocks.nether_brick_stairs || blockState.block == Blocks.oak_stairs || blockState.block == Blocks.quartz_stairs
-
-    private fun isFence(blockState: IBlockState): Boolean =
-        blockState.block == Blocks.acacia_fence || blockState.block == Blocks.birch_fence || blockState.block == Blocks.cobblestone_wall || blockState.block == Blocks.dark_oak_fence || blockState.block == Blocks.jungle_fence || blockState.block == Blocks.spruce_fence || blockState.block == Blocks.oak_fence || blockState.block == Blocks.nether_brick_fence
 }

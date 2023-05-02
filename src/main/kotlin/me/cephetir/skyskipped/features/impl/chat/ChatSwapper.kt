@@ -31,12 +31,15 @@ class ChatSwapper : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!EssentialAPI.getMinecraftUtil().isHypixel() || !Config.chatSwapper) return
+        if (!EssentialAPI.getMinecraftUtil().isHypixel() || !Config.chatSwapper.value) return
         val msg = event.message.unformattedText.stripColor()
         if ((msg.startsWith("You have been kicked from the party") || msg.contains("has disbanded") || msg.startsWith("You left the party") || msg.contains("was disbanded")) && inParty) {
             Queues.sendCommand("/chat all")
             inParty = false
-        } else if (((msg.startsWith("You have joined") && msg.endsWith(" party!")) || msg.startsWith("Party Members") || msg.contains("joined the party") || msg.contains("joined the dungeon group") || msg.contains("joined your party")) && !inParty) {
+        } else if (((msg.startsWith("You have joined") && msg.endsWith(" party!")) || msg.startsWith("Party Members") || msg.contains("joined the party") || msg.contains("joined the dungeon group") || msg.contains(
+                "joined your party"
+            )) && !inParty
+        ) {
             Queues.sendCommand("/chat p")
             inParty = true
         }

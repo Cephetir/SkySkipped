@@ -20,7 +20,6 @@ package me.cephetir.skyskipped.mixins;
 
 import gg.essential.lib.mixinextras.injector.ModifyReturnValue;
 import me.cephetir.bladecore.utils.TextUtils;
-import me.cephetir.skyskipped.config.Cache;
 import me.cephetir.skyskipped.config.Config;
 import me.cephetir.skyskipped.features.impl.hacks.ShinyBlocks;
 import net.minecraft.block.Block;
@@ -45,44 +44,41 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
     @Shadow
+    private static int debugFPS;
+    @Shadow
     public GameSettings gameSettings;
-
     @Shadow
     public boolean inGameHasFocus;
-
     @Shadow
     public MovingObjectPosition objectMouseOver;
-
     @Shadow
     public PlayerControllerMP playerController;
-
     @Shadow
     public WorldClient theWorld;
-
     @Shadow
     public EntityPlayerSP thePlayer;
-
     @Shadow
     public EntityRenderer entityRenderer;
-
     @Shadow
     private Timer timer;
 
-    @Shadow
-    private static int debugFPS;
+    @ModifyReturnValue(method = "getDebugFPS", at = @At("RETURN"))
+    private static int getDebugFPSRedirect(int original) {
+        return Config.fpsSpoof.getValue() ? original + Config.fpsSpoofNumber.getValue().intValue() : original;
+    }
 
     @Inject(method = "sendClickBlockToController", at = @At("HEAD"), cancellable = true)
-    private void sendClickBlockToControllerHead(CallbackInfo ci) {
+    private void sendClickBlockToControllerHead(boolean leftClick, CallbackInfo ci) {
         if (ShinyBlocks.Companion.getShouldBreak()) {
             ShinyBlocks.Companion.mine();
             ci.cancel();
             return;
         }
 
-        if (!Config.Companion.getStopBreaking() || Config.Companion.getStopBreakingList().isEmpty() || this.objectMouseOver == null || this.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK)
+        if (!Config.stopBreaking.getValue() || Config.stopBreakingList.getValue().isEmpty() || this.objectMouseOver == null || this.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK)
             return;
 
-        String[] blocks = Config.Companion.getStopBreakingList().split(", ");
+        String[] blocks = Config.stopBreakingList.getValue().split(", ");
         BlockPos blockpos = this.objectMouseOver.getBlockPos();
         Block block = this.theWorld.getBlockState(blockpos).getBlock();
 
@@ -92,9 +88,9 @@ public class MixinMinecraft {
 
     @Inject(method = "sendClickBlockToController", at = @At("RETURN"))
     private void sendClickBlockToController(CallbackInfo ci) {
-        if (!Config.Companion.getFastBreak() || !Cache.INSTANCE.getOnIsland()) return;
+        if (!Config.fastBreak.getValue()) return;
 
-        int extraClicks = Config.Companion.getFastBreakNumber();
+        int extraClicks = Config.fastBreakNumber.getValue().intValue();
         boolean shouldClick = Minecraft.getMinecraft().currentScreen == null && this.gameSettings.keyBindAttack.isKeyDown() && this.inGameHasFocus;
         if (this.objectMouseOver != null && extraClicks > 0 && shouldClick)
             for (int i = 0; i < extraClicks; i++) {
@@ -106,20 +102,15 @@ public class MixinMinecraft {
                         || this.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK
                         || blockpos.equals(prevBlockPos)
                         || this.theWorld.getBlockState(blockpos).getBlock().getMaterial() == Material.air
-                        || TextUtils.INSTANCE.containsAny(this.theWorld.getBlockState(blockpos).getBlock().getUnlocalizedName(), Config.Companion.getStopBreakingList())
+                        || TextUtils.INSTANCE.containsAny(this.theWorld.getBlockState(blockpos).getBlock().getUnlocalizedName(), Config.stopBreakingList.getValue())
                 ) break;
                 this.playerController.clickBlock(blockpos, this.objectMouseOver.sideHit);
                 if (i % 3 == 0) this.thePlayer.swingItem();
             }
     }
 
-    @ModifyReturnValue(method = "getDebugFPS", at = @At("RETURN"))
-    private static int getDebugFPSRedirect(int original) {
-        return Config.Companion.getFpsSpoof() ? original + Config.Companion.getFpsSpoofNumber() : original;
-    }
-
     @Redirect(method = "runGameLoop", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;debugFPS:I", opcode = Opcodes.GETSTATIC, ordinal = 0))
     private int runGameLoopRedirect() {
-        return Config.Companion.getFpsSpoof() ? debugFPS + Config.Companion.getFpsSpoofNumber() : debugFPS;
+        return Config.fpsSpoof.getValue() ? debugFPS + Config.fpsSpoofNumber.getValue().intValue() : debugFPS;
     }
 }

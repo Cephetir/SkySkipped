@@ -19,7 +19,7 @@ import dev.architectury.pack200.java.Pack200Adapter
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.8.20"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("gg.essential.loom") version "0.10.0.+"
     id("io.github.juuxel.loom-quiltflower-mini") version "7d04f32023"
@@ -28,7 +28,7 @@ plugins {
     idea
 }
 
-version = "3.4"
+version = "3.5"
 group = "me.cephetir"
 
 base {
@@ -79,10 +79,10 @@ dependencies {
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
 
-    include("me.cephetir:bladecore-loader-1.8.9-forge:1.1")
-    implementation("me.cephetir:bladecore-1.8.9-forge:0.0.1-a")
+    include("me.cephetir:bladecore-loader-1.8.9-forge:1.2")
+    implementation("me.cephetir:bladecore-1.8.9-forge:0.0.2-c")
 
-    implementation("com.github.DV8FromTheWorld:JDA:v5.0.0-alpha.19") {
+    implementation("net.dv8tion:JDA:5.0.0-alpha.19") {
         exclude(module = "opus-java")
     }
 
@@ -127,7 +127,7 @@ tasks {
     }
     remapJar {
         val file = shadowJar.get().archiveFile
-        archiveClassifier.set(file.hashCode().toString())
+        archiveClassifier.set(file.hashCode().toString().removePrefix("-"))
         input.set(file)
     }
     shadowJar {
@@ -166,12 +166,12 @@ tasks {
                 listOf(
                     "-Xjvm-default=all",
                     "-Xbackend-threads=0",
-                    "-Xuse-k2"
+                    //"-Xuse-k2"
                 )
         }
         kotlinDaemonJvmArguments.set(
             listOf(
-                "-Xmx2G",
+                "-Xmx4G",
                 "-Dkotlin.enableCacheBuilding=true",
                 "-Dkotlin.useParallelTasks=true",
                 "-Dkotlin.enableFastIncremental=true"

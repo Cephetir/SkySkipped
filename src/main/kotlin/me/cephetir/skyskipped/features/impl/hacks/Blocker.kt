@@ -31,10 +31,10 @@ class Blocker : Feature() {
 
     @SubscribeEvent
     fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (!Cache.onSkyblock || !Config.block) return
+        if (!Cache.onSkyblock || !Config.block.value) return
         if (event.entity != mc.thePlayer || event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) return
 
-        if (Config.blockZombieSword &&
+        if (Config.blockZombieSword.value &&
             mc.thePlayer.heldItem?.getSkyBlockID()?.contains("ZOMBIE_SWORD") == true &&
             mc.thePlayer.health >= mc.thePlayer.maxHealth
         ) {
@@ -43,7 +43,7 @@ class Blocker : Feature() {
         }
 
         val item = mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
-        if (!item.containsAny(Config.blockList.split(", "))) return
+        if (!item.containsAny(Config.blockList.value.split(", "))) return
         mc.thePlayer.playSound("random.orb", 0.8f, 1f)
         event.isCanceled = true
     }

@@ -118,7 +118,7 @@ class SugarCaneMacro : Macro("SugarCane") {
     }
 
     private fun onDisable() {
-        if (Config.sugarCaneCpuSaver) {
+        if (Config.sugarCaneCpuSaver.value) {
             mc.gameSettings.limitFramerate = lastFps
             mc.gameSettings.renderDistanceChunks = lastDist
         }
@@ -130,9 +130,9 @@ class SugarCaneMacro : Macro("SugarCane") {
     }
 
     private fun reset() {
-        farmDirection = FarmDirection.values()[Config.sugarCaneDirection]
-        farmDirectionNormal = FarmDirectionNormal.values()[Config.sugarCaneDirectionNormal]
-        farmType = FarmType.values()[Config.sugarCaneType]
+        farmDirection = FarmDirection.values()[Config.sugarCaneDirection.value]
+        farmDirectionNormal = FarmDirectionNormal.values()[Config.sugarCaneDirectionNormal.value]
+        farmType = FarmType.values()[Config.sugarCaneType.value]
         movementDirection = MovementDirection.LEFT
         farmingState = FarmingState.SETUP
 
@@ -230,18 +230,18 @@ class SugarCaneMacro : Macro("SugarCane") {
         }
         if (rotating == null) {
             val ya = try {
-                Config.customYaw.toFloat()
+                Config.customYaw.value.toFloat()
             } catch (ex: NumberFormatException) {
                 ex.printStackTrace()
                 69420f
             }
             val pi = try {
-                Config.customPitch.toFloat()
+                Config.customPitch.value.toFloat()
             } catch (ex: NumberFormatException) {
                 ex.printStackTrace()
                 69420f
             }
-            val yaw = if (Config.customYawToggle && ya != 69420f) ya
+            val yaw = if (Config.customYawToggle.value && ya != 69420f) ya
             else if (farmType == FarmType.NORMAL) when (farmDirectionNormal) {
                 FarmDirectionNormal.POSITIVE -> 45f
                 FarmDirectionNormal.NEGATIVE -> -45f
@@ -252,14 +252,14 @@ class SugarCaneMacro : Macro("SugarCane") {
                 FarmDirection.WEST -> 90f
                 FarmDirection.EAST -> -90f
             }
-            val pitch = if (Config.customPitchToggle && pi != 69420f) pi else 0f
+            val pitch = if (Config.customPitchToggle.value && pi != 69420f) pi else 0f
             printdev("Rotate yaw and pitch: $yaw $pitch")
             rotating = RotationClass(RotationClass.Rotation(yaw, pitch), if (yaw > 80 || pitch > 80) 1500L else 750L)
         }
         if (rotating!!.done) {
             printdev("Finished rotating")
 
-            if (Config.sugarCaneCpuSaver) {
+            if (Config.sugarCaneCpuSaver.value) {
                 lastFps = mc.gameSettings.limitFramerate
                 mc.gameSettings.limitFramerate = 30
                 lastDist = mc.gameSettings.renderDistanceChunks
@@ -348,7 +348,7 @@ class SugarCaneMacro : Macro("SugarCane") {
                 printdev("Changing direction to ${movementDirection.name}")
                 switchTimer = System.currentTimeMillis()
 
-                if (Config.sugarCaneSetSpawn && System.currentTimeMillis() - spawnTimer >= 1000) {
+                if (Config.sugarCaneSetSpawn.value && System.currentTimeMillis() - spawnTimer >= 1000) {
                     UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
                     mc.thePlayer.sendChatMessage("/sethome")
                     spawnTimer = System.currentTimeMillis()
@@ -434,7 +434,7 @@ class SugarCaneMacro : Macro("SugarCane") {
             }
             val moving = round(abs(motion) % 1.0 * 10000.0) / 10000.0
 
-            if (moving != 0.0 && Config.macroLagbackFix) return
+            if (moving != 0.0 && Config.macroLagbackFix.value) return
             if (ignoreBlocks.contains(sideBlock.block)) return
 
             if (ignoreBlocks.contains(frwrdBlock.block)) {
@@ -449,7 +449,7 @@ class SugarCaneMacro : Macro("SugarCane") {
                 else MovementDirection.LEFT
             printdev("Changing direction to ${movementDirection.name}")
 
-            if (Config.sugarCaneSetSpawn && System.currentTimeMillis() - spawnTimer >= 1000) {
+            if (Config.sugarCaneSetSpawn.value && System.currentTimeMillis() - spawnTimer >= 1000) {
                 UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
                 mc.thePlayer.sendChatMessage("/sethome")
                 spawnTimer = System.currentTimeMillis()
@@ -467,8 +467,8 @@ class SugarCaneMacro : Macro("SugarCane") {
 
         val yaw = mc.thePlayer.rotationYaw
         val pitch = mc.thePlayer.rotationPitch
-        if (lastyaw !in (yaw - Config.rotationDiff)..(yaw + Config.rotationDiff) ||
-            lastpitch !in (pitch - Config.rotationDiff)..(pitch + Config.rotationDiff)
+        if (lastyaw !in (yaw - Config.rotationDiff.value)..(yaw + Config.rotationDiff.value) ||
+            lastpitch !in (pitch - Config.rotationDiff.value)..(pitch + Config.rotationDiff.value)
         ) {
             printdev("Detected rotation change")
             farmingState = FarmingState.SETUP
@@ -535,7 +535,7 @@ class SugarCaneMacro : Macro("SugarCane") {
         if (jacobFailsafe()) return true
         banwaveChecker()
 
-        mc.thePlayer.inventory.currentItem = Config.autoPickSlot - 1
+        mc.thePlayer.inventory.currentItem = Config.autoPickSlot.value.toInt() - 1
         return false
     }
 
@@ -553,7 +553,7 @@ class SugarCaneMacro : Macro("SugarCane") {
     private fun unstuckFailsafe(): Int {
         if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return 0
         var stuck = 0
-        if (!Config.sugarCaneStuck) return 0
+        if (!Config.sugarCaneStuck.value) return 0
         if (Failsafes.lastPos == null) Failsafes.lastPos = mc.thePlayer.position
         else {
             if (checkPos(mc.thePlayer.position)) {
@@ -577,13 +577,13 @@ class SugarCaneMacro : Macro("SugarCane") {
     private fun desyncFailsafe(): Int {
         if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return 0
         var desynced = 0
-        if (!Config.sugarCaneDesync) return 0
+        if (!Config.sugarCaneDesync.value) return 0
         if (Failsafes.ticksWarpDesync >= 0) {
             Failsafes.ticksWarpDesync--
             return 0
         }
 
-        val ticksTimeout = Config.sugarCaneDesyncTime * 20
+        val ticksTimeout = Config.sugarCaneDesyncTime.value * 20
         val stack = mc.thePlayer.heldItem
         if (stack == null ||
             !stack.hasTagCompound() ||
@@ -628,7 +628,7 @@ class SugarCaneMacro : Macro("SugarCane") {
     }
 
     private fun jacobFailsafe(): Boolean {
-        if (!Config.sugarCaneJacob) return false
+        if (!Config.sugarCaneJacob.value) return false
         if (!Cache.isJacob) return false
         printdev("Jacob event is on!")
 
@@ -639,7 +639,7 @@ class SugarCaneMacro : Macro("SugarCane") {
             if (split.size != 3) return false
             val number = split[2].replace(",", "").toInt()
             printdev("Jacob crop amount $number")
-            if (number >= Config.sugarCaneJacobNumber) {
+            if (number >= Config.sugarCaneJacobNumber.value) {
                 printdev("Jacob detected!")
                 UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
                 sendWebhook("Jacob event", "Jacob event started! Stopping macro...", false)
@@ -655,7 +655,7 @@ class SugarCaneMacro : Macro("SugarCane") {
 
     private fun fullInvFailsafe(): Boolean {
         if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return false
-        if (!Config.sugarCaneFullInv) return false
+        if (!Config.sugarCaneFullInv.value) return false
 
         if (InventoryUtils.isFull()) {
             printdev("Inventory is full!")
@@ -672,8 +672,8 @@ class SugarCaneMacro : Macro("SugarCane") {
     }
 
     private fun banwaveChecker() {
-        if (!Config.sugarCaneBanWaveChecker) return
-        if (checkerTicks++ < Config.sugarCaneBanWaveCheckerTimer * 60 * 20) return
+        if (!Config.sugarCaneBanWaveChecker.value) return
+        if (checkerTicks++ < Config.sugarCaneBanWaveCheckerTimer.value * 60 * 20) return
 
         Multithreading.runAsync {
             val status = HttpUtils.sendGet(
@@ -683,7 +683,7 @@ class SugarCaneMacro : Macro("SugarCane") {
             if (status == "Nah") {
                 banwave = false
                 UChat.chat("§cSkySkipped §f:: §eBanwave: §aFalse")
-                if (Config.sugarCaneBanWaveCheckerDisable && checkerStopped) {
+                if (Config.sugarCaneBanWaveCheckerDisable.value && checkerStopped) {
                     UChat.chat("§cSkySkipped §f:: §eReenbabling macro...")
                     sendWebhook("Ban Wave Checker", "Ban Wave ended, reenabling macro...", false)
                     farmingState = FarmingState.IDLE
@@ -692,7 +692,7 @@ class SugarCaneMacro : Macro("SugarCane") {
             } else if (status == "disconnect:all") {
                 banwave = true
                 UChat.chat("§cSkySkipped §f:: §eBanwave: §cTrue")
-                if (Config.sugarCaneBanWaveCheckerDisable && !checkerStopped) {
+                if (Config.sugarCaneBanWaveCheckerDisable.value && !checkerStopped) {
                     UChat.chat("§cSkySkipped §f:: §eDisabling macro...")
                     sendWebhook("Ban Wave Checker", "Ban Wave started, disabling macro...", false)
                     farmingState = FarmingState.IDLE
@@ -715,7 +715,7 @@ class SugarCaneMacro : Macro("SugarCane") {
 
     private fun checkBan() {
         if (mc.currentScreen is GuiDisconnected) {
-            if (Config.webhook) {
+            if (Config.webhook.value) {
                 val message = ObfuscationReflectionHelper.getPrivateValue<IChatComponent, GuiDisconnected>(
                     GuiDisconnected::class.java, mc.currentScreen as GuiDisconnected,
                     "message", "field_146304_f"
@@ -726,7 +726,7 @@ class SugarCaneMacro : Macro("SugarCane") {
                 sendWebhook("Disconnected", "You got disconnected with reason:\\n$rsn", true)
             }
 
-            if (Config.sugarCaneReconnect) {
+            if (Config.sugarCaneReconnect.value) {
                 farmingState = FarmingState.IDLE
                 dced = true
                 mc.displayGuiScreen(

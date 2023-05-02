@@ -29,6 +29,7 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
 import me.cephetir.skyskipped.features.impl.hacks.HotbarSaver
 import me.cephetir.skyskipped.features.impl.hacks.PetMacro
+import me.cephetir.skyskipped.features.impl.macro.GuiRecorder
 import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.gui.impl.GuiHudEditor
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
@@ -62,10 +63,10 @@ class SkySkippedCommand : CommandBase() {
     }
 
     override fun processCommand(sender: ICommandSender, args: Array<String>) {
-        if (args.isEmpty()) return EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
+        if (args.isEmpty()) return Config.sm.openGui()
 
         when (args[0].lowercase()) {
-            "gui" -> EssentialAPI.getGuiUtil().openScreen(SkySkipped.config.gui())
+            "gui" -> Config.sm.openGui()
             "keybinds", "kb" -> EssentialAPI.getGuiUtil().openScreen(GuiItemSwap())
             "github" -> {
                 val text = UTextComponent("§cSkySkipped §f:: §eGithub: §fhttps://github.com/Cephetir/SkySkipped")
@@ -77,7 +78,7 @@ class SkySkippedCommand : CommandBase() {
             "pet" -> {
                 if (args.size >= 2 && args[1].isNumeric() && args[1].toInt() > 0) {
                     val player = mc.thePlayer
-                    if (Config.petsOverlay) Features.petsOverlay.auto = args[1].toInt()
+                    if (Config.petsOverlay.value) Features.petsOverlay.auto = args[1].toInt()
                     else BladeEventBus.subscribe(PetMacro(args[1].toInt()), true)
                     player.sendChatMessage("/pets")
                 } else chat("§cSkySkipped §f:: §4Specify pet index! Usage: /sm pet [pet index (start counting from 1)]")
@@ -89,7 +90,7 @@ class SkySkippedCommand : CommandBase() {
             }
 
             "trail" -> {
-                if (args.size >= 2) Config.trailParticle = args[1]
+                if (args.size >= 2) Config.trailParticle.value = args[1]
                 else chat("§cSkySkipped §f:: §4Specify particle name!")
             }
 
@@ -117,6 +118,24 @@ class SkySkippedCommand : CommandBase() {
                 chat("§cSkySkipped §f:: §ePacket thottle counter was reseted.")
             }
 
+            "guirecord" -> if (args.size < 2)
+                chat("§cSkySkipped §f:: §cUsage: /sm guirecord [record|loop [true/false]|save [file]|load [file]]")
+            else when (args[1]) {
+                "record" -> GuiRecorder.record()
+
+                "loop" -> if (args.size < 3)
+                    chat("§cSkySkipped §f:: §cUsage: /sm guirecord [record|loop [true/false]|save [file]|load [file]]")
+                else GuiRecorder.loop(args[2].toBoolean())
+
+                "save" -> if (args.size < 3)
+                    chat("§cSkySkipped §f:: §cUsage: /sm guirecord [record|loop [true/false]|save [file]|load [file]]")
+                else GuiRecorder.save(args[2])
+
+                "load" -> if (args.size < 3)
+                    chat("§cSkySkipped §f:: §cUsage: /sm guirecord [record|loop [true/false]|save [file]|load [file]]")
+                else GuiRecorder.load(args[2])
+            }
+
             "config" -> UDesktop.open(Config.modDir)
             "reload" -> SkySkipped.loadCosmetics()
             else -> chat(
@@ -125,15 +144,14 @@ class SkySkippedCommand : CommandBase() {
                     §cSkySkipped §f:: §e/sm §for§e /sm gui §f- §eOpens GUI
                     §cSkySkipped §f:: §e/sm keybinds §for§e /sm kb §f- §eOpens item swap keybinds GUI
                     §cSkySkipped §f:: §e/sm pet [pet index (start counting from 1)] §f- §eAuto select pet very fast
-                    §cSkySkipped §f:: §e/sm keybinds §for§e /sm kb §f- §eOpen keybinds GUI
                     §cSkySkipped §f:: §e/sm trail [particle name] §f- §eSet trail particle
                     §cSkySkipped §f:: §e/sm hud §f- §eOpens hud editor GUI
                     §cSkySkipped §f:: §e/sm hotbars §for§e /sm hb [save|select|remove|list] [preset name] §f- §eSave, select or remove hotbar preset
                     §cSkySkipped §f:: §e/sm packetThrottle §for§e /sm pt (reset) §f- §eShow packet thottle amount
-                    §cSkySkipped §f:: §e/sm config §f- §eReload cosmetics and custom names
+                    §cSkySkipped §f:: §e/sm guirecord [record|loop [true/false]|save [file]|load [file]] §f- §eRecord slot clicking in guis
+                    §cSkySkipped §f:: §e/sm config §f- §eOpen config folder
                     §cSkySkipped §f:: §e/sm reload §f- §eReload cosmetics and custom names
                     §cSkySkipped §f:: §e/sm github §f- §eOpens official github page
-                    §cSkySkipped §f:: §e/sm help §f- §eShows this message
                     """.trimIndent()
             )
         }

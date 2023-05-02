@@ -23,8 +23,8 @@ import gg.essential.universal.ChatColor
 import me.cephetir.bladecore.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.bladecore.utils.TextUtils.stripColor
 import me.cephetir.bladecore.utils.threading.safeListener
+import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.config.Config.Companion.coinsToggle
 import me.cephetir.skyskipped.event.events.ScoreboardRenderEvent
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.utils.render.RenderUtils
@@ -47,7 +47,7 @@ class CustomScoreboard : Feature() {
 
     init {
         safeListener<ScoreboardRenderEvent> {
-            if (!Config.customSb) return@safeListener
+            if (!Config.customSb.value) return@safeListener
             it.cancel()
             renderScoreboard(it.objective, it.resolution)
         }
@@ -74,7 +74,7 @@ class CustomScoreboard : Feature() {
                     ScorePlayerTeam.formatPlayerName(
                         scoreplayerteam as Team,
                         score.playerName
-                    ) + if (!Config.customSbNumbers) ": " + EnumChatFormatting.RED + score.scorePoints else ""
+                    ) + if (!Config.customSbNumbers.value) ": " + EnumChatFormatting.RED + score.scorePoints else ""
                 )
                 width = width.coerceAtLeast(mc.fontRendererObj.getStringWidth(s))
             }
@@ -107,29 +107,33 @@ class CustomScoreboard : Feature() {
                 lastHeight = h
             }
 
-            if (Config.customSbBlurT) BlurUtils.blurAreaRounded(
+            if (Config.customSbBlurT.value) BlurUtils.blurAreaRounded(
                 x, y,
                 x + w, y + h,
                 8f,
-                Config.customSbBlur
+                Config.customSbBlur.value.toFloat()
             )
-            if (Config.customSbBg) RoundUtils.drawRoundedRect(
+            if (Config.customSbBg.value) RoundUtils.drawRoundedRect(
                 x - 0.5f,
                 y - 0.5f,
                 x + w + 0.5f,
                 y + h + 0.5f,
                 5f,
-                Config.customSbBgColor.rgb
+                Color(Config.customSbBgColorR.value.toInt(), Config.customSbBgColorG.value.toInt(), Config.customSbBgColorB.value.toInt(), Config.customSbBgColorA.value.toInt()).rgb
             )
-            if (Config.customSbShadow) ShadowUtils.shadow(Config.customSbShadowStr,
-                { RoundUtils.drawRoundedRect(x, y, x + w, y + h, 5f, Color(0, 0, 0, 190).rgb) },
+            if (Config.customSbShadow.value) ShadowUtils.shadow(Config.customSbShadowStr.value.toFloat(),
+                { RoundUtils.drawRoundedRect(x, y, x + w, y + h, 5f, Color(0, 0, 0, 210).rgb) },
                 { RoundUtils.drawRoundedRect(x, y, x + w, y + h, 5f) }
             )
-            if (Config.customSbOutline) RoundUtils.drawRoundedOutline(
+            if (Config.customSbOutline.value) RoundUtils.drawRoundedOutline(
                 x - 1, y - 1, x + w + 1, y + h + 1,
                 5f,
                 2.5f,
-                if (!Config.customSbOutlineColorRainbow) Config.customSbOutlineColor.rgb
+                if (!Config.customSbOutlineColorRainbow.value) Color(
+                    Config.customSbOutlineColorR.value.toInt(),
+                    Config.customSbOutlineColorG.value.toInt(),
+                    Config.customSbOutlineColorB.value.toInt()
+                ).rgb
                 else RenderUtils.getChroma(3000F, 0),
             )
 
@@ -138,16 +142,16 @@ class CustomScoreboard : Feature() {
                 ++i2
                 val scoreplayerteam2: ScorePlayerTeam = scoreboard.getPlayersTeam(score2.playerName) ?: continue
                 var s2: String = ScorePlayerTeam.formatPlayerName(scoreplayerteam2 as Team, score2.playerName)
-                    .replace("§ewww.hypixel.ne\ud83c\udf82§et", Config.customSbText.replace("&", "§"))
+                    .replace("§ewww.hypixel.ne\ud83c\udf82§et", Config.customSbText.value.replace("&", "§"))
                 val k2 = j1 - i2 * fontHeight
                 val matcher = Pattern.compile("\\d\\d/\\d\\d/\\d\\d").matcher(s2)
-                if (Config.customSbLobby && matcher.find()) s2 = ChatFormatting.GRAY.toString() + matcher.group()
-                val flag = s2 == Config.customSbText.replace("&", "§")
+                if (Config.customSbLobby.value && matcher.find()) s2 = ChatFormatting.GRAY.toString() + matcher.group()
+                val flag = s2 == Config.customSbText.value.replace("&", "§")
                 if (flag) mc.fontRendererObj.drawStringWithShadow(
                     s2,
                     l1 + width / 2.0f - mc.fontRendererObj.getStringWidth(s2) / 2,
                     k2,
-                    Config.customSbOutlineColor.rgb
+                    Color(Config.customSbOutlineColorR.value.toInt(), Config.customSbOutlineColorG.value.toInt(), Config.customSbOutlineColorB.value.toInt()).rgb
                 )
                 else mc.fontRendererObj.drawStringWithShadow(a(s2), l1, k2, 553648127)
                 if (i2 == collection.size) {
@@ -169,12 +173,12 @@ class CustomScoreboard : Feature() {
 
     private fun a(text: String): String {
         val txt = text.stripColor().keepScoreboardCharacters().trim()
-        return if (coinsToggle && txt.startsWith("Purse: ")) {
+        return if (Config.coinsToggle.value && txt.startsWith("Purse: ")) {
             val coins = txt.substring(7).split(" ")[0].replace(",", "").toDouble()
-            val needed = coins + Config.coins
+            val needed = coins + Config.coins.value.toLong()
             val format = DecimalFormat("###,###.##")
             val s = format.format(needed).replace(" ", ",")
             "Purse: " + ChatColor.GOLD + s
-        } else text
+        } else SkySkipped.getCosmetics(text)!!
     }
 }

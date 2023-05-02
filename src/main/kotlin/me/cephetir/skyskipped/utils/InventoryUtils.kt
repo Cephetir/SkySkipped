@@ -59,5 +59,6 @@ object InventoryUtils {
 
     fun getStackInSlot(slot: Int): ItemStack? = mc.thePlayer.inventory.getStackInSlot(slot)
 
-    fun getStackInOpenContainerSlot(slot: Int): ItemStack? = if (mc.thePlayer.openContainer?.inventorySlots?.get(slot)?.hasStack == true) mc.thePlayer.openContainer.inventorySlots[slot].stack else null
+    fun getStackInOpenContainerSlot(slot: Int): ItemStack? =
+        if (mc.thePlayer.openContainer?.inventorySlots?.get(slot)?.hasStack == true) mc.thePlayer.openContainer.inventorySlots[slot].stack else null
 }

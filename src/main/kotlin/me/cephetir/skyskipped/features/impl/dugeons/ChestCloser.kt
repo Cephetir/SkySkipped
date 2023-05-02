@@ -30,7 +30,7 @@ import net.minecraft.network.play.server.S2DPacketOpenWindow
 class ChestCloser : Feature() {
     init {
         listener<PacketEvent.Receive> {
-            if (!Config.chestCloser || it.packet !is S2DPacketOpenWindow || !Cache.inDungeon || (it.packet as S2DPacketOpenWindow).windowTitle.unformattedText.stripColor() != "Chest") return@listener
+            if (!Config.chestCloser.value || it.packet !is S2DPacketOpenWindow || !Cache.inDungeon || (it.packet as S2DPacketOpenWindow).windowTitle.unformattedText.stripColor() != "Chest") return@listener
 
             it.cancel()
             mc.netHandler.networkManager.sendPacket(C0DPacketCloseWindow((it.packet as S2DPacketOpenWindow).windowId))

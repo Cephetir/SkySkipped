@@ -21,30 +21,34 @@ package me.cephetir.skyskipped.features.impl.hacks
 import gg.essential.universal.UChat
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
-import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import net.minecraft.client.gui.GuiChat
+import net.minecraft.client.gui.inventory.GuiEditSign
 import net.minecraft.client.gui.inventory.GuiInventory
 import net.minecraft.inventory.Slot
-import net.minecraftforge.client.event.RenderWorldLastEvent
+import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import org.lwjgl.input.Keyboard
 
 class ItemSwap : Feature() {
-    private val called = mutableMapOf<Pair<Slot, Slot>, Int>()
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Cache.onSkyblock) return
-        if (mc.currentScreen !is GuiInventory) return
+        if (event.phase != TickEvent.Phase.START || !Cache.onSkyblock || mc.currentScreen is GuiChat || mc.currentScreen is GuiEditSign) return
 
+        var flag = false
         for (keybind in SkySkipped.keybinds) {
             val down = keybind.isDown(true)
             if (down == keybind.lastState) continue
             keybind.lastState = down
             if (!down) continue
+
+            if (mc.currentScreen !is GuiInventory && !flag) {
+                mc.displayGuiScreen(GuiInventory(mc.thePlayer))
+                flag = true
+            }
 
             val screen = (mc.currentScreen as GuiInventory).inventorySlots
 
@@ -62,42 +66,25 @@ class ItemSwap : Feature() {
                 else if (item.displayName.contains(names[1], true)) second = slot
             }
 
-            if (first != null && second != null) called[Pair(first, second)] = 0
-            else UChat.chat("§cSkySkipped §f:: §4Can't find first or second item to swap!")
+            if (first != null && second != null) {
+                //mc.playerController.windowClick(screen.windowId, first.slotNumber, 0, 0, mc.thePlayer)
+                mc.netHandler.addToSendQueue(C0EPacketClickWindow(screen.windowId, first.slotNumber, 0, 0, first.stack, 0))
+                mc.thePlayer.openContainer.slotClick(first.slotNumber, 0, 0, mc.thePlayer)
+
+                //mc.playerController.windowClick(screen.windowId, second.slotNumber, 0, 0, mc.thePlayer)
+                mc.netHandler.addToSendQueue(C0EPacketClickWindow(screen.windowId, second.slotNumber, 0, 0, second.stack, 0))
+                mc.thePlayer.openContainer.slotClick(second.slotNumber, 0, 0, mc.thePlayer)
+
+                //mc.playerController.windowClick(screen.windowId, first.slotNumber, 0, 0, mc.thePlayer)
+                mc.netHandler.addToSendQueue(C0EPacketClickWindow(screen.windowId, first.slotNumber, 0, 0, first.stack, 0))
+                mc.thePlayer.openContainer.slotClick(first.slotNumber, 0, 0, mc.thePlayer)
+            } else UChat.chat("§cSkySkipped §f:: §4Can't find first or second item to swap!")
         }
+
+        if (flag) mc.thePlayer.closeScreen()
     }
 
-    fun GuiItemSwap.Keybind.isDown(inGui: Boolean = false) =
-        if (this.keyCode == Keyboard.KEY_NONE || (!inGui && (me.cephetir.skyskipped.utils.mc.currentScreen != null || me.cephetir.skyskipped.utils.mc.currentScreen is GuiChat))) false
+    private fun GuiItemSwap.Keybind.isDown(inGui: Boolean = false) =
+        if (this.keyCode == Keyboard.KEY_NONE || (!inGui && (mc.currentScreen != null || mc.currentScreen is GuiChat))) false
         else Keyboard.isKeyDown(this.keyCode)
-
-    private var timer = System.currentTimeMillis()
-
-    @SubscribeEvent
-    fun onRender(event: RenderWorldLastEvent) {
-        for ((slots, step) in called) {
-            if (mc.currentScreen !is GuiInventory) return called.clear()
-            if (System.currentTimeMillis() - timer < Config.swapDelay) return
-            timer = System.currentTimeMillis()
-
-            val first = slots.first
-            val second = slots.second
-            val screen = (mc.currentScreen as GuiInventory).inventorySlots
-
-            when (step) {
-                0 -> {
-                    mc.playerController.windowClick(screen.windowId, first.slotNumber, 0, 0, mc.thePlayer)
-                    called[slots] = 1
-                }
-                1 -> {
-                    mc.playerController.windowClick(screen.windowId, second.slotNumber, 0, 0, mc.thePlayer)
-                    called[slots] = 2
-                }
-                2 -> {
-                    mc.playerController.windowClick(screen.windowId, first.slotNumber, 0, 0, mc.thePlayer)
-                    called.remove(slots)
-                }
-            }
-        }
-    }
 }

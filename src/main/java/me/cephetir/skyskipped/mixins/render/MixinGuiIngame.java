@@ -41,15 +41,15 @@ public class MixinGuiIngame {
 
     @ModifyArg(method = "renderScoreboard", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I"))
     public String a(String text) {
-        if (Config.Companion.getCustomSb()) return text;
+        if (Config.customSb.getValue()) return text;
         String txt = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(text)).trim();
-        if (Config.Companion.getCoinsToggle() && txt.startsWith("Purse: ")) {
+        if (Config.coinsToggle.getValue() && txt.startsWith("Purse: ")) {
             double coins = Double.parseDouble(txt.substring(7).split(" ")[0].replace(",", ""));
-            double needed = coins + Config.Companion.getCoins();
+            double needed = coins + Long.parseLong(Config.coins.getValue());
             DecimalFormat format = new DecimalFormat("###,###.##");
             String s = format.format(needed).replace(" ", ",");
             return "Purse: " + ChatColor.GOLD + s;
-        } else if (Config.Companion.getCustomSbNumbers() && text.startsWith(EnumChatFormatting.RED + "") && Pattern.compile("\\d+").matcher(txt).matches())
+        } else if (Config.customSbNumbers.getValue() && text.startsWith(EnumChatFormatting.RED + "") && Pattern.compile("\\d+").matcher(txt).matches())
             return "";
         else return text;
     }

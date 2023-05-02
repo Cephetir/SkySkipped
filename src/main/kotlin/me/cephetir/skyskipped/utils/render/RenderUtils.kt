@@ -200,11 +200,13 @@ object RenderUtils {
         worldrenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
         tessellator.draw()
         GlStateManager.color(r, g, b, a)
+        glLineWidth(2f)
         RenderGlobal.drawSelectionBoundingBox(aabb)
         GlStateManager.enableTexture2D()
+        GlStateManager.enableLighting()
         GlStateManager.enableDepth()
         GlStateManager.disableBlend()
-        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
+        GlStateManager.resetColor()
     }
 
     fun getChroma(speed: Float, offset: Int): Int = Color.HSBtoRGB(
@@ -634,5 +636,32 @@ object RenderUtils {
         tessellator.draw()
         GlStateManager.enableDepth()
         GlStateManager.popMatrix()
+    }
+
+    fun drawLine(coordA: Vec3, coordB: Vec3, lineWidth: Float, color: Int) {
+        GlStateManager.enableBlend()
+        GlStateManager.disableDepth()
+        GlStateManager.disableLighting()
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
+        GlStateManager.disableTexture2D()
+        val a = (color shr 24 and 255).toFloat() / 255.0f
+        val r = (color shr 16 and 255).toFloat() / 255.0f
+        val g = (color shr 8 and 255).toFloat() / 255.0f
+        val b = (color and 255).toFloat() / 255.0f
+        GlStateManager.color(r, g, b, a)
+        glLineWidth(lineWidth)
+
+        val tessellator = Tessellator.getInstance()
+        val worldrenderer = tessellator.worldRenderer
+        worldrenderer.begin(3, DefaultVertexFormats.POSITION)
+        worldrenderer.pos(coordA.xCoord, coordA.yCoord, coordA.zCoord).endVertex()
+        worldrenderer.pos(coordB.xCoord, coordB.yCoord, coordB.zCoord).endVertex()
+        tessellator.draw()
+
+        GlStateManager.enableTexture2D()
+        GlStateManager.enableLighting()
+        GlStateManager.enableDepth()
+        GlStateManager.disableBlend()
+        GlStateManager.resetColor()
     }
 }

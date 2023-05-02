@@ -69,7 +69,7 @@ class LavaFishingSpots : Feature() {
     fun onTick(event: ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
 
-        if (Config.lavaFishingEsp && mc.theWorld != null && SkyblockListener.island == SkyblockIsland.CrystalHollows && !started) {
+        if (Config.lavaFishingEsp.value && mc.theWorld != null && SkyblockListener.island == SkyblockIsland.CrystalHollows && !started) {
             started = true
             BackgroundScope.launchLooping(job)
         } else if (started) {
@@ -80,7 +80,7 @@ class LavaFishingSpots : Feature() {
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!Config.lavaFishingEsp || lava.isEmpty() || SkyblockListener.island != SkyblockIsland.CrystalHollows || !started) return
+        if (!Config.lavaFishingEsp.value || lava.isEmpty() || SkyblockListener.island != SkyblockIsland.CrystalHollows || !started) return
 
         val (viewerX, viewerY, viewerZ) = RenderUtils.getViewerPos(event.partialTicks)
         for (pos in lava) {

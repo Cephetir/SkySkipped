@@ -18,6 +18,7 @@
 
 package me.cephetir.skyskipped.gui.impl
 
+import gg.essential.elementa.ElementaVersion
 import gg.essential.elementa.WindowScreen
 import gg.essential.elementa.components.ScrollComponent
 import gg.essential.elementa.components.UIContainer
@@ -37,7 +38,7 @@ import net.minecraft.client.settings.GameSettings
 import net.minecraft.util.ChatAllowedCharacters
 import java.awt.Color
 
-class GuiItemSwap : WindowScreen(newGuiScale = 2) {
+class GuiItemSwap : WindowScreen(ElementaVersion.V2, newGuiScale = 2) {
 
     private val scrollComponent: ScrollComponent
     private var clickedButton: Entry? = null
@@ -152,10 +153,12 @@ class GuiItemSwap : WindowScreen(newGuiScale = 2) {
                     clickedButton!!.keyCode = 0
                     clickedButton!!.modifiers = emptyList()
                 }
+
                 keyCode != 0 -> {
                     clickedButton!!.keyCode = keyCode
                     clickedButton!!.modifiers = extra
                 }
+
                 typedChar.code > 0 -> {
                     clickedButton!!.keyCode = typedChar.code + 256
                     clickedButton!!.modifiers = extra

@@ -45,7 +45,7 @@ class Metrics : Feature() {
             obj.addProperty("name", mc.session.username)
             obj.addProperty("online", online)
             HttpUtils.sendPost(
-                "https://skyskipped-website.vercel.app/api/user",
+                "https://skyskipped.com/api/user",
                 obj.toString(),
                 mapOf(
                     "Content-Type" to "application/json"

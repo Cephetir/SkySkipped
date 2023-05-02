@@ -31,6 +31,7 @@ class RotationClass(rotation: Rotation, time: Long) {
     private var endRot = Rotation(0f, 0f)
     private var startTime = 0L
     private var endTime = 0L
+
     @Volatile
     var done = true
 

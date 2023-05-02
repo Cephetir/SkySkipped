@@ -22,7 +22,9 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import gg.essential.api.EssentialAPI
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import me.cephetir.bladecore.core.cache.impl.MapCache
 import me.cephetir.bladecore.core.event.BladeEventBus
 import me.cephetir.bladecore.utils.HttpUtils
@@ -35,9 +37,11 @@ import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.features.impl.macro.RemoteControlling
 import me.cephetir.skyskipped.features.impl.misc.Metrics
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
-import me.cephetir.skyskipped.utils.CustomName
+import me.cephetir.skyskipped.utils.Cosmetic
 import me.cephetir.skyskipped.utils.mc
+import me.cephetir.skyskipped.utils.skyblock.Ping
 import net.minecraft.client.settings.KeyBinding
+import net.minecraft.util.ResourceLocation
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.Mod
@@ -48,8 +52,8 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.lwjgl.input.Keyboard
 import java.awt.Desktop
+import java.io.File
 import java.net.URI
-
 
 @Mod(
     modid = SkySkipped.MODID,
@@ -64,25 +68,21 @@ class SkySkipped {
     companion object {
         const val MODID = "skyskipped"
         const val MOD_NAME = "SkySkipped"
-        const val VERSION = "3.4"
+        const val VERSION = "3.5"
 
-        lateinit var config: Config
         val features = Features()
         val logger: Logger = LogManager.getLogger("SkySkipped")
         var devMode = false
 
-        val autoGhostBlockKey = KeyBinding("Auto Ghost Block", Keyboard.KEY_NONE, "SkySkipped")
-        val perspectiveToggle = KeyBinding("Better Perspective", Keyboard.KEY_NONE, "SkySkipped")
-        val autoDojo = KeyBinding("Auto Dojo", Keyboard.KEY_NONE, "SkySkipped")
-        val giftAura = KeyBinding("Gift Aura", Keyboard.KEY_NONE, "SkySkipped")
         val keybinds = hashSetOf<GuiItemSwap.Keybind>()
-        val macroKey = KeyBinding("Toggle Macro", Keyboard.KEY_NONE, "SkySkipped")
-        val hotbarKey = KeyBinding("Swap Hotbar Layouts", Keyboard.KEY_NONE, "SkySkipped")
+        val giftAura = KeyBinding("Gift Aura", Keyboard.KEY_NONE, "SkySkipped")
+        val playGuiRecorder = KeyBinding("Play gui recorder", Keyboard.KEY_NONE, "SkySkipped")
 
-        private val cosmetics = hashSetOf<CustomName>()
+        private val cosmetics = hashSetOf<Cosmetic>()
         private val regex =
             Regex("(?:§.)*(?<rank>\\[(?:§.)*\\d+(?:§.)*\\])? ?(?:§.)*(?<prefix>\\[\\w\\w\\w(?:§.)*(?:\\+(?:§.)*)*])? ?(?<username>\\w{3,16})(?:§.)*:*")
         val cosmeticCache = MapCache<String, String>(10000)
+        val capeCache = MapCache<String, Cosmetic.Cape?>(100)
 
         @JvmStatic
         fun getCosmetics(message: String?): String? {
@@ -113,19 +113,37 @@ class SkySkipped {
             return text
         }
 
+        @JvmStatic
+        fun getCape(uuid: String): ResourceLocation? {
+            if (mc.thePlayer == null || mc.theWorld == null)
+                return null
+            if (capeCache.isCached(uuid))
+                return capeCache.get(uuid)?.getCape()
+
+            val cape = cosmetics.find { it.cape != null && it.cape.uuid == uuid }?.cape
+            capeCache.cache(uuid, cape)
+            return cape?.getCape()
+        }
+
         private val gson = Gson()
         fun loadCosmetics() {
+            logger.info("Downloading cosmetics...")
             cosmetics.forEach { BladeEventBus.unsubscribe(it) }
             cosmetics.clear()
             val body = HttpUtils.sendGet(
                 "https://gist.githubusercontent.com/Cephetir/327b7738f91cd11636a5ae35029dd83c/raw",
                 mapOf("Content-Type" to "application/json")
             ) ?: return
-            gson.fromJson(body, JsonArray::class.java)?.toList()?.forEach {
+            gson.fromJson(body, JsonArray::class.java)?.forEach {
                 it as JsonObject
                 val name = it.getAsJsonPrimitive("name").asString
+                var cape: Cosmetic.Cape? = null
+                if (it.has("cape")) {
+                    val obj = it.getAsJsonObject("cape")
+                    cape = Cosmetic.Cape(obj.getAsJsonPrimitive("uuid").asString, obj.getAsJsonPrimitive("url").asString)
+                }
                 if (it.getAsJsonPrimitive("animated").asBoolean) {
-                    val nicks = mutableListOf<CustomName.Nick>()
+                    val nicks = mutableListOf<Cosmetic.Nick>()
                     val frames = it.getAsJsonArray("frames")
                     frames.sortedBy { frame ->
                         frame as JsonObject
@@ -133,91 +151,98 @@ class SkySkipped {
                     }.forEach { frame ->
                         frame as JsonObject
                         nicks.add(
-                            CustomName.Nick(
+                            Cosmetic.Nick(
                                 frame.getAsJsonPrimitive("nick").asString,
                                 frame.getAsJsonPrimitive("prefix").asString,
                                 frame.getAsJsonPrimitive("nextIn").asInt
                             )
                         )
                     }
-                    cosmetics.add(CustomName(name, true, nicks))
+                    cosmetics.add(Cosmetic(name, true, nicks, cape))
                 } else cosmetics.add(
-                    CustomName(
+                    Cosmetic(
                         name, false,
                         listOf(
-                            CustomName.Nick(
+                            Cosmetic.Nick(
                                 it.asJsonObject.getAsJsonPrimitive("nick").asString,
                                 it.asJsonObject.getAsJsonPrimitive("prefix").asString,
                                 -1
                             )
-                        )
+                        ), cape
                     )
                 )
             } ?: return logger.info("Failed to download cosmetics!")
             cosmeticCache.resetCache()
+            capeCache.resetCache()
             logger.info("Successfully downloaded cosmetics!")
         }
+
+        var newVersion = -1.0
     }
 
     @Mod.EventHandler
     fun onPreInit(event: FMLPreInitializationEvent) {
         logger.info("Starting SkySkipped...")
 
-        config = Config()
-        config.preload()
-        config.loadKeybinds()
-        config.loadHotbars()
-        config.loadScripts()
+        Config.load()
+        Config.loadKeybinds()
+        Config.loadHotbars()
+        Config.loadScripts()
     }
 
     @Mod.EventHandler
     fun onInit(event: FMLInitializationEvent) {
         logger.info("Initializing SkySkipped...")
 
+        BladeEventBus.subscribe(this, true)
         features.register()
+        Ping
+
+        updateJob = BackgroundScope.launch {
+            newVersion = checkForUpdates()
+            loadCosmetics()
+        }
 
         ClientCommandHandler.instance.registerCommand(SkySkippedCommand())
         ClientCommandHandler.instance.registerCommand(Features.leaveCommand)
         ClientCommandHandler.instance.registerCommand(Features.partyCommand)
 
-        ClientRegistry.registerKeyBinding(autoGhostBlockKey)
-        ClientRegistry.registerKeyBinding(perspectiveToggle)
-        ClientRegistry.registerKeyBinding(autoDojo)
         ClientRegistry.registerKeyBinding(giftAura)
-        ClientRegistry.registerKeyBinding(macroKey)
-        ClientRegistry.registerKeyBinding(hotbarKey)
+        ClientRegistry.registerKeyBinding(playGuiRecorder)
 
         ShutdownHook.register {
-            config.saveKeybinds()
-            config.saveHotbars()
-            config.markDirty()
-            config.writeData()
+            Config.saveKeybinds()
+            Config.saveHotbars()
 
             Metrics.update(false)
             RPC.shutdown()
             RemoteControlling.stop()
+            File(Config.modDir, "capes").deleteRecursively()
         }
+    }
+
+    private var updateJob: Job? = null
+    private fun checkForUpdates(): Double {
+        logger.info("Checking for updates...")
+        val version = HttpUtils.sendGet("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt", null)?.toDouble() ?: return -1.0
+        if (VERSION.toDouble() < version) {
+            logger.info("New version detected!")
+            return version
+        } else logger.info("Latest version!")
+        return -1.0
     }
 
     @Mod.EventHandler
     fun onLoad(event: FMLLoadCompleteEvent) {
-        logger.info("Checking for updates...")
-
-        BackgroundScope.launch {
-            run {
-                val version = HttpUtils.sendGet("https://raw.githubusercontent.com/Cephetir/SkySkipped/kotlin/h.txt", null)?.toDouble() ?: return@run
-                if (VERSION.toDouble() < version) {
-                    logger.info("New version detected!")
-                    EssentialAPI.getNotifications().push(
-                        "SkySkipped",
-                        "New Version Detected: $version\nClick to Download",
-                        10f,
-                        action = { Desktop.getDesktop().browse(URI("https://github.com/Cephetir/SkySkipped/releases")) }
-                    )
-                } else logger.info("Latest version!")
-            }
-
-            loadCosmetics()
+        if (updateJob?.isCompleted == false) runBlocking {
+            updateJob?.join()
         }
+
+        if (newVersion != -1.0) EssentialAPI.getNotifications().push(
+            "SkySkipped",
+            "New Version Detected: $newVersion\nClick to see more",
+            20f,
+            action = { Desktop.getDesktop().browse(URI("https://github.com/Cephetir/SkySkipped/releases/latest")) }
+        )
     }
 }

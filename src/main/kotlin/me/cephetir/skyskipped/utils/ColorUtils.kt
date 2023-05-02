@@ -31,6 +31,7 @@ object ColorUtils {
                 Integer.valueOf(hex.substring(2, 4), 16),
                 Integer.valueOf(hex.substring(4, 6), 16),
             )
+
             8 -> return Color(
                 Integer.valueOf(hex.substring(2, 4), 16),
                 Integer.valueOf(hex.substring(4, 6), 16),

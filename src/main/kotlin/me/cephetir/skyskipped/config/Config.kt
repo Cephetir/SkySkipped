@@ -19,12 +19,7 @@
 package me.cephetir.skyskipped.config
 
 import com.google.gson.*
-import gg.essential.elementa.utils.withAlpha
-import gg.essential.vigilance.Vigilant
-import gg.essential.vigilance.data.Category
-import gg.essential.vigilance.data.Property
-import gg.essential.vigilance.data.PropertyType
-import gg.essential.vigilance.data.SortingBehavior
+import me.cephetir.bladecore.config.settings.SettingManager
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.features.impl.hacks.HotbarSaver
@@ -32,110 +27,27 @@ import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.features.impl.macro.RemoteControlling
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import me.cephetir.skyskipped.utils.mc
-import java.awt.Color
+import net.minecraft.block.Block
+import net.minecraft.init.Blocks
 import java.io.File
-import kotlin.reflect.jvm.javaField
 
-class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFile, "SkySkipped", sortingBehavior = ConfigSorting()) {
-    init {
+
+object Config {
+    val modDir = File(File(mc.mcDataDir, "config"), "skyskipped")
+    val macroScriptsFolder = File(modDir, "scripts")
+    private val gson = Gson()
+    private val keybindsFile = File(modDir, "keybinds.json")
+    private val hotbarFile = File(modDir, "hotbars.json")
+    private val configFile = File(modDir, "config.json")
+    val sm = SettingManager(configFile, "SkySkipped", ConfigSorting())
+
+    fun load() {
         if (!configFile.exists()) {
             configFile.parentFile.mkdirs()
             configFile.createNewFile()
         }
-
-        registerListener<Boolean>(::DRPC.javaField!!) {
-            RPC.reset(it)
-        }
-
-        registerListener<Boolean>(::remoteControl.javaField!!) {
-            if (it) RemoteControlling.setup()
-            else RemoteControlling.stop()
-        }
-
-        registerListener<Int>(::macroType.javaField!!) {
-            MacroManager.current = MacroManager.macros[it]
-        }
-
-
-        addDependency("espMode", "esp")
-        addDependency("playeresp", "esp")
-        addDependency("starredmobsesp", "esp")
-        addDependency("batsesp", "esp")
-        addDependency("keyesp", "esp")
-        addDependency("playersespColor", "playeresp")
-        addDependency("playerespChroma", "playeresp")
-        addDependency("mobsespColor", "starredmobsesp")
-        addDependency("starredmobsespChroma", "starredmobsesp")
-        addDependency("batsespColor", "batsesp")
-        addDependency("batsespChroma", "batsesp")
-        addDependency("keyespColor", "keyesp")
-        addDependency("keyespChroma", "keyesp")
-        addDependency("customespColor", "customesp")
-        addDependency("customespChroma", "customesp")
-        addDependency("customespText", "customesp")
-
-        addDependency("drpcDetail", "DRPC")
-        addDependency("drpcState", "DRPC")
-        addDependency("drpcText", "DRPC")
-        addDependency("drpcText2", "DRPC")
-
-        addDependency("presentsColor", "presents")
-
-        addDependency("autoGBMode", "autoGB")
-        addDependency("betterPerspectiveItems", "betterPerspective")
-        addDependency("betterPerspectiveMode", "betterPerspective")
-
-        addDependency("customSbText", "customSb")
-        addDependency("customSbLobby", "customSb")
-        addDependency("customSbBlurT", "customSb")
-        addDependency("customSbBg", "customSb")
-        addDependency("customSbBgColor", "customSbBg")
-        addDependency("customSbShadow", "customSb")
-        addDependency("customSbShadowStr", "customSbShadow")
-        addDependency("customSbBlur", "customSbBlurT")
-        addDependency("customSbOutline", "customSb")
-        addDependency("customSbOutlineColor", "customSbOutline")
-        addDependency("customSbOutlineColorRainbow", "customSbOutline")
-
-        addDependency("blockList", "block")
-        addDependency("blockZombieSword", "block")
-
-        addDependency("petsBgBlur", "petsOverlay")
-        addDependency("petsBorderColor", "petsOverlay")
-        addDependency("petsBorderWidth", "petsOverlay")
-
-        addDependency("trailParticle", "trail")
-        addDependency("trailInterval", "trail")
-
-        addDependency("coins", "coinsToggle")
-        addDependency("mimicText", "mimic")
-
-        addDependency("customPitch", "customPitchToggle")
-        addDependency("customYaw", "customYawToggle")
-        addDependency("netherWartDesyncTime", "netherWartDesync")
-        addDependency("netherWartJacobNumber", "netherWartJacob")
-        addDependency("netherWartBanWaveCheckerDisable", "netherWartBanWaveChecker")
-        addDependency("netherWartBanWaveCheckerTimer", "netherWartBanWaveChecker")
-        addDependency("webhookUrl", "webhook")
-
-        addDependency("farmingHudX", "farmingHud")
-        addDependency("farmingHudY", "farmingHud")
-        addDependency("farmingHudColor", "farmingHud")
-        addDependency("farmingHudColorText", "farmingHud")
-
-        addDependency("stopBreakingList", "stopBreaking")
-        addDependency("autoReplyGuild", "autoReply")
-        addDependency("fpsSpoofNumber", "fpsSpoof")
-
-        setSubcategoryDescription("Hacks", "Item Swapper", "Set keybinds for Item Swapper in special gui \"/sm kb\"")
-        setSubcategoryDescription("Hacks", "Hotbar Swapper", "Set hotbar presets for Hotbar Swapper using command \"/sm hb\"")
-
-        initialize()
+        sm.loadConfig()
     }
-
-    private val gson = Gson()
-    private val keybindsFile = File(modDir, "keybinds.json")
-    private val hotbarFile = File(modDir, "hotbars.json")
 
     fun loadKeybinds() {
         try {
@@ -254,12 +166,13 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
         }
     }
 
-    private class ConfigSorting : SortingBehavior() {
+    private class ConfigSorting : SettingManager.CategorySorting() {
         private val categories = listOf(
             "Dungeons",
             "Macro",
             "Failsafes (Legacy)",
             "Visual",
+            "Optimization",
             "Movement",
             "Hacks",
             "Chat",
@@ -269,1481 +182,1572 @@ class Config(configFile: File = File(modDir, "config.toml")) : Vigilant(configFi
             "Misc",
         )
 
-        override fun getCategoryComparator(): Comparator<in Category> =
-            Comparator.comparingInt { category: Category -> categories.indexOf(category.name) }
+        override fun getCategoryComparator(): Comparator<in SettingManager.Category> =
+            Comparator.comparingInt { categories.indexOf(it.name) }
     }
 
-    companion object {
-        val modDir = File(File(mc.mcDataDir, "config"), "skyskipped")
-        val macroScriptsFolder = File(modDir, "scripts")
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Chest Closer",
-            category = "Dungeons",
-            subcategory = "Chest Closer",
-            description = "Auto close chests in dungeons."
-        )
-        var chestCloser = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Party chat swapper",
-            category = "Chat",
-            description = "Automatically swaps between party chat and global chat."
-        )
-        var chatSwapper = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Discord RPC",
-            category = "Discord",
-            description = "Shows status in discord."
-        )
-        var DRPC = true
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "RPC First Line",
-            category = "Discord",
-            description = "Shows status in discord.",
-            options = ["Location", "Username", "Server", "Item in hand", "Custom Text"]
-        )
-        var drpcDetail = 2
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "RPC Second Line",
-            category = "Discord",
-            description = "Shows status in discord.",
-            options = ["Location", "Username", "Server", "Item in hand", "Custom Text"]
-        )
-        var drpcState = 3
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "RPC Custom Text First Line",
-            category = "Discord",
-            description = "Shows status in discord."
-        )
-        var drpcText = ""
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "RPC Custom Text Second Line",
-            category = "Discord",
-            description = "Shows status in discord."
-        )
-        var drpcText2 = ""
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "ESP",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Shows mobs through walls."
-        )
-        var esp = false
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "ESP Mode",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Type of esp.",
-            options = ["Outline", "Box", "Chams"]
-        )
-        var espMode = 0
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Player ESP",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Shows players through walls."
-        )
-        var playeresp = false
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Player ESP Color",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Color for ESP."
-        )
-        var playersespColor: Color = Color.PINK
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Player ESP Chroma Color",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Chroma color for ESP."
-        )
-        var playerespChroma = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Starred Mobs ESP",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Shows starred mobs through walls."
-        )
-        var starredmobsesp = false
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Starred mobs ESP Color",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Color for ESP."
-        )
-        var mobsespColor: Color = Color.ORANGE
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Starred mobs ESP Chroma Color",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Chroma color for ESP."
-        )
-        var starredmobsespChroma = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Bats ESP",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Shows bats through walls."
-        )
-        var batsesp = false
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Bats ESP Color",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Color for ESP."
-        )
-        var batsespColor: Color = Color.GREEN
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Bats ESP Chroma Color",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Chroma color for ESP."
-        )
-        var batsespChroma = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Key ESP",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Shows keys through walls."
-        )
-        var keyesp = false
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Key ESP Color",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Color for ESP."
-        )
-        var keyespColor: Color = Color.RED
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Key ESP Chroma Color",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Chroma color for ESP."
-        )
-        var keyespChroma = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Custom ESP",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Shows custom mobs through walls."
-        )
-        var customesp = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Custom ESP Mobs",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Enter nametag name above mob.\nSplit with \", \""
-        )
-        var customespText = "Enderman, Zombie"
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Custom ESP Color",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Color for ESP."
-        )
-        var customespColor: Color = Color.BLUE
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Custom ESP Chroma Color",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Chroma color for ESP."
-        )
-        var customespChroma = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Terminal ESP",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Shows terminals on f7 boss fight through walls."
-        )
-        var terminalEsp = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Wither Door ESP",
-            category = "Dungeons",
-            subcategory = "ESP",
-            description = "Shows wither doors though walls in dungeons."
-        )
-        var witherDoorEsp = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Block ability",
-            category = "Hacks",
-            subcategory = "Block ability",
-            description = "Blocks item ability."
-        )
-        var block = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Item list",
-            category = "Hacks",
-            subcategory = "Block ability",
-            description = "List of items to block ability. Split with \", \"."
-        )
-        var blockList = ""
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Block Useless Zombie Sword Charges",
-            category = "Hacks",
-            subcategory = "Block ability",
-            description = "Block Useless Zombie Sword Charges."
-        )
-        var blockZombieSword = false
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Item Swap Delay",
-            category = "Hacks",
-            subcategory = "Item Swapper",
-            description = "Delay between items swapping.",
-            increment = 10,
-            max = 1000,
-            min = 10
-        )
-        var swapDelay = 100
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Jerry Box Open Delay",
-            category = "Hacks",
-            subcategory = "Jerry Box Opener",
-            description = "Delay between jerry box openning.",
-            increment = 10,
-            max = 1000,
-            min = 100
-        )
-        var boxDelay = 500
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Hotbar Swap Delay",
-            category = "Hacks",
-            subcategory = "Hotbar Swapper",
-            description = "Delay between items swapping.",
-            increment = 10,
-            max = 1000,
-            min = 10
-        )
-        var hotbarSwapDelay = 100
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Lava Fishing ESP",
-            category = "Hacks",
-            description = "Shows lava fising spots through walls."
-        )
-        var lavaFishingEsp = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Name ping",
-            category = "Chat",
-            description = "Plays sound when someone says your name in chat."
-        )
-        var ping = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Leave Dungeon",
-            category = "Dungeons",
-            subcategory = "Auto Leave",
-            description = "Runs /leavedungeon command after run ends."
-        )
-        var EndLeave = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Party FragBot when Dungeon ends",
-            category = "Dungeons",
-            subcategory = "Auto Leave",
-            description = "Runs /fragrun command after run ends."
-        )
-        var EndParty = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "FragBot Name",
-            category = "Dungeons",
-            subcategory = "Auto Leave",
-            description = "FragBot IGN."
-        )
-        var BotName = ""
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Delay For \"Leave Dungeon\"",
-            category = "Dungeons",
-            subcategory = "Auto Leave",
-            description = "Delay between going to lobby and to dungeon hub.",
-            increment = 10,
-            max = 10000
-        )
-        var delay = 2000
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Super Secret Money Exploit!",
-            category = "Super Secret Settings",
-            description = "§kMAKES YOUR PURSE BLOW UP WITH BILLIONS OF COINS"
-        )
-        var coinsToggle = false
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Amount of Coins",
-            category = "Super Secret Settings",
-            description = "Amount of Coins to add in purse",
-            max = 10_000_000_000.toInt(),
-            increment = 10000000
-        )
-        var coins = 10000000
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Mimic Killed Message On Mimic Death",
-            category = "Dungeons",
-            subcategory = "Ping",
-            description = "Send mimic text on it's death."
-        )
-        var mimic = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Mimic Message Text",
-            category = "Dungeons",
-            subcategory = "Ping",
-            description = "Text for mimic message."
-        )
-        var mimicText = "Mimic Killed!"
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Rabbit hat Ping",
-            category = "Dungeons",
-            subcategory = "Ping",
-            description = "Ping on Watcher cleared."
-        )
-        var rabbitPing = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Hide Pet's Candies",
-            category = "Visual",
-            description = "Hide pet's candies counter in tooltip."
-        )
-        var hidePetCandies = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Pets Overlay",
-            category = "Visual",
-            subcategory = "Pets Overlay",
-            description = "Good-looking overlay for pets menu.\n§cDon't use with small window size"
-        )
-        var petsOverlay = false
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Pets Overlay Background Blur Strength",
-            category = "Visual",
-            subcategory = "Pets Overlay",
-            description = "Strength for pets overlay background blur.",
-            minF = 5f,
-            maxF = 25f,
-            decimalPlaces = 1
-        )
-        var petsBgBlur = 12.5f
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Pets Overlay Border Color",
-            category = "Visual",
-            subcategory = "Pets Overlay",
-            description = "Color for pets overlay border."
-        )
-        var petsBorderColor: Color = Color(87, 0, 247, 255)
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Pets Overlay Border Width",
-            category = "Visual",
-            subcategory = "Pets Overlay",
-            description = "Width for pets overlay border.",
-            minF = 1f,
-            maxF = 6f,
-            decimalPlaces = 1
-        )
-        var petsBorderWidth = 2f
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Highlight Presents in Jerry Workshop",
-            category = "Visual",
-            subcategory = "Highlight Presents",
-            description = "Highlights presents in Jerry Workshop."
-        )
-        var presents = false
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Highlight Presents Color",
-            category = "Visual",
-            subcategory = "Highlight Presents",
-            description = "Color for presents highlight."
-        )
-        var presentsColor: Color = Color.GREEN
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Ghost Block",
-            category = "Dungeons",
-            subcategory = "Auto Ghost Block",
-            description = "Automatically make ghost block on stairs, upside down stairs, skulls, etc."
-        )
-        var autoGB = false
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "Auto Ghost Block Mode",
-            category = "Dungeons",
-            subcategory = "Auto Ghost Block",
-            description = "Automatically make ghost block when you're sneaking on stairs, upside down stairs, skulls, etc.",
-            options = ["On sneak", "On key"]
-        )
-        var autoGBMode = 0
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Admin Room Detection",
-            category = "Dungeons",
-            description = "Scans dungeon for admin room."
-        )
-        var adminRoom = false
-
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Perspective Toggle",
-            category = "Visual",
-            subcategory = "Perspective Toggle",
-            description = "Activates 3rd perspective on key."
-        )
-        var betterPerspective = true
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "Perspective Toggle Mode",
-            category = "Visual",
-            subcategory = "Perspective Toggle",
-            description = "Mode for perspective toggle.",
-            options = ["Hold", "Toggle"]
-        )
-        var betterPerspectiveMode = 0
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Perspective Item",
-            category = "Visual",
-            subcategory = "Perspective Toggle",
-            description = "On what item Perspective Toggle will work. Split with \", \".\nLeave blank for toggle to work with any item."
-        )
-        var betterPerspectiveItems = ""
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Custom Scoreboard",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Draw custom scoreboard."
-        )
-        var customSb = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Hide Server Number",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Hide server number from scoreboard."
-        )
-        var customSbLobby = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Blur Scoreboard Background",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Blur the background of scoreboard."
-        )
-        var customSbBlurT = false
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Custom Scoreboard Background Blur Strength",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Strength for scoreboard background blur.",
-            minF = 5f,
-            maxF = 25f,
-            decimalPlaces = 1
-        )
-        var customSbBlur = 20f
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Scoreboard Background",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Scoreboard background."
-        )
-        var customSbBg = true
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Scoreboard Background Color",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Color for scoreboard background."
-        )
-        var customSbBgColor: Color = Color(0, 0, 0, 110)
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Draw Scoreboard Outline",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Draw scoreboard outline."
-        )
-        var customSbOutline = false
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Scoreboard Outline Color",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Color for scoreboard outline."
-        )
-        var customSbOutlineColor: Color = Color(87, 0, 247, 255)
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Scoreboard Shadow",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Scoreboard Shadow."
-        )
-        var customSbShadow = true
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Scoreboard Shadow Strength",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Strength for scoreboard shadow.",
-            minF = 5f,
-            maxF = 25f,
-            decimalPlaces = 1
-        )
-        var customSbShadowStr = 15f
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Scoreboard Outline Rainbow Color",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Rainbow color for scoreboard outline."
-        )
-        var customSbOutlineColorRainbow = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Custom Scoreboard Text",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Name text to display on scoreboard\nFor color codes use \"&\"."
-        )
-        var customSbText = "SkySkipped"
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Red Ugly Numbers",
-            category = "Visual",
-            subcategory = "Scoreboard",
-            description = "Remove red ugly numbers."
-        )
-        var customSbNumbers = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Open Maddox Phone",
-            category = "Slayers",
-            description = "Clicks on Batphone and in chat on slayer kill."
-        )
-        var autoMaddox = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Delight Locked Gemstone Slots in AH",
-            category = "Visual",
-            description = "Make items with locked gemstone slots dark in ah."
-        )
-        var highlightSlots = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Trail",
-            category = "Visual",
-            subcategory = "Trail",
-            description = "Render trail behind player when moving."
-        )
-        var trail = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Trail Particles",
-            category = "Visual",
-            subcategory = "Trail",
-            description = "What particles will be rendered\nGet names from https://www.spigotmc.org/wiki/particle-list-1-8-8/"
-        )
-        var trailParticle = "DRIP_LAVA"
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Trail Interval",
-            category = "Visual",
-            subcategory = "Trail",
-            description = "Interval between particles in ms.",
-            min = 0,
-            max = 5000,
-            increment = 10
-        )
-        var trailInterval = 100
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Fast Break",
-            category = "Hacks",
-            subcategory = "Fast Break",
-            description = "Break extra blocks behind."
-        )
-        var fastBreak = false
-
-        @Property(
-            type = PropertyType.NUMBER,
-            name = "Fast Break Block Number",
-            category = "Hacks",
-            subcategory = "Fast Break",
-            description = "How many extra blocks to break.",
-            min = 0,
-            max = 3,
-            increment = 1
-        )
-        var fastBreakNumber = 3
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Stop fly",
-            category = "Movement",
-            description = "Stop flying on private island."
-        )
-        var stopFly = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Cookie Clicker",
-            category = "Misc",
-            description = "Auto clicks in cookie clicker."
-        )
-        var cookieClicker = false
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "Macro Type",
-            category = "Macro",
-            description = "Choose macro for keybind.",
-            options = ["Nether Wart (SShaped)", "Sugar Cane (Normal and SShaped)"]
-        )
-        var macroType = 0
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Schedule Disable",
-            category = "Macro",
-            description = "Hours before macro will be auto disabled (0 for unlimited time).",
-            minF = 0f,
-            maxF = 12f,
-            decimalPlaces = 1
-        )
-        var macroStopTime = 0f
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Custom Pitch Toggle",
-            category = "Macro",
-            description = "Override default pitch."
-        )
-        var customYawToggle = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Custom Yaw Value",
-            category = "Macro",
-            description = "Override default yaw."
-        )
-        var customYaw = "0"
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Custom Pitch Toggle",
-            category = "Macro",
-            description = "Override default pitch."
-        )
-        var customPitchToggle = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Custom Pitch Value",
-            category = "Macro",
-            description = "Override default pitch."
-        )
-        var customPitch = "0"
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Rotation Difference",
-            category = "Macro",
-            description = "Rotation difference needed for auto rotation rotate your head back.",
-            minF = 0f,
-            maxF = 50f,
-            decimalPlaces = 1
-        )
-        var rotationDiff = 0.2f
-
-        @Property(
-            type = PropertyType.NUMBER,
-            name = "Auto Pick Slot With Hoe",
-            category = "Macro",
-            description = "Auto picks slot when macro is started.",
-            min = 1,
-            max = 9,
-            increment = 1
-        )
-        var autoPickSlot = 1
-
-        //        @Property(
+    @JvmField
+    val chestCloser = sm.booleanSetting("Chest Closer") {
+        description = "Auto close chests in dungeons"
+        category = "Dungeons"
+        subCategory = "Chest Closer"
+    }
+
+    @JvmField
+    val chatSwapper = sm.booleanSetting("Party chat swapper") {
+        description = "Automatically swaps between party chat and global chat"
+        category = "Chat"
+    }
+
+    @JvmField
+    val DRPC = sm.booleanSetting("Discord RPC") {
+        description = "Shows SkySkipped status in discord"
+        category = "Discord"
+        value = true
+        listener = { RPC.reset(it) }
+    }
+
+    @JvmField
+    val drpcDetail = sm.selectorSetting("RPC First Line") {
+        category = "Discord"
+        options = arrayOf("Location", "Username", "Server", "Item in hand", "Custom Text")
+    }
+
+    @JvmField
+    val drpcState = sm.selectorSetting("RPC Second Line") {
+        category = "Discord"
+        options = arrayOf("Location", "Username", "Server", "Item in hand", "Custom Text")
+        value = 3
+    }
+
+    @JvmField
+    val drpcText = sm.textSetting("RPC Custom Text First Line") {
+        category = "Discord"
+        isHidden = { drpcDetail.value != 4 }
+    }
+
+    @JvmField
+    val drpcText2 = sm.textSetting("RPC Custom Text Second Line") {
+        category = "Discord"
+        isHidden = { drpcState.value != 4 }
+    }
+
+    @JvmField
+    val esp = sm.booleanSetting("ESP") {
+        description = "Shows mobs through walls"
+        category = "Dungeons"
+        subCategory = "ESP"
+    }
+
+    @JvmField
+    val espMode = sm.selectorSetting("ESP Mode") {
+        description = "Type of esp"
+        category = "Dungeons"
+        subCategory = "ESP"
+        options = arrayOf("Outline", "Box", "Chams")
+    }
+
+    @JvmField
+    val playeresp = sm.booleanSetting("Player ESP") {
+        description = "Shows players through walls"
+        category = "Dungeons"
+        subCategory = "ESP"
+        isHidden = { !esp.value }
+    }
+
+    @JvmField
+    val playerespR = sm.numberSetting("Player ESP Color Red") {
+        description = "Red color for Player ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 255.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !playeresp.value || playerespChroma.value }
+    }
+
+    @JvmField
+    val playerespG = sm.numberSetting("Player ESP Color Green") {
+        description = "Green color for Player ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 175.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !playeresp.value || playerespChroma.value }
+    }
+
+    @JvmField
+    val playerespB = sm.numberSetting("Player ESP Color Blue") {
+        description = "Blue color for Player ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 175.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !playeresp.value || playerespChroma.value }
+    }
+
+    @JvmField
+    val playerespChroma = sm.booleanSetting("Player ESP Chroma Color") {
+        description = "Chroma color for Player ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        isHidden = { !esp.value || !playeresp.value }
+    }
+
+    @JvmField
+    val starredmobsesp = sm.booleanSetting("Starred Mobs ESP") {
+        description = "Shows starred mobs through walls"
+        category = "Dungeons"
+        subCategory = "ESP"
+        isHidden = { !esp.value }
+    }
+
+    @JvmField
+    val mobsespR = sm.numberSetting("Starred mobs ESP Color Red") {
+        description = "Red color for Starred mobs ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 255.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !starredmobsesp.value || starredmobsespChroma.value }
+    }
+
+    @JvmField
+    val mobsespG = sm.numberSetting("Starred mobs ESP Color Green") {
+        description = "Green color for Starred mobs ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 200.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !starredmobsesp.value || starredmobsespChroma.value }
+    }
+
+    @JvmField
+    val mobsespB = sm.numberSetting("Starred mobs ESP Color Blue") {
+        description = "Blue color for Starred mobs ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 0.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !starredmobsesp.value || starredmobsespChroma.value }
+    }
+
+    @JvmField
+    val starredmobsespChroma = sm.booleanSetting("Starred mobs ESP Chroma Color") {
+        description = "Chroma color for Starred mobs ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        isHidden = { !esp.value || !starredmobsesp.value }
+    }
+
+    @JvmField
+    val batsesp = sm.booleanSetting("Bats ESP") {
+        description = "Shows bats through walls"
+        category = "Dungeons"
+        subCategory = "ESP"
+        isHidden = { !esp.value }
+    }
+
+    @JvmField
+    val batsespR = sm.numberSetting("Bats ESP Color Red") {
+        description = "Red color for Bats ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 0.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !batsesp.value || batsespChroma.value }
+    }
+
+    @JvmField
+    val batsespG = sm.numberSetting("Bats ESP Color Green") {
+        description = "Green color for Bats ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 255.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !batsesp.value || batsespChroma.value }
+    }
+
+    @JvmField
+    val batsespB = sm.numberSetting("Bats ESP Color Blue") {
+        description = "Blue color for Bats ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 0.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !batsesp.value || batsespChroma.value }
+    }
+
+    @JvmField
+    val batsespChroma = sm.booleanSetting("Bats ESP Chroma Color") {
+        description = "Chroma color for Bats ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        isHidden = { !esp.value || !batsesp.value }
+    }
+
+    @JvmField
+    val keyesp = sm.booleanSetting("Key ESP") {
+        description = "Shows key through walls"
+        category = "Dungeons"
+        subCategory = "ESP"
+        isHidden = { !esp.value }
+    }
+
+    @JvmField
+    val keyespR = sm.numberSetting("Key ESP Color Red") {
+        description = "Red color for Key ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 255.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !keyesp.value || keyespChroma.value }
+    }
+
+    @JvmField
+    val keyespG = sm.numberSetting("Key ESP Color Green") {
+        description = "Green color for Key ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 0.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !keyesp.value || keyespChroma.value }
+    }
+
+    @JvmField
+    val keyespB = sm.numberSetting("Key ESP Color Blue") {
+        description = "Blue color for Key ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 0.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !keyesp.value || keyespChroma.value }
+    }
+
+    @JvmField
+    val keyespChroma = sm.booleanSetting("Key ESP Chroma Color") {
+        description = "Chroma color for Key ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        isHidden = { !esp.value || !keyesp.value }
+    }
+
+    @JvmField
+    val customesp = sm.booleanSetting("Custom ESP") {
+        description = "Shows key through walls"
+        category = "Dungeons"
+        subCategory = "ESP"
+        isHidden = { !esp.value }
+    }
+
+    @JvmField
+    val customespR = sm.numberSetting("Custom ESP Color Red") {
+        description = "Red color for Custom ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 255.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !customesp.value || customespChroma.value }
+    }
+
+    @JvmField
+    val customespG = sm.numberSetting("Custom ESP Color Green") {
+        description = "Green color for Custom ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 0.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !customesp.value || customespChroma.value }
+    }
+
+    @JvmField
+    val customespB = sm.numberSetting("Custom ESP Color Blue") {
+        description = "Blue color for Custom ESP"
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = 0.0
+        min = 0.0
+        max = 255.0
+        isHidden = { !esp.value || !customesp.value || customespChroma.value }
+    }
+
+    @JvmField
+    val customespChroma = sm.booleanSetting("Custom ESP Chroma Color") {
+        category = "Dungeons"
+        subCategory = "ESP"
+        isHidden = { !esp.value || !customesp.value }
+    }
+
+    @JvmField
+    val customespText = sm.textSetting("Custom ESP Mobs") {
+        description = "Enter nametag name above mob.\nSplit with \", \""
+        category = "Dungeons"
+        subCategory = "ESP"
+        value = "Enderman, Zombie"
+        isHidden = { !esp.value || !customesp.value }
+    }
+
+    @JvmField
+    val terminalEsp = sm.booleanSetting("Terminal ESP") {
+        description = "Shows terminals on f7 boss fight through walls"
+        category = "Dungeons"
+        subCategory = "ESP"
+    }
+
+    @JvmField
+    val witherDoorEsp = sm.booleanSetting("Wither Door ESP") {
+        description = "Shows wither doors though walls in dungeons"
+        category = "Dungeons"
+        subCategory = "ESP"
+    }
+
+    @JvmField
+    val block = sm.booleanSetting("Block ability") {
+        category = "Hacks"
+        subCategory = "Block ability"
+    }
+
+    @JvmField
+    val blockList = sm.textSetting("Item list") {
+        description = "Split with \", \""
+        category = "Hacks"
+        subCategory = "Block ability"
+    }
+
+    @JvmField
+    val blockZombieSword = sm.booleanSetting("Block Useless Zombie Sword Charges") {
+        category = "Hacks"
+        subCategory = "Block ability"
+    }
+
+    @JvmField
+    val boxKeybind = sm.keybindSetting("Jerry Box Opener Keybind") {
+        category = "Hacks"
+        subCategory = "Jerry Box Opener"
+    }
+
+    @JvmField
+    val boxDelay = sm.numberSetting("Jerry Box Opener Delay") {
+        category = "Hacks"
+        subCategory = "Jerry Box Opener"
+        value = 500.0
+        max = 1000.0
+        min = 100.0
+        places = -1
+    }
+
+    @JvmField
+    val hotbarSwapKey = sm.keybindSetting("Hotbar Swap Keybind") {
+        category = "Hacks"
+        subCategory = "Hotbar Swapper"
+    }
+
+    @JvmField
+    val hotbarSwapDelay = sm.numberSetting("Hotbar Swap Delay") {
+        description = "Set hotbar presets for Hotbar Swapper using command \"/sm hb\""
+        category = "Hacks"
+        subCategory = "Hotbar Swapper"
+        value = 100.0
+        places = -1
+        max = 1000.0
+        min = 10.0
+    }
+
+    @JvmField
+    val lavaFishingEsp = sm.booleanSetting("Lava Fishing ESP") {
+        category = "Hacks"
+        description = "Shows lava fising spots through walls"
+    }
+
+    @JvmField
+    val ping = sm.booleanSetting("Name ping") {
+        category = "Chat"
+        description = "Plays sound when someone says your name in chat"
+    }
+
+    @JvmField
+    val EndLeave = sm.booleanSetting("Auto Leave Dungeon") {
+        category = "Dungeons"
+        subCategory = "Auto Leave"
+        description = "Runs /leavedungeon command after run ends"
+    }
+
+    @JvmField
+    val EndParty = sm.booleanSetting("Auto Party FragBot when Dungeon ends") {
+        category = "Dungeons"
+        subCategory = "Auto Leave"
+        description = "Runs /fragrun command after run ends"
+    }
+
+    @JvmField
+    val BotName = sm.textSetting("FragBot Name") {
+        category = "Dungeons"
+        subCategory = "Auto Leave"
+        description = "FragBot IGN"
+    }
+
+    @JvmField
+    val delay = sm.numberSetting("Delay For \"Leave Dungeon\"") {
+        category = "Dungeons"
+        subCategory = "Auto Leave"
+        description = "Delay between going to lobby and to dungeon hub"
+        value = 2000.0
+        max = 10000.0
+        min = 100.0
+        places = -2
+    }
+
+    @JvmField
+    val coinsToggle = sm.booleanSetting("Super Secret Money Exploit!") {
+        category = "Super Secret Settings"
+        description = "§kMAKES YOUR PURSE BLOW UP WITH BILLIONS OF COINS"
+    }
+
+    @JvmField
+    val coins = sm.textSetting("Amount of Coins") {
+        category = "Super Secret Settings"
+        description = "Amount of Coins to add in purse"
+        value = "10000000"
+        maxTextSize = 9
+        isHidden = { !coinsToggle.value }
+    }
+
+    @JvmField
+    val mimic = sm.booleanSetting("Mimic Killed Message On Mimic Death") {
+        category = "Dungeons"
+        subCategory = "Ping"
+        description = "Send mimic text on it's death"
+    }
+
+    @JvmField
+    val mimicText = sm.textSetting("Mimic Message Text") {
+        category = "Dungeons"
+        subCategory = "Ping"
+        description = "Text for mimic message."
+        value = "Mimic Dead!"
+        isHidden = { !mimic.value }
+    }
+
+    @JvmField
+    val rabbitPing = sm.booleanSetting("Watcher Done Ping") {
+        category = "Dungeons"
+        subCategory = "Ping"
+    }
+
+    @JvmField
+    val hidePetCandies = sm.booleanSetting("Hide Pet's Candies") {
+        category = "Visual"
+        description = "Hide pet's candies counter in tooltip."
+    }
+
+    @JvmField
+    val petsOverlay = sm.booleanSetting("Pets Overlay") {
+        category = "Visual"
+        subCategory = "Pets Overlay"
+        description = "§cDon't use with small window size"
+    }
+
+    @JvmField
+    val petsBgBlur = sm.numberSetting("Pets Overlay Background Blur Strength") {
+        category = "Visual"
+        subCategory = "Pets Overlay"
+        value = 12.5
+        min = 5.0
+        max = 25.0
+        places = 1
+        isHidden = { !petsOverlay.value }
+    }
+
+    @JvmField
+    val petsBorderColorR = sm.numberSetting("Pets Overlay Border Color Red") {
+        category = "Visual"
+        subCategory = "Pets Overlay"
+        description = "Red color for pets overlay border."
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 87.0
+        isHidden = { !petsOverlay.value }
+    }
+
+    @JvmField
+    val petsBorderColorG = sm.numberSetting("Pets Overlay Border Color Green") {
+        category = "Visual"
+        subCategory = "Pets Overlay"
+        description = "Green color for pets overlay border."
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 0.0
+        isHidden = { !petsOverlay.value }
+    }
+
+    @JvmField
+    val petsBorderColorB = sm.numberSetting("Pets Overlay Border Color Blue") {
+        category = "Visual"
+        subCategory = "Pets Overlay"
+        description = "Blue color for pets overlay border."
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 247.0
+        isHidden = { !petsOverlay.value }
+    }
+
+    @JvmField
+    val petsBorderWidth = sm.numberSetting("Pets Overlay Border Width") {
+        category = "Visual"
+        subCategory = "Pets Overlay"
+        value = 2.0
+        min = 1.0
+        max = 6.0
+        places = 1
+        isHidden = { !petsOverlay.value }
+    }
+
+    @JvmField
+    val presents = sm.booleanSetting("Highlight Presents in Jerry Workshop") {
+        category = "Visual"
+        subCategory = "Highlight Presents"
+    }
+
+    @JvmField
+    val presentsColorR = sm.numberSetting("Highlight Presents Color Red") {
+        category = "Visual"
+        subCategory = "Highlight Presents"
+        description = "Red Color for presents highlight"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 0.0
+        isHidden = { !presents.value }
+    }
+
+    @JvmField
+    val presentsColorG = sm.numberSetting("Highlight Presents Color Green") {
+        category = "Visual"
+        subCategory = "Highlight Presents"
+        description = "Green Color for presents highlight"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 255.0
+        isHidden = { !presents.value }
+    }
+
+    @JvmField
+    val presentsColorB = sm.numberSetting("Highlight Presents Color Blue") {
+        category = "Visual"
+        subCategory = "Highlight Presents"
+        description = "Blue Color for presents highlight"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 0.0
+        isHidden = { !presents.value }
+    }
+
+    @JvmField
+    val autoGB = sm.booleanSetting("Auto Ghost Blocks") {
+        category = "Dungeons"
+        subCategory = "Auto Ghost Block"
+    }
+
+    @JvmField
+    val autoGBMode = sm.selectorSetting("Auto Ghost Blocks Mode") {
+        category = "Dungeons"
+        subCategory = "Auto Ghost Block"
+        options = arrayOf("On sneak", "On key")
+        isHidden = { !autoGB.value }
+    }
+
+    @JvmField
+    val autoGBKey = sm.keybindSetting("Auto Ghost Blocks Keybind") {
+        category = "Dungeons"
+        subCategory = "Auto Ghost Block"
+        isHidden = { !autoGB.value || autoGBMode.value != 1 }
+    }
+
+    @JvmField
+    val adminRoom = sm.booleanSetting("Admin Room Detection") {
+        category = "Dungeons"
+        description = "Scans dungeon for admin room"
+    }
+
+    @JvmField
+    val betterPerspective = sm.booleanSetting("Perspective Toggle") {
+        category = "Visual"
+        subCategory = "Perspective Toggle"
+        description = "Activates 3rd perspective on key press"
+        value = true
+    }
+
+    @JvmField
+    val betterPerspectiveMode = sm.selectorSetting("Perspective Toggle Mode") {
+        category = "Visual"
+        subCategory = "Perspective Toggle"
+        options = arrayOf("Hold", "Toggle")
+        isHidden = { !betterPerspective.value }
+    }
+
+    @JvmField
+    val betterPerspectiveKey = sm.keybindSetting("Perspective Keybind") {
+        category = "Visual"
+        subCategory = "Perspective Toggle"
+        isHidden = { !betterPerspective.value }
+    }
+
+    @JvmField
+    val customSb = sm.booleanSetting("Custom Scoreboard") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+    }
+
+    @JvmField
+    val customSbLobby = sm.booleanSetting("Hide Server Number") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        value = true
+        isHidden = { !customSb.value }
+    }
+
+    @JvmField
+    val customSbBlurT = sm.booleanSetting("Blur Scoreboard Background") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        isHidden = { !customSb.value }
+    }
+
+    @JvmField
+    val customSbBlur = sm.numberSetting("Custom Scoreboard Background Blur Strength") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        value = 20.0
+        min = 5.0
+        max = 25.0
+        places = 1
+        isHidden = { !customSb.value }
+    }
+
+    @JvmField
+    val customSbBg = sm.booleanSetting("Scoreboard Background") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        value = true
+        isHidden = { !customSb.value }
+    }
+
+    @JvmField
+    val customSbBgColorR = sm.numberSetting("Scoreboard Background Color Red") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        description = "Red Color for scoreboard background"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 0.0
+        isHidden = { !customSb.value || !customSbBg.value }
+    }
+
+    @JvmField
+    val customSbBgColorG = sm.numberSetting("Scoreboard Background Color Green") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        description = "Green Color for scoreboard background"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 0.0
+        isHidden = { !customSb.value || !customSbBg.value }
+    }
+
+    @JvmField
+    val customSbBgColorB = sm.numberSetting("Scoreboard Background Color Blue") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        description = "Blue Color for scoreboard background"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 0.0
+        isHidden = { !customSb.value || !customSbBg.value }
+    }
+
+    @JvmField
+    val customSbBgColorA = sm.numberSetting("Scoreboard Background Color Alpha") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        description = "Alpha for scoreboard background"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 255.0
+        isHidden = { !customSb.value || !customSbBg.value }
+    }
+
+    @JvmField
+    val customSbOutline = sm.booleanSetting("Draw Scoreboard Outline") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        isHidden = { !customSb.value }
+    }
+
+    @JvmField
+    val customSbOutlineColorR = sm.numberSetting("Scoreboard Outline Color Red") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        description = "Red Color for scoreboard outline"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 87.0
+        isHidden = { !customSb.value || !customSbOutline.value || customSbOutlineColorRainbow.value }
+    }
+
+    @JvmField
+    val customSbOutlineColorG = sm.numberSetting("Scoreboard Outline Color Green") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        description = "Green Color for scoreboard outline"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 0.0
+        isHidden = { !customSb.value || !customSbOutline.value || customSbOutlineColorRainbow.value }
+    }
+
+    @JvmField
+    val customSbOutlineColorB = sm.numberSetting("Scoreboard Outline Color Blue") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        description = "Blue Color for scoreboard outline"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 247.0
+        isHidden = { !customSb.value || !customSbOutline.value || customSbOutlineColorRainbow.value }
+    }
+
+    @JvmField
+    val customSbOutlineColorRainbow = sm.booleanSetting("Scoreboard Outline Rainbow Color") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        isHidden = { !customSb.value || !customSbOutline.value }
+    }
+
+    @JvmField
+    val customSbShadow = sm.booleanSetting("Scoreboard Shadow") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        value = true
+        isHidden = { !customSb.value }
+    }
+
+    @JvmField
+    val customSbShadowStr = sm.numberSetting("Scoreboard Shadow Strength") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        value = 15.0
+        min = 5.0
+        max = 25.0
+        places = 1
+        isHidden = { !customSb.value || !customSbShadow.value }
+    }
+
+    @JvmField
+    val customSbText = sm.textSetting("Custom Scoreboard Text") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+        description = "For color codes use \"&\""
+        value = "SkySkipped"
+        isHidden = { !customSb.value }
+    }
+
+    @JvmField
+    val customSbNumbers = sm.booleanSetting("Remove Red Ugly Numbers") {
+        category = "Visual"
+        subCategory = "Scoreboard"
+    }
+
+    @JvmField
+    val autoMaddox = sm.booleanSetting("Auto Open Maddox Phone") {
+        category = "Slayers"
+        description = "Clicks on Batphone and in chat on slayer kill"
+    }
+
+    @JvmField
+    val highlightSlots = sm.booleanSetting("Delight Locked Gemstone Slots in AH") {
+        category = "Visual"
+        description = "Make items with locked gemstone slots dark in ah"
+    }
+
+    @JvmField
+    val trail = sm.booleanSetting("Trail") {
+        category = "Visual"
+        subCategory = "Trail"
+        description = "Render trail behind player when moving"
+    }
+
+    @JvmField
+    val trailParticle = sm.textSetting("Trail Particles") {
+        category = "Visual"
+        subCategory = "Trail"
+        description = "Get names from https://www.spigotmc.org/wiki/particle-list-1-8-8/"
+        value = "DRIP_LAVA"
+        isHidden = { !trail.value }
+    }
+
+    @JvmField
+    val trailInterval = sm.numberSetting("Trail Interval") {
+        category = "Visual"
+        subCategory = "Trail"
+        value = 100.0
+        min = 0.0
+        max = 5000.0
+        places = -1
+    }
+
+    @JvmField
+    val fastBreak = sm.booleanSetting("Fast Break") {
+        category = "Hacks"
+        subCategory = "Fast Break"
+        description = "Works only on instantly breaking blocks!"
+    }
+
+    @JvmField
+    val fastBreakNumber = sm.numberSetting("Fast Break Block Amount") {
+        category = "Hacks"
+        subCategory = "Fast Break"
+        min = 0.0
+        max = 3.0
+        value = 3.0
+        isHidden = { !fastBreak.value }
+    }
+
+    @JvmField
+    val stopFly = sm.booleanSetting("Stop fly") {
+        category = "Movement"
+        description = "Stop flying on private island"
+    }
+
+    @JvmField
+    val cookieClicker = sm.booleanSetting("Cookie Clicker") {
+        category = "Misc"
+    }
+
+    @JvmField
+    val macroType = sm.selectorSetting("Macro Type") {
+        category = "Macro"
+        options = arrayOf("Nether Wart (SShaped)", "Sugar Cane (Normal and SShaped)")
+        value = 0
+        listener = { MacroManager.current = MacroManager.macros[it] }
+    }
+
+    @JvmField
+    val macroKeybind = sm.keybindSetting("Macro Keybind") {
+        category = "Macro"
+    }
+
+    @JvmField
+    val macroStopTime = sm.numberSetting("Schedule Disable") {
+        category = "Macro"
+        description = "Hours before macro will be auto disabled (0 for unlimited time)"
+        min = 0.0
+        max = 12.0
+        places = 1
+    }
+
+    @JvmField
+    val customYawToggle = sm.booleanSetting("Custom Yaw Toggle") {
+        category = "Macro"
+    }
+
+    @JvmField
+    val customYaw = sm.textSetting("Custom Yaw Value") {
+        category = "Macro"
+        isHidden = { !customYawToggle.value }
+        value = "0"
+    }
+
+    @JvmField
+    val customPitchToggle = sm.booleanSetting("Custom Pitch Toggle") {
+        category = "Macro"
+    }
+
+    @JvmField
+    val customPitch = sm.textSetting("Custom Pitch Value") {
+        category = "Macro"
+        isHidden = { !customPitchToggle.value }
+        value = "0"
+    }
+
+    @JvmField
+    val rotationDiff = sm.numberSetting("Rotation Difference") {
+        category = "Macro"
+        description = "Rotation difference needed for auto rotation rotate your head back"
+        min = 0.0
+        max = 10.0
+        places = 1
+        value = 0.2
+    }
+
+    @JvmField
+    val autoPickSlot = sm.numberSetting("Auto Pick Slot With Hoe") {
+        category = "Macro"
+        min = 1.0
+        max = 9.0
+    }
+
+    //        @Property(
 //            type = PropertyType.SWITCH,
 //            name = "Macro Randomization",
 //            category = "Macro",
 //            description = "Randomize certain actions to look more legit (may fix packet thottle and desync)."
 //        )
-        var macroRandomization = true
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Custom Macro Script Name",
-            category = "Macro",
-            description = "Name of custom macro script which will be ran during macro.\nAll scripts should be placed in \"config/skyskipped/scripts\"."
-        )
-        var macroScript = "example.txt"
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Lagback Fix",
-            category = "Macro",
-            description = "Enable this if youre experiencing lagbacks."
-        )
-        var macroLagbackFix = false
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "Farm Direction",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Set direction of your eyes (check it with f3).",
-            options = ["North", "East", "West", "South"]
-        )
-        var netherWartDirection = 0
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "Farm Type",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Type of your farm.",
-            options = ["Horizontal", "Vertical", "Ladders", "Dropdown"]
-        )
-        var netherWartType = 0
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Set Spawn",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Set spawn on row switch."
-        )
-        var netherWartSetSpawn = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Unstuck Failsafe",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Prevent stacking in blocks."
-        )
-        var netherWartStuck = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Desync Failsafe",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Stops macro when hypixel decides to stop breaking crops."
-        )
-        var netherWartDesync = true
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Desync Failsafe Timeout",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Seconds to wait for failsafe to trigger.",
-            min = 1,
-            max = 20,
-            increment = 1
-        )
-        var netherWartDesyncTime = 5
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Jacob Failsafe",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Stops macro on Jacob Event start."
-        )
-        var netherWartJacob = true
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Jacob Failsafe Stop At",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Amount of crops mined during Jacob after which macro will stop.",
-            min = 0,
-            max = 1000000,
-            increment = 1000
-        )
-        var netherWartJacobNumber = 400000
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Full Inventory Failsafe",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Clears inventory if it fills up."
-        )
-        var netherWartFullInv = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Ban Wave Checker",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Checks if there's a ban wave happens right now."
-        )
-        var netherWartBanWaveChecker = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Ban Wave Auto Macro Disable",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Disable macro when ban wave happens."
-        )
-        var netherWartBanWaveCheckerDisable = true
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Ban Wave Checker Timer",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Delay in minutes between ban wave checks.",
-            minF = 0.1f,
-            maxF = 30f,
-            decimalPlaces = 1
-        )
-        var netherWartBanWaveCheckerTimer = 5f
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "CPU Saver",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Limits cpu usage while macroing."
-        )
-        var netherWartCpuSaver = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Reconnect",
-            category = "Macro",
-            subcategory = "Nether Wart Macro",
-            description = "Auto reconnects to server after getting disconnected."
-        )
-        var netherWartReconnect = false
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "Farm Direction (Only SShaped Type)",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Set direction of your eyes (check it with f3).",
-            options = ["North", "East", "West", "South"]
-        )
-        var sugarCaneDirection = 0
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "Farm Direction (Only Normal Type)",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Set yaw direction (check it with f3).",
-            options = ["45", "-45"]
-        )
-        var sugarCaneDirectionNormal = 0
-
-        @Property(
-            type = PropertyType.SELECTOR,
-            name = "Farm Type",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Type of your farm.",
-            options = ["Normal", "SShaped", "SShaped Dropdown", "SShaped Ladders"]
-        )
-        var sugarCaneType = 0
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Set Spawn",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Set spawn on row switch."
-        )
-        var sugarCaneSetSpawn = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Unstuck Failsafe",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Prevent stacking in blocks."
-        )
-        var sugarCaneStuck = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Desync Failsafe",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Stops macro when hypixel decides to stop breaking crops."
-        )
-        var sugarCaneDesync = true
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Desync Failsafe Timeout",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Seconds to wait for failsafe to trigger.",
-            min = 1,
-            max = 20,
-            increment = 1
-        )
-        var sugarCaneDesyncTime = 5
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Jacob Failsafe",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Stops macro on Jacob Event start."
-        )
-        var sugarCaneJacob = true
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Jacob Failsafe Stop At",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Amount of crops mined during Jacob after which macro will stop.",
-            min = 0,
-            max = 1000000,
-            increment = 1000
-        )
-        var sugarCaneJacobNumber = 400000
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Full Inventory Failsafe",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Clears inventory if it fills up."
-        )
-        var sugarCaneFullInv = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Ban Wave Checker",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Checks if there's a ban wave happens right now."
-        )
-        var sugarCaneBanWaveChecker = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Ban Wave Auto Macro Disable",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Disable macro when ban wave happens."
-        )
-        var sugarCaneBanWaveCheckerDisable = true
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Ban Wave Checker Timer",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Delay in minutes between ban wave checks.",
-            minF = 0.1f,
-            maxF = 30f,
-            decimalPlaces = 1
-        )
-        var sugarCaneBanWaveCheckerTimer = 5f
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "CPU Saver",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Limits cpu usage while macroing."
-        )
-        var sugarCaneCpuSaver = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Reconnect",
-            category = "Macro",
-            subcategory = "Sugar Cane Macro",
-            description = "Auto reconnects to server after getting disconnected."
-        )
-        var sugarCaneReconnect = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Webhook Notifications",
-            category = "Macro",
-            subcategory = "Notifications",
-            description = "Send different notifications to webhook about something happening."
-        )
-        var webhook = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Webhook URL",
-            category = "Macro",
-            subcategory = "Notifications",
-            description = "Webhook URL for notifications."
-        )
-        var webhookUrl = ""
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Desktop Notifications",
-            category = "Macro",
-            subcategory = "Notifications",
-            description = "Sends notifications just like webhook."
-        )
-        var desktopNotifications = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Remote Macro Controlling",
-            category = "Macro",
-            subcategory = "Remote Controlling",
-            description = "Control macro from anywhere with discord bot."
-        )
-        var remoteControl = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Bot's Token",
-            category = "Macro",
-            subcategory = "Remote Controlling",
-            description = "Bot's token.\nRead tutorial on discord server."
-        )
-        var remoteControlUrl = ""
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Farming HUD",
-            category = "Macro",
-            subcategory = "Farming HUD",
-            description = "Render huds with some useful information."
-        )
-        var farmingHud = false
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Farming HUD Position X",
-            category = "Macro",
-            subcategory = "Farming HUD",
-            description = "Edit position with \"/sm hud\".",
-            minF = 0f,
-            maxF = 10000f,
-            decimalPlaces = 1
-        )
-        var farmingHudX = 0f
-
-        @Property(
-            type = PropertyType.DECIMAL_SLIDER,
-            name = "Farming HUD Position Y",
-            category = "Macro",
-            subcategory = "Farming HUD",
-            description = "Edit position with \"/sm hud\".",
-            minF = 0f,
-            maxF = 10000f,
-            decimalPlaces = 1
-        )
-        var farmingHudY = 0f
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Farming HUD Background Color",
-            category = "Macro",
-            subcategory = "Farming HUD",
-            description = "Background color of Farming HUD."
-        )
-        var farmingHudColor = Color.BLACK.withAlpha(110)
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Farming HUD Text Color",
-            category = "Macro",
-            subcategory = "Farming HUD",
-            description = "Text color of Farming HUD."
-        )
-        var farmingHudColorText: Color = Color.RED.darker()
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Gyro Radius",
-            category = "Dungeons",
-            subcategory = "Item Radius",
-            description = "Renders a circle while holding Gyrokinetic Wand where mobs will be pulled in."
-        )
-        var gyroRadius = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Hyperion Radius",
-            category = "Dungeons",
-            subcategory = "Item Radius",
-            description = "Renders a circle Hyperion dmg area."
-        )
-        var hypRadius = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Dungeons Only",
-            category = "Dungeons",
-            subcategory = "Item Radius",
-            description = "Enable radiuses only in dungeons."
-        )
-        var onlyDungeonRadius = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "In Third Person Only",
-            category = "Dungeons",
-            subcategory = "Item Radius",
-            description = "Enable radiuses only in third person view."
-        )
-        var onlyThirdPersonRadius = false
-
-        @Property(
-            type = PropertyType.COLOR,
-            name = "Item Radius Color",
-            category = "Dungeons",
-            subcategory = "Item Radius",
-            description = "Color for item radius."
-        )
-        var radiusColor: Color = Color.GREEN
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Item Radius Chroma Color",
-            category = "Dungeons",
-            subcategory = "Item Radius",
-            description = "Chroma color for item radius."
-        )
-        var radiusColorChroma = true
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Zero Ping Gui",
-            category = "Misc",
-            description = "Use GUIs without lags."
-        )
-        var zeroPingGui = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Better Cocoa Beans Sizes",
-            category = "Hacks",
-            description = "Make hitbox of cocoa beans bigger and smaller if not grown."
-        )
-        var beansSize = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Keep Focus",
-            category = "Hacks",
-            description = "Always keep minecraft window in focus."
-        )
-        var keepFocus = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Anti Escrow AH",
-            category = "Misc",
-            subcategory = "Anti Escrow",
-            description = "Reopens ah if escrow happens."
-        )
-        var antiEscrowAh = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Anti Escrow AH Bin",
-            category = "Misc",
-            subcategory = "Anti Escrow",
-            description = "Reopens ah after you buy bin."
-        )
-        var antiEscrowAhBin = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Anti Escrow BZ",
-            category = "Misc",
-            subcategory = "Anti Escrow",
-            description = "Reopens bz if escrow happens."
-        )
-        var antiEscrowBz = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Salvage",
-            category = "Hacks",
-            description = "Fixed version of auto salvage that works with both dungeon and lava fishing gear."
-        )
-        var autoSalvage = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Chat Search",
-            category = "Chat",
-            description = "Search text in chat by pressing Ctrl + F."
-        )
-        var chatSearch = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Container Search",
-            category = "Misc",
-            description = "Search items in containers by pressing Ctrl + F."
-        )
-        var containerSearch = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Stop Breaking Blocks",
-            category = "Hacks",
-            subcategory = "Stop Breaking",
-            description = "Stops you from breaking certain blocks list."
-        )
-        var stopBreaking = false
-
-        @Property(
-            type = PropertyType.TEXT,
-            name = "Stop Breaking Blocks List",
-            category = "Hacks",
-            subcategory = "Stop Breaking",
-            description = "List of blocks to stop breaking."
-        )
-        var stopBreakingList = "dirt"
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Reply",
-            category = "Chat",
-            description = "Auto replys to \"wc\" and \"gg\" with \"\"wc\" - someonesIgn\"."
-        )
-        var autoReply = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Reply Guild Only",
-            category = "Chat",
-            description = "Auto Reply will work only in guild chat."
-        )
-        var autoReplyGuild = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Fps Spoofer",
-            category = "Misc",
-            subcategory = "Fps Spoofer",
-            description = "Big numbers are funni."
-        )
-        var fpsSpoof = false
-
-        @Property(
-            type = PropertyType.SLIDER,
-            name = "Fps Spoofer Number",
-            category = "Misc",
-            subcategory = "Fps Spoofer",
-            description = "Big numbers are funni.",
-            max = Int.MAX_VALUE,
-            min = 0,
-            increment = 10
-        )
-        var fpsSpoofNumber = 69420
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "M3 Professor Fire Freeze Timer",
-            category = "Dungeons",
-            description = "Timer until fire freeze use in M3 boss fight."
-        )
-        var fireFreezePing = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Going in Portal",
-            category = "Dungeons",
-            description = "Automatically sends \"going\" message in chat when entering portal."
-        )
-        var autoGo = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Remove Carpet Bounds",
-            category = "Hacks",
-            description = "Removes carpet hitboxes."
-        )
-        var removeCarpets = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Redirect Middle Clicks",
-            category = "Misc",
-            description = "Redirect middle clicks to left clicks to not get kicked to lobby.\nWorks with other mods!"
-        )
-        var redirectClicks = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Shiny Blocks Esp",
-            category = "Hacks",
-            subcategory = "Shiny Blocks",
-            description = "Shiny Blocks Esp in the End"
-        )
-        var shinyBlocksEsp = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Shiny Blocks Aura",
-            category = "Hacks",
-            subcategory = "Shiny Blocks",
-            description = "Auto mine Shiny Blocks in the End"
-        )
-        var shinyBlocksAura = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Optimize NEU's equipment overlay",
-            category = "Misc",
-            description = "Disable NEU's useless code which lags game hard."
-        )
-        var neuOptimize = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Stop Rendering Falling Blocks",
-            category = "Misc",
-            description = "Improve fps by not rendering useless dungeon shit."
-        )
-        var stopFallingBlocks = false
-
-        @Property(
-            type = PropertyType.SWITCH,
-            name = "Auto Auction Buyer",
-            category = "Misc",
-            subcategory = "Auction Buyer",
-            description = "Instantly buys auction and skips confirmation gui."
-        )
-        var auctionBuyer = false
+    var macroRandomization = true
+
+    @JvmField
+    val macroScript = sm.textSetting("Custom Macro Script Name") {
+        category = "Macro"
+        value = "example.txt"
+    }
+
+    @JvmField
+    val macroLagbackFix = sm.booleanSetting("Lagback Fix") {
+        category = "Macro"
+    }
+
+    @JvmField
+    val netherWartDirection = sm.selectorSetting("Farm Direction") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        description = "Set direction of your eyes (check it with f3)"
+        options = arrayOf("North", "East", "West", "South")
+    }
+
+    @JvmField
+    val netherWartType = sm.selectorSetting("Farm Type") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        description = "Type of your farm"
+        options = arrayOf("Horizontal", "Vertical", "Ladders", "Dropdown")
+    }
+
+    @JvmField
+    val netherWartSetSpawn = sm.booleanSetting("Auto Set Spawn") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = true
+    }
+
+    @JvmField
+    val netherWartStuck = sm.booleanSetting("Unstuck Failsafe") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = true
+    }
+
+    @JvmField
+    val netherWartDesync = sm.booleanSetting("Desync Failsafe") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = true
+    }
+
+    @JvmField
+    val netherWartDesyncTime = sm.numberSetting("Desync Failsafe Timeout") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = 5.0
+        min = 1.0
+        max = 20.0
+        isHidden = { !netherWartDesync.value }
+    }
+
+    @JvmField
+    val netherWartJacob = sm.booleanSetting("Jacob Failsafe") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = true
+    }
+
+    @JvmField
+    val netherWartJacobNumber = sm.numberSetting("Jacob Failsafe Stop At") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = 400000.0
+        min = 0.0
+        max = 1000000.0
+        places = -3
+        isHidden = { !netherWartJacob.value }
+    }
+
+    @JvmField
+    val netherWartFullInv = sm.booleanSetting("Full Inventory Failsafe") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = true
+    }
+
+    @JvmField
+    val netherWartBanWaveChecker = sm.booleanSetting("Ban Wave Checker") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = true
+    }
+
+    @JvmField
+    val netherWartBanWaveCheckerDisable = sm.booleanSetting("Ban Wave Auto Macro Disable") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = true
+        isHidden = { !netherWartBanWaveChecker.value }
+    }
+
+    @JvmField
+    val netherWartBanWaveCheckerTimer = sm.numberSetting("Ban Wave Checker Timer") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = 5.0
+        min = 0.1
+        max = 30.0
+        places = 1
+    }
+
+    @JvmField
+    val netherWartCpuSaver = sm.booleanSetting("CPU Saver") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+    }
+
+    @JvmField
+    val netherWartReconnect = sm.booleanSetting("Auto Reconnect") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+    }
+
+    @JvmField
+    val sugarCaneDirection = sm.selectorSetting("Farm Direction (Only SShaped Type)") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        description = "Set direction of your eyes (check it with f3)"
+        options = arrayOf("North", "East", "West", "South")
+    }
+
+    @JvmField
+    val sugarCaneDirectionNormal = sm.selectorSetting("Farm Direction (Only Normal Type)") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        description = "Set yaw direction (check it with f3)"
+        options = arrayOf("45", "-45")
+    }
+
+    @JvmField
+    val sugarCaneType = sm.selectorSetting("Farm Type") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        options = arrayOf("Normal", "SShaped", "SShaped Dropdown", "SShaped Ladders")
+    }
+
+    @JvmField
+    val sugarCaneSetSpawn = sm.booleanSetting("Auto Set Spawn") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = true
+    }
+
+    @JvmField
+    val sugarCaneStuck = sm.booleanSetting("Unstuck Failsafe") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = true
+    }
+
+    @JvmField
+    val sugarCaneDesync = sm.booleanSetting("Desync Failsafe") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = true
+    }
+
+    @JvmField
+    val sugarCaneDesyncTime = sm.numberSetting("Desync Failsafe Timeout") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = 5.0
+        min = 1.0
+        max = 20.0
+        isHidden = { !sugarCaneDesync.value }
+    }
+
+    @JvmField
+    val sugarCaneJacob = sm.booleanSetting("Jacob Failsafe") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = true
+    }
+
+    @JvmField
+    val sugarCaneJacobNumber = sm.numberSetting("Jacob Failsafe Stop At") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = 400000.0
+        min = 0.0
+        max = 1000000.0
+        places = -3
+    }
+
+    @JvmField
+    val sugarCaneFullInv = sm.booleanSetting("Full Inventory Failsafe") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = true
+    }
+
+    @JvmField
+    val sugarCaneBanWaveChecker = sm.booleanSetting("Ban Wave Checker") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = true
+    }
+
+    @JvmField
+    val sugarCaneBanWaveCheckerDisable = sm.booleanSetting("Ban Wave Auto Macro Disable") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = true
+        isHidden = { !sugarCaneBanWaveChecker.value }
+    }
+
+    @JvmField
+    val sugarCaneBanWaveCheckerTimer = sm.numberSetting("Ban Wave Checker Timer") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = 5.0
+        min = 0.1
+        max = 30.0
+        places = 1
+        isHidden = { !sugarCaneBanWaveChecker.value }
+    }
+
+    @JvmField
+    val sugarCaneCpuSaver = sm.booleanSetting("CPU Saver") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+    }
+
+    @JvmField
+    val sugarCaneReconnect = sm.booleanSetting("Auto Reconnect") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+    }
+
+    @JvmField
+    val webhook = sm.booleanSetting("Webhook Notifications") {
+        category = "Macro"
+        subCategory = "Notifications"
+    }
+
+    @JvmField
+    val webhookUrl = sm.textSetting("Webhook URL") {
+        category = "Macro"
+        subCategory = "Notifications"
+        maxTextSize = 100
+        isHidden = { !webhook.value }
+    }
+
+    @JvmField
+    val desktopNotifications = sm.booleanSetting("Desktop Notifications") {
+        category = "Macro"
+        subCategory = "Notifications"
+        value = true
+    }
+
+    @JvmField
+    val remoteControl = sm.booleanSetting("Remote Macro Controlling") {
+        category = "Macro"
+        subCategory = "Remote Controlling"
+        description = "Read tutorial on discord server"
+        listener = {
+            if (it) RemoteControlling.setup()
+            else RemoteControlling.stop()
+        }
+    }
+
+    @JvmField
+    val remoteControlUrl = sm.textSetting("Bot's Token") {
+        category = "Macro"
+        subCategory = "Remote Controlling"
+        maxTextSize = 100
+    }
+
+    @JvmField
+    val farmingHud = sm.booleanSetting("Farming HUD") {
+        category = "Macro"
+        subCategory = "Farming HUD"
+    }
+
+    @JvmField
+    val farmingHudX = sm.numberSetting("Farming HUD Position X") {
+        category = "Macro"
+        subCategory = "Farming HUD"
+        description = "Edit position with \"/sm hud\""
+        min = 0.0
+        max = 10000.0
+        places = 1
+        isHidden = { !farmingHud.value }
+    }
+
+    @JvmField
+    val farmingHudY = sm.numberSetting("Farming HUD Position Y") {
+        category = "Macro"
+        subCategory = "Farming HUD"
+        description = "Edit position with \"/sm hud\""
+        min = 0.0
+        max = 10000.0
+        places = 1
+        isHidden = { !farmingHud.value }
+    }
+
+    @JvmField
+    val gyroRadius = sm.booleanSetting("Gyro Radius") {
+        category = "Dungeons"
+        subCategory = "Item Radius"
+    }
+
+    @JvmField
+    val hypRadius = sm.booleanSetting("Hyperion Radius") {
+        category = "Dungeons"
+        subCategory = "Item Radius"
+    }
+
+    @JvmField
+    val onlyDungeonRadius = sm.booleanSetting("Dungeons Only") {
+        category = "Dungeons"
+        subCategory = "Item Radius"
+        value = true
+        isHidden = { !gyroRadius.value && !hypRadius.value }
+    }
+
+    @JvmField
+    val onlyThirdPersonRadius = sm.booleanSetting("In Third Person Only") {
+        category = "Dungeons"
+        subCategory = "Item Radius"
+        isHidden = { !gyroRadius.value && !hypRadius.value }
+    }
+
+    @JvmField
+    val radiusColorR = sm.numberSetting("Item Radius Color Red") {
+        category = "Dungeons"
+        subCategory = "Item Radius"
+        description = "Red Color for item radius"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 0.0
+        isHidden = { (!gyroRadius.value && !hypRadius.value) || radiusColorChroma.value }
+    }
+
+    @JvmField
+    val radiusColorG = sm.numberSetting("Item Radius Color Green") {
+        category = "Dungeons"
+        subCategory = "Item Radius"
+        description = "Green Color for item radius"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 255.0
+        isHidden = { (!gyroRadius.value && !hypRadius.value) || radiusColorChroma.value }
+    }
+
+    @JvmField
+    val radiusColorB = sm.numberSetting("Item Radius Color Blue") {
+        category = "Dungeons"
+        subCategory = "Item Radius"
+        description = "Blue Color for item radius"
+        min = 0.0
+        max = 255.0
+        places = 0
+        value = 0.0
+        isHidden = { (!gyroRadius.value && !hypRadius.value) || radiusColorChroma.value }
+    }
+
+    @JvmField
+    val radiusColorChroma = sm.booleanSetting("Item Radius Chroma Color") {
+        category = "Dungeons"
+        subCategory = "Item Radius"
+        isHidden = { !gyroRadius.value && !hypRadius.value }
+    }
+
+    @JvmField
+    val zeroPingGui = sm.booleanSetting("Zero Ping Gui") {
+        category = "Misc"
+    }
+
+    @JvmField
+    val beansSize = sm.booleanSetting("Bigger Cocoa Beans Sizes") {
+        category = "Hacks"
+    }
+
+    @JvmField
+    val mushroomSize = sm.booleanSetting("Bigger Mushroom Sizes") {
+        category = "Hacks"
+        listener = {
+            if (it) {
+                Blocks.red_mushroom.setBlockBounds(0f, 0f, 0f, 1f, 1f, 1f)
+                Blocks.brown_mushroom.setBlockBounds(0f, 0f, 0f, 1f, 1f, 1f)
+            } else {
+                Blocks.red_mushroom.setBlockBounds(0.3f, 0.0f, 0.3f, 0.7f, 0.4f, 0.7f)
+                Blocks.brown_mushroom.setBlockBounds(0.3f, 0.0f, 0.3f, 0.7f, 0.4f, 0.7f)
+            }
+        }
+    }
+
+    @JvmField
+    val cropSize = sm.booleanSetting("Bigger Potato and Carrot Sizes") {
+        category = "Hacks"
+        listener = {
+            if (it) {
+                Blocks.carrots.setBlockBounds(0f, 0f, 0f, 1f, 1f, 1f)
+                Blocks.potatoes.setBlockBounds(0f, 0f, 0f, 1f, 1f, 1f)
+            } else {
+                Blocks.carrots.setBlockBounds(0.0f, 0.0f, 0.0f, 1f, 0.25f, 1f)
+                Blocks.potatoes.setBlockBounds(0.0f, 0.0f, 0.0f, 1f, 0.25f, 1f)
+            }
+        }
+    }
+
+    @JvmField
+    val caneSize = sm.booleanSetting("Bigger Sugar Cane Sizes") {
+        category = "Hacks"
+        listener = {
+            if (it)
+                Blocks.reeds.setBlockBounds(0f, 0f, 0f, 1f, 1f, 1f)
+            else
+                Blocks.reeds.setBlockBounds(0.125f, 0.0f, 0.125f, 0.875f, 1.0f, 0.875f)
+        }
+    }
+
+    @JvmField
+    val keepFocus = sm.booleanSetting("Keep Focus") {
+        category = "Hacks"
+    }
+
+    @JvmField
+    val antiEscrowAh = sm.booleanSetting("Anti Escrow AH") {
+        category = "Misc"
+        subCategory = "Anti Escrow"
+        description = "Reopens ah if escrow happens"
+    }
+
+    @JvmField
+    val antiEscrowAhBin = sm.booleanSetting("Anti Escrow AH Bin") {
+        category = "Misc"
+        subCategory = "Anti Escrow"
+        description = "Reopens ah after you buy bin"
+    }
+
+    @JvmField
+    val antiEscrowBz = sm.booleanSetting("Anti Escrow BZ") {
+        category = "Misc"
+        subCategory = "Anti Escrow"
+        description = "Reopens bz if escrow happens"
+    }
+
+    @JvmField
+    val autoSalvage = sm.booleanSetting("Auto Salvage") {
+        category = "Hacks"
+        description = "Works with both dungeon and lava fishing gear"
+    }
+
+    @JvmField
+    val chatSearch = sm.booleanSetting("Chat Search") {
+        category = "Chat"
+        description = "Search text in chat by pressing Ctrl + F"
+    }
+
+    @JvmField
+    val containerSearch = sm.booleanSetting("Container Search") {
+        category = "Misc"
+        description = "Search items in containers by pressing Ctrl + F"
+    }
+
+    @JvmField
+    val stopBreaking = sm.booleanSetting("Stop Breaking Blocks") {
+        category = "Hacks"
+        subCategory = "Stop Breaking"
+    }
+
+    @JvmField
+    val stopBreakingList = sm.textSetting("Stop Breaking Blocks List") {
+        category = "Hacks"
+        subCategory = "Stop Breaking"
+        value = "dirt"
+        isHidden = { !stopBreaking.value }
+    }
+
+    @JvmField
+    val autoReply = sm.booleanSetting("Auto Reply") {
+        category = "Chat"
+        description = "Replys to \"wc\" and \"gg\" with \"\"wc\" - someonesIgn\""
+    }
+
+    @JvmField
+    val autoReplyGuild = sm.booleanSetting("Auto Reply Guild Only") {
+        category = "Chat"
+        isHidden = { !autoReply.value }
+    }
+
+    @JvmField
+    val fpsSpoof = sm.booleanSetting("Fps Spoofer") {
+        category = "Misc"
+        subCategory = "Fps Spoofer"
+        description = "Big numbers are funni"
+    }
+
+    @JvmField
+    val fpsSpoofNumber = sm.numberSetting("Fps Spoofer Number") {
+        category = "Misc"
+        subCategory = "Fps Spoofer"
+        value = 69420.0
+        max = Int.MAX_VALUE.toDouble()
+        min = 0.0
+        places = -1
+        isHidden = { !fpsSpoof.value }
+    }
+
+    @JvmField
+    val fireFreezePing = sm.booleanSetting("M3 Professor Fire Freeze Timer") {
+        category = "Dungeons"
+    }
+
+    @JvmField
+    val autoGo = sm.booleanSetting("Auto Going in Portal") {
+        category = "Dungeons"
+        description = "Sends \"going\" message when entering portal"
+    }
+
+    @JvmField
+    val removeCarpets = sm.booleanSetting("Remove Carpet Hitboxes") {
+        category = "Hacks"
+        listener = {
+            if (it) Block.getBlockFromName("carpet").setBlockBounds(0f, 0f, 0f, 1f, 0f, 1f)
+            else Block.getBlockFromName("carpet").setBlockBounds(0f, 0f, 0f, 1f, 1 / 16f, 1f)
+        }
+    }
+
+    @JvmField
+    val redirectClicks = sm.booleanSetting("Auto Redirect Middle Clicks") {
+        category = "Misc"
+        description = "To not get kicked to limbo. Works with other mods!"
+    }
+
+    @JvmField
+    val shinyBlocksEsp = sm.booleanSetting("Shiny Blocks Esp") {
+        category = "Hacks"
+        subCategory = "Shiny Blocks"
+    }
+
+    @JvmField
+    val shinyBlocksAura = sm.booleanSetting("Shiny Blocks Nuker") {
+        category = "Hacks"
+        subCategory = "Shiny Blocks"
+    }
+
+    @JvmField
+    val neuOptimize = sm.booleanSetting("Optimize NEU's equipment overlay") {
+        category = "Optimization"
+    }
+
+    @JvmField
+    val stopFallingBlocks = sm.booleanSetting("Stop Rendering Falling Blocks") {
+        category = "Optimization"
+    }
+
+    @JvmField
+    val hideDamageInBoss = sm.booleanSetting("Stop Rendering Damage in Boss") {
+        category = "Optimization"
+    }
+
+    @JvmField
+    val hideWitherCloak = sm.booleanSetting("Stop Rendering Wither Cloak Creepers") {
+        category = "Optimization"
+    }
+
+    @JvmField
+    val showDamage = sm.booleanSetting("Render Damage Always on Top") {
+        category = "Misc"
+        description = "Useful for dmg testing"
+    }
+
+    @JvmField
+    val banDetector = sm.booleanSetting("Ban Detector") {
+        category = "Chat"
+        description = "Says who got banned"
+        value = true
+    }
+
+    @JvmField
+    val terminatorClicker = sm.booleanSetting("Terminator Clicker") {
+        category = "Dungeons"
+        subCategory = "Terminator Clicker"
+    }
+
+    @JvmField
+    val terminatorClickerDelay = sm.numberSetting("Terminator Clicker Delay") {
+        category = "Dungeons"
+        subCategory = "Terminator Clicker"
+        value = 30.0
+        min = 10.0
+        max = 100.0
+        places = -1
+        isHidden = { !terminatorClicker.value }
+    }
+
+    @JvmField
+    val aotvDisplay = sm.booleanSetting("Display AOTV Tp Postion") {
+        category = "Visual"
+        subCategory = "AOTV Display"
+    }
+
+    @JvmField
+    val aotvDisplayKey = sm.keybindSetting("Display AOTV On Key") {
+        category = "Visual"
+        subCategory = "AOTV Display"
+        description = "Leave to NONE to disable"
+        isHidden = { !aotvDisplay.value }
+    }
+
+    @JvmField
+    val aotvDisplayTuners = sm.booleanSetting("Assume AOTV with Tuners") {
+        category = "Visual"
+        subCategory = "AOTV Display"
+        value = true
+        isHidden = { !aotvDisplay.value }
+    }
+
+    @JvmField
+    val aotvDisplayDisableEther = sm.booleanSetting("Disable on Sneak") {
+        category = "Visual"
+        subCategory = "AOTV Display"
+        isHidden = { !aotvDisplay.value }
+    }
+
+    @JvmField
+    val grassEsp = sm.booleanSetting("Garden Grass ESP") {
+        category = "Hacks"
     }
 }

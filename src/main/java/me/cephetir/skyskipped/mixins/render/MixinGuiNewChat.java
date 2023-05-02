@@ -40,13 +40,12 @@ public abstract class MixinGuiNewChat {
     @Shadow
     @Final
     private List<ChatLine> chatLines;
-
-    @Shadow
-    public abstract void deleteChatLine(int id);
-
     @Shadow
     @Final
     private List<ChatLine> drawnChatLines;
+
+    @Shadow
+    public abstract void deleteChatLine(int id);
 
     @Shadow
     protected abstract void setChatLine(IChatComponent chatComponent, int chatLineId, int updateCounter, boolean displayOnly);

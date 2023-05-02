@@ -47,6 +47,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.EntityJoinWorldEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.world.WorldEvent
+import java.awt.Color
 
 
 class ESP : Feature() {
@@ -56,7 +57,7 @@ class ESP : Feature() {
 
     init {
         listener<RenderWorldLastEvent> {
-            if (!Config.esp || drawBox.isEmpty()) return@listener
+            if (!Config.esp.value || drawBox.isEmpty()) return@listener
 
             for ((entity, color) in drawBox)
                 RenderUtils.renderBoundingBox(entity, color)
@@ -65,13 +66,13 @@ class ESP : Feature() {
         }
 
         safeListener<RenderEntityModelEvent> {
-            if (!Config.esp) return@safeListener
+            if (!Config.esp.value) return@safeListener
 
-            if (Config.customesp)
+            if (Config.customesp.value)
                 if (it.entity is EntityArmorStand) {
                     if (!it.entity.hasCustomName()) return@safeListener
                     val name = it.entity.customNameTag.stripColor()
-                    for (cname in Config.customespText.split(", ")) {
+                    for (cname in Config.customespText.value.split(", ")) {
                         if (!name.contains(cname, true)) continue
 
                         val mob = customMobs[it.entity]
@@ -84,7 +85,11 @@ class ESP : Feature() {
                             drawEsp(
                                 mob,
                                 model,
-                                if (Config.customespChroma) RenderUtils.getChroma(3000f, 0) else Config.customespColor.rgb,
+                                if (Config.customespChroma.value) RenderUtils.getChroma(3000f, 0) else Color(
+                                    Config.customespR.value.toInt(),
+                                    Config.customespG.value.toInt(),
+                                    Config.customespB.value.toInt()
+                                ).rgb,
                                 it.partialTicks,
                                 it
                             )
@@ -92,12 +97,16 @@ class ESP : Feature() {
                         } else getMobsWithinAABB(it.entity)
                         break
                     }
-                } else for (cname in Config.customespText.split(", ")) {
+                } else for (cname in Config.customespText.value.split(", ")) {
                     if (it.entity.name?.contains(cname, true) == false) continue
                     drawEsp(
                         it.entity,
                         it.model,
-                        if (Config.customespChroma) RenderUtils.getChroma(3000f, 0) else Config.customespColor.rgb,
+                        if (Config.customespChroma.value) RenderUtils.getChroma(3000f, 0) else Color(
+                            Config.customespR.value.toInt(),
+                            Config.customespG.value.toInt(),
+                            Config.customespB.value.toInt()
+                        ).rgb,
                         it.partialTicks,
                         it
                     )
@@ -110,7 +119,7 @@ class ESP : Feature() {
                 is EntityArmorStand -> {
                     if (!it.entity.hasCustomName()) return@safeListener
                     val name = it.entity.customNameTag.stripColor()
-                    if (Config.starredmobsesp && name.startsWith("✯ ")) {
+                    if (Config.starredmobsesp.value && name.startsWith("✯ ")) {
                         val mob = starredMobs[it.entity]
                         if (mob != null) {
                             if (mob.isDead()) {
@@ -121,29 +130,44 @@ class ESP : Feature() {
                             drawEsp(
                                 mob,
                                 model,
-                                if (Config.starredmobsespChroma) RenderUtils.getChroma(3000f, 0) else Config.mobsespColor.rgb,
+                                if (Config.starredmobsespChroma.value) RenderUtils.getChroma(3000f, 0) else Color(
+                                    Config.mobsespR.value.toInt(),
+                                    Config.mobsespG.value.toInt(),
+                                    Config.mobsespB.value.toInt()
+                                ).rgb,
                                 it.partialTicks,
                                 it
                             )
                         } else getStarredMobsWithinAABB(it.entity)
-                    } else if (Config.keyesp && (name == "Wither Key" || name == "Blood Key"))
-                        RenderUtils.drawBeaconBeam(it.entity, if (Config.keyespChroma) RenderUtils.getChroma(3000f, 0) else Config.keyespColor.rgb)
+                    } else if (Config.keyesp.value && (name == "Wither Key" || name == "Blood Key"))
+                        RenderUtils.drawBeaconBeam(
+                            it.entity,
+                            if (Config.keyespChroma.value) RenderUtils.getChroma(3000f, 0) else Color(Config.keyespR.value.toInt(), Config.keyespG.value.toInt(), Config.keyespB.value.toInt()).rgb
+                        )
                 }
 
                 is EntityOtherPlayerMP ->
-                    if (Config.starredmobsesp && it.entity.name?.trim() == "Shadow Assassin")
+                    if (Config.starredmobsesp.value && it.entity.name?.trim() == "Shadow Assassin")
                         drawEsp(
                             it.entity,
                             it.model,
-                            if (Config.starredmobsespChroma) RenderUtils.getChroma(3000f, 0) else Config.mobsespColor.rgb,
+                            if (Config.starredmobsespChroma.value) RenderUtils.getChroma(3000f, 0) else Color(
+                                Config.mobsespR.value.toInt(),
+                                Config.mobsespG.value.toInt(),
+                                Config.mobsespB.value.toInt()
+                            ).rgb,
                             it.partialTicks,
                             it
                         )
-                    else if (Config.playeresp && !it.entity.isDead && it.entity.team != null && (it.entity.team as ScorePlayerTeam).nameTagVisibility != Team.EnumVisible.NEVER)
+                    else if (Config.playeresp.value && !it.entity.isDead && it.entity.team != null && (it.entity.team as ScorePlayerTeam).nameTagVisibility != Team.EnumVisible.NEVER)
                         drawEsp(
                             it.entity,
                             it.model,
-                            if (Config.playerespChroma) RenderUtils.getChroma(3000f, 0) else Config.playersespColor.rgb,
+                            if (Config.playerespChroma.value) RenderUtils.getChroma(3000f, 0) else Color(
+                                Config.playerespR.value.toInt(),
+                                Config.playerespG.value.toInt(),
+                                Config.playerespB.value.toInt()
+                            ).rgb,
                             it.partialTicks,
                             it
                         )
@@ -152,11 +176,11 @@ class ESP : Feature() {
                     if (it.entity.isInvisible)
                         it.entity.isInvisible = false
 
-                is EntityBat -> if (Config.batsesp && (it.entity.maxHealth.also { hp -> maxHP = hp } == 100.0f || maxHP == 200.0f)) {
+                is EntityBat -> if (Config.batsesp.value && (it.entity.maxHealth.also { hp -> maxHP = hp } == 100.0f || maxHP == 200.0f)) {
                     RenderUtils.drawChamsEsp(
                         it.entity,
                         it.model,
-                        if (Config.batsespChroma) RenderUtils.getChroma(3000f, 0) else Config.batsespColor.rgb,
+                        if (Config.batsespChroma.value) RenderUtils.getChroma(3000f, 0) else Color(Config.batsespR.value.toInt(), Config.batsespG.value.toInt(), Config.batsespB.value.toInt()).rgb,
                         it.partialTicks
                     )
                     it.cancel()
@@ -165,7 +189,7 @@ class ESP : Feature() {
         }
 
         listener<EntityJoinWorldEvent>(-1, receiveCanceled = true) {
-            if (!Cache.inDungeon || !Config.esp) return@listener
+            if (!Cache.inDungeon || !Config.esp.value) return@listener
             if ((it.entity is EntityOtherPlayerMP && it.entity.name?.trim() == "Shadow Assassin") || it.entity is EntityEnderman)
                 it.entity.isInvisible = false
         }
@@ -177,7 +201,7 @@ class ESP : Feature() {
         }
 
         listener<LivingDeathEvent> {
-            if (!Config.esp) return@listener
+            if (!Config.esp.value) return@listener
             customMobs.remove(it.entity)
             if (!Cache.inDungeon) return@listener
             starredMobs.remove(it.entity)
@@ -185,7 +209,7 @@ class ESP : Feature() {
     }
 
     private fun drawEsp(entity: EntityLivingBase, model: ModelBase, color: Int, partialTicks: Float, event: RenderEntityModelEvent) {
-        when (Config.espMode) {
+        when (Config.espMode.value) {
             0 -> RenderUtils.drawOutlinedEsp(entity, model, color, partialTicks)
             1 -> drawBox[entity] = color
             2 -> {

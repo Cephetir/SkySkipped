@@ -29,7 +29,7 @@ class FragRun : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if (event.message.unformattedText.stripColor().trim().contains("> EXTRA STATS <") && Config.EndLeave)
+        if (event.message.unformattedText.stripColor().trim().contains("> EXTRA STATS <") && Config.EndLeave.value)
             Features.leaveCommand.start(false)
     }
 }

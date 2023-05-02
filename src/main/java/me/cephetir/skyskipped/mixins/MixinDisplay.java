@@ -23,12 +23,18 @@ import org.lwjgl.opengl.Display;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(Display.class)
+@Mixin(value = Display.class, remap = false)
 public class MixinDisplay {
-    @Inject(method = "isActive", at = @At(value = "RETURN"), cancellable = true, remap = false)
+    @Inject(method = "isActive", at = @At(value = "RETURN"), cancellable = true)
     private static void isActive(CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(cir.getReturnValue() || Config.Companion.getKeepFocus());
+        cir.setReturnValue(cir.getReturnValue() || Config.keepFocus.getValue());
+    }
+
+    @ModifyVariable(method = "setTitle", at = @At("HEAD"), argsOnly = true)
+    private static String setTitle(String value) {
+        return "SkySkipped";
     }
 }

@@ -21,8 +21,6 @@ package me.cephetir.skyskipped.features.impl.hacks
 import gg.essential.universal.UChat
 import me.cephetir.bladecore.core.event.BladeEventBus
 import me.cephetir.bladecore.core.event.listener.asyncListener
-import me.cephetir.bladecore.utils.minecraft.KeybindUtils.isDown
-import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
@@ -68,7 +66,7 @@ object HotbarSaver : Feature() {
         if (event.phase != TickEvent.Phase.START || !Cache.onSkyblock || Listener.called) return
         if (mc.currentScreen !is GuiChest && mc.currentScreen !is GuiInventory) return
 
-        val down = SkySkipped.hotbarKey.isDown(true)
+        val down = Config.hotbarSwapKey.isKeyDown()
         if (down == keybindLastState) return
         keybindLastState = down
         if (!down) return
@@ -125,7 +123,7 @@ object HotbarSaver : Feature() {
                     }
                     // Proccess
                     1 -> {
-                        if (timer.time < Config.hotbarSwapDelay) return@asyncListener
+                        if (timer.time < Config.hotbarSwapDelay.value) return@asyncListener
                         if (hotbarSlot >= count + 8) {
                             step = 2
                             return@asyncListener

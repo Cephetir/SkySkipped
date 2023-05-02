@@ -60,7 +60,7 @@ object RemoteControlling {
         if (!Loader.isModLoaded("skyskippedjdaaddon")) return SkySkipped.logger.error("Failed to start JDA! SkySkipped JDA Addon mod not loaded!")
 
         try {
-            jda = JDABuilder.createLight(Config.remoteControlUrl)
+            jda = JDABuilder.createLight(Config.remoteControlUrl.value)
                 .disableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .setBulkDeleteSplittingEnabled(false)
@@ -161,7 +161,7 @@ object RemoteControlling {
                             event.message.reply("Invalid macro name!").queue()
                             return
                         }
-                        Config.macroType = MacroManager.macros.indexOf(macro).coerceAtLeast(0)
+                        Config.macroType.value = MacroManager.macros.indexOf(macro).coerceAtLeast(0)
                         event.message.reply("Switched macro to ${MacroManager.current.name}!").queue()
                     } else if (message.startsWith("slot") || message.startsWith("s")) {
                         val slot = message.removePrefix("slot ").removePrefix("s ").trim()

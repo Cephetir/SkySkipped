@@ -44,15 +44,26 @@ class ZeroPingGui : Feature() {
         "Sack",
         "Present Item"
     )
+    private val clicked = ArrayList<Int>()
+    private var currentlyVisible = -1
 
     init {
         listener<ClickSlotEvent> {
-            if (!Cache.onSkyblock || !Config.zeroPingGui || it.button != 0 || it.slot == null) return@listener
+            if (!Cache.onSkyblock || !Config.zeroPingGui.value || it.button != 0 || it.slot == null) return@listener
             val stack = it.gui.inventorySlots.getSlot(0).stack ?: return@listener
             if (stack.displayName != " " || stack.itemDamage != 15 || ignore.contains(SkyblockListener.lastOpenContainerName)) return@listener
 
             it.cancel()
-            mc.playerController.windowClick(it.gui.inventorySlots.windowId, it.slot.slotNumber, 2, 3, player)
+            var window = it.gui.inventorySlots.windowId
+            if (window != currentlyVisible) {
+                clicked.clear()
+                clicked.add(window)
+                currentlyVisible = window
+            } else {
+                while (clicked.contains(window)) window++
+                clicked.add(window)
+            }
+            mc.playerController.windowClick(window, it.slot.slotNumber, 2, 3, player)
         }
     }
 }

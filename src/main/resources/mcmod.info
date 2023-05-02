@@ -7,7 +7,9 @@
     "mcversion": "${mcversion}",
     "url": "https://github.com/Cephetir/SkySkipped",
     "updateUrl": "https://github.com/Cephetir/SkySkipped/releases/latest",
-    "authorList": ["Cephetir"],
+    "authorList": [
+      "Cephetir"
+    ],
     "credits": "Cephetir",
     "logoFile": "",
     "screenshots": [],

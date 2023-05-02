@@ -28,13 +28,13 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 class Trail : Feature() {
     private var timer = 0L
     private val particle: EnumParticleTypes
-        get() = EnumParticleTypes.values().find { it.name.equals(Config.trailParticle, true) } ?: EnumParticleTypes.DRIP_LAVA
+        get() = EnumParticleTypes.values().find { it.name.equals(Config.trailParticle.value, true) } ?: EnumParticleTypes.DRIP_LAVA
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (System.currentTimeMillis() - timer < Config.trailInterval) return
+        if (System.currentTimeMillis() - timer < Config.trailInterval.value) return
         timer = System.currentTimeMillis()
-        if (event.phase != TickEvent.Phase.START || !Config.trail || mc.thePlayer == null) return
+        if (event.phase != TickEvent.Phase.START || !Config.trail.value || mc.thePlayer == null) return
         if (mc.thePlayer.motionX == 0.0 && mc.thePlayer.motionZ == 0.0) return
 
         mc.theWorld.spawnParticle(

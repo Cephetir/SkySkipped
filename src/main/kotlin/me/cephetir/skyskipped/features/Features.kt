@@ -27,9 +27,13 @@ import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.features.impl.dugeons.*
 import me.cephetir.skyskipped.features.impl.hacks.*
 import me.cephetir.skyskipped.features.impl.macro.FarmingHUD
+import me.cephetir.skyskipped.features.impl.macro.GuiRecorder
 import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.features.impl.misc.*
 import me.cephetir.skyskipped.features.impl.movement.AutoStopFlying
+import me.cephetir.skyskipped.features.impl.optimization.HideDamageInBoss
+import me.cephetir.skyskipped.features.impl.optimization.HideWitherCloak
+import me.cephetir.skyskipped.features.impl.optimization.StopFallingBlocks
 import me.cephetir.skyskipped.features.impl.visual.*
 
 class Features {
@@ -60,9 +64,7 @@ class Features {
         AutoStopFlying(),
         Metrics(),
         AutoCookieClicker(),
-        AutoDojo(),
         Trail(),
-        RoomDetection(),
         MacroManager,
         FarmingHUD(),
         HotbarSaver,
@@ -75,10 +77,18 @@ class Features {
         ChatSearch(),
         SearchContainer(),
         AutoReply(),
-        WitherDoorEsp(),
         AutoRedirectClick(),
         ShinyBlocks(),
         StopFallingBlocks(),
+        HideDamageInBoss(),
+        DungeonScan,
+        JerryBoxOpener(),
+        BanDetector(),
+        TerminatorClicker(),
+        AOTVDisplay(),
+        Garden(),
+        HideWitherCloak(),
+        GuiRecorder,
     )
 
     fun register() = features.forEach { BladeEventBus.subscribe(it, true) }

@@ -18,9 +18,6 @@
 
 package me.cephetir.skyskipped.features.impl.visual
 
-import me.cephetir.bladecore.utils.TextUtils.containsAny
-import me.cephetir.bladecore.utils.minecraft.KeybindUtils.isDown
-import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -32,14 +29,13 @@ class PerspectiveToggle : Feature() {
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null || !Config.betterPerspective) return
+        if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null || mc.currentScreen != null || !Config.betterPerspective.value) return
 
-        val down = SkySkipped.perspectiveToggle.isDown()
+        val down = Config.betterPerspectiveKey.isKeyDown()
         if (down == keybindLastState) return
         keybindLastState = down
-        if (!down && Config.betterPerspectiveMode == 1) return
+        if (!down && Config.betterPerspectiveMode.value == 1) return
 
-        if (Config.betterPerspectiveItems == "" || mc.thePlayer.heldItem == null || mc.thePlayer.heldItem.displayName.containsAny(Config.betterPerspectiveItems.split(", ")))
-            mc.gameSettings.thirdPersonView = if (mc.gameSettings.thirdPersonView == 3) 0 else 3
+        mc.gameSettings.thirdPersonView = if (mc.gameSettings.thirdPersonView == 3) 0 else 3
     }
 }

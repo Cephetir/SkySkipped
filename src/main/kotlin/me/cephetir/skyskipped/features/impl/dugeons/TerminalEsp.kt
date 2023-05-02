@@ -54,7 +54,7 @@ class TerminalEsp : Feature() {
 
     @SubscribeEvent(receiveCanceled = true)
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Cache.inDungeon || !Config.terminalEsp) return
+        if (!Cache.inDungeon || !Config.terminalEsp.value) return
 
         val msg = event.message.unformattedText.stripColor()
         if (msg.contains("[BOSS] Goldor: Little ants, plotting and scheming, thinking they are invincible…"))
@@ -65,7 +65,7 @@ class TerminalEsp : Feature() {
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!Cache.inDungeon || !Config.terminalEsp || job == null) return
+        if (!Cache.inDungeon || !Config.terminalEsp.value || job == null) return
 
         val rm = mc.renderManager as IMixinRenderManager
         val renderPosX = rm.renderPosX
@@ -121,6 +121,7 @@ class TerminalEsp : Feature() {
                                 printdev("Detected inactive")
                                 renderRed1.push(i)
                             }
+
                             i2.name.stripColor().contains("Terminal Active") -> {
                                 printdev("Detected active")
                                 renderGreen1.push(i)

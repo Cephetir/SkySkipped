@@ -45,7 +45,7 @@ class Pings : Feature() {
 
     init {
         listener<ClientChatReceivedEvent> {
-            if (!Cache.inDungeon || !Config.fireFreezePing) return@listener
+            if (!Cache.inDungeon || !Config.fireFreezePing.value) return@listener
             val msg = it.message.unformattedText.stripColor()
             if (msg.startsWith("[BOSS] The Professor: Oh? You found my Guardians one weakness?")) {
                 ffTimer = System.currentTimeMillis() + 5000L
@@ -57,7 +57,7 @@ class Pings : Feature() {
         }
 
         listener<ClientTickEvent> {
-            if (!Cache.inDungeon || !Config.autoGo || player == null || world == null) return@listener
+            if (!Cache.inDungeon || !Config.autoGo.value || player == null || world == null) return@listener
             if (System.currentTimeMillis() - lastGo < 2000L) return@listener
             if (world!!.getBlockState(BlockPos(player!!.posX, player!!.posY, player!!.posZ)).block != Blocks.portal) {
                 saidGo = false
@@ -82,16 +82,16 @@ class Pings : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Cache.inDungeon || !Config.rabbitPing || rabPing) return
+        if (!Cache.inDungeon || !Config.rabbitPing.value || rabPing) return
         if (event.message.unformattedText.stripColor().contains("You have proven yourself. You may pass")) {
-            PingUtils(50, "Rabbit Hat!")
+            PingUtils(50, "Watcher done!")
             rabPing = true
         }
     }
 
     @SubscribeEvent
     fun onEntityDeath(event: LivingDeathEvent) {
-        if (!Cache.inDungeon || !Config.mimic || mimicPing) return
+        if (!Cache.inDungeon || !Config.mimic.value || mimicPing) return
         if (event.entity is EntityZombie) {
             val entity = event.entity as EntityZombie
             if (entity.isChild &&
@@ -100,7 +100,7 @@ class Pings : Feature() {
                 entity.getCurrentArmor(2) == null &&
                 entity.getCurrentArmor(3) == null
             ) {
-                Queues.sendMessage("/pc " + Config.mimicText)
+                Queues.sendMessage("/pc " + Config.mimicText.value)
                 mimicPing = true
             }
         }

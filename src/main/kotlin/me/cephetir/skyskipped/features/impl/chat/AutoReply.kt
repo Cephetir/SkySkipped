@@ -32,7 +32,7 @@ class AutoReply : Feature() {
 
     init {
         safeAsyncListener<ClientChatReceivedEvent> {
-            if (!Config.autoReply) return@safeAsyncListener
+            if (!Config.autoReply.value) return@safeAsyncListener
 
             val msg = it.message.unformattedText.stripColor()
             val m = regex.matchEntire(msg) ?: return@safeAsyncListener
@@ -47,17 +47,19 @@ class AutoReply : Feature() {
                 "Co-op" -> "/cc"
                 else -> "/ac"
             }
-            if (Config.autoReplyGuild && command != "/gc") return@safeAsyncListener
+            if (Config.autoReplyGuild.value && command != "/gc") return@safeAsyncListener
             printdev("Command: $command")
             val message = m.groupValues[5]
             if (message.containsAny(" wc", "wc ") || message.equals("wc", true))
                 Queues.sendMessage("$command \"wc\" - ${m.groupValues[4]}")
-            else if (message.containsAny(" gg", "gg ") || message.equals("gg", true))
+            else if (message.contains(" gg", true) || message.equals("gg", true))
                 Queues.sendMessage("$command \"gg\" - ${m.groupValues[4]}")
             else if (message.containsAny(" good game", "good game ") || message.equals("good game", true))
                 Queues.sendMessage("$command \"good game\" - ${m.groupValues[4]}")
             else if (message.containsAny(" wrong chat", "wrong chat ") || message.equals("wrong chat", true))
                 Queues.sendMessage("$command \"wrong chat\" - ${m.groupValues[4]}")
+            else if (message.contains("ඞ"))
+                Queues.sendMessage("$command \"ඞ\" - ${m.groupValues[4]}")
         }
     }
 }

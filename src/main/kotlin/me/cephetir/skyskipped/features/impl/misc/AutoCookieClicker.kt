@@ -21,19 +21,23 @@ package me.cephetir.skyskipped.features.impl.misc
 import me.cephetir.bladecore.utils.TextUtils.stripColor
 import me.cephetir.bladecore.utils.threading.safeListener
 import me.cephetir.skyskipped.config.Config
-import me.cephetir.skyskipped.event.events.DrawSlotEvent
 import me.cephetir.skyskipped.features.Feature
-import org.lwjgl.input.Mouse
+import net.minecraft.client.gui.inventory.GuiChest
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
 class AutoCookieClicker : Feature() {
     init {
-        safeListener<DrawSlotEvent.Pre> {
-            if (it.slot.hasStack && it.slot.stack.displayName.stripColor().endsWith(" Cookies") && Config.cookieClicker)
+        safeListener<ClientTickEvent> {
+            if (!Config.cookieClicker.value) return@safeListener
+            val gui = mc.currentScreen ?: return@safeListener
+            if (gui !is GuiChest) return@safeListener
+            val slot = gui.inventorySlots.getSlot(13)
+            if (slot.hasStack && slot.stack.displayName.stripColor().contains("Cookies"))
                 playerController.windowClick(
-                    it.gui.inventorySlots.windowId,
-                    it.slot.slotNumber,
-                    Mouse.getButtonIndex("BUTTON2"),
+                    gui.inventorySlots.windowId,
+                    slot.slotNumber,
                     0,
+                    1,
                     mc.thePlayer
                 )
         }

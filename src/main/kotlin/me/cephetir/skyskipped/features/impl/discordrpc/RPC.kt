@@ -28,7 +28,7 @@ object RPC : Feature() {
 
     fun shutdown() = discordRPCManager.disconnect()
 
-    fun reset(enabled: Boolean = Config.DRPC) {
+    fun reset(enabled: Boolean = Config.DRPC.value) {
         if (enabled && !discordRPCManager.isActive) discordRPCManager.connect()
         else if (!enabled && discordRPCManager.isActive) discordRPCManager.disconnect()
     }

@@ -43,7 +43,7 @@ class ChatSearch : Feature() {
 
     @SubscribeEvent
     fun onKeyPre(event: KeyboardInputEvent.Pre) {
-        if (!Config.chatSearch || mc.currentScreen !is GuiChat) return
+        if (!Config.chatSearch.value || mc.currentScreen !is GuiChat) return
 
         if (!Keyboard.getEventKeyState()) return
         if (Keyboard.isRepeatEvent()) return
@@ -88,7 +88,7 @@ class ChatSearch : Feature() {
 
     @SubscribeEvent
     fun onMouseClicked(event: GuiScreenEvent.MouseInputEvent.Pre) {
-        if (!search || !Config.chatSearch || Mouse.getEventButton() != 1 || !Mouse.getEventButtonState()) return
+        if (!search || !Config.chatSearch.value || Mouse.getEventButton() != 1 || !Mouse.getEventButtonState()) return
         val index = getChatLineIndex(UMouse.Raw.x.roundToInt(), UMouse.Raw.y.roundToInt())
         if (index == -1) return
 

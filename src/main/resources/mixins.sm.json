@@ -3,7 +3,9 @@
   "refmap": "mixins.sm.refmap.json",
   "minVersion": "0.7.11",
   "compatibilityLevel": "JAVA_8",
+  "verbose": true,
   "mixins": [
+    "MixinBlock",
     "MixinBlockCarpet",
     "MixinBlockCocoa",
     "MixinEntityPlayer",
@@ -12,6 +14,7 @@
     "render.MixinPatcherFontRendererHook"
   ],
   "client": [
+    "MixinAbstractClientPlayer",
     "MixinDisplay",
     "MixinGuiContainer",
     "MixinGuiDisconnected",
@@ -34,6 +37,7 @@
     "render.MixinFontRenderer",
     "render.MixinGuiIngame",
     "render.MixinGuiNewChat",
+    "render.MixinRender",
     "render.MixinRenderManager"
   ]
 }

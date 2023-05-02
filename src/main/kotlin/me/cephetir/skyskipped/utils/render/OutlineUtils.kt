@@ -65,7 +65,7 @@ object OutlineUtils {
             headYaw,
             headPitch,
             scaleFactor,
-            f, f1,f2, f3
+            f, f1, f2, f3
         )
         setColor(f, f1, f2, f3)
         renderTwo()
@@ -81,7 +81,7 @@ object OutlineUtils {
             headYaw,
             headPitch,
             scaleFactor,
-            f, f1,f2, f3
+            f, f1, f2, f3
         )
         setColor(f, f1, f2, f3)
         renderThree()
@@ -96,7 +96,7 @@ object OutlineUtils {
             headYaw,
             headPitch,
             scaleFactor,
-            f, f1,f2, f3
+            f, f1, f2, f3
         )
         setColor(f, f1, f2, f3)
         setColor(f, f1, f2, f3)
@@ -113,7 +113,7 @@ object OutlineUtils {
             headYaw,
             headPitch,
             scaleFactor,
-            f, f1,f2, f3
+            f, f1, f2, f3
         )
         setColor(f, f1, f2, f3)
         renderFive()

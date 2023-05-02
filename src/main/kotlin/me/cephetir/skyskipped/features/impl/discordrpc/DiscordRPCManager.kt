@@ -31,7 +31,7 @@ import me.cephetir.skyskipped.utils.mc
 import java.time.OffsetDateTime
 
 class DiscordRPCManager : AbstractDiscordIPC() {
-    override val APP_ID = 867366183057752094L
+    override val APP_ID = 1102633365858947162L
     override val rpcBuilder: RichPresence.Builder = RichPresence.Builder()
         .setLargeImage("large", "SkySkipped v${SkySkipped.VERSION}")
 
@@ -56,8 +56,8 @@ class DiscordRPCManager : AbstractDiscordIPC() {
     }
 
     override fun updateRPC(): RichPresence = rpcBuilder
-        .setDetails(getLine(Config.drpcDetail))
-        .setState(getLine(if (Config.drpcState == 4) 5 else Config.drpcState))
+        .setDetails(getLine(Config.drpcDetail.value))
+        .setState(getLine(if (Config.drpcState.value == 4) 5 else Config.drpcState.value))
         .build()
 
     private fun getLine(line: Int): String = when (line) {
@@ -69,8 +69,8 @@ class DiscordRPCManager : AbstractDiscordIPC() {
         1 -> mc.session.username
         2 -> if (mc.isIntegratedServerRunning) "Singleplayer" else mc.currentServerData?.serverIP ?: "Main Menu"
         3 -> mc.thePlayer?.heldItem?.displayName?.stripColor()?.trim() ?: "Nothing"
-        4 -> Config.drpcText
-        5 -> Config.drpcText2
+        4 -> Config.drpcText.value
+        5 -> Config.drpcText2.value
         else -> ""
     }
 }

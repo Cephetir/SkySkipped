@@ -27,7 +27,7 @@ class HidePetCandies : Feature() {
 
     @SubscribeEvent
     fun onTooltip(event: ItemTooltipEvent) {
-        if(!Config.hidePetCandies) return
+        if (!Config.hidePetCandies.value) return
         for (i in 0 until event.toolTip.size - 1) {
             if (event.toolTip[i].contains("Pet Candy Used")) {
                 event.toolTip.removeAt(i)

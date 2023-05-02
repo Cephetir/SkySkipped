@@ -42,6 +42,7 @@ import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
+import java.awt.Color
 import java.util.concurrent.TimeUnit
 
 /*
@@ -55,13 +56,13 @@ class PresentHighlight : Feature() {
 
     @SubscribeEvent
     fun onWorldRender(event: RenderWorldLastEvent) {
-        if (mc.theWorld == null || !Config.presents || !Cache.inWorkshop) return
+        if (mc.theWorld == null || !Config.presents.value || !Cache.inWorkshop) return
         val entities = mc.theWorld.loadedEntityList
         for (entity in entities)
             if (entity is EntityArmorStand && shouldDraw(entity) && !clicked.contains(entity))
                 RenderUtils.drawBox(
                     entity.positionVector,
-                    Config.presentsColor,
+                    Color(Config.presentsColorR.value.toInt(), Config.presentsColorG.value.toInt(), Config.presentsColorB.value.toInt()),
                     event.partialTicks
                 )
     }

@@ -41,7 +41,7 @@ class AutoSalvage : Feature() {
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Cache.onSkyblock || !Config.autoSalvage || stop) return
+        if (event.phase != TickEvent.Phase.START || !Cache.onSkyblock || !Config.autoSalvage.value || stop) return
         if (mc.currentScreen !is GuiChest || !(SkyblockListener.lastOpenContainerName?.stripColor()?.contains("Salvage Item") ?: return)) return
         if (tickTimer++ % 10 != 0) return
 
@@ -71,7 +71,7 @@ class AutoSalvage : Feature() {
 
     private fun shouldSalvage(item: ItemStack): Boolean {
         val attributes = item.getExtraAttributes() ?: return false
-                // Dungeons
+        // Dungeons
         return !(!attributes.hasKey("baseStatBoostPercentage") || attributes.hasKey("dungeon_item_level") || item.getSkyBlockID() == "ICE_SPRAY_WAND") ||
                 // Lava Fishing
                 item.getSkyBlockID().equalsAny(

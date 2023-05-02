@@ -52,7 +52,8 @@ object ShadowUtils {
         val height = sc.scaledHeight
         val factor = sc.scaleFactor
         if (lastWidth != width || lastHeight != height
-            || initFramebuffer == null || frameBuffer == null || shaderGroup == null) {
+            || initFramebuffer == null || frameBuffer == null || shaderGroup == null
+        ) {
             initFramebuffer = Framebuffer(width * factor, height * factor, true)
             initFramebuffer!!.setFramebufferColor(0F, 0F, 0F, 0F)
             initFramebuffer!!.setFramebufferFilter(GL_LINEAR)

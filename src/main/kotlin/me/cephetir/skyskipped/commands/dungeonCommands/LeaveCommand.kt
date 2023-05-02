@@ -78,14 +78,16 @@ class LeaveCommand : CommandBase() {
             when (step) {
                 0 -> {
                     mc.thePlayer.sendChatMessage("/lobby")
-                    delay(Config.delay.toLong())
+                    delay(Config.delay.value.toLong())
                     step++
                 }
+
                 1 -> {
                     mc.thePlayer.sendChatMessage("/play skyblock")
-                    delay(Config.delay.toLong())
+                    delay(Config.delay.value.toLong())
                     step++
                 }
+
                 2 -> {
                     val scoreboard = mc.thePlayer.worldScoreboard
                     val scoreObjective = scoreboard.getObjectiveInDisplaySlot(1)
@@ -104,7 +106,7 @@ class LeaveCommand : CommandBase() {
                         }
                     }
                     if (!ok) mc.thePlayer.sendChatMessage("/warp dungeon_hub")
-                    if (Config.EndParty && Config.BotName != "" || party) Features.partyCommand.start()
+                    if (Config.EndParty.value && Config.BotName.value != "" || party) Features.partyCommand.start()
                     BladeEventBus.unsubscribe(toStop, true)
                     started = false
                     step = 0

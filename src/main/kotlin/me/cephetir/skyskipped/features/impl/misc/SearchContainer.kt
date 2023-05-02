@@ -40,7 +40,7 @@ class SearchContainer : Feature() {
 
     @SubscribeEvent
     fun onKeyPre(event: GuiScreenEvent.KeyboardInputEvent.Pre) {
-        if (mc.currentScreen !is GuiContainer || !Config.containerSearch) return
+        if (mc.currentScreen !is GuiContainer || !Config.containerSearch.value) return
         if (!Keyboard.getEventKeyState()) return
         if (Keyboard.isRepeatEvent()) return
         val key = Keyboard.getEventKey()
@@ -64,7 +64,7 @@ class SearchContainer : Feature() {
 
     @SubscribeEvent
     fun onGuiRender(event: GuiScreenEvent.DrawScreenEvent.Post) {
-        if (!Config.containerSearch || !capturingText) return
+        if (!Config.containerSearch.value || !capturingText) return
         val gui = event.gui
         GlStateManager.pushMatrix()
         GlStateManager.scale(1.5f, 1.5f, 1.5f)
@@ -87,7 +87,7 @@ class SearchContainer : Feature() {
 
     init {
         safeListener<DrawSlotEvent.Pre> {
-            if (!Config.containerSearch || !capturingText) return@safeListener
+            if (!Config.containerSearch.value || !capturingText) return@safeListener
             val slot = it.slot
             if (slot.hasStack && slot.stack.displayName.contains(text, true)) Gui.drawRect(
                 slot.xDisplayPosition,
@@ -99,7 +99,7 @@ class SearchContainer : Feature() {
         }
 
         safeListener<DrawSlotEvent.Post> {
-            if (!Config.containerSearch || !capturingText) return@safeListener
+            if (!Config.containerSearch.value || !capturingText) return@safeListener
             val slot = it.slot
             if (!slot.hasStack || !slot.stack.displayName.contains(text, true)) Gui.drawRect(
                 slot.xDisplayPosition,

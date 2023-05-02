@@ -41,7 +41,7 @@ class HighlightUnlockedGemSots : Feature() {
 
     @SubscribeEvent
     fun onDraw(event: GuiScreenEvent.DrawScreenEvent.Pre) {
-        if (!Config.highlightSlots || event.gui !is GuiChest) return
+        if (!Config.highlightSlots.value || event.gui !is GuiChest) return
         val chest = ((event.gui as GuiChest).inventorySlots as ContainerChest).lowerChestInventory
         val chestName = chest.displayName.unformattedText
         if (!chestName.contains("Auctions Browser")) return

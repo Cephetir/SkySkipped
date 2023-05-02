@@ -75,8 +75,9 @@ class PartyCommand : CommandBase() {
                     delay(200L)
                     step++
                 }
+
                 1 -> {
-                    mc.thePlayer.sendChatMessage("/p " + Config.BotName)
+                    mc.thePlayer.sendChatMessage("/p " + Config.BotName.value)
                     BladeEventBus.unsubscribe(toStop, true)
                     started = false
                     step = 0

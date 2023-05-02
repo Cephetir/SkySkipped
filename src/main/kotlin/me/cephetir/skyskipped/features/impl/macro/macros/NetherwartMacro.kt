@@ -116,7 +116,7 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private fun onDisable() {
-        if (Config.netherWartCpuSaver) {
+        if (Config.netherWartCpuSaver.value) {
             mc.gameSettings.limitFramerate = lastFps
             mc.gameSettings.renderDistanceChunks = lastDist
         }
@@ -128,8 +128,8 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private fun reset() {
-        farmDirection = FarmDirection.values()[Config.netherWartDirection]
-        farmType = FarmType.values()[Config.netherWartType]
+        farmDirection = FarmDirection.values()[Config.netherWartDirection.value]
+        farmType = FarmType.values()[Config.netherWartType.value]
         movementDirection = MovementDirection.LEFT
         farmingState = FarmingState.SETUP
 
@@ -226,32 +226,32 @@ class NetherwartMacro : Macro("NetherWart") {
         }
         if (rotating == null) {
             val ya = try {
-                Config.customYaw.toFloat()
+                Config.customYaw.value.toFloat()
             } catch (ex: NumberFormatException) {
                 ex.printStackTrace()
                 69420f
             }
             val pi = try {
-                Config.customPitch.toFloat()
+                Config.customPitch.value.toFloat()
             } catch (ex: NumberFormatException) {
                 ex.printStackTrace()
                 69420f
             }
-            val yaw = if (Config.customYawToggle && ya != 69420f) ya
+            val yaw = if (Config.customYawToggle.value && ya != 69420f) ya
             else when (farmDirection) {
                 FarmDirection.NORTH -> 180f
                 FarmDirection.SOUTH -> 0f
                 FarmDirection.WEST -> 90f
                 FarmDirection.EAST -> -90f
             }
-            val pitch = if (Config.customPitchToggle && pi != 69420f) pi else 0f
+            val pitch = if (Config.customPitchToggle.value && pi != 69420f) pi else 0f
             printdev("Rotate yaw and pitch: $yaw $pitch")
             rotating = RotationClass(RotationClass.Rotation(yaw, pitch), if (yaw > 80 || pitch > 80) 1500L else 750L)
         }
         if (rotating!!.done) {
             printdev("Finished rotating")
 
-            if (Config.netherWartCpuSaver) {
+            if (Config.netherWartCpuSaver.value) {
                 lastFps = mc.gameSettings.limitFramerate
                 mc.gameSettings.limitFramerate = 30
                 lastDist = mc.gameSettings.renderDistanceChunks
@@ -407,7 +407,7 @@ class NetherwartMacro : Macro("NetherWart") {
         val moving = round(abs(motion) % 1.0 * 10000.0) / 10000.0
 
         printdev("Checking velo")
-        if (moving != 0.0 && Config.macroLagbackFix) return
+        if (moving != 0.0 && Config.macroLagbackFix.value) return
         printdev("Checking side block ${sideBlock.block.localizedName}")
         if (ignoreBlocks.contains(sideBlock.block)) return
 
@@ -423,7 +423,7 @@ class NetherwartMacro : Macro("NetherWart") {
             else MovementDirection.LEFT
         printdev("Changing direction to ${movementDirection.name}")
 
-        if (Config.netherWartSetSpawn && System.currentTimeMillis() - spawnTimer >= 1000) {
+        if (Config.netherWartSetSpawn.value && System.currentTimeMillis() - spawnTimer >= 1000) {
             UChat.chat("§cSkySkipped §f:: §eSetting spawnpoint...")
             mc.thePlayer.sendChatMessage("/sethome")
             spawnTimer = System.currentTimeMillis()
@@ -440,8 +440,8 @@ class NetherwartMacro : Macro("NetherWart") {
 
         val yaw = mc.thePlayer.rotationYaw
         val pitch = mc.thePlayer.rotationPitch
-        if (lastyaw !in (yaw - Config.rotationDiff)..(yaw + Config.rotationDiff) ||
-            lastpitch !in (pitch - Config.rotationDiff)..(pitch + Config.rotationDiff)
+        if (lastyaw !in (yaw - Config.rotationDiff.value)..(yaw + Config.rotationDiff.value) ||
+            lastpitch !in (pitch - Config.rotationDiff.value)..(pitch + Config.rotationDiff.value)
         ) {
             printdev("Detected rotation change")
             farmingState = FarmingState.SETUP
@@ -507,7 +507,7 @@ class NetherwartMacro : Macro("NetherWart") {
         if (jacobFailsafe()) return true
         banwaveChecker()
 
-        mc.thePlayer.inventory.currentItem = Config.autoPickSlot - 1
+        mc.thePlayer.inventory.currentItem = Config.autoPickSlot.value.toInt() - 1
         return false
     }
 
@@ -525,7 +525,7 @@ class NetherwartMacro : Macro("NetherWart") {
     private fun unstuckFailsafe(): Int {
         if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return 0
         var stuck = 0
-        if (!Config.netherWartStuck) return 0
+        if (!Config.netherWartStuck.value) return 0
         if (Failsafes.lastPos == null) Failsafes.lastPos = mc.thePlayer.position
         else {
             if (checkPos(mc.thePlayer.position)) {
@@ -549,13 +549,13 @@ class NetherwartMacro : Macro("NetherWart") {
     private fun desyncFailsafe(): Int {
         if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return 0
         var desynced = 0
-        if (!Config.netherWartDesync) return 0
+        if (!Config.netherWartDesync.value) return 0
         if (Failsafes.ticksWarpDesync >= 0) {
             Failsafes.ticksWarpDesync--
             return 0
         }
 
-        val ticksTimeout = Config.netherWartDesyncTime * 20
+        val ticksTimeout = Config.netherWartDesyncTime.value * 20
         val stack = mc.thePlayer.heldItem
         if (stack == null ||
             !stack.hasTagCompound() ||
@@ -600,7 +600,7 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private fun jacobFailsafe(): Boolean {
-        if (!Config.netherWartJacob) return false
+        if (!Config.netherWartJacob.value) return false
         if (!Cache.isJacob) return false
         printdev("Jacob event is on!")
 
@@ -611,7 +611,7 @@ class NetherwartMacro : Macro("NetherWart") {
             if (split.size != 3) return false
             val number = split[2].replace(",", "").toInt()
             printdev("Jacob crop amount $number")
-            if (number >= Config.netherWartJacobNumber) {
+            if (number >= Config.netherWartJacobNumber.value) {
                 printdev("Jacob detected!")
                 UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
                 sendWebhook("Jacob event", "Jacob event started! Stopping macro...", false)
@@ -627,7 +627,7 @@ class NetherwartMacro : Macro("NetherWart") {
 
     private fun fullInvFailsafe(): Boolean {
         if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return false
-        if (!Config.netherWartFullInv) return false
+        if (!Config.netherWartFullInv.value) return false
 
         if (InventoryUtils.isFull()) {
             printdev("Inventory is full!")
@@ -644,8 +644,8 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private fun banwaveChecker() {
-        if (!Config.netherWartBanWaveChecker) return
-        if (checkerTicks++ < Config.netherWartBanWaveCheckerTimer * 60 * 20) return
+        if (!Config.netherWartBanWaveChecker.value) return
+        if (checkerTicks++ < Config.netherWartBanWaveCheckerTimer.value * 60 * 20) return
 
         Multithreading.runAsync {
             val status = HttpUtils.sendGet(
@@ -655,7 +655,7 @@ class NetherwartMacro : Macro("NetherWart") {
             if (status == "Nah") {
                 banwave = false
                 UChat.chat("§cSkySkipped §f:: §eBanwave: §aFalse")
-                if (Config.netherWartBanWaveCheckerDisable && checkerStopped) {
+                if (Config.netherWartBanWaveCheckerDisable.value && checkerStopped) {
                     UChat.chat("§cSkySkipped §f:: §eReenbabling macro...")
                     sendWebhook("Ban Wave Checker", "Ban Wave ended, reenabling macro...", false)
                     farmingState = FarmingState.IDLE
@@ -664,7 +664,7 @@ class NetherwartMacro : Macro("NetherWart") {
             } else if (status == "disconnect:all") {
                 banwave = true
                 UChat.chat("§cSkySkipped §f:: §eBanwave: §cTrue")
-                if (Config.netherWartBanWaveCheckerDisable && !checkerStopped) {
+                if (Config.netherWartBanWaveCheckerDisable.value && !checkerStopped) {
                     UChat.chat("§cSkySkipped §f:: §eDisabling macro...")
                     sendWebhook("Ban Wave Checker", "Ban Wave started, disabling macro...", false)
                     farmingState = FarmingState.IDLE
@@ -687,7 +687,7 @@ class NetherwartMacro : Macro("NetherWart") {
 
     private fun checkBan() {
         if (mc.currentScreen is GuiDisconnected) {
-            if (Config.webhook) {
+            if (Config.webhook.value) {
                 val message = ObfuscationReflectionHelper.getPrivateValue<IChatComponent, GuiDisconnected>(
                     GuiDisconnected::class.java, mc.currentScreen as GuiDisconnected,
                     "message", "field_146304_f"
@@ -698,7 +698,7 @@ class NetherwartMacro : Macro("NetherWart") {
                 sendWebhook("Disconnected", "You got disconnected with reason:\\n$rsn", true)
             }
 
-            if (Config.netherWartReconnect) {
+            if (Config.netherWartReconnect.value) {
                 farmingState = FarmingState.IDLE
                 dced = true
                 mc.displayGuiScreen(

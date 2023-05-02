@@ -35,9 +35,9 @@ public class MixinModlist {
     @Shadow(remap = false)
     private Map<String, String> modTags;
 
-    @Inject(method = "<init>(Ljava/util/List;)V", at = @At(value = "RETURN"),remap = false)
+    @Inject(method = "<init>(Ljava/util/List;)V", at = @At(value = "RETURN"), remap = false)
     public void test(List<ModContainer> modList, CallbackInfo ci) {
-        if (Minecraft.getMinecraft().isIntegratedServerRunning()) return;
-        this.modTags.keySet().removeIf(mod -> !mod.matches("fml|forge|mcp|optifine|skyblockaddons|skytils|patcher|"));
+        if (Minecraft.getMinecraft().isSingleplayer()) return;
+        this.modTags.keySet().removeIf(mod -> !mod.matches("fml|forge|mcp|optifine|skyblockaddons|skytils|patcher"));
     }
 }

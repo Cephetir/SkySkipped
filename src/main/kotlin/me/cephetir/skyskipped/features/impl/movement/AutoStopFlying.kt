@@ -32,7 +32,7 @@ class AutoStopFlying : Feature() {
     // #HypixelBestDevs
     @SubscribeEvent
     fun onWorld(event: WorldEvent.Load) {
-        if (!Config.stopFly) return
+        if (!Config.stopFly.value) return
         BackgroundScope.launch {
             val last = System.currentTimeMillis()
             var state = false

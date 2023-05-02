@@ -34,7 +34,7 @@ class Ping : Feature() {
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if(!Config.ping || !EssentialAPI.getMinecraftUtil().isHypixel()) return
+        if (!Config.ping.value || !EssentialAPI.getMinecraftUtil().isHypixel()) return
         val text = event.message as ChatComponentText
         val unformattedText = text.unformattedText.stripColor()
         val matcher = regex.matcher(unformattedText)

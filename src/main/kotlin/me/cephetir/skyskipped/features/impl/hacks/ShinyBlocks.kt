@@ -124,7 +124,7 @@ class ShinyBlocks : Feature() {
 
             val (viewerX, viewerY, viewerZ) = RenderUtils.getViewerPos(it.partialTicks)
             if (particles.isNotEmpty()) {
-                if (Config.shinyBlocksAura) {
+                if (Config.shinyBlocksAura.value) {
                     val pos = particles.minByOrNull { pos -> pos.distanceTo(player!!.position) }!!
                     if (pos.distanceTo(player!!.position) < 4.5) {
                         breaking = pos
@@ -132,7 +132,7 @@ class ShinyBlocks : Feature() {
                     }
                 }
 
-                if (Config.shinyBlocksEsp) for (block in particles) {
+                if (Config.shinyBlocksEsp.value) for (block in particles) {
                     val x = block.x - viewerX
                     val y = block.y - viewerY
                     val z = block.z - viewerZ

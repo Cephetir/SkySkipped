@@ -22,7 +22,6 @@ import gg.essential.universal.UChat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import me.cephetir.bladecore.utils.TextUtils.stripColor
-import me.cephetir.bladecore.utils.minecraft.KeybindUtils.isDown
 import me.cephetir.bladecore.utils.threading.BackgroundJob
 import me.cephetir.bladecore.utils.threading.BackgroundScope
 import me.cephetir.skyskipped.SkySkipped
@@ -45,7 +44,7 @@ object MacroManager : Feature() {
         SugarCaneMacro()
     )
 
-    var current = macros[Config.macroType]
+    var current = macros[0]
 
     var startTime = 0L
     var stopTime = 0L
@@ -55,15 +54,15 @@ object MacroManager : Feature() {
 
     @SubscribeEvent
     fun onInput(event: ClientTickEvent) {
-        if (!Cache.onSkyblock || mc.thePlayer == null || mc.theWorld == null) return
+        if (!Cache.onSkyblock || mc.thePlayer == null || mc.theWorld == null || mc.currentScreen != null) return
 
-        val down = SkySkipped.macroKey.isDown()
+        val down = Config.macroKeybind.isKeyDown()
         if (down == keybindLastState) return
         keybindLastState = down
         if (!down) return
 
         startTime = System.currentTimeMillis()
-        stopTime = (Config.macroStopTime * 60 * 60 * 1000).roundToLong()
+        stopTime = (Config.macroStopTime.value * 60 * 60 * 1000).roundToLong()
         if (current.enabled) {
             if (::scriptJob.isInitialized) {
                 UChat.chat("§cSkySkipped §f:: §eCancelling script job...")
@@ -86,8 +85,8 @@ object MacroManager : Feature() {
     }
 
     private fun startScript() {
-        if (Config.macroScript.isBlank()) return
-        val file = File(Config.macroScriptsFolder, Config.macroScript)
+        if (Config.macroScript.value.isBlank()) return
+        val file = File(Config.macroScriptsFolder, Config.macroScript.value)
         if (!file.exists()) return UChat.chat("§cSkySkipped §f:: §4Can't find macro script file!")
 
         var loop: Boolean

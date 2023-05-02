@@ -48,10 +48,12 @@ object BlurUtils {
 
     private var lastStrength = 5F
 
-    private fun setupFramebuffers() {
+    private fun setupFramebuffers(sc: ScaledResolution) {
+        val width = sc.scaledWidth
+        val height = sc.scaledHeight
         try {
-            shaderGroup.createBindFramebuffers(mc.displayWidth, mc.displayHeight)
-        } catch (e : Exception) {
+            shaderGroup.createBindFramebuffers(width, height)
+        } catch (e: Exception) {
             SkySkipped.logger.error("Exception caught while setting up shader group", e)
         }
     }
@@ -99,7 +101,7 @@ object BlurUtils {
         val height = sc.scaledHeight
 
         if (sizeHasChanged(scaleFactor, width, height))
-            setupFramebuffers()
+            setupFramebuffers(sc)
 
         lastFactor = scaleFactor
         lastWidth = width
