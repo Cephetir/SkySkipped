@@ -7,7 +7,6 @@ Website: https://skyskipped-website.vercel.app
 
 
 ## Features
-Outdated! [join discord](https://discord.gg/bDkfEF26rf) for full features list!
 <details>
     <summary>Chat</summary>
 
