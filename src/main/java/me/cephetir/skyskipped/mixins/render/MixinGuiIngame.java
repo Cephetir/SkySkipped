@@ -43,7 +43,7 @@ public class MixinGuiIngame {
     public String a(String text) {
         if (Config.customSb.getValue()) return text;
         String txt = TextUtils.keepScoreboardCharacters(TextUtils.stripColor(text)).trim();
-        if (Config.coinsToggle.getValue() && txt.startsWith("Purse: ")) {
+        if (Config.coinsToggle.getValue() && txt.startsWith("Purse: ") && !Config.coins.getValue().isEmpty()) {
             double coins = Double.parseDouble(txt.substring(7).split(" ")[0].replace(",", ""));
             double needed = coins + Long.parseLong(Config.coins.getValue());
             DecimalFormat format = new DecimalFormat("###,###.##");

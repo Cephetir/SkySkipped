@@ -21,14 +21,14 @@ Website: https://www.skyskipped.com
   - Searches text in whole chat
 - Ban Detector
   - Says who got banned when message appears in chat
+- Profile id hider
 </details>
 
 <details>
     <summary>Dungeons</summary>
 
 ### Dungeons
-- Auto Ghost Block
-    - Automatically make ghost block on stairs, upside down stairs, skulls, etc.
+- Ghost blocks with restore keybind
 - Auto Dungeon Leave/Auto Fragbot Invite
     - Leaves dungeon on its end
 - Chest Closer
@@ -45,10 +45,12 @@ Website: https://www.skyskipped.com
   - Scans dungeon for admin room
 - M3 Boss Timer
   - Says when you need to use Fire Freeze
+  - Auto fire freeze
 - Radius
   - Shows radius of hyperion and gyro
 - Terminator Clicker
   - Spams right click when using terminator
+- Blessing Display
 </details>
 
 <details>
@@ -59,8 +61,10 @@ Website: https://www.skyskipped.com
   - Advanced netherwart macro with many failsafes, webhook and notifications support, ban wave checker, different farm types and more!
 - Sugar Cane Macro
   - Advanced sugar cane macro with many failsafes, webhook and notifications support, ban wave checker, different farm types and more!
+- F11 Macro
 - GUI recorder
   - Records gui clicks to replay later
+- Harp Macro
 - A lot of macro failsafes
 - Remote Macro Controlling
   - Control macro from anywhere with discord bot
@@ -71,7 +75,8 @@ Website: https://www.skyskipped.com
 <details>
     <summary>Hacks (real) (100%) (trust me best hacks)</summary>
 
-### Hacks (real) (100%) (trust me best hacks)
+### Hacks (real)
+- Auto cofl sniper
 - Block Ability
     - Blocks any item's ability
 - Item Swapper With Custom Keybinds
@@ -92,6 +97,9 @@ Website: https://www.skyskipped.com
   - Disables pause menu when alt tabbing
 - Fastest Jerry Box Opener
   - Opens jerry boxes for you
+- Fishing assist
+- Hacker computer solver
+- Auto attributes pickup
 </details>
 
 <details>
@@ -134,6 +142,8 @@ Website: https://www.skyskipped.com
     <summary>Misc</summary>
 
 ### Misc
+- Proxies support
+- Session login
 - Auto Stop Fly
   - Stop flying on private island when spawned with soup
 - Cookie Clicker
@@ -142,6 +152,9 @@ Website: https://www.skyskipped.com
 - Contanier Search
 - Anti Escrow on Auction And Bin
 - Fps spoofer
+- Zero ping etherwarp
+- Better portal
+- No cursor reset
 </details>
 
 ## Commands

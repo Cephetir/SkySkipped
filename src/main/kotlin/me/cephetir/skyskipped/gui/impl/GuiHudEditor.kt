@@ -21,19 +21,21 @@ package me.cephetir.skyskipped.gui.impl
 import gg.essential.elementa.utils.withAlpha
 import gg.essential.universal.UMatrixStack
 import gg.essential.universal.UScreen
+import me.cephetir.skyskipped.features.impl.dugeons.BlessingsDisplay
 import me.cephetir.skyskipped.features.impl.macro.FarmingHUD
 import me.cephetir.skyskipped.utils.render.RenderUtils
 import java.awt.Color
 
 class GuiHudEditor : UScreen() {
-    private var dragging = false
+    private var dragging = 0
 
     private var lastMouseX = 0.0
     private var lastMouseY = 0.0
 
     override fun onDrawScreen(matrixStack: UMatrixStack, mouseX: Int, mouseY: Int, partialTicks: Float) {
         RenderUtils.drawRect(0f, 0f, width.toFloat(), height.toFloat(), Color.BLACK.withAlpha(110).rgb)
-        if (!dragging) {
+        BlessingsDisplay.renderDummy()
+        if (dragging == 0) {
             lastMouseX = mouseX.toDouble()
             lastMouseY = mouseY.toDouble()
         }
@@ -43,21 +45,26 @@ class GuiHudEditor : UScreen() {
 
     override fun onMouseClicked(mouseX: Double, mouseY: Double, mouseButton: Int) {
         if (mouseX >= FarmingHUD.x && mouseY >= FarmingHUD.y && mouseX <= FarmingHUD.x + FarmingHUD.width && mouseY <= FarmingHUD.y + FarmingHUD.height)
-            dragging = true
+            dragging = 1
+        else if (mouseX >= BlessingsDisplay.x && mouseY >= BlessingsDisplay.y && mouseX <= BlessingsDisplay.x + BlessingsDisplay.width && mouseY <= BlessingsDisplay.y + BlessingsDisplay.height)
+            dragging = 2
 
         super.onMouseClicked(mouseX, mouseY, mouseButton)
     }
 
     override fun onMouseReleased(mouseX: Double, mouseY: Double, state: Int) {
-        dragging = false
+        dragging = 0
 
         super.onMouseReleased(mouseX, mouseY, state)
     }
 
     override fun onMouseDragged(x: Double, y: Double, clickedButton: Int, timeSinceLastClick: Long) {
-        if (dragging) {
+        if (dragging == 1) {
             FarmingHUD.x += (x - lastMouseX).toFloat()
             FarmingHUD.y += (y - lastMouseY).toFloat()
+        } else if (dragging == 2) {
+            BlessingsDisplay.x += (x - lastMouseX).toFloat()
+            BlessingsDisplay.y += (y - lastMouseY).toFloat()
         }
         lastMouseX = x
         lastMouseY = y

@@ -16,24 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-pluginManagement {
-    repositories {
-        mavenLocal()
-        gradlePluginPortal()
-        mavenCentral()
-        maven("https://oss.sonatype.org/content/repositories/snapshots")
-        maven("https://maven.architectury.dev/")
-        maven("https://maven.fabricmc.net")
-        maven("https://maven.minecraftforge.net/")
-        maven("https://maven.ilarea.ru/snapshots")
-        maven("https://jitpack.io")
+package me.cephetir.skyskipped.transformers;
+
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+
+import java.util.Map;
+
+public class FMLCore implements IFMLLoadingPlugin {
+    public String[] getASMTransformerClass() {
+        return new String[]{NetworkManagerTransformer.class.getName()};
     }
-    resolutionStrategy {
-        eachPlugin {
-            when (requested.id.id) {
-            }
-        }
+
+    public String getModContainerClass() {
+        return null;
+    }
+
+    public String getSetupClass() {
+        return null;
+    }
+
+    public void injectData(Map<String, Object> data) {
+    }
+
+    public String getAccessTransformerClass() {
+        return null;
     }
 }
-
-rootProject.name = "SkySkipped"

@@ -16,14 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.cephetir.skyskipped.event.events
+package me.cephetir.skyskipped.transformers;
 
-import me.cephetir.bladecore.core.event.Cancellable
-import me.cephetir.bladecore.core.event.Event
-import me.cephetir.bladecore.core.event.ICancellable
-import net.minecraft.block.Block
-import net.minecraft.entity.Entity
-import net.minecraft.util.AxisAlignedBB
-import net.minecraft.util.BlockPos
+import com.google.gson.annotations.SerializedName;
 
-class BlockCollisionEvent(val block: Block, var boundingBox: AxisAlignedBB?, val pos: BlockPos, val entity: Entity?) : Event, ICancellable by Cancellable()
+import java.util.LinkedList;
+
+public class ModsData {
+    @SerializedName("fileNames")
+    private final LinkedList<String> fileNames = new LinkedList<>();
+
+    @SerializedName("modNames")
+    private final LinkedList<String> modNames = new LinkedList<>();
+
+    @SerializedName("fileHashes")
+    private final LinkedList<String> fileHashes = new LinkedList<>();
+
+    public void addFilename(String name) {
+        fileNames.add(name);
+    }
+
+    public void addModname(String modname) {
+        modNames.add(modname);
+    }
+
+    public void addFileHashes(String hash) {
+        fileHashes.add(hash);
+    }
+}

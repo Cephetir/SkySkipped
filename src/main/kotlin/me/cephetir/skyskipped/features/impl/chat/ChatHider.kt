@@ -16,24 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-pluginManagement {
-    repositories {
-        mavenLocal()
-        gradlePluginPortal()
-        mavenCentral()
-        maven("https://oss.sonatype.org/content/repositories/snapshots")
-        maven("https://maven.architectury.dev/")
-        maven("https://maven.fabricmc.net")
-        maven("https://maven.minecraftforge.net/")
-        maven("https://maven.ilarea.ru/snapshots")
-        maven("https://jitpack.io")
-    }
-    resolutionStrategy {
-        eachPlugin {
-            when (requested.id.id) {
-            }
+package me.cephetir.skyskipped.features.impl.chat
+
+import me.cephetir.bladecore.core.event.listener.listener
+import me.cephetir.bladecore.utils.TextUtils.stripColor
+import me.cephetir.skyskipped.config.Config
+import me.cephetir.skyskipped.features.Feature
+import net.minecraftforge.client.event.ClientChatReceivedEvent
+
+class ChatHider : Feature() {
+    init {
+        listener<ClientChatReceivedEvent> {
+            if (Config.hideProfileId.value && it.message.formattedText.stripColor().startsWith("Profile ID: "))
+                it.isCanceled = true
         }
     }
 }
-
-rootProject.name = "SkySkipped"

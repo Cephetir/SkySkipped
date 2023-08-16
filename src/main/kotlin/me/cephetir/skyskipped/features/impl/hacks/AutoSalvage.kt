@@ -19,6 +19,7 @@
 package me.cephetir.skyskipped.features.impl.hacks
 
 import me.cephetir.bladecore.core.listeners.SkyblockListener
+import me.cephetir.bladecore.utils.TextUtils.containsAny
 import me.cephetir.bladecore.utils.TextUtils.equalsAny
 import me.cephetir.bladecore.utils.TextUtils.stripColor
 import me.cephetir.bladecore.utils.minecraft.skyblock.ItemUtils.getExtraAttributes
@@ -81,6 +82,8 @@ class AutoSalvage : Feature() {
                     "FLAMING_CHESTPLATE",
                     "TAURUS_HELMET",
                     "STAFF_OF_THE_VOLCANO"
-                )
+                ) ||
+                // Custom Items Ids
+                item.getSkyBlockID().containsAny(Config.autoSalvageId.value.split(",").map { it.trim() })
     }
 }

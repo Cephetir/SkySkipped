@@ -23,6 +23,7 @@ import me.cephetir.skyskipped.commands.dungeonCommands.FragRun
 import me.cephetir.skyskipped.commands.dungeonCommands.LeaveCommand
 import me.cephetir.skyskipped.commands.dungeonCommands.PartyCommand
 import me.cephetir.skyskipped.features.impl.chat.*
+import me.cephetir.skyskipped.features.impl.cofl.AutoFuckingCoflBuy
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
 import me.cephetir.skyskipped.features.impl.dugeons.*
 import me.cephetir.skyskipped.features.impl.hacks.*
@@ -36,12 +37,10 @@ import me.cephetir.skyskipped.features.impl.optimization.HideWitherCloak
 import me.cephetir.skyskipped.features.impl.optimization.StopFallingBlocks
 import me.cephetir.skyskipped.features.impl.visual.*
 
-class Features {
-    companion object {
-        val leaveCommand = LeaveCommand()
-        val partyCommand = PartyCommand()
-        val petsOverlay = PetsOverlay()
-    }
+object Features {
+    val leaveCommand = LeaveCommand()
+    val partyCommand = PartyCommand()
+    val petsOverlay = PetsOverlay()
 
     private val features = listOf(
         ChestCloser(),
@@ -55,7 +54,7 @@ class Features {
         HidePetCandies(),
         petsOverlay,
         PresentHighlight(),
-        AutoGhostBlock(),
+        GhostBlocks,
         PerspectiveToggle(),
         AutoMaddoxPhone(),
         CustomScoreboard(),
@@ -70,7 +69,6 @@ class Features {
         HotbarSaver,
         LavaFishingSpots(),
         ItemRadius(),
-        ZeroPingGui(),
         TerminalEsp(),
         AntiEscrow(),
         AutoSalvage(),
@@ -89,6 +87,16 @@ class Features {
         Garden(),
         HideWitherCloak(),
         GuiRecorder,
+        BlessingsDisplay(),
+        TokenAuth,
+        Harp(),
+        AutoFuckingCoflBuy,
+        ChatHider(),
+        ZeroPingEtherwarp(),
+        FishingAssist(),
+        Rift(),
+        AutoAttribPickup(),
+        NoCursorReset,
     )
 
     fun register() = features.forEach { BladeEventBus.subscribe(it, true) }

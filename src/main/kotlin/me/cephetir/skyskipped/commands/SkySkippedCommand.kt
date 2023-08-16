@@ -27,6 +27,7 @@ import me.cephetir.bladecore.utils.TextUtils.isNumeric
 import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Features
+import me.cephetir.skyskipped.features.impl.cofl.AutoFuckingCoflBuy
 import me.cephetir.skyskipped.features.impl.hacks.HotbarSaver
 import me.cephetir.skyskipped.features.impl.hacks.PetMacro
 import me.cephetir.skyskipped.features.impl.macro.GuiRecorder
@@ -39,6 +40,7 @@ import net.minecraft.command.ICommandSender
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
 import net.minecraft.util.BlockPos
+
 
 class SkySkippedCommand : CommandBase() {
     override fun getCommandName(): String {
@@ -74,6 +76,30 @@ class SkySkippedCommand : CommandBase() {
                 text.setClick(ClickEvent.Action.OPEN_URL, "https://github.com/Cephetir/SkySkipped")
                 sender.addChatMessage(text)
             }
+
+            "cofl" -> if (args.size >= 2) when (args[1]) {
+                "callback" -> {
+                    if (!Config.autoBuy.value) return chat("§cSkySkipped §f:: §4Auction flipper is not enabled!")
+                    if (!AutoFuckingCoflBuy.websocket.isOpen) return chat("§cSkySkipped §f:: §4You are not connected to socket!")
+                    val command = args.drop(2)
+                    if (command.isEmpty()) return chat("§cSkySkipped §f:: §4You didn't provide cofl command!")
+                    AutoFuckingCoflBuy.websocket.send("{\"type\":\"clicked\",\"data\":\"\\\"\\\\\\\"${command.joinToString(" ")}\\\\\\\"\\\"\"}")
+                    val send = command.drop(1)
+                    if (send.isEmpty()) return chat("§cSkySkipped §f:: §4Invalid cofl command!")
+                    AutoFuckingCoflBuy.websocket.send("{\"type\":\"${send[0]}\",\"data\":\"\\\"${send.drop(1).joinToString(" ")}\\\"\"}")
+                }
+
+                "captcha" -> {
+                    if (!Config.autoBuy.value) return chat("§cSkySkipped §f:: §4Auction flipper is not enabled!")
+                    if (AutoFuckingCoflBuy.websocket == AutoFuckingCoflBuy.mainWebsocket) return chat("§cSkySkipped §f:: §4You are already connected to main socket!")
+                    chat("§cSkySkipped §f:: §eSwitching back to main socket...")
+                    AutoFuckingCoflBuy.forceMain = true
+                    AutoFuckingCoflBuy.websocket.close()
+                    AutoFuckingCoflBuy.websocket = AutoFuckingCoflBuy.mainWebsocket
+                }
+            }
+
+            "checkqueue" -> chat("${AutoFuckingCoflBuy.flipQueue}, ${AutoFuckingCoflBuy.sellQueue}, ${AutoFuckingCoflBuy.selling}, ${AutoFuckingCoflBuy.buying}")
 
             "pet" -> {
                 if (args.size >= 2 && args[1].isNumeric() && args[1].toInt() > 0) {

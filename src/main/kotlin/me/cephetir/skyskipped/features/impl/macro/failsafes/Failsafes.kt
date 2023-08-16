@@ -27,6 +27,7 @@ import me.cephetir.bladecore.utils.threading.BackgroundScope
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.features.impl.macro.Macro
+import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.utils.RandomUtils
 import me.cephetir.skyskipped.utils.RotationClass
 import net.minecraft.client.gui.GuiChat
@@ -79,7 +80,7 @@ object Failsafes : Feature() {
         warpTimer = System.currentTimeMillis()
 
         if (Cache.onIsland) getBack.run()
-        else if (Cache.onSkyblock) mc.thePlayer.sendChatMessage("/is")
+        else if (Cache.onSkyblock) mc.thePlayer.sendChatMessage(if (MacroManager.current.inGarden) "/warp garden" else "/is")
         else if (!Cache.onSkyblock) {
             mc.thePlayer.sendChatMessage("/l")
             BackgroundScope.launch {
@@ -192,7 +193,7 @@ object Failsafes : Feature() {
             DesyncedSteps.WARP_BACK -> {
                 if (desyncF) {
                     unpressKeys()
-                    mc.thePlayer.sendChatMessage("/is")
+                    mc.thePlayer.sendChatMessage(if (MacroManager.current.inGarden) "/warp garden" else "/is")
                     desyncF = false
                 }
                 if (System.currentTimeMillis() - desyncWaitTimer >= 5000L) {

@@ -19,9 +19,13 @@
 package me.cephetir.skyskipped.config
 
 import com.google.gson.*
+import gg.essential.universal.UChat
 import me.cephetir.bladecore.config.settings.SettingManager
+import me.cephetir.bladecore.config.settings.impl.DecoratorSetting
 import me.cephetir.skyskipped.SkySkipped
+import me.cephetir.skyskipped.features.impl.cofl.AutoFuckingCoflBuy
 import me.cephetir.skyskipped.features.impl.discordrpc.RPC
+import me.cephetir.skyskipped.features.impl.dugeons.GhostBlocks
 import me.cephetir.skyskipped.features.impl.hacks.HotbarSaver
 import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.features.impl.macro.RemoteControlling
@@ -760,25 +764,40 @@ object Config {
         isHidden = { !presents.value }
     }
 
-    @JvmField
-    val autoGB = sm.booleanSetting("Auto Ghost Blocks") {
+    private val ghostBlocks = sm.keybindSetting("Ghost Blocks") {
         category = "Dungeons"
-        subCategory = "Auto Ghost Block"
+        subCategory = "Ghost Block"
+        onClick = {
+            GhostBlocks.active = it
+        }
+    }
+
+    private val ghostBlocksRestore = sm.keybindSetting("Restore Ghost Blocks") {
+        category = "Dungeons"
+        subCategory = "Ghost Block"
+        onClick = {
+            if (it) GhostBlocks.restore()
+        }
     }
 
     @JvmField
-    val autoGBMode = sm.selectorSetting("Auto Ghost Blocks Mode") {
+    val ghostBlocksRange = sm.numberSetting("Ghost Blocks Range") {
         category = "Dungeons"
-        subCategory = "Auto Ghost Block"
-        options = arrayOf("On sneak", "On key")
-        isHidden = { !autoGB.value }
+        subCategory = "Ghost Block"
+        min = 2.0
+        max = 12.0
+        places = 0
+        value = 5.0
     }
 
     @JvmField
-    val autoGBKey = sm.keybindSetting("Auto Ghost Blocks Keybind") {
+    val ghostBlocksDelay = sm.numberSetting("Ghost Blocks Delay") {
         category = "Dungeons"
-        subCategory = "Auto Ghost Block"
-        isHidden = { !autoGB.value || autoGBMode.value != 1 }
+        subCategory = "Ghost Block"
+        min = 0.0
+        max = 1000.0
+        places = -1
+        value = 250.0
     }
 
     @JvmField
@@ -1051,7 +1070,7 @@ object Config {
     @JvmField
     val macroType = sm.selectorSetting("Macro Type") {
         category = "Macro"
-        options = arrayOf("Nether Wart (SShaped)", "Sugar Cane (Normal and SShaped)")
+        options = arrayOf("Nether Wart (SShaped)", "Sugar Cane (Normal and SShaped)", "F11 Macro")
         value = 0
         listener = { MacroManager.current = MacroManager.macros[it] }
     }
@@ -1111,13 +1130,10 @@ object Config {
         max = 9.0
     }
 
-    //        @Property(
-//            type = PropertyType.SWITCH,
-//            name = "Macro Randomization",
-//            category = "Macro",
-//            description = "Randomize certain actions to look more legit (may fix packet thottle and desync)."
-//        )
-    var macroRandomization = true
+    @JvmField
+    val soundFailsafes = sm.booleanSetting("Replace All Failsafes with Sounds") {
+        category = "Macro"
+    }
 
     @JvmField
     val macroScript = sm.textSetting("Custom Macro Script Name") {
@@ -1127,6 +1143,34 @@ object Config {
 
     @JvmField
     val macroLagbackFix = sm.booleanSetting("Lagback Fix") {
+        category = "Macro"
+    }
+
+    @JvmField
+    val warpBackFailsafe = sm.booleanSetting("Warp back failsafe") {
+        category = "Macro"
+    }
+
+    @JvmField
+    val autoWarpGarden = sm.booleanSetting("Auto Warp Garden") {
+        category = "Macro"
+    }
+
+    @JvmField
+    val autoWarpGardenCoords = sm.textSetting("Auto Warp Garden Coords") {
+        category = "Macro"
+        description = "Coords where you stand to do /warp garden"
+        value = "0,0,0"
+        isHidden = { !autoWarpGarden.value }
+    }
+
+    @JvmField
+    val macroCpuSaver = sm.booleanSetting("CPU Saver") {
+        category = "Macro"
+    }
+
+    @JvmField
+    val macroUngrab = sm.booleanSetting("Ungrab Mouse on Macro Activate") {
         category = "Macro"
     }
 
@@ -1155,6 +1199,13 @@ object Config {
 
     @JvmField
     val netherWartStuck = sm.booleanSetting("Unstuck Failsafe") {
+        category = "Macro"
+        subCategory = "Nether Wart Macro"
+        value = true
+    }
+
+    @JvmField
+    val netherWartBedrock = sm.booleanSetting("Bedrock cage Failsafe") {
         category = "Macro"
         subCategory = "Nether Wart Macro"
         value = true
@@ -1190,7 +1241,7 @@ object Config {
         subCategory = "Nether Wart Macro"
         value = 400000.0
         min = 0.0
-        max = 1000000.0
+        max = 2_500_000.0
         places = -3
         isHidden = { !netherWartJacob.value }
     }
@@ -1225,12 +1276,6 @@ object Config {
         min = 0.1
         max = 30.0
         places = 1
-    }
-
-    @JvmField
-    val netherWartCpuSaver = sm.booleanSetting("CPU Saver") {
-        category = "Macro"
-        subCategory = "Nether Wart Macro"
     }
 
     @JvmField
@@ -1277,6 +1322,13 @@ object Config {
     }
 
     @JvmField
+    val sugarCaneBedrock = sm.booleanSetting("Bedrock cage Failsafe") {
+        category = "Macro"
+        subCategory = "Sugar Cane Macro"
+        value = true
+    }
+
+    @JvmField
     val sugarCaneDesync = sm.booleanSetting("Desync Failsafe") {
         category = "Macro"
         subCategory = "Sugar Cane Macro"
@@ -1306,8 +1358,9 @@ object Config {
         subCategory = "Sugar Cane Macro"
         value = 400000.0
         min = 0.0
-        max = 1000000.0
+        max = 2_500_000.0
         places = -3
+        isHidden = { !sugarCaneJacob.value }
     }
 
     @JvmField
@@ -1344,15 +1397,56 @@ object Config {
     }
 
     @JvmField
-    val sugarCaneCpuSaver = sm.booleanSetting("CPU Saver") {
+    val sugarCaneReconnect = sm.booleanSetting("Auto Reconnect") {
         category = "Macro"
         subCategory = "Sugar Cane Macro"
     }
 
     @JvmField
-    val sugarCaneReconnect = sm.booleanSetting("Auto Reconnect") {
+    val f11A = sm.booleanSetting("F11 Press A") {
         category = "Macro"
-        subCategory = "Sugar Cane Macro"
+        subCategory = "F11 Macro"
+    }
+
+    @JvmField
+    val f11D = sm.booleanSetting("F11 Press D") {
+        category = "Macro"
+        subCategory = "F11 Macro"
+    }
+
+    @JvmField
+    val f11W = sm.booleanSetting("F11 Press W") {
+        category = "Macro"
+        subCategory = "F11 Macro"
+    }
+
+    @JvmField
+    val f11S = sm.booleanSetting("F11 Press S") {
+        category = "Macro"
+        subCategory = "F11 Macro"
+    }
+
+    @JvmField
+    val f11LMB = sm.booleanSetting("F11 Press Left Mouse Button") {
+        category = "Macro"
+        subCategory = "F11 Macro"
+    }
+
+    @JvmField
+    val f11Desync = sm.booleanSetting("Desync Failsafe") {
+        category = "Macro"
+        subCategory = "F11 Macro"
+        value = true
+    }
+
+    @JvmField
+    val f11DesyncTime = sm.numberSetting("Desync Failsafe Timeout") {
+        category = "Macro"
+        subCategory = "F11 Macro"
+        value = 5.0
+        min = 1.0
+        max = 20.0
+        isHidden = { !f11Desync.value }
     }
 
     @JvmField
@@ -1493,11 +1587,6 @@ object Config {
     }
 
     @JvmField
-    val zeroPingGui = sm.booleanSetting("Zero Ping Gui") {
-        category = "Misc"
-    }
-
-    @JvmField
     val beansSize = sm.booleanSetting("Bigger Cocoa Beans Sizes") {
         category = "Hacks"
     }
@@ -1574,6 +1663,12 @@ object Config {
     }
 
     @JvmField
+    val autoSalvageId = sm.textSetting("Auto Salvage Custom Items Ids") {
+        category = "Hacks"
+        isHidden = { !autoSalvage.value }
+    }
+
+    @JvmField
     val chatSearch = sm.booleanSetting("Chat Search") {
         category = "Chat"
         description = "Search text in chat by pressing Ctrl + F"
@@ -1632,6 +1727,13 @@ object Config {
     @JvmField
     val fireFreezePing = sm.booleanSetting("M3 Professor Fire Freeze Timer") {
         category = "Dungeons"
+        subCategory = "Fire Freeze Timer"
+    }
+
+    @JvmField
+    val fireFreezeAuto = sm.booleanSetting("Fire Freeze Auto Use") {
+        category = "Dungeons"
+        subCategory = "Fire Freeze Timer"
     }
 
     @JvmField
@@ -1694,13 +1796,6 @@ object Config {
     }
 
     @JvmField
-    val banDetector = sm.booleanSetting("Ban Detector") {
-        category = "Chat"
-        description = "Says who got banned"
-        value = true
-    }
-
-    @JvmField
     val terminatorClicker = sm.booleanSetting("Terminator Clicker") {
         category = "Dungeons"
         subCategory = "Terminator Clicker"
@@ -1749,5 +1844,215 @@ object Config {
     @JvmField
     val grassEsp = sm.booleanSetting("Garden Grass ESP") {
         category = "Hacks"
+    }
+
+    @JvmField
+    val blessingsDisplay = sm.booleanSetting("Display Active Blessings in HUD") {
+        category = "Dungeons"
+        subCategory = "Blessing Display"
+    }
+
+    @JvmField
+    val blessingsDisplayX = sm.numberSetting("Blessings Display HUD X") {
+        category = "Dungeons"
+        subCategory = "Blessing Display"
+        description = "Edit position with \"/sm hud\""
+        min = 0.0
+        max = 10000.0
+        places = 1
+        isHidden = { !blessingsDisplay.value }
+    }
+
+    @JvmField
+    val blessingsDisplayY = sm.numberSetting("Blessings Display HUD Y") {
+        category = "Dungeons"
+        subCategory = "Blessing Display"
+        description = "Edit position with \"/sm hud\""
+        min = 0.0
+        max = 10000.0
+        places = 1
+        isHidden = { !blessingsDisplay.value }
+    }
+
+    @JvmField
+    val blessingsDisplayScale = sm.numberSetting("Blessings Display HUD Scaling") {
+        category = "Dungeons"
+        subCategory = "Blessing Display"
+        description = "Edit position with \"/sm hud\""
+        min = 0.2
+        max = 2.0
+        places = 1
+        isHidden = { !blessingsDisplay.value }
+    }
+
+    @JvmField
+    val harp = sm.booleanSetting("Harp Macro") {
+        category = "Hacks"
+        subCategory = "Harp"
+    }
+
+    private val whaaaaaa = sm.decoratorSetting("") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+        value = "This AH flipper uses Cofl API to get flips."
+        state = DecoratorSetting.State.WARNING
+    }
+
+    private val whaaaaaa2 = sm.decoratorSetting("") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+        value = "You can change settings/verify account on their website!"
+        state = DecoratorSetting.State.WARNING
+    }
+
+    @JvmField
+    val autoBuy = sm.booleanSetting("Auction Flipper Toggle") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+        listener = {
+            AutoFuckingCoflBuy.reset()
+            AutoFuckingCoflBuy.websocket = AutoFuckingCoflBuy.mainWebsocket
+            AutoFuckingCoflBuy.forceMain = false
+            if (it) {
+                antiEscrowAh.value = false
+                antiEscrowAhBin.value = false
+                AutoFuckingCoflBuy.QueueThread.start()
+            } else AutoFuckingCoflBuy.QueueThread.stop()
+        }
+    }
+
+    @JvmField
+    val useSkip = sm.booleanSetting("Use Skip") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+    }
+
+    @JvmField
+    val autoRelist = sm.booleanSetting("Auto Relist Items") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+        listener = { AutoFuckingCoflBuy.sellQueue.clear() }
+    }
+
+    @JvmField
+    val printMessages = sm.booleanSetting("Print All Cofl Messages") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+    }
+
+    @JvmField
+    val flipperWebhook = sm.booleanSetting("Use Discord Webhook") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+    }
+
+    @JvmField
+    val flipperWebhookUrl = sm.textSetting("Webhook URL") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+        maxTextSize = 100
+        isHidden = { !flipperWebhook.value }
+    }
+
+    @JvmField
+    val ungrabKeybind = sm.keybindSetting("Ungrab Mouse") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+    }
+
+    @JvmField
+    val customListingTime = sm.selectorSetting("Listing Time") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+        description = "Custom Listing Time for auction"
+        options = arrayOf("1 Hour", "6 Hours", "12 Hours", "24 Hours", "2 Days")
+    }
+
+    @JvmField
+    val bedDelay = sm.numberSetting("Bed Spam Delay") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+        min = 10.0
+        max = 1000.0
+        places = -1
+        value = 250.0
+    }
+
+    @JvmField
+    val bedInitDelay = sm.numberSetting("Bed Initial Delay") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+        min = 0.0
+        max = 3000.0
+        places = -2
+        value = 1000.0
+    }
+
+    @JvmField
+    val autoWarpIsland = sm.booleanSetting("Auto Warp To Island") {
+        category = "Hacks"
+        subCategory = "Auction Flipper"
+    }
+
+    @JvmField
+    val hideProfileId = sm.booleanSetting("Hide Profile Id in Chat") {
+        category = "Chat"
+    }
+
+    @JvmField
+    val zeroPingEtherwarp = sm.booleanSetting("Zero Etherwarp") {
+        category = "Misc"
+    }
+
+    @JvmField
+    val fishingAssist = sm.booleanSetting("Fishing Assist") {
+        category = "Hacks"
+        description = "Auto pulls back fishing rod"
+    }
+
+    @JvmField
+    val hackingSolver = sm.booleanSetting("Hacking Computer solver") {
+        category = "Hacks"
+        subCategory = "Rift"
+    }
+
+    @JvmField
+    val autoAttribPickup = sm.booleanSetting("Auto Attributes Pickup") {
+        category = "Misc"
+        subCategory = "Auto Attributes Pickup"
+    }
+
+    @JvmField
+    val autoAttribPickupKeybind = sm.keybindSetting("Toggle Keybind") {
+        category = "Misc"
+        subCategory = "Auto Attributes Pickup"
+        onClick = {
+            if (it) {
+                autoAttribPickup.value = !autoAttribPickup.value
+                UChat.chat("§cSkySkipped §f:: §eAuto Attrib Pickup ${if (autoAttribPickup.value) "§aEnabled" else "§cDisabled"}§e!")
+            }
+        }
+    }
+
+    @JvmField
+    val autoAttribPickupInclude = sm.textSetting("Include Attribute") {
+        category = "Misc"
+        subCategory = "Auto Attributes Pickup"
+    }
+
+    @JvmField
+    val autoAttribPickupExclude = sm.textSetting("Exclude Attribute") {
+        category = "Misc"
+        subCategory = "Auto Attributes Pickup"
+    }
+
+    @JvmField
+    val betterPortal = sm.booleanSetting("Better Portal") {
+        category = "Misc"
+    }
+
+    @JvmField
+    val noCursorReset = sm.booleanSetting("No Cursor Reset") {
+        category = "Misc"
     }
 }

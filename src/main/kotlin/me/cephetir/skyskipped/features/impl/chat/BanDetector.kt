@@ -18,6 +18,7 @@
 
 package me.cephetir.skyskipped.features.impl.chat
 
+import gg.essential.api.EssentialAPI
 import gg.essential.universal.UChat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -26,8 +27,8 @@ import me.cephetir.bladecore.core.listeners.SkyblockListener
 import me.cephetir.bladecore.utils.TextUtils.stripColor
 import me.cephetir.bladecore.utils.player
 import me.cephetir.bladecore.utils.threading.BackgroundScope
-import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.FunnyShit
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
@@ -38,10 +39,10 @@ class BanDetector : Feature() {
 
     init {
         listener<ClientChatReceivedEvent> {
-            if (!Config.banDetector.value || !SkyblockListener.onSkyblock) return@listener
+            if (!EssentialAPI.getMinecraftUtil().isHypixel()) return@listener
 
             val msg = it.message.unformattedText.stripColor()
-            if (msg.contains("A player has been removed from")) BackgroundScope.launch {
+            if (msg.contains("A player has been removed from") && !msg.contains(":")) BackgroundScope.launch {
                 delay(1000L)
                 if (playersLeftList.isEmpty()) {
                     UChat.chat("§cSkySkipped §f:: §4Couldn't detect any banned players!")
@@ -49,11 +50,12 @@ class BanDetector : Feature() {
                 }
                 val players = playersLeftList.keys.joinToString(separator = "§c, §e")
                 UChat.chat("§cSkySkipped §f:: §cPossiblely banned players: §e$players§c!")
+                FunnyShit.gotSkillIssued()
             }
         }
 
         listener<ClientTickEvent> {
-            if (!Config.banDetector.value || !SkyblockListener.onSkyblock || player == null) return@listener
+            if (!SkyblockListener.onSkyblock || player == null) return@listener
 
             playersLeftList.values.removeIf { System.currentTimeMillis() - it > 2000L }
 

@@ -19,6 +19,7 @@
 package me.cephetir.skyskipped.mixins.accessors;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Session;
 import net.minecraft.util.Timer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -27,4 +28,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface IMixinMinecraft {
     @Accessor("timer")
     Timer getTimer();
+
+    @Accessor("session")
+    Session getSession();
+
+    @Accessor("session")
+    void setSession(Session session);
 }

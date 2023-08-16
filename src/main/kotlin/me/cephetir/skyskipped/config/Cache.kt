@@ -30,7 +30,7 @@ object Cache {
     val inWorkshop
         get() = SkyblockListener.island == SkyblockIsland.JerryWorkshop
     val onIsland
-        get() = SkyblockListener.island == SkyblockIsland.PrivateIsland
+        get() = SkyblockListener.island == SkyblockIsland.PrivateIsland || SkyblockListener.island == SkyblockIsland.Garden
     val isJacob
         get() = SkyblockListener.jacobEvent
 

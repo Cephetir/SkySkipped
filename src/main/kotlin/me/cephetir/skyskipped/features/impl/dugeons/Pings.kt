@@ -25,6 +25,7 @@ import me.cephetir.bladecore.utils.world
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.utils.InventoryUtils
 import me.cephetir.skyskipped.utils.skyblock.PingUtils
 import me.cephetir.skyskipped.utils.skyblock.Queues
 import net.minecraft.entity.monster.EntityZombie
@@ -47,12 +48,17 @@ class Pings : Feature() {
         listener<ClientChatReceivedEvent> {
             if (!Cache.inDungeon || !Config.fireFreezePing.value) return@listener
             val msg = it.message.unformattedText.stripColor()
-            if (msg.startsWith("[BOSS] The Professor: Oh? You found my Guardians one weakness?")) {
+            if (msg.startsWith("[BOSS] The Professor: Oh? You found my Guardians' one weakness?")) {
                 ffTimer = System.currentTimeMillis() + 5000L
-                PingUtils(110, "", false) {
+                PingUtils(110, "", false, {
                     val seconds = max(0.0, ((this.ffTimer - System.currentTimeMillis()) / 10.0).roundToInt() / 100.0)
                     "§4Use §c§lFire §3§lFreeze §4in: §c${seconds}s"
-                }
+                }, {
+                    if (Config.fireFreezeAuto.value) {
+                        player?.inventory?.currentItem = InventoryUtils.findItemInHotbar("Fire Freeze")
+                        mc.playerController.sendUseItem(player, world, player?.heldItem)
+                    }
+                })
             }
         }
 

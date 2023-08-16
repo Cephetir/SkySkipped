@@ -18,26 +18,17 @@
 
 package me.cephetir.skyskipped.mixins;
 
-import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.network.handshake.FMLHandshakeMessage;
+import me.cephetir.skyskipped.config.Config;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiScreen;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.List;
-import java.util.Map;
-
-@Mixin(value = FMLHandshakeMessage.ModList.class, remap = false)
-public class MixinModlist {
-    @Shadow
-    private Map<String, String> modTags;
-
-    @Inject(method = "<init>(Ljava/util/List;)V", at = @At(value = "RETURN"))
-    public void test(List<ModContainer> modList, CallbackInfo ci) {
-        if (Minecraft.getMinecraft().isSingleplayer()) return;
-        this.modTags.keySet().removeIf(c -> !c.matches("FML|Forge|mcp"));
+@Mixin(EntityPlayerSP.class)
+public class MixinEntityPlayerSP {
+    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiScreen;doesGuiPauseGame()Z"))
+    private boolean useChatInPortal(GuiScreen gui) {
+        return Config.betterPortal.getValue() || gui.doesGuiPauseGame();
     }
 }

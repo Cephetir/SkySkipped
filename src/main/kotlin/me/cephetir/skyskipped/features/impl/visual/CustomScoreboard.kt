@@ -173,7 +173,7 @@ class CustomScoreboard : Feature() {
 
     private fun a(text: String): String {
         val txt = text.stripColor().keepScoreboardCharacters().trim()
-        return if (Config.coinsToggle.value && txt.startsWith("Purse: ")) {
+        return if (Config.coinsToggle.value && txt.startsWith("Purse: ") && Config.coins.value.isNotEmpty()) {
             val coins = txt.substring(7).split(" ")[0].replace(",", "").toDouble()
             val needed = coins + Config.coins.value.toLong()
             val format = DecimalFormat("###,###.##")

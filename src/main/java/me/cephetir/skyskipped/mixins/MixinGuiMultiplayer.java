@@ -19,19 +19,47 @@
 package me.cephetir.skyskipped.mixins;
 
 import me.cephetir.skyskipped.config.Cache;
+import me.cephetir.skyskipped.features.impl.misc.TokenAuth;
+import me.cephetir.skyskipped.gui.impl.GuiProxyMenu;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMultiplayer;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.util.ChatComponentText;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GuiMultiplayer.class)
-public class MixinGuiMultiplayer {
+public class MixinGuiMultiplayer extends GuiScreen {
     @Inject(method = "connectToServer", at = @At("HEAD"))
     public void connectToServer(ServerData server, CallbackInfo ci) {
         Cache.prevName = server.serverName;
         Cache.prevIP = server.serverIP;
         Cache.prevIsLan = server.isOnLAN();
+    }
+
+    @Inject(method = "initGui", at = @At("RETURN"))
+    private void initGui(CallbackInfo callbackInfo) {
+        this.buttonList.add(new GuiButton(69420, this.width - 108, 8, 100, 20, "Proxy"));
+        this.buttonList.add(new GuiButton(69402, this.width - 210, 8, 100, 20, "TokenAuth"));
+    }
+
+    @Inject(method = "actionPerformed", at = @At("HEAD"), cancellable = true)
+    private void actionPerformed(GuiButton button, CallbackInfo callbackInfo) {
+        if (button.id == 69420) {
+            mc.displayGuiScreen(new GuiProxyMenu(this));
+            callbackInfo.cancel();
+        } else if (button.id == 69402) {
+            mc.displayGuiScreen(new TokenAuth.SessionGui(this));
+            callbackInfo.cancel();
+        }
+    }
+
+    @Inject(method = "connectToServer", at = @At("HEAD"))
+    public void connectToServer(CallbackInfo callbackInfo) {
+        if (mc.getNetHandler() != null)
+            mc.getNetHandler().getNetworkManager().closeChannel(new ChatComponentText(""));
     }
 }

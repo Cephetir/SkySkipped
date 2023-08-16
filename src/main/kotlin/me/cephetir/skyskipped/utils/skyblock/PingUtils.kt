@@ -28,14 +28,17 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
-class PingUtils(private var ticks: Int, private val text: String, private val sound: Boolean = true, private val dynamicText: (() -> String)? = null) {
+class PingUtils(private var ticks: Int, private val text: String, private val sound: Boolean = true, private val dynamicText: (() -> String)? = null, private val callback: () -> Unit = {}) {
 
     init {
         listener<ClientTickEvent> {
             if (it.phase != TickEvent.Phase.START) return@listener
             if (world == null || player == null) return@listener BladeEventBus.unsubscribe(this)
 
-            if (ticks <= 0) BladeEventBus.unsubscribe(this, true)
+            if (ticks <= 0) {
+                callback()
+                BladeEventBus.unsubscribe(this)
+            }
             if (sound && ticks % 2 == 0) player!!.playSound("random.orb", 1f, 1f)
             ticks--
         }

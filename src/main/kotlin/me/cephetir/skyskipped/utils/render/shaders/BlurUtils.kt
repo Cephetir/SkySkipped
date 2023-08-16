@@ -48,12 +48,10 @@ object BlurUtils {
 
     private var lastStrength = 5F
 
-    private fun setupFramebuffers(sc: ScaledResolution) {
-        val width = sc.scaledWidth
-        val height = sc.scaledHeight
+    private fun setupFramebuffers() {
         try {
-            shaderGroup.createBindFramebuffers(width, height)
-        } catch (e: Exception) {
+            shaderGroup.createBindFramebuffers(mc.displayWidth, mc.displayHeight)
+        } catch (e : Exception) {
             SkySkipped.logger.error("Exception caught while setting up shader group", e)
         }
     }
@@ -92,7 +90,7 @@ object BlurUtils {
         if (y > y2) {
             val z = y
             y = y2
-            y2 = y
+            y2 = z
         }
 
         val sc = ScaledResolution(mc)
@@ -101,7 +99,8 @@ object BlurUtils {
         val height = sc.scaledHeight
 
         if (sizeHasChanged(scaleFactor, width, height))
-            setupFramebuffers(sc)
+            setupFramebuffers()
+        //GlStateManager.ortho(0.0, mc.displayWidth.toDouble(), mc.displayHeight.toDouble(), 0.0, 1000.0, 3000.0)
 
         lastFactor = scaleFactor
         lastWidth = width
@@ -147,6 +146,7 @@ object BlurUtils {
 
         Stencil.dispose()
         GlStateManager.enableAlpha()
+        //GlStateManager.ortho(0.0, sc.scaledWidth_double, sc.scaledHeight_double, 0.0, 1000.0, 3000.0)
     }
 
     @JvmStatic

@@ -42,6 +42,7 @@ class AutoStopFlying : Feature() {
                 delay(100)
             }
             mc.thePlayer.capabilities.isFlying = false
+            mc.thePlayer.sendPlayerAbilities()
         }
     }
 }

@@ -20,21 +20,21 @@ package me.cephetir.skyskipped.features.impl.macro.macros
 
 import gg.essential.api.utils.Multithreading
 import gg.essential.universal.UChat
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import me.cephetir.bladecore.core.event.BladeEventBus
+import me.cephetir.bladecore.core.listeners.SkyblockIsland
+import me.cephetir.bladecore.core.listeners.SkyblockListener
 import me.cephetir.bladecore.utils.HttpUtils
 import me.cephetir.bladecore.utils.TextUtils.keepScoreboardCharacters
 import me.cephetir.bladecore.utils.TextUtils.stripColor
 import me.cephetir.bladecore.utils.minecraft.skyblock.ScoreboardUtils
-import me.cephetir.bladecore.utils.threading.BackgroundScope
+import me.cephetir.bladecore.utils.player
 import me.cephetir.bladecore.utils.threading.safeListener
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.impl.macro.Macro
+import me.cephetir.skyskipped.features.impl.macro.MacroManager
 import me.cephetir.skyskipped.features.impl.macro.failsafes.Failsafes
 import me.cephetir.skyskipped.utils.InventoryUtils
-import me.cephetir.skyskipped.utils.RandomUtils
 import me.cephetir.skyskipped.utils.RotationClass
 import net.minecraft.block.Block
 import net.minecraft.client.gui.GuiChat
@@ -113,10 +113,11 @@ class NetherwartMacro : Macro("NetherWart") {
         unpressKeys()
         BladeEventBus.subscribe(events)
         UChat.chat("§cSkySkipped §f:: §eNether Wart Macro §aEnabled§e! Settings: ${farmDirection.name}, ${farmType.name}")
+        mc.thePlayer.inventory.currentItem = Config.autoPickSlot.value.toInt() - 1
     }
 
     private fun onDisable() {
-        if (Config.netherWartCpuSaver.value) {
+        if (Config.macroCpuSaver.value) {
             mc.gameSettings.limitFramerate = lastFps
             mc.gameSettings.renderDistanceChunks = lastDist
         }
@@ -132,6 +133,7 @@ class NetherwartMacro : Macro("NetherWart") {
         farmType = FarmType.values()[Config.netherWartType.value]
         movementDirection = MovementDirection.LEFT
         farmingState = FarmingState.SETUP
+        inGarden = SkyblockListener.island == SkyblockIsland.Garden
 
         rotating = null
         rotated = false
@@ -149,6 +151,8 @@ class NetherwartMacro : Macro("NetherWart") {
         checkerStopped = false
 
         banwave = false
+        hotbarTicks = 0
+        rotationTicks = 0
 
         Failsafes.reset()
     }
@@ -184,7 +188,7 @@ class NetherwartMacro : Macro("NetherWart") {
         }
 
         if (!stoppedForEvent) return
-        if (!message.contains("Come see me in the Hub", true)) return
+        if (!message.contains("The Farming Contest is over", true)) return
         printdev("Detected jacob msg in chat")
         UChat.chat("§cSkySkipped §f:: §eJacob event ended! Starting macro again...")
         farmingState = FarmingState.SETUP
@@ -198,7 +202,6 @@ class NetherwartMacro : Macro("NetherWart") {
                 if (applyFailsafes()) return
                 checkDirection()
                 checkRotation()
-                randomEvent()
             }
 
             FarmingState.CLIMB -> climb()
@@ -218,9 +221,9 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private fun setup() {
-        unpressKeys()
+        //unpressKeys()
         mc.displayGuiScreen(null)
-        if (!Cache.onIsland) {
+        if (!Cache.onIsland && Config.warpBackFailsafe.value) {
             farmingState = FarmingState.WARPED
             return
         }
@@ -251,7 +254,7 @@ class NetherwartMacro : Macro("NetherWart") {
         if (rotating!!.done) {
             printdev("Finished rotating")
 
-            if (Config.netherWartCpuSaver.value) {
+            if (Config.macroCpuSaver.value) {
                 lastFps = mc.gameSettings.limitFramerate
                 mc.gameSettings.limitFramerate = 30
                 lastDist = mc.gameSettings.renderDistanceChunks
@@ -286,10 +289,9 @@ class NetherwartMacro : Macro("NetherWart") {
     private fun onTickPost() {
         if (farmingState != FarmingState.FARM) return
         unpressKeys()
-        if (stopMove) return
         if (mc.currentScreen != null && mc.currentScreen !is GuiChat) return
 
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.keyCode, !stopAttack)
+        KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.keyCode, true)
         KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.keyCode, forward)
         KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.keyCode, false)
         val flag = movementDirection == MovementDirection.LEFT
@@ -322,7 +324,11 @@ class NetherwartMacro : Macro("NetherWart") {
         Blocks.water,
         Blocks.flowing_water,
         Blocks.wall_sign,
-        Blocks.ladder
+        Blocks.ladder,
+        Blocks.trapdoor,
+        Blocks.iron_trapdoor,
+        Blocks.pumpkin_stem,
+        Blocks.melon_stem,
     )
 
     private fun checkDirection() {
@@ -430,6 +436,7 @@ class NetherwartMacro : Macro("NetherWart") {
         }
     }
 
+    private var rotationTicks = 0
     private fun checkRotation() {
         if (lastyaw == -1f || lastpitch == -1f || rotated) {
             lastyaw = mc.thePlayer.rotationYaw
@@ -440,54 +447,28 @@ class NetherwartMacro : Macro("NetherWart") {
 
         val yaw = mc.thePlayer.rotationYaw
         val pitch = mc.thePlayer.rotationPitch
-        if (lastyaw !in (yaw - Config.rotationDiff.value)..(yaw + Config.rotationDiff.value) ||
-            lastpitch !in (pitch - Config.rotationDiff.value)..(pitch + Config.rotationDiff.value)
-        ) {
+        val check = (lastyaw !in (yaw - Config.rotationDiff.value)..(yaw + Config.rotationDiff.value) ||
+                lastpitch !in (pitch - Config.rotationDiff.value)..(pitch + Config.rotationDiff.value))
+        if (check && Config.soundFailsafes.value) {
+            UChat.chat("§cSkySkipped §f:: §eRotation failsafe triggered!")
+            player!!.playSound("random.anvil_land", 3f, 1f)
+        } else if (check && ++rotationTicks > 40) {
             printdev("Detected rotation change")
             farmingState = FarmingState.SETUP
             rotating = null
+            rotationTicks = 0
         }
     }
 
-    private var randomEventTimer = 0
-    private var stopMove = false
-    private var stopAttack = false
-
-    private fun randomEvent() {
-        return
-        if (!Config.macroRandomization) return
-        if (randomEventTimer++ < 900) return
-        randomEventTimer = 0
-        if (RandomUtils.getRandom(1, 3) != 1) return
-
-        printdev("Random event happens!")
-        when (RandomUtils.getRandom(1, 3)) {
-            1 -> {
-                stopMove = true
-                BackgroundScope.launch { delay(500L); stopAttack = false }
-                printdev("Random event is stop move")
-            }
-
-            2 -> {
-                stopAttack = true
-                BackgroundScope.launch { delay(3000L); stopAttack = false }
-                printdev("Random event is stop attack")
-            }
-
-            3 -> {
-                mc.thePlayer.rotationYaw = RandomUtils.getRandom(-90f, 90f)
-                mc.thePlayer.rotationPitch = RandomUtils.getRandom(-90f, 90f)
-                farmingState = FarmingState.IDLE
-                BackgroundScope.launch { delay(1000L); farmingState = FarmingState.SETUP }
-                printdev("Random event is random rotation")
-            }
-        }
-    }
-
+    private var hotbarTicks = 0
     private fun applyFailsafes(): Boolean {
         if (bedrockFailsafe()) {
             UChat.chat("§cSkySkipped §f:: §eBedrock detected! Applying cage failsafe...")
             sendWebhook("Bedrock Cage", "Found bedrock around player! Applying failsafe...", true)
+            if (Config.soundFailsafes.value) {
+                player!!.playSound("random.anvil_land", 3f, 1f)
+                return false
+            }
             farmingState = FarmingState.BEDROCK_CAGE
             Failsafes.bedrockTimer = System.currentTimeMillis() + 3500L
             return true
@@ -495,6 +476,17 @@ class NetherwartMacro : Macro("NetherWart") {
         if (warpBackFailsafe()) return true
         if (captchaFailsafe()) return true
         if (fullInvFailsafe()) return true
+
+        if (Config.autoWarpGarden.value) {
+            val coords = runCatching { Config.autoWarpGardenCoords.value.split(",").map { it.trim().toInt() } }.getOrNull()
+            if (coords == null || coords.size < 3) {
+                UChat.chat("§cSkySkipped §f:: §4Failed to parse warp garden coords!")
+                MacroManager.toggle()
+                return true
+            }
+            if (coords[0] == truncate(player!!.posX).toInt() && coords[1] == truncate(player!!.posY).toInt() && coords[2] == truncate(player!!.posZ).toInt())
+                player!!.sendChatMessage("/warp garden")
+        }
 
         val unstuck = unstuckFailsafe()
         if (unstuck == 2) return true
@@ -507,11 +499,20 @@ class NetherwartMacro : Macro("NetherWart") {
         if (jacobFailsafe()) return true
         banwaveChecker()
 
-        mc.thePlayer.inventory.currentItem = Config.autoPickSlot.value.toInt() - 1
+        if (mc.thePlayer.inventory.currentItem != Config.autoPickSlot.value.toInt() - 1 && ++hotbarTicks > 40) {
+            UChat.chat("§cSkySkipped §f:: §eHotbar failsafe triggered!")
+            if (Config.soundFailsafes.value) {
+                player!!.playSound("random.anvil_land", 3f, 1f)
+                return false
+            }
+            mc.thePlayer.inventory.currentItem = Config.autoPickSlot.value.toInt() - 1
+            hotbarTicks = 20
+        }
         return false
     }
 
     private fun bedrockFailsafe(): Boolean {
+        if (!Config.netherWartBedrock.value) return false
         val pos1 = mc.thePlayer.position.add(-2, -2, -2)
         val pos2 = mc.thePlayer.position.add(2, 2, 2)
 
@@ -539,6 +540,11 @@ class NetherwartMacro : Macro("NetherWart") {
 
         if (Failsafes.ticksStuck >= 60) {
             printdev("Detected stuck")
+            if (Config.soundFailsafes.value) {
+                UChat.chat("§cSkySkipped §f:: §eUnstuck failsafe triggered!")
+                player!!.playSound("random.anvil_land", 3f, 1f)
+                return 0
+            }
             farmingState = FarmingState.STUCK
             Failsafes.stuckSteps = Failsafes.StuckSteps.SETUP
             stuck = 2
@@ -582,6 +588,11 @@ class NetherwartMacro : Macro("NetherWart") {
 
         if (Failsafes.ticksDesync >= ticksTimeout) {
             printdev("Detected desync")
+            if (Config.soundFailsafes.value) {
+                UChat.chat("§cSkySkipped §f:: §eDesync failsafe triggered!")
+                player!!.playSound("random.anvil_land", 3f, 1f)
+                return 0
+            }
             farmingState = FarmingState.DESYNED
             Failsafes.desyncedSteps = Failsafes.DesyncedSteps.SETUP
             desynced = 2
@@ -590,7 +601,7 @@ class NetherwartMacro : Macro("NetherWart") {
     }
 
     private fun warpBackFailsafe(): Boolean {
-        if (Cache.onIsland) return false
+        if (Cache.onIsland || !Config.warpBackFailsafe.value) return false
         printdev("Detected not on island")
         farmingState = FarmingState.WARPED
 
@@ -615,6 +626,10 @@ class NetherwartMacro : Macro("NetherWart") {
                 printdev("Jacob detected!")
                 UChat.chat("§cSkySkipped §f:: §eJacob event started! Stopping macro...")
                 sendWebhook("Jacob event", "Jacob event started! Stopping macro...", false)
+                if (Config.soundFailsafes.value) {
+                    player!!.playSound("random.anvil_land", 3f, 1f)
+                    return false
+                }
                 farmingState = FarmingState.IDLE
                 stoppedForEvent = true
                 return true
@@ -708,7 +723,7 @@ class NetherwartMacro : Macro("NetherWart") {
                         ServerData(Cache.prevName, Cache.prevIP, Cache.prevIsLan)
                     )
                 )
-            } else toggle()
+            } else MacroManager.toggle()
         }
     }
 

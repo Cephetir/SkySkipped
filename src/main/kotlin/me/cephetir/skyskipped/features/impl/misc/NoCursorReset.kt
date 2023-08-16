@@ -18,21 +18,27 @@
 
 package me.cephetir.skyskipped.features.impl.misc
 
-import me.cephetir.bladecore.utils.threading.safeListener
-import me.cephetir.skyskipped.config.Config
+import me.cephetir.bladecore.core.event.listener.listener
 import me.cephetir.skyskipped.features.Feature
-import me.cephetir.skyskipped.utils.InventoryUtils.getName
-import net.minecraft.inventory.ContainerChest
+import net.minecraft.client.gui.inventory.GuiChest
+import net.minecraft.client.gui.inventory.GuiContainer
+import net.minecraftforge.client.event.GuiOpenEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
-class AutoCookieClicker : Feature() {
+object NoCursorReset : Feature() {
+    var last = -1L
+    var guiOpen = false
+
     init {
-        safeListener<ClientTickEvent> {
-            if (!Config.cookieClicker.value) return@safeListener
-            val container = player.openContainer ?: return@safeListener
-            if (container !is ContainerChest) return@safeListener
-            if (container.getName().startsWith("Cookie Clicker"))
-                playerController.windowClick(container.windowId, 13, 2, 3, player)
+        listener<GuiOpenEvent> {
+            val oldGuiScreen = mc.currentScreen
+            if (it.gui is GuiChest && (oldGuiScreen is GuiContainer || oldGuiScreen == null)) {
+                last = System.currentTimeMillis()
+            }
+        }
+
+        listener<ClientTickEvent> {
+            guiOpen = mc.currentScreen != null
         }
     }
 }

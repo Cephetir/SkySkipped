@@ -38,6 +38,7 @@ import me.cephetir.skyskipped.features.impl.macro.RemoteControlling
 import me.cephetir.skyskipped.features.impl.misc.Metrics
 import me.cephetir.skyskipped.gui.impl.GuiItemSwap
 import me.cephetir.skyskipped.utils.Cosmetic
+import me.cephetir.skyskipped.utils.FunnyShit
 import me.cephetir.skyskipped.utils.mc
 import me.cephetir.skyskipped.utils.skyblock.Ping
 import net.minecraft.client.settings.KeyBinding
@@ -68,9 +69,8 @@ class SkySkipped {
     companion object {
         const val MODID = "skyskipped"
         const val MOD_NAME = "SkySkipped"
-        const val VERSION = "3.5"
+        const val VERSION = "3.6"
 
-        val features = Features()
         val logger: Logger = LogManager.getLogger("SkySkipped")
         var devMode = false
 
@@ -79,10 +79,9 @@ class SkySkipped {
         val playGuiRecorder = KeyBinding("Play gui recorder", Keyboard.KEY_NONE, "SkySkipped")
 
         private val cosmetics = hashSetOf<Cosmetic>()
-        private val regex =
-            Regex("(?:§.)*(?<rank>\\[(?:§.)*\\d+(?:§.)*\\])? ?(?:§.)*(?<prefix>\\[\\w\\w\\w(?:§.)*(?:\\+(?:§.)*)*])? ?(?<username>\\w{3,16})(?:§.)*:*")
+        private val regex = Regex("(?:§.)*(?<rank>\\[(?:§.)*\\d+(?:§.)*\\])? ?(?:§.)*(?<prefix>\\[\\w\\w\\w(?:§.)*(?:\\+(?:§.)*)*])? ?(?<username>\\w{3,16})(?:§.)*:*")
         val cosmeticCache = MapCache<String, String>(10000)
-        val capeCache = MapCache<String, Cosmetic.Cape?>(100)
+        private val capeCache = MapCache<String, Cosmetic.Cape?>(100)
 
         @JvmStatic
         fun getCosmetics(message: String?): String? {
@@ -90,7 +89,7 @@ class SkySkipped {
             if (cosmeticCache.isCached(message))
                 return cosmeticCache.get(message)!!
 
-            var text = message
+            var text: String = message
             val result = regex.findAll(text)
             var displace = 0
             for (matcher in result) {
@@ -125,7 +124,7 @@ class SkySkipped {
             return cape?.getCape()
         }
 
-        private val gson = Gson()
+        val gson = Gson()
         fun loadCosmetics() {
             logger.info("Downloading cosmetics...")
             cosmetics.forEach { BladeEventBus.unsubscribe(it) }
@@ -195,8 +194,9 @@ class SkySkipped {
         logger.info("Initializing SkySkipped...")
 
         BladeEventBus.subscribe(this, true)
-        features.register()
+        Features.register()
         Ping
+        FunnyShit
 
         updateJob = BackgroundScope.launch {
             newVersion = checkForUpdates()
@@ -234,7 +234,7 @@ class SkySkipped {
 
     @Mod.EventHandler
     fun onLoad(event: FMLLoadCompleteEvent) {
-        if (updateJob?.isCompleted == false) runBlocking {
+        if (updateJob?.isCompleted != true) runBlocking {
             updateJob?.join()
         }
 

@@ -25,6 +25,7 @@ import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
 import me.cephetir.skyskipped.mixins.accessors.IMixinGuiContainer
 import me.cephetir.skyskipped.mixins.accessors.IMixinGuiScreen
+import me.cephetir.skyskipped.utils.InventoryUtils.getName
 import me.cephetir.skyskipped.utils.mc
 import me.cephetir.skyskipped.utils.render.RoundUtils.drawRoundedOutline
 import me.cephetir.skyskipped.utils.render.RoundUtils.drawRoundedRect
@@ -58,7 +59,7 @@ class PetsOverlay : Feature() {
         if (!Config.petsOverlay.value) return
         if (event.gui !is GuiChest) return
         val container = (event.gui as GuiChest).inventorySlots as ContainerChest
-        if (!container.lowerChestInventory.displayName.unformattedText.endsWith("Pets")) return
+        if (!container.getName().endsWith("Pets")) return
         petsOverlay = GuiPetsOverlay(event.gui as GuiChest)
         BackgroundScope.launch {
             delay(50L)
@@ -72,7 +73,7 @@ class PetsOverlay : Feature() {
         if (event.gui !is GuiChest) return
         if (petsOverlay == null) return
         val container = (event.gui as GuiChest).inventorySlots as ContainerChest
-        if (!container.lowerChestInventory.displayName.unformattedText.endsWith("Pets")) return
+        if (!container.getName().endsWith("Pets")) return
         event.isCanceled = true
         petsOverlay!!.setSize(event.gui as GuiChest)
         petsOverlay!!.onDrawScreen(event.mouseX, event.mouseY)
@@ -84,7 +85,7 @@ class PetsOverlay : Feature() {
         if (event.gui !is GuiChest) return
         if (petsOverlay == null) return
         val container = (event.gui as GuiChest).inventorySlots as ContainerChest
-        if (!container.lowerChestInventory.displayName.unformattedText.endsWith("Pets")) return
+        if (!container.getName().endsWith("Pets")) return
         event.isCanceled = true
         val i: Int = Mouse.getEventX() * event.gui.width / this.mc.displayWidth
         val j: Int = event.gui.height - Mouse.getEventY() * event.gui.height / this.mc.displayHeight - 1

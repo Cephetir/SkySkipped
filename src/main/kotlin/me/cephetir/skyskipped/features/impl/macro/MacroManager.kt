@@ -28,20 +28,25 @@ import me.cephetir.skyskipped.SkySkipped
 import me.cephetir.skyskipped.config.Cache
 import me.cephetir.skyskipped.config.Config
 import me.cephetir.skyskipped.features.Feature
+import me.cephetir.skyskipped.features.impl.macro.macros.F11Macro
 import me.cephetir.skyskipped.features.impl.macro.macros.NetherwartMacro
 import me.cephetir.skyskipped.features.impl.macro.macros.SugarCaneMacro
+import net.minecraft.util.MouseHelper
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
+import org.lwjgl.input.Mouse
 import java.io.File
 import java.util.*
 import kotlin.math.roundToLong
 
+
 object MacroManager : Feature() {
     val macros = listOf(
         NetherwartMacro(),
-        SugarCaneMacro()
+        SugarCaneMacro(),
+        F11Macro()
     )
 
     var current = macros[0]
@@ -54,13 +59,17 @@ object MacroManager : Feature() {
 
     @SubscribeEvent
     fun onInput(event: ClientTickEvent) {
-        if (!Cache.onSkyblock || mc.thePlayer == null || mc.theWorld == null || mc.currentScreen != null) return
+        if (mc.thePlayer == null || mc.theWorld == null || mc.currentScreen != null) return
 
         val down = Config.macroKeybind.isKeyDown()
         if (down == keybindLastState) return
         keybindLastState = down
         if (!down) return
 
+        toggle()
+    }
+
+    fun toggle() {
         startTime = System.currentTimeMillis()
         stopTime = (Config.macroStopTime.value * 60 * 60 * 1000).roundToLong()
         if (current.enabled) {
@@ -69,11 +78,40 @@ object MacroManager : Feature() {
                 BackgroundScope.cancel(scriptJob)
             }
             current.toggle()
+            if (Config.macroUngrab.value) regrabMouse()
             return
         }
         if (!Cache.onIsland) return UChat.chat("§cSkySkipped §f:: §4You're not on private island!")
         startScript()
         current.toggle()
+        if (Config.macroUngrab.value) ungrabMouse()
+    }
+
+    private var oldMouseHelper: MouseHelper? = null
+    private var doesGameWantUngrab = false
+    fun ungrabMouse() {
+        if (!mc.inGameHasFocus) return
+        if (oldMouseHelper == null) oldMouseHelper = mc.mouseHelper
+        mc.gameSettings.pauseOnLostFocus = false
+        doesGameWantUngrab = !Mouse.isGrabbed()
+        oldMouseHelper!!.ungrabMouseCursor()
+        mc.inGameHasFocus = true
+        mc.mouseHelper = object : MouseHelper() {
+            override fun mouseXYChange() {}
+            override fun grabMouseCursor() {
+                doesGameWantUngrab = false
+            }
+            override fun ungrabMouseCursor() {
+                doesGameWantUngrab = true
+            }
+        }
+    }
+
+    fun regrabMouse() {
+        if (oldMouseHelper == null) return
+        mc.mouseHelper = oldMouseHelper
+        if (!doesGameWantUngrab) mc.mouseHelper.grabMouseCursor()
+        oldMouseHelper = null
     }
 
     var packetThrottleAmout = 0

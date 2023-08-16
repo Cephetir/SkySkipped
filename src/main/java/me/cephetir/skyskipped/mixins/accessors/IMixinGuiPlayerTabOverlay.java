@@ -16,24 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-pluginManagement {
-    repositories {
-        mavenLocal()
-        gradlePluginPortal()
-        mavenCentral()
-        maven("https://oss.sonatype.org/content/repositories/snapshots")
-        maven("https://maven.architectury.dev/")
-        maven("https://maven.fabricmc.net")
-        maven("https://maven.minecraftforge.net/")
-        maven("https://maven.ilarea.ru/snapshots")
-        maven("https://jitpack.io")
-    }
-    resolutionStrategy {
-        eachPlugin {
-            when (requested.id.id) {
-            }
-        }
-    }
-}
+package me.cephetir.skyskipped.mixins.accessors;
 
-rootProject.name = "SkySkipped"
+import net.minecraft.client.gui.GuiPlayerTabOverlay;
+import net.minecraft.util.IChatComponent;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+
+@Mixin(GuiPlayerTabOverlay.class)
+public interface IMixinGuiPlayerTabOverlay {
+    @Accessor("footer")
+    IChatComponent getFooter();
+}

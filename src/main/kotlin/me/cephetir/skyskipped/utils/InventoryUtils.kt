@@ -18,6 +18,7 @@
 
 package me.cephetir.skyskipped.utils
 
+import me.cephetir.bladecore.utils.TextUtils.containsAny
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.inventory.ContainerChest
@@ -38,27 +39,33 @@ object InventoryUtils {
     }
 
     @JvmStatic
-    fun findItemInHotbar(name: String): Int {
+    fun findItemInHotbar(vararg name: String): Int {
+        val names = name.toList()
         val inv = mc.thePlayer.inventory
         for (i in 0..8) {
             val curStack = inv.getStackInSlot(i)
-            if (curStack != null && curStack.displayName.contains(name))
+            if (curStack != null && curStack.displayName.containsAny(names))
                 return i
         }
         return -1
     }
 
+    @JvmStatic
     fun getInventoryName(gui: GuiScreen = mc.currentScreen): String? {
         if (gui is GuiChest) {
             val chest = gui.inventorySlots as ContainerChest
             val inv = chest.lowerChestInventory
-            return if (inv.hasCustomName()) inv.displayName.unformattedText else null
+            return inv.displayName.formattedText
         }
         return null
     }
 
+    fun ContainerChest.getName(): String = lowerChestInventory.displayName.formattedText
+
+    @JvmStatic
     fun getStackInSlot(slot: Int): ItemStack? = mc.thePlayer.inventory.getStackInSlot(slot)
 
+    @JvmStatic
     fun getStackInOpenContainerSlot(slot: Int): ItemStack? =
         if (mc.thePlayer.openContainer?.inventorySlots?.get(slot)?.hasStack == true) mc.thePlayer.openContainer.inventorySlots[slot].stack else null
 }

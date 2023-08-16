@@ -19,16 +19,15 @@ import dev.architectury.pack200.java.Pack200Adapter
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.20"
+    kotlin("jvm") version "1.9.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("gg.essential.loom") version "0.10.0.+"
-    id("io.github.juuxel.loom-quiltflower-mini") version "7d04f32023"
     id("dev.architectury.architectury-pack200") version "0.1.3"
     java
     idea
 }
 
-version = "3.5"
+version = "3.6"
 group = "me.cephetir"
 
 base {
@@ -80,7 +79,7 @@ dependencies {
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
 
     include("me.cephetir:bladecore-loader-1.8.9-forge:1.2")
-    implementation("me.cephetir:bladecore-1.8.9-forge:0.0.2-c")
+    implementation("me.cephetir:bladecore-1.8.9-forge:0.0.2-f")
 
     implementation("net.dv8tion:JDA:5.0.0-alpha.19") {
         exclude(module = "opus-java")
@@ -92,7 +91,7 @@ dependencies {
 
 sourceSets {
     main {
-        output.setResourcesDir(file("${buildDir}/classes/kotlin/main"))
+        output.resourcesDir = file("${buildDir}/classes/kotlin/main")
     }
 }
 
@@ -118,7 +117,8 @@ tasks {
                     "ModType" to "FML",
                     "TweakClass" to "me.cephetir.bladecore.loader.BladeCoreTweaker",
                     "TweakOrder" to "0",
-                    "MixinConfigs" to "mixins.sm.json"
+                    "MixinConfigs" to "mixins.sm.json",
+                    "FMLCorePlugin" to "me.cephetir.skyskipped.transformers.FMLCore"
                 )
             )
         }
@@ -164,8 +164,6 @@ tasks {
 
             freeCompilerArgs =
                 listOf(
-                    "-Xjvm-default=all",
-                    "-Xbackend-threads=0",
                     //"-Xuse-k2"
                 )
         }
