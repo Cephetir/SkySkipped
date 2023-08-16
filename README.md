@@ -73,7 +73,7 @@ Website: https://www.skyskipped.com
 </details>
 
 <details>
-    <summary>Hacks (real) (100%) (trust me best hacks)</summary>
+    <summary>Hacks (real)</summary>
 
 ### Hacks (real)
 - Auto cofl sniper
