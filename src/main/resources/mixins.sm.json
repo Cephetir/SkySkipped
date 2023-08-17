@@ -5,7 +5,6 @@
   "compatibilityLevel": "JAVA_8",
   "verbose": true,
   "mixins": [
-    "MixinBlock",
     "MixinBlockCarpet",
     "MixinBlockCocoa",
     "MixinEntityPlayer",

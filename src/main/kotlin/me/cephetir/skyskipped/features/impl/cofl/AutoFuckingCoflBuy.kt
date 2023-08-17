@@ -373,11 +373,16 @@ object AutoFuckingCoflBuy : Feature() {
                     8 -> {
                         if (mc.currentScreen == null || mc.currentScreen !is GuiChest) return@listener
                         slotLeftClick(player!!.openContainer.windowId, 29)
-                        slotLeftClick(player!!.openContainer.windowId + 1, 11)
                         sellStep = 9
                     }
 
                     9 -> {
+                        if (mc.currentScreen == null || mc.currentScreen !is GuiChest || InventoryUtils.getInventoryName()?.contains("Confirm BIN Auction") != true) return@listener
+                        slotLeftClick(player!!.openContainer.windowId, 11)
+                        sellStep = 10
+                    }
+
+                    10 -> {
                         if (mc.currentScreen != null && mc.currentScreen is GuiChest)
                             player!!.closeScreen()
                         sellStep = 1
